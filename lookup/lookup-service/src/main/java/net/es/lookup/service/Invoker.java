@@ -11,6 +11,7 @@ import javax.swing.plaf.metal.MetalBorders;
 public class Invoker {
 
     private static String port = "8080";
+    private static LookupService lookupService = null;
 
     /**
      * Main program to start the Lookup Service
@@ -24,12 +25,15 @@ public class Invoker {
         System.out.println("starting Lookup Service");
 
         // Create the REST service
-        LookupService lookupService = new LookupService(Integer.parseInt(Invoker.port));
+        Invoker.lookupService = new LookupService(Integer.parseInt(Invoker.port));
         // Start the service
-        lookupService.startService();
+        Invoker.lookupService.startService();
 
-        Thread.sleep(10000);
-
+        // Block forever
+        Object blockMe = new Object();
+        synchronized (blockMe) {
+            blockMe.wait();
+        }
     }
 
     public static void parseArgs(String args[])  throws java.io.IOException {

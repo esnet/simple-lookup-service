@@ -8,17 +8,17 @@ import javax.ws.rs.Produces;
 /**
  *
  */
-@Path("/lookup/service/{service}")
-public class ServiceResource {
+@Path("/lookup/service/{service}/{key}")
+public class KeyResource {
 
     // The Java method will process HTTP GET requests
     @GET
     // The Java method will produce content identified by the MIME Media
     // type "text/plain"
     @Produces("text/plain")
-    public String getService(@PathParam("service") String service) {
+    public String getService(@PathParam("service") String service, @PathParam("key") String key) {
         // Return some cliched textual content
-        return "/lookup/service/" + service + "\n";
+        return "/lookup/services/" + service + "/" + key + "\n";
     }
 }
 
