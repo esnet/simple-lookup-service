@@ -1,0 +1,77 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <artifactId>LOOKUP</artifactId>
+        <groupId>net.es.lookup</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>lookup-service</artifactId>
+    <name>Lookup Service</name>
+
+       <!-- puts all code & libraries in one jar -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>onejar-maven-plugin.googlecode.com</id>
+            <url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+
+    <build>
+        <plugins>
+           <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+		<version>2.3.2</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+            <compilerArgument>-version</compilerArgument>
+                </configuration>
+            </plugin>
+
+            <!-- puts all code & libraries in one jar -->
+            <plugin>
+                <groupId>org.dstovall</groupId>
+                <artifactId>onejar-maven-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <mainClass>net.es.lookup.bootstrap.Invoker</mainClass>
+                            <classifier>onejar</classifier>
+                        </configuration>
+                        <goals>
+                            <goal>one-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <dependencies>
+
+       <!-- testing -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>5.8</version>
+            <scope>test</scope>
+            <classifier>jdk15</classifier>
+        </dependency>
+
+        <!-- command-line parsing -->
+        <dependency>
+            <groupId>net.sf.jopt-simple</groupId>
+            <artifactId>jopt-simple</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
+    </dependencies>
+
+    <profiles>
+    </profiles>
+
+</project>
