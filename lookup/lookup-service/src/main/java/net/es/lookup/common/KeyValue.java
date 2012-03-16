@@ -1,4 +1,4 @@
-package net.es.lookup.api;
+package net.es.lookup.common;
 
 public class KeyValue {
 
