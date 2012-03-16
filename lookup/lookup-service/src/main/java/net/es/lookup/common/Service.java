@@ -53,4 +53,12 @@ public class Service {
         return results;
     }
 
+    public synchronized String toString() {
+        StringBuffer buffer = new StringBuffer();
+        for (KeyValue keyValue : this.keyValues) {
+            buffer.append(keyValue.getKey() + ":" + keyValue.getValue().toString());
+        }
+        return buffer.toString();
+    }
+
 }

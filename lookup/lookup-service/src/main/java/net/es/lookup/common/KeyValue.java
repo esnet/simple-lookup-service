@@ -3,7 +3,12 @@ package net.es.lookup.common;
 public class KeyValue {
 
     private String key;
-    private String value;
+    private Object value;
+
+    public KeyValue (String key, Object value) {
+        this.key = key;
+        this.value = value;
+    }
 
     public String getKey() {
         return key;
@@ -13,11 +18,11 @@ public class KeyValue {
         this.key = key;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 }
