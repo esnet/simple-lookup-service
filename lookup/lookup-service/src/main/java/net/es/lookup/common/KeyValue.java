@@ -2,6 +2,15 @@ package net.es.lookup.common;
 
 public class KeyValue {
 
+    public static final String ACCESS_POINT = "access-point";
+    public static final String CLIENT_UUID = "client-uuid";
+    public static final String AUTHORIZATION = "authorization";
+    public static final String TTL = "ttl";
+    public static final String SERVICE_NAME = "name";
+    public static final String SERVICE_DOMAIN = "domain";
+    public static final String SERVICE_TYPE = "service-type";
+    public static final String SERVICE_URI = "uri";
+
     private String key;
     private Object value;
 

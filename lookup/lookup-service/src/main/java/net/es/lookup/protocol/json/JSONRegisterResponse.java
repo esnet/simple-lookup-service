@@ -1,5 +1,7 @@
 package net.es.lookup.protocol.json;
 
-public class JSONRegisterResponse {
+import net.es.lookup.common.RegisterResponse;
+
+public class JSONRegisterResponse implements RegisterResponse {
 
 }

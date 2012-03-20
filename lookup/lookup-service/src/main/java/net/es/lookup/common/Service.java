@@ -46,7 +46,7 @@ public class Service {
     public synchronized List<KeyValue> getKeyValues (String key) {
         ArrayList<KeyValue> results = new ArrayList<KeyValue>();
         for (KeyValue keyValue : this.keyValues) {
-            if (keyValue.equals(key)) {
+            if (keyValue.getKey().equals(key)) {
                 results.add(keyValue);
             }
         }
@@ -59,6 +59,30 @@ public class Service {
             buffer.append(keyValue.getKey() + ":" + keyValue.getValue().toString());
         }
         return buffer.toString();
+    }
+
+    @Override public boolean equals(Object obj) {
+        //check for self-comparison
+        if ( this == obj ) return true;
+        if ( !(obj instanceof Service) ) return false;
+
+        Service service = (Service) obj;
+        List serviceKeyValues = service.getKeyValues();
+        if (serviceKeyValues == null) {
+            if (this.keyValues == null) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        if (this.keyValues == null) {
+            return false;
+        }
+
+        List<KeyValue> clientIds = this.getKeyValues(KeyValue.CLIENT_UUID);
+        List<KeyValue> accessPoints = this.getKeyValues(KeyValue.ACCESS_POINT);
+        List<KeyValue> serviceTypes = this.getKeyValues(KeyValue.SERVICE_TYPE);
+        return false;
     }
 
 }

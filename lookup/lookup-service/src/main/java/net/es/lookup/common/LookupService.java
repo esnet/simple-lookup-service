@@ -11,6 +11,8 @@ public interface LookupService {
 
     public RegisterRequest publishService (RegisterRequest registerRequest);
 
+    public Service getServiceByURI (String URI);
+
     public QueryResponse query (QueryRequest queryRequest);
 
 }

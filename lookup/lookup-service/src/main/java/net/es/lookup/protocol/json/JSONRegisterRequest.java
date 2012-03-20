@@ -2,12 +2,14 @@ package net.es.lookup.protocol.json;
 
 import net.es.lookup.common.KeyValue;
 import net.es.lookup.common.Service;
+import net.es.lookup.common.RegisterRequest;
+import net.es.lookup.common.RegisterResponse;
 import net.sf.json.JSONArray;
 import net.sf.json.util.JSONStringer;
 import net.sf.json.util.JSONTokener;
 import net.sf.json.JSONObject;
 
-public class JSONRegisterRequest {
+public class JSONRegisterRequest implements RegisterRequest {
 
     static final int VALID = 1;
     static final int INCORRECT_FORMAT =  2;
