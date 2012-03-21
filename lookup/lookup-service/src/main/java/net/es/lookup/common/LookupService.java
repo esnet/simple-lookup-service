@@ -11,9 +11,9 @@ public interface LookupService {
 
     public RegisterResponse publishService (RegisterRequest registerRequest);
 
-    public Service deleteService(String URI, List<KeyValue> keyValues);
+    public DeleteResponse deleteService(DeleteRequest deleteRequest);
     
-    public Service renewService(String URI, List<KeyValue> keyValues);
+    public RenewResponse renewService(RenewRequest renewRequest);
     
     public Service getServiceByURI (String URI);
 
