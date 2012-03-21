@@ -7,6 +7,8 @@ import net.es.lookup.common.LookupService;
 import net.es.lookup.common.QueryRequest;
 import net.es.lookup.common.QueryResponse;
 import net.es.lookup.common.RegisterRequest;
+import net.es.lookup.common.RegisterResponse;
+import net.es.lookup.common. KeyValue;
 
 public class NullDBLookupService implements LookupService {
 
@@ -19,7 +21,7 @@ public class NullDBLookupService implements LookupService {
     }
 
 
-    public RegisterRequest publishService (RegisterRequest registerRequest) {
+    public RegisterResponse publishService (RegisterRequest registerRequest) {
         return null;
     }
 
@@ -29,6 +31,14 @@ public class NullDBLookupService implements LookupService {
 
     public QueryResponse query (QueryRequest queryRequest) {
         return null;
+    }
+    
+    public Service deleteService(String URI, List<KeyValue> keyValues){
+    	return null;
+    }
+    
+    public Service renewService(String URI, List<KeyValue> keyValues){
+    	return null;
     }
 
     private synchronized boolean serviceExists (Service service) {
