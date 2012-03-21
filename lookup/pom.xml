@@ -6,7 +6,7 @@
     <packaging>pom</packaging>
     <name>Lookup Service</name>
     <properties>
-       <lookup.version>0.0.1-SNAPSHOT</oscars.version>
+       <lookup.version>0.0.1-SNAPSHOT</lookup.version>
        <java.version>1.5</java.version>
     </properties>
 
