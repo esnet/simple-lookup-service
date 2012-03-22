@@ -1,5 +1,5 @@
 package net.es.lookup.common;
 
-public interface DeleteResponse {
+public interface DeleteResponse extends Message{
 
 }

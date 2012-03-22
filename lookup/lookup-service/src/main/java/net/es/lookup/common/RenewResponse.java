@@ -1,5 +1,5 @@
 package net.es.lookup.common;
 
-public interface RenewResponse {
+public interface RenewResponse extends Message{
 
 }

@@ -1,5 +1,5 @@
 package net.es.lookup.common;
 
-public interface QueryResponse {
+public interface QueryResponse extends Message{
 
 }

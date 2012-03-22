@@ -1,7 +1,5 @@
 package net.es.lookup.common;
 
-public interface RegisterRequest {
-    public int getStatus();
+public interface RegisterRequest extends Message {
 
-    public Service getService ();
 }
