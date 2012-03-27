@@ -53,4 +53,7 @@ public class JSONRegisterRequest implements RegisterRequest {
         return this.service;
     }
 
+    public Service getContent(){
+    	return null;
+    }
 }
