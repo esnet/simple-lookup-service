@@ -146,15 +146,31 @@ public class ServiceDAOMongoDb implements LookupService{
 		return response;
 	}
 	
+	
+	
 	public QueryResponse query(QueryRequest queryRequest){
 		net.es.lookup.common.Service serv = (net.es.lookup.common.Service) queryRequest.getContent();
 		BasicDBObject query = new BasicDBObject();
+		BasicDBObject doc = new BasicDBObject();
 		ArrayList<net.es.lookup.common.KeyValue> keyvalues = (ArrayList<net.es.lookup.common.KeyValue>)serv.getKeyValues();
+		
+		String op = queryRequest.getOperator();
+		String mongoOp = "$and";
+		
+		if(!op.isEmpty()){
+			if(op.equalsIgnoreCase("any")){
+				mongoOp = "$or";
+			}else if(op.equalsIgnoreCase("all")){
+				mongoOp = "$and";
+			}
+		}
 		
 		for (int i=0; i<keyvalues.size();i++){
 			KeyValue kv = keyvalues.get(i);
-			query.put(kv.getKey(), kv.getValue());
+			doc.put(kv.getKey(), kv.getValue());
 		}
+		
+		query.put(mongoOp, doc);
 		
 		DBCursor cur = coll.find(query);
 		ArrayList <net.es.lookup.common.Service> result = new ArrayList<net.es.lookup.common.Service>();
