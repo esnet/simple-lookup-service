@@ -36,7 +36,7 @@ public class JSONRenewResponse implements RenewResponse {
 		
 	}
 	
-	public Map getKeyValueMap(){
+	public Map getMap(){
 		return null;
 	}
 }

@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.net.*;
+import java.util.Map;
 import com.mongodb.*;
+import java.net.UnknownHostException;
 
 public class ServiceDAOMongoDb implements LookupService{
 	private String dburl="localhost";
@@ -52,15 +53,10 @@ public class ServiceDAOMongoDb implements LookupService{
 	public RegisterResponse publishService(RegisterRequest registerRequest){
 		int errorcode;
 		String errormsg;
-		Service services = (Service) registerRequest.getContent();
-		ArrayList keyvalues = (ArrayList)services.getKeyValues();
+		Map services = (Map) registerRequest.getMap();
+	
 		BasicDBObject doc = new BasicDBObject();
-		
-		for(int i=0; i< keyvalues.size(); i++){
-			KeyValue tmp = (KeyValue)keyvalues.get(i);		
-			String tmpKey = tmp.getKey();
-			doc.put(tmpKey, tmp.getValue());					
-		}
+		doc.putAll(services);
 		
 		WriteResult wrt = coll.insert(doc);
 		CommandResult cmdres = wrt.getLastError();
@@ -82,11 +78,11 @@ public class ServiceDAOMongoDb implements LookupService{
 	public DeleteResponse deleteService(DeleteRequest deleteRequest){
 		int errorcode;
 		String errormsg;
-		Service serv = (Service) deleteRequest.getContent();
+	
 		BasicDBObject query = new BasicDBObject();
-		ArrayList uri = (ArrayList)serv.getKeyValues("uri");
+		String uri = deleteRequest.getURI();
 		//TODO: add check to see if only one elem is returned
-		query.put("uri", uri.get(0));
+		query.put("uri", uri);
 		WriteResult wrt = coll.remove(query);
 		
 		CommandResult cmdres = wrt.getLastError();
@@ -148,10 +144,9 @@ public class ServiceDAOMongoDb implements LookupService{
 	
 	
 	public QueryResponse query(QueryRequest queryRequest){
-		Service serv = (Service) queryRequest.getContent();
+		Map serv =  queryRequest.getMap();
 		BasicDBObject query = new BasicDBObject();
 		BasicDBObject doc = new BasicDBObject();
-		ArrayList<KeyValue> keyvalues = (ArrayList<KeyValue>)serv.getKeyValues();
 		
 		String op = queryRequest.getOperator();
 		String mongoOp = "$and";
@@ -164,11 +159,8 @@ public class ServiceDAOMongoDb implements LookupService{
 			}
 		}
 		
-		for (int i=0; i<keyvalues.size();i++){
-			KeyValue kv = keyvalues.get(i);
-			doc.put(kv.getKey(), kv.getValue());
-		}
-		
+		doc.putAll(serv);
+	
 		query.put(mongoOp, doc);
 		
 		DBCursor cur = coll.find(query);

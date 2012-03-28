@@ -13,7 +13,12 @@ public class JSONDeleteRequest implements DeleteRequest{
 		return 0;
 	}
 	
-	public Map getKeyValueMap(){
+	public String getURI(){
 		return null;
 	}
+	
+	public Map getMap(){
+		return null;
+	}
+	
 }

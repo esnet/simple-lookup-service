@@ -29,7 +29,7 @@ public class JSONRegisterResponse implements RegisterResponse {
 		return 0;
 	}
 	
-	public Map getKeyValueMap(){
+	public Map getMap(){
 		return null;
 	}
 }

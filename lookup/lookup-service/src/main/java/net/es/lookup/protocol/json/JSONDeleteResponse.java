@@ -26,7 +26,7 @@ public class JSONDeleteResponse implements DeleteResponse{
 		
 	}
 	
-	public Map getKeyValueMap(){
+	public Map getMap(){
 		return null;
 	}
 	

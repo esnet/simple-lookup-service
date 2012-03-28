@@ -30,7 +30,7 @@ public class JSONQueryResponse implements QueryResponse {
 		
 	}
 	
-	public Map getKeyValueMap(){
+	public Map getMap(){
 		return null;
 	}
 }

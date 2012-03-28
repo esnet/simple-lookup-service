@@ -58,7 +58,7 @@ public class JSONRegisterRequest implements RegisterRequest {
     	return null;
     }
     
-	public Map getKeyValueMap(){
+	public Map getMap(){
 		return null;
 	}
 }

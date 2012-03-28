@@ -1,6 +1,7 @@
 package net.es.lookup.protocol.json;
 
-import net.es.lookup.common.*;
+import net.es.lookup.common.QueryRequest;
+import net.es.lookup.common.Service;
 import java.util.Map;
 
 public class JSONQueryRequest implements QueryRequest {
@@ -17,7 +18,7 @@ public class JSONQueryRequest implements QueryRequest {
 		return null;
 	}
 	
-	public Map getKeyValueMap(){
+	public Map getMap(){
 		return null;
 	}
 }

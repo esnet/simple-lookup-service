@@ -21,7 +21,7 @@ public class JSONRenewRequest implements RenewRequest {
 		return 0;
 	}
 	
-	public Map getKeyValueMap(){
+	public Map getMap(){
 		return null;
 	}
 }
