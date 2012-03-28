@@ -1,17 +1,15 @@
 package net.es.lookup.database;
 
-import net.es.lookup.common.*;
-import net.es.lookup.protocol.json.*;
+import net.es.lookup.common.DuplicateKeyException;
+import net.es.lookup.common.Service;
+import net.es.lookup.common.Message;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.Map;
+import java.util.*;
+
 import com.mongodb.*;
 import java.net.UnknownHostException;
 
-public class ServiceDAOMongoDb implements LookupService{
+public class ServiceDAOMongoDb {
 	private String dburl="localhost";
 	private int dbport=27017;
 	private String dbname="LookupService";
@@ -22,20 +20,20 @@ public class ServiceDAOMongoDb implements LookupService{
 	private DBCollection coll;
 	// retrieves default - mongodb running on localhost and default port - 27017 and dbname- "lookupservice", collection name - "services" 
 	//creates a new one if it cannot find one 
-	ServiceDAOMongoDb() throws UnknownHostException{
+	public ServiceDAOMongoDb() throws UnknownHostException{
 		init();
 	}
 	
 	//uses default url and port - mongodb running on localhost and default port - 27017
 	//creates a new one if it cannot find one
-	ServiceDAOMongoDb(String dbname, String collname) throws UnknownHostException{
+	public ServiceDAOMongoDb(String dbname, String collname) throws UnknownHostException{
 		this.dbname = dbname;
 		this.collname = collname;
 		init();
 	}
 	
 	//retrieves the db and collection(table); creates a new one if it cannot find one
-	ServiceDAOMongoDb (String dburl, int dbport, String dbname, String collname)  throws UnknownHostException{
+	public ServiceDAOMongoDb (String dburl, int dbport, String dbname, String collname)  throws UnknownHostException{
 		this.dburl = dburl;
 		this.dbport = dbport;
 		this.dbname = dbname;
@@ -50,10 +48,10 @@ public class ServiceDAOMongoDb implements LookupService{
 	}
 	
 	//should use json specific register request and response.
-	public RegisterResponse publishService(RegisterRequest registerRequest){
+	public Message publishService(Service service){
 		int errorcode;
 		String errormsg;
-		Map services = (Map) registerRequest.getMap();
+		Map services = (Map) service.getMap();
 	
 		BasicDBObject doc = new BasicDBObject();
 		doc.putAll(services);
@@ -68,19 +66,19 @@ public class ServiceDAOMongoDb implements LookupService{
 			errormsg = cmdres.getErrorMessage();
 		}
 		
-		RegisterResponse response = new JSONRegisterResponse();
+		Message response = new Message();
 		response.setError(errorcode);
 		response.setErrorMessage(errormsg);
 		return response;
 	}
 	
 	
-	public DeleteResponse deleteService(DeleteRequest deleteRequest){
+	public Message deleteService(Service service){
 		int errorcode;
 		String errormsg;
 	
 		BasicDBObject query = new BasicDBObject();
-		String uri = deleteRequest.getURI();
+		String uri = service.getURI();
 		//TODO: add check to see if only one elem is returned
 		query.put("uri", uri);
 		WriteResult wrt = coll.remove(query);
@@ -95,19 +93,19 @@ public class ServiceDAOMongoDb implements LookupService{
 			errormsg = cmdres.getErrorMessage();
 		}
 		
-		DeleteResponse response = new JSONDeleteResponse();
+		Message response = new Message();
 		response.setError(errorcode);
 		response.setErrorMessage(errormsg);
 		return response;
 	}
 	
-	public RenewResponse renewService(RenewRequest renewRequest){
+	public Message renewService(Service service){
 		
 		int errorcode;
 		String errormsg;
 		
-		String uri = renewRequest.getURI();
-        int ttl = renewRequest.getTTL();
+		String uri = service.getURI();
+        int ttl = service.getTTL();
 		BasicDBObject query = new BasicDBObject();
 		//TODO: add check to see if only one elem is returned
 		query.put("uri", uri);
@@ -135,7 +133,7 @@ public class ServiceDAOMongoDb implements LookupService{
 			errormsg = "Database corrupted";
 		}
 	
-		RenewResponse response = new JSONRenewResponse();
+		Message response = new Message();
 		response.setError(errorcode);
 		response.setErrorMessage(errormsg);
 		return response;
@@ -143,7 +141,7 @@ public class ServiceDAOMongoDb implements LookupService{
 	
 	
 	
-	public QueryResponse query(QueryRequest queryRequest){
+	public List<Service> query(Message queryRequest){
 		Map serv =  queryRequest.getMap();
 		BasicDBObject query = new BasicDBObject();
 		BasicDBObject doc = new BasicDBObject();
@@ -173,16 +171,19 @@ public class ServiceDAOMongoDb implements LookupService{
 				Iterator<String> it = keys.iterator();
 				while(it.hasNext()){	
 					String tmpKey = it.next();
-					KeyValue kv = new KeyValue(tmpKey,tmp.get(tmpKey));
-					tmpserv.addKeyValue(kv);
+                    try {
+					    tmpserv.add (tmpKey,tmp.get(tmpKey));
+                    } catch (DuplicateKeyException e) {
+                        // Since the key/value pairs are coming from the database, we are guaranteed to be valid
+                        // therefore, any DuplicateKeyException would indicate a bug in the code
+                        // TODO: better error handling
+                        Thread.dumpStack();
+                    }
 				}
 			}
 			result.add(tmpserv);
 		}
-		
-		QueryResponse response = new JSONQueryResponse();
-		response.setResult(result);
-		return response;
+		return result;
 	}
 	
 	public Service getServiceByURI(String URI){
@@ -202,8 +203,14 @@ public class ServiceDAOMongoDb implements LookupService{
 				while(it.hasNext()){
 					
 					String tmpKey = it.next();
-					KeyValue kv = new KeyValue(tmpKey,tmp.get(tmpKey));
-					result.addKeyValue(kv);
+					try {
+					    result.add (tmpKey,tmp.get(tmpKey));
+                    } catch (DuplicateKeyException e) {
+                        // Since the key/value pairs are coming from the database, we are guaranteed to be valid
+                        // therefore, any DuplicateKeyException would indicate a bug in the code
+                        // TODO: better error handling
+                        Thread.dumpStack();
+                    }
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 package net.es.lookup.common;
 
-public interface RegisterRequest extends Message {
+public abstract class RegisterRequest extends Message {
 
 }

@@ -7,16 +7,26 @@ package net.es.lookup.common;
 
 import java.util.List;
 
-public interface LookupService {
+public class LookupService {
 
-    public RegisterResponse publishService (RegisterRequest registerRequest);
+    public RegisterResponse publishService (RegisterRequest registerRequest) {
+        return null;
+    }
 
-    public DeleteResponse deleteService(DeleteRequest deleteRequest);
+    public DeleteResponse deleteService(DeleteRequest deleteRequest) {
+        return null;
+    }
     
-    public RenewResponse renewService(RenewRequest renewRequest);
+    public RenewResponse renewService(RenewRequest renewRequest) {
+        return null;
+    }
     
-    public Service getServiceByURI (String URI);
+    public Service getServiceByURI (String URI) {
+        return null;
+    }
 
-    public QueryResponse query (QueryRequest queryRequest);
+    public QueryResponse query (QueryRequest queryRequest) {
+        return null;
+    }
 
 }

@@ -6,37 +6,6 @@ import net.es.lookup.common.Service;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class JSONRenewResponse implements RenewResponse {
+public class JSONRenewResponse extends RenewResponse {
 
-    public Service getContent(){
-    	return null;
-    }
-    
-	public int getStatus(){
-		return 0;
-	}
-	
-	public int getError(){
-		return 0;
-	}
-	
-	public String getErrorMessage(){
-		return null;
-	}
-	
-	public void setError(int code){
-		
-	}
-	
-	public void setErrorMessage(String s){
-		
-	}
-	
-	public void setResult(ArrayList<Service> s){
-		
-	}
-	
-	public Map getMap(){
-		return null;
-	}
 }

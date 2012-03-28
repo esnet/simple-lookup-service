@@ -1,5 +1,4 @@
 package net.es.lookup.common;
 
-public interface QueryRequest extends Message {
-	public String getOperator();
+public abstract class QueryRequest extends Message {
 }

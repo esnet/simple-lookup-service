@@ -1,29 +1,23 @@
 package net.es.lookup.protocol.json;
 
-import net.es.lookup.common.KeyValue;
-import net.es.lookup.common.Service;
+import net.es.lookup.common.DuplicateKeyException;
 import net.es.lookup.common.RegisterRequest;
-import net.es.lookup.common.RegisterResponse;
 import net.sf.json.JSONArray;
-import net.sf.json.util.JSONStringer;
 import net.sf.json.util.JSONTokener;
 import net.sf.json.JSONObject;
-import java.util.Map;
 
-public class JSONRegisterRequest implements RegisterRequest {
+public class JSONRegisterRequest extends RegisterRequest {
 
     static final int VALID = 1;
     static final int INCORRECT_FORMAT =  2;
 
-    private Service service = null;
     private int status = 0;
 
-    public JSONRegisterRequest (String message) {
-        this.service = new Service();
+    public JSONRegisterRequest (String message) throws DuplicateKeyException {
         this.parseJSON(message);
     }
 
-    private void parseJSON (String message) {
+    private void parseJSON (String message) throws DuplicateKeyException {
 
         JSONTokener tokener = new JSONTokener(message);
 
@@ -39,26 +33,10 @@ public class JSONRegisterRequest implements RegisterRequest {
         for (Object o : keyValues) {
             JSONObject jo = (JSONObject) o;
             for (Object o2 : jo.keySet()) {
-                KeyValue keyValue = new KeyValue (o2.toString(), jo.get(o2));
-                this.service.addKeyValue(keyValue);
+                this.add(o2.toString(), jo.get(o2));
             }
         }
         this.status = JSONRegisterRequest.VALID;
     }
 
-    public int getStatus() {
-        return this.status;
-    }
-
-    public Service getService () {
-        return this.service;
-    }
-
-    public Service getContent(){
-    	return null;
-    }
-    
-	public Map getMap(){
-		return null;
-	}
 }

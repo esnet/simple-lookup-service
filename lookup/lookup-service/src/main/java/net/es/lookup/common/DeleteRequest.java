@@ -1,5 +1,4 @@
 package net.es.lookup.common;
 
-public interface DeleteRequest extends Message{
-	public String getURI();
+public abstract class DeleteRequest extends Message {
 }
