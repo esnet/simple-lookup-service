@@ -8,6 +8,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.util.JSONStringer;
 import net.sf.json.util.JSONTokener;
 import net.sf.json.JSONObject;
+import java.util.Map;
 
 public class JSONRegisterRequest implements RegisterRequest {
 
@@ -56,4 +57,8 @@ public class JSONRegisterRequest implements RegisterRequest {
     public Service getContent(){
     	return null;
     }
+    
+	public Map getKeyValueMap(){
+		return null;
+	}
 }

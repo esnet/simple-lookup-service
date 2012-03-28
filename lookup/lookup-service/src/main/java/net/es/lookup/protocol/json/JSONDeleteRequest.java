@@ -1,6 +1,8 @@
 package net.es.lookup.protocol.json;
 
-import net.es.lookup.common.*;
+import net.es.lookup.common.DeleteRequest;
+import net.es.lookup.common.Service;
+import java.util.Map;
 
 public class JSONDeleteRequest implements DeleteRequest{
     public Service getContent(){
@@ -9,5 +11,9 @@ public class JSONDeleteRequest implements DeleteRequest{
     
 	public int getStatus(){
 		return 0;
+	}
+	
+	public Map getKeyValueMap(){
+		return null;
 	}
 }

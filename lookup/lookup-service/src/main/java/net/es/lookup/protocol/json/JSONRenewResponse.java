@@ -1,8 +1,10 @@
 package net.es.lookup.protocol.json;
 
-import java.util.ArrayList;
 
-import net.es.lookup.common.*;
+import net.es.lookup.common.RenewResponse;
+import net.es.lookup.common.Service;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class JSONRenewResponse implements RenewResponse {
 
@@ -32,5 +34,9 @@ public class JSONRenewResponse implements RenewResponse {
 	
 	public void setResult(ArrayList<Service> s){
 		
+	}
+	
+	public Map getKeyValueMap(){
+		return null;
 	}
 }

@@ -1,6 +1,8 @@
 package net.es.lookup.protocol.json;
 
-import net.es.lookup.common.*;
+import java.util.Map;
+import net.es.lookup.common.Service;
+import net.es.lookup.common.DeleteResponse;
 
 public class JSONDeleteResponse implements DeleteResponse{
     public Service getContent(){
@@ -22,6 +24,10 @@ public class JSONDeleteResponse implements DeleteResponse{
 	}
 	public void setErrorMessage(String s){
 		
+	}
+	
+	public Map getKeyValueMap(){
+		return null;
 	}
 	
 }

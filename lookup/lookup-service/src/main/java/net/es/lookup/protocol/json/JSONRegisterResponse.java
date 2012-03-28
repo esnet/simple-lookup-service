@@ -1,6 +1,7 @@
 package net.es.lookup.protocol.json;
 
 import net.es.lookup.common.RegisterResponse;
+import java.util.Map;
 
 public class JSONRegisterResponse implements RegisterResponse {
 	public JSONRegisterResponse(){
@@ -26,5 +27,9 @@ public class JSONRegisterResponse implements RegisterResponse {
 	
 	public int getStatus(){
 		return 0;
+	}
+	
+	public Map getKeyValueMap(){
+		return null;
 	}
 }

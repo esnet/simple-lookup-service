@@ -3,7 +3,6 @@ package net.es.lookup.database;
 import net.es.lookup.common.*;
 import net.es.lookup.protocol.json.*;
 
-import java.security.Provider.Service;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -53,7 +52,7 @@ public class ServiceDAOMongoDb implements LookupService{
 	public RegisterResponse publishService(RegisterRequest registerRequest){
 		int errorcode;
 		String errormsg;
-		net.es.lookup.common.Service services = (net.es.lookup.common.Service) registerRequest.getContent();
+		Service services = (Service) registerRequest.getContent();
 		ArrayList keyvalues = (ArrayList)services.getKeyValues();
 		BasicDBObject doc = new BasicDBObject();
 		
@@ -83,7 +82,7 @@ public class ServiceDAOMongoDb implements LookupService{
 	public DeleteResponse deleteService(DeleteRequest deleteRequest){
 		int errorcode;
 		String errormsg;
-		net.es.lookup.common.Service serv = (net.es.lookup.common.Service) deleteRequest.getContent();
+		Service serv = (Service) deleteRequest.getContent();
 		BasicDBObject query = new BasicDBObject();
 		ArrayList uri = (ArrayList)serv.getKeyValues("uri");
 		//TODO: add check to see if only one elem is returned
@@ -149,10 +148,10 @@ public class ServiceDAOMongoDb implements LookupService{
 	
 	
 	public QueryResponse query(QueryRequest queryRequest){
-		net.es.lookup.common.Service serv = (net.es.lookup.common.Service) queryRequest.getContent();
+		Service serv = (Service) queryRequest.getContent();
 		BasicDBObject query = new BasicDBObject();
 		BasicDBObject doc = new BasicDBObject();
-		ArrayList<net.es.lookup.common.KeyValue> keyvalues = (ArrayList<net.es.lookup.common.KeyValue>)serv.getKeyValues();
+		ArrayList<KeyValue> keyvalues = (ArrayList<KeyValue>)serv.getKeyValues();
 		
 		String op = queryRequest.getOperator();
 		String mongoOp = "$and";
@@ -173,9 +172,9 @@ public class ServiceDAOMongoDb implements LookupService{
 		query.put(mongoOp, doc);
 		
 		DBCursor cur = coll.find(query);
-		ArrayList <net.es.lookup.common.Service> result = new ArrayList<net.es.lookup.common.Service>();
+		ArrayList <Service> result = new ArrayList<Service>();
 		while (cur.hasNext()){
-			net.es.lookup.common.Service tmpserv = new net.es.lookup.common.Service();
+			Service tmpserv = new Service();
 			DBObject tmp = cur.next();
 			Set<String> keys = tmp.keySet();
 			if (!keys.isEmpty()){
@@ -194,7 +193,7 @@ public class ServiceDAOMongoDb implements LookupService{
 		return response;
 	}
 	
-	public net.es.lookup.common.Service getServiceByURI(String URI){
+	public Service getServiceByURI(String URI){
 		int errorcode;
 		String errormsg;
 		
@@ -202,7 +201,7 @@ public class ServiceDAOMongoDb implements LookupService{
 		query.put("uri", URI);
 		DBCursor cur = coll.find(query);
 		
-		net.es.lookup.common.Service result = new net.es.lookup.common.Service();
+		Service result = new Service();
 		if (cur.length() == 1){
 			DBObject tmp = cur.next();
 			Set<String> keys = tmp.keySet();

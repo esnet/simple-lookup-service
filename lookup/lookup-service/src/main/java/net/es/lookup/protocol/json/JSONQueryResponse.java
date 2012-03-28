@@ -1,7 +1,9 @@
 package net.es.lookup.protocol.json;
 
-import net.es.lookup.common.*;
-import java.util.*;
+import net.es.lookup.common.QueryResponse;
+import net.es.lookup.common.Service;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class JSONQueryResponse implements QueryResponse {
     public Service getContent(){
@@ -26,5 +28,9 @@ public class JSONQueryResponse implements QueryResponse {
 	}
 	public void setResult(ArrayList<Service> s){
 		
+	}
+	
+	public Map getKeyValueMap(){
+		return null;
 	}
 }
