@@ -18,6 +18,12 @@ public class ServiceDAOMongoDb {
 	private Mongo mongo;
 	private DB db;
 	private DBCollection coll;
+    private static ServiceDAOMongoDb instance = null;
+
+    public static ServiceDAOMongoDb getInstance(int port) {
+        return ServiceDAOMongoDb.instance;
+    }
+
 	// retrieves default - mongodb running on localhost and default port - 27017 and dbname- "lookupservice", collection name - "services" 
 	//creates a new one if it cannot find one 
 	public ServiceDAOMongoDb() throws UnknownHostException{
@@ -41,7 +47,13 @@ public class ServiceDAOMongoDb {
 		init();
 	}
 	
-	private void init() throws UnknownHostException{
+	private void init() throws UnknownHostException {
+        if (ServiceDAOMongoDb.instance != null) {
+            // An instance has been already created.
+            throw new RuntimeException("Attempt to create a second instance of ServiceDAOMongoDb");
+        }
+        ServiceDAOMongoDb.instance = this;
+
 		mongo = new Mongo(dburl,dbport);
 		db = mongo.getDB(dbname);
 		coll = db.getCollection(collname);
