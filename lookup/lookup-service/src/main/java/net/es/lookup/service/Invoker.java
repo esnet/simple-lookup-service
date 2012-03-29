@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import net.es.lookup.database.ServiceDAOMongoDb;
 
 import javax.swing.plaf.metal.MetalBorders;
 
@@ -12,6 +13,7 @@ public class Invoker {
 
     private static String port = "8080";
     private static LookupService lookupService = null;
+    private static ServiceDAOMongoDb dao = null;
 
     /**
      * Main program to start the Lookup Service
@@ -22,8 +24,11 @@ public class Invoker {
     public static void main(String[] args) throws Exception {
 
         parseArgs( args );
-        System.out.println("starting Lookup Service");
 
+        System.out.println("stating ServiceDAOMongoDb");
+        Invoker.dao = new ServiceDAOMongoDb();
+
+        System.out.println("starting Lookup Service");
         // Create the REST service
         Invoker.lookupService = new LookupService(Integer.parseInt(Invoker.port));
         // Start the service

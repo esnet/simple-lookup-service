@@ -24,7 +24,7 @@ public class LookupService {
         LookupService.instance = new LookupService();
     }
 
-    public static LookupService getInstance(int port) {
+    public static LookupService getInstance() {
         return LookupService.instance;
     }
 

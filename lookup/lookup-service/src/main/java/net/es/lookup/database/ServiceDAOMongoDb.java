@@ -20,7 +20,7 @@ public class ServiceDAOMongoDb {
 	private DBCollection coll;
     private static ServiceDAOMongoDb instance = null;
 
-    public static ServiceDAOMongoDb getInstance(int port) {
+    public static ServiceDAOMongoDb getInstance() {
         return ServiceDAOMongoDb.instance;
     }
 
@@ -60,10 +60,10 @@ public class ServiceDAOMongoDb {
 	}
 	
 	//should use json specific register request and response.
-	public Message publishService(Service service){
+	public Message publishService(Message message){
 		int errorcode;
 		String errormsg;
-		Map services = (Map) service.getMap();
+		Map services = (Map) message.getMap();
 	
 		BasicDBObject doc = new BasicDBObject();
 		doc.putAll(services);
@@ -85,12 +85,12 @@ public class ServiceDAOMongoDb {
 	}
 	
 	
-	public Message deleteService(Service service){
+	public Message deleteService(Message message){
 		int errorcode;
 		String errormsg;
 	
 		BasicDBObject query = new BasicDBObject();
-		String uri = service.getURI();
+		String uri = message.getURI();
 		//TODO: add check to see if only one elem is returned
 		query.put("uri", uri);
 		WriteResult wrt = coll.remove(query);
@@ -111,13 +111,13 @@ public class ServiceDAOMongoDb {
 		return response;
 	}
 	
-	public Message renewService(Service service){
+	public Message renewService(Message message){
 		
 		int errorcode;
 		String errormsg;
 		
-		String uri = service.getURI();
-        int ttl = service.getTTL();
+		String uri = message.getURI();
+        int ttl = message.getTTL();
 		BasicDBObject query = new BasicDBObject();
 		//TODO: add check to see if only one elem is returned
 		query.put("uri", uri);

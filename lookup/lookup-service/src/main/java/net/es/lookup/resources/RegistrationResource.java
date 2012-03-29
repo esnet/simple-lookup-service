@@ -8,6 +8,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.QueryParam;
 
 import net.es.lookup.common.DuplicateKeyException;
+import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
 
@@ -31,11 +32,11 @@ public class RegistrationResource {
         // Return some cliched textual content
         try {
             JSONRegisterRequest request = new JSONRegisterRequest(message);
+            ServiceDAOMongoDb.getInstance().publishService(request);
+            JSONRegisterResponse response = new JSONRegisterResponse();
         } catch (DuplicateKeyException e) {
             // TODO: Handle error
         }
-        JSONRegisterResponse response = new JSONRegisterResponse();
-
         return "\n";
     }
 }
