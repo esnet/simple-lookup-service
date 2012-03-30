@@ -16,6 +16,8 @@ import java.net.URI;
  */
 public class LookupService {
 
+    public static String SERVICE_URI_PREFIX="service";
+
     private int port = 8080;
     private HttpServer httpServer = null;
     private static LookupService instance = null;

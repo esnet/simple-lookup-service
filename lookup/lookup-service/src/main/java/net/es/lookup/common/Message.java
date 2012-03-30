@@ -1,5 +1,6 @@
 package net.es.lookup.common;
 
+import java.rmi.MarshalledObject;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,12 +16,17 @@ public class  Message {
     public static final String SERVICE_URI = "uri";
     public static final String QUERY_OPERATOR = "operator";
 
-    private final HashMap<String,Object> keyValues = new HashMap<String, Object>();
+    private final Map<String,Object> keyValues;
     private int status = 0;
     private int error = 0;
     private String errorMessage = "";
 
     public Message() {
+        this.keyValues = new HashMap<String, Object>();
+    }
+
+    public Message(Map<String,Object> map) {
+        this.keyValues = map;
     }
 
     public synchronized int getStatus() {
@@ -49,7 +55,31 @@ public class  Message {
     }
 
     public int getTTL() {
-        return ((Integer) this.getMap().get(Message.TTL)).intValue();
+        Integer res = (Integer) this.getMap().get(Message.TTL);
+        if (res == null) {
+            return -1;
+        }
+        return res.intValue();
+    }
+
+    public String getServiceType() {
+        return  (String) this.getMap().get(Message.SERVICE_TYPE);
+    }
+
+    public String getAccessPoint() {
+        return  (String) this.getMap().get(Message.ACCESS_POINT);
+    }
+
+    public String getClientUUID() {
+        return  (String) this.getMap().get(Message.CLIENT_UUID);
+    }
+
+    public String getServiceName() {
+        return  (String) this.getMap().get(Message.SERVICE_NAME);
+    }
+
+    public String getServiceDomain() {
+        return  (String) this.getMap().get(Message.SERVICE_DOMAIN);
     }
 
     public String getOperator() {
