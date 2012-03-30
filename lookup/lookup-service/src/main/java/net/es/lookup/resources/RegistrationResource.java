@@ -8,6 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 
 import net.es.lookup.common.DuplicateKeyException;
+import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
@@ -38,10 +39,13 @@ public class RegistrationResource {
             // Verify that request is valid and authorized
             if (this.isValid(request) && this.isAuthed(request)) {
                 // Generate a new URI for this service and add it to the service key/value pairs
-                String uri = this.newURI();
-                request.add(Message.SERVICE_URI, uri);
-
-                ServiceDAOMongoDb.getInstance().publishService(request);
+                String uri = this.newURI ();
+                request.add (Message.SERVICE_URI, uri);
+                // Request a lease
+                boolean gotLease = LeaseManager.getInstance().requestLease(request);
+                if (gotLease) {
+                    ServiceDAOMongoDb.getInstance().publishService(request);
+                }
 
                 // Build response
                 response = new JSONRegisterResponse (request.getMap());
@@ -75,5 +79,6 @@ public class RegistrationResource {
         String uri = LookupService.SERVICE_URI_PREFIX + "/" + UUID.randomUUID().toString();
         return uri;
     }
+
 }
 

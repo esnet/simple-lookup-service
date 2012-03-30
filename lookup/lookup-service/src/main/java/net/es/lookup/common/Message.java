@@ -15,6 +15,7 @@ public class  Message {
     public static final String SERVICE_TYPE = "service-type";
     public static final String SERVICE_URI = "uri";
     public static final String QUERY_OPERATOR = "operator";
+    public static final String EXPIRES = "expires";
 
     private final Map<String,Object> keyValues;
     private int status = 0;
