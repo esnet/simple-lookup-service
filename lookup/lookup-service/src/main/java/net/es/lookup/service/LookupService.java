@@ -22,9 +22,9 @@ public class LookupService {
     private HttpServer httpServer = null;
     private static LookupService instance = null;
 
-    static {
-        LookupService.instance = new LookupService();
-    }
+    //static {
+      //  LookupService.instance = new LookupService();
+    //}
 
     public static LookupService getInstance() {
         return LookupService.instance;

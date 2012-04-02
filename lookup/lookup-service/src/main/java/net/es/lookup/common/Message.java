@@ -95,7 +95,7 @@ public class  Message {
         return this.error;
     }
 
-    public synchronized void setErrorMessage (String errorMessahe) {
+    public synchronized void setErrorMessage (String errorMessage) {
         this.errorMessage = errorMessage;
     }
 

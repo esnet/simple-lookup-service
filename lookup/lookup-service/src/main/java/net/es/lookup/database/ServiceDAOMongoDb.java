@@ -3,14 +3,18 @@ package net.es.lookup.database;
 import net.es.lookup.common.DuplicateKeyException;
 import net.es.lookup.common.Service;
 import net.es.lookup.common.Message;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
 
 import com.mongodb.*;
 import java.net.UnknownHostException;
 
 public class ServiceDAOMongoDb {
-	private String dburl="localhost";
+	private String dburl="127.0.0.1";
 	private int dbport=27017;
 	private String dbname="LookupService";
 	private String collname="services";
@@ -55,8 +59,12 @@ public class ServiceDAOMongoDb {
         ServiceDAOMongoDb.instance = this;
 
 		mongo = new Mongo(dburl,dbport);
+		System.out.println(mongo.getAddress().toString());
+		
 		db = mongo.getDB(dbname);
+		System.out.println(db.getName());
 		coll = db.getCollection(collname);
+		System.out.println(coll.getName());
 	}
 	
 	//should use json specific register request and response.
@@ -69,6 +77,7 @@ public class ServiceDAOMongoDb {
 		doc.putAll(services);
 		
 		WriteResult wrt = coll.insert(doc);
+		
 		CommandResult cmdres = wrt.getLastError();
 		if(cmdres.ok()){
 			errorcode = 200;
@@ -155,13 +164,30 @@ public class ServiceDAOMongoDb {
 	
 	public List<Service> query(Message queryRequest){
 		Map serv =  queryRequest.getMap();
+		
+		List <HashMap<String,Object>> keyValueList = new ArrayList<HashMap<String,Object>>();
+		
+		Set<String> tKeys = serv.keySet();
+		if(!tKeys.isEmpty()){
+			Iterator<String> itr = tKeys.iterator();
+			while(itr.hasNext()){
+				String newKey = itr.next(); 
+				if(!(newKey.equals(Message.QUERY_OPERATOR))){
+					HashMap<String, Object> tmpHash = new HashMap<String, Object>();
+					tmpHash.put(newKey, serv.get(newKey));
+					keyValueList.add(tmpHash);
+				}
+				
+			}
+		}
+		
 		BasicDBObject query = new BasicDBObject();
 		BasicDBObject doc = new BasicDBObject();
 		
 		String op = queryRequest.getOperator();
 		String mongoOp = "$and";
 		
-		if(!op.isEmpty()){
+		if(op != null && !op.isEmpty()){
 			if(op.equalsIgnoreCase("any")){
 				mongoOp = "$or";
 			}else if(op.equalsIgnoreCase("all")){
@@ -169,11 +195,14 @@ public class ServiceDAOMongoDb {
 			}
 		}
 		
-		doc.putAll(serv);
-	
-		query.put(mongoOp, doc);
+		//doc.putAll(keyValueList);
+
+		query.put(mongoOp, keyValueList);
 		
 		DBCursor cur = coll.find(query);
+		System.out.println(query.toString());
+		System.out.println(cur.count());
+		
 		ArrayList <Service> result = new ArrayList<Service>();
 		while (cur.hasNext()){
 			Service tmpserv = new Service();
