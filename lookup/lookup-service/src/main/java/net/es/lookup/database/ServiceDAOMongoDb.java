@@ -68,11 +68,21 @@ public class ServiceDAOMongoDb {
 	}
 	
 	//should use json specific register request and response.
-	public Message publishService(Message message){
+	public Message queryAndPublishService(Message message, Message queryRequest){
 		int errorcode;
 		String errormsg;
+		Message response = new Message();
+		
+		//check for duplicates
+		List<Service> dupEntries = this.query(queryRequest);
+		
+		if(dupEntries.size()>1){
+			response.setError(500);
+			response.setErrorMessage("Duplicate entries found");
+			return response;		
+		}
+		
 		Map services = (Map) message.getMap();
-	
 		BasicDBObject doc = new BasicDBObject();
 		doc.putAll(services);
 		
@@ -87,7 +97,7 @@ public class ServiceDAOMongoDb {
 			errormsg = cmdres.getErrorMessage();
 		}
 		
-		Message response = new Message();
+		
 		response.setError(errorcode);
 		response.setErrorMessage(errormsg);
 		return response;
@@ -101,7 +111,7 @@ public class ServiceDAOMongoDb {
 		BasicDBObject query = new BasicDBObject();
 		String uri = message.getURI();
 		//TODO: add check to see if only one elem is returned
-		query.put("uri", uri);
+		query.put(Message.SERVICE_URI, uri);
 		WriteResult wrt = coll.remove(query);
 		
 		CommandResult cmdres = wrt.getLastError();
@@ -134,8 +144,9 @@ public class ServiceDAOMongoDb {
 		
 		DBCursor cur = coll.find(query);
 		
-		if (cur.length() == 1){
+		if (cur.size() == 1){
 			DBObject tmp = cur.next();
+			//DBObject tmp = new DBObject();
 			tmp.put("ttl", ttl);
 			WriteResult wrt = coll.save(tmp);
 			
@@ -151,7 +162,13 @@ public class ServiceDAOMongoDb {
 			
 		}else{
 			errorcode = 500;
-			errormsg = "Database corrupted";
+			
+			if(cur.size()>1){
+				errormsg = "Database corrupted";
+			}else{
+				errormsg = "Element not found";
+			}
+			
 		}
 	
 		Message response = new Message();
@@ -161,43 +178,9 @@ public class ServiceDAOMongoDb {
 	}
 	
 	
-	
 	public List<Service> query(Message queryRequest){
-		Map serv =  queryRequest.getMap();
 		
-		List <HashMap<String,Object>> keyValueList = new ArrayList<HashMap<String,Object>>();
-		
-		Set<String> tKeys = serv.keySet();
-		if(!tKeys.isEmpty()){
-			Iterator<String> itr = tKeys.iterator();
-			while(itr.hasNext()){
-				String newKey = itr.next(); 
-				if(!(newKey.equals(Message.QUERY_OPERATOR))){
-					HashMap<String, Object> tmpHash = new HashMap<String, Object>();
-					tmpHash.put(newKey, serv.get(newKey));
-					keyValueList.add(tmpHash);
-				}
-				
-			}
-		}
-		
-		BasicDBObject query = new BasicDBObject();
-		BasicDBObject doc = new BasicDBObject();
-		
-		String op = queryRequest.getOperator();
-		String mongoOp = "$and";
-		
-		if(op != null && !op.isEmpty()){
-			if(op.equalsIgnoreCase("any")){
-				mongoOp = "$or";
-			}else if(op.equalsIgnoreCase("all")){
-				mongoOp = "$and";
-			}
-		}
-		
-		//doc.putAll(keyValueList);
-
-		query.put(mongoOp, keyValueList);
+		BasicDBObject query = buildQuery(queryRequest);
 		
 		DBCursor cur = coll.find(query);
 		System.out.println(query.toString());
@@ -227,6 +210,51 @@ public class ServiceDAOMongoDb {
 		return result;
 	}
 	
+	
+	//Builds the query from the given map
+	private BasicDBObject buildQuery(Message queryRequest){
+		Map serv =  queryRequest.getMap();
+		List <HashMap<String,Object>> keyValueList = new ArrayList<HashMap<String,Object>>();
+		
+		Set<String> tKeys = serv.keySet();
+		if(!tKeys.isEmpty()){
+			Iterator<String> itr = tKeys.iterator();
+			//build the query
+			while(itr.hasNext()){
+				String newKey = itr.next(); 
+				if(!(newKey.equals(Message.QUERY_OPERATOR))){ 
+					HashMap<String, Object> tmpHash = new HashMap<String, Object>();
+					ArrayList <Object> values = (ArrayList<Object>) serv.get(newKey);
+					if(values.size()>1){
+						HashMap<String, Object> listvalues = new HashMap<String, Object>(); 
+						listvalues.put("$in", values);
+						tmpHash.put(newKey, listvalues);						
+					}else if(values.size()==1){
+						tmpHash.put(newKey, values.get(0));
+					}		
+					keyValueList.add(tmpHash);
+				}				
+			}
+		}
+		
+		BasicDBObject query = new BasicDBObject();
+		
+		String op = queryRequest.getOperator();
+		String mongoOp = "$and";
+		
+		if(op != null && !op.isEmpty()){
+			if(op.equalsIgnoreCase("any")){
+				mongoOp = "$or";
+			}else if(op.equalsIgnoreCase("all")){
+				mongoOp = "$and";
+			}
+		}
+
+		query.put(mongoOp, keyValueList);
+		
+		return query;
+	}
+	
 	public Service getServiceByURI(String URI){
 		int errorcode;
 		String errormsg;
@@ -235,27 +263,12 @@ public class ServiceDAOMongoDb {
 		query.put("uri", URI);
 		DBCursor cur = coll.find(query);
 		
-		Service result = new Service();
-		if (cur.length() == 1){
+		Service result=null;
+		if (cur.size() == 1){
 			DBObject tmp = cur.next();
-			Set<String> keys = tmp.keySet();
-			if (!keys.isEmpty()){
-				Iterator<String> it = keys.iterator();
-				while(it.hasNext()){
-					
-					String tmpKey = it.next();
-					try {
-					    result.add (tmpKey,tmp.get(tmpKey));
-                    } catch (DuplicateKeyException e) {
-                        // Since the key/value pairs are coming from the database, we are guaranteed to be valid
-                        // therefore, any DuplicateKeyException would indicate a bug in the code
-                        // TODO: better error handling
-                        Thread.dumpStack();
-                    }
-				}
-			}
-		}
-			
+			Message tmpmsg = new Message(tmp.toMap());
+			result = new Service(tmpmsg);
+		}			
 		return result;
 	}
 	

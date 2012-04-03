@@ -44,7 +44,7 @@ public class RegistrationResource {
                 // Request a lease
                 boolean gotLease = LeaseManager.getInstance().requestLease(request);
                 if (gotLease) {
-                    ServiceDAOMongoDb.getInstance().publishService(request);
+                    ServiceDAOMongoDb.getInstance().queryAndPublishService(request,request);
                 }
 
                 // Build response

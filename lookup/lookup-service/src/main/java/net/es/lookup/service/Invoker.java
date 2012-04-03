@@ -7,6 +7,8 @@ import joptsimple.OptionSpec;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -35,44 +37,7 @@ public class Invoker {
         Invoker.lookupService = new LookupService(Integer.parseInt(Invoker.port));
         // Start the service
         Invoker.lookupService.startService();
-        
-        
-        //Insert values
-        //Message ms = new Message();
-        //ms.add(Message.SERVICE_NAME, "test");
-       // ms.add(Message.SERVICE_URI, "http://test");
-        //ms.add(Message.SERVICE_DOMAIN, "es.net");
-        //Invoker.dao.publishService(ms);
-        
-        //ms = new Message();
-        //ms.add(Message.SERVICE_NAME, "test1");
-        //ms.add(Message.SERVICE_URI, "http://test1");
-        //ms.add(Message.SERVICE_DOMAIN, "lbl");
-        //Invoker.dao.publishService(ms);
-        
-        //ms = new Message();
-        //ms.add(Message.SERVICE_NAME, "test");
-        //Invoker.dao.publishService(ms);
-        
-        //Query test
-        Message msg = new Message();
-        msg.add(Message.SERVICE_NAME, "test");
-        msg.add(Message.SERVICE_URI, "http://test");
-        msg.add(Message.SERVICE_DOMAIN, "es.net");
-        //msg.add(Message.QUERY_OPERATOR, "all");
-        
-        List<Service> response = Invoker.dao.query(msg);
-        for (Service x:response){
-        	System.out.println(x);
-        }
-        
-        //Delete values
-        Message delmsg = new Message();
-        delmsg.add(Message.SERVICE_NAME, "test");
-        delmsg.add(Message.SERVICE_URI, "http://test");
-        delmsg.add(Message.SERVICE_DOMAIN, "es.net");
-        Invoker.dao.deleteService();
-        
+                
         // Block forever
         Object blockMe = new Object();
         synchronized (blockMe) {
