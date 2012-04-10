@@ -49,7 +49,14 @@ public class RegistrationResource {
                 // Request a lease
                 boolean gotLease = LeaseManager.getInstance().requestLease(request);
                 if (gotLease) {
-                    ServiceDAOMongoDb.getInstance().queryAndPublishService(request,request);
+                    // Build the matching query request that must fail for the service to be published
+                    Message query = new Message();
+                    query.add(Message.ACCESS_POINT, request.getAccessPoint());
+                    query.add(Message.CLIENT_UUID,request.getClientUUID());
+                    query.add(Message.SERVICE_TYPE, request.getServiceType());
+                    query.add(Message.SERVICE_DOMAIN, request.getServiceDomain());
+
+                    ServiceDAOMongoDb.getInstance().queryAndPublishService(request,query);
                     response = new JSONRegisterResponse (request.getMap());
                     return response.toString();
                 }

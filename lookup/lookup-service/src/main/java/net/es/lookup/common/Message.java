@@ -8,7 +8,6 @@ import java.util.Map;
 
 public class  Message {
 
-    public static final String DATA = "data";
     public static final String ACCESS_POINT = "access-point";
     public static final String CLIENT_UUID = "client-uuid";
     public static final String TTL = "ttl";
