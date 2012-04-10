@@ -136,7 +136,7 @@ public class ServiceDAOMongoDb {
 		String errormsg;
 		
 		String uri = message.getURI();
-        int ttl = message.getTTL();
+        long ttl = message.getTTL();
 		BasicDBObject query = new BasicDBObject();
 		//TODO: add check to see if only one elem is returned
 		query.put("uri", uri);

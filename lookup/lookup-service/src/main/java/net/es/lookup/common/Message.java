@@ -1,14 +1,16 @@
 package net.es.lookup.common;
 
+import org.apache.commons.lang.math.LongRange;
+
 import java.rmi.MarshalledObject;
 import java.util.HashMap;
 import java.util.Map;
 
 public class  Message {
 
+    public static final String DATA = "data";
     public static final String ACCESS_POINT = "access-point";
     public static final String CLIENT_UUID = "client-uuid";
-    public static final String AUTHORIZATION = "authorization";
     public static final String TTL = "ttl";
     public static final String SERVICE_NAME = "name";
     public static final String SERVICE_DOMAIN = "domain";
@@ -18,7 +20,7 @@ public class  Message {
     public static final String EXPIRES = "expires";
 
     private final Map<String,Object> keyValues;
-    private int status = 0;
+    protected int status = 0;
     private int error = 0;
     private String errorMessage = "";
 
@@ -55,12 +57,12 @@ public class  Message {
         return (String) this.getMap().get(Message.SERVICE_URI);
     }
 
-    public int getTTL() {
-        Integer res = (Integer) this.getMap().get(Message.TTL);
+    public long getTTL() {
+        Long res = (Long) this.getMap().get(Message.TTL);
         if (res == null) {
             return -1;
         }
-        return res.intValue();
+        return res;
     }
 
     public String getServiceType() {

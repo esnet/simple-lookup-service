@@ -18,7 +18,7 @@ import net.es.lookup.service.LookupService;
 /**
  *
  */
-@Path("/lookup/service")
+@Path("/lookup/services")
 public class RegistrationResource {
 
     private String params;
@@ -36,6 +36,11 @@ public class RegistrationResource {
         JSONRegisterResponse response;
         try {
             JSONRegisterRequest request = new JSONRegisterRequest(message);
+            if (request.getStatus() == JSONRegisterRequest.INCORRECT_FORMAT) {
+                System.out.println("INCORRECT FORMAT");
+                // TODO: return correct error code
+                return "402\n";
+            }
             // Verify that request is valid and authorized
             if (this.isValid(request) && this.isAuthed(request)) {
                 // Generate a new URI for this service and add it to the service key/value pairs
@@ -45,12 +50,15 @@ public class RegistrationResource {
                 boolean gotLease = LeaseManager.getInstance().requestLease(request);
                 if (gotLease) {
                     ServiceDAOMongoDb.getInstance().queryAndPublishService(request,request);
+                    response = new JSONRegisterResponse (request.getMap());
+                    return response.toString();
                 }
 
                 // Build response
                 response = new JSONRegisterResponse (request.getMap());
             }
         } catch (DuplicateKeyException e) {
+            Thread.dumpStack();
             // TODO: Handle error
         }
         return "\n";
@@ -67,8 +75,13 @@ public class RegistrationResource {
     private boolean isValid(JSONRegisterRequest request) {
         // All mandatory key/value must be present
         boolean res = false;
+        System.out.println(request.getAccessPoint());
+        System.out.println(request.getTTL());
+        System.out.println(request.getClientUUID());
+        System.out.println(request.getServiceDomain());
+        System.out.println(request.getServiceType());
 
-        res = (((request.getAccessPoint()== null) || request.getAccessPoint().isEmpty()) ||
+        res = ! (((request.getAccessPoint()== null) || request.getAccessPoint().isEmpty()) ||
                (request.getTTL() == 0) ||
                ((request.getServiceType()== null) || request.getServiceType().isEmpty()));
 
