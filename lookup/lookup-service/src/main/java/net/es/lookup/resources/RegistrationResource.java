@@ -1,6 +1,6 @@
 package net.es.lookup.resources;
 
-import java.util.UUID;
+import java.util.*;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.POST;
@@ -51,10 +51,25 @@ public class RegistrationResource {
                 if (gotLease) {
                     // Build the matching query request that must fail for the service to be published
                     Message query = new Message();
-                    query.add(Message.ACCESS_POINT, request.getAccessPoint());
-                    query.add(Message.CLIENT_UUID,request.getClientUUID());
-                    query.add(Message.SERVICE_TYPE, request.getServiceType());
-                    query.add(Message.SERVICE_DOMAIN, request.getServiceDomain());
+                    /**
+                    query.add(Message.ACCESS_POINT,new ArrayList<String>().add(request.getAccessPoint()));
+                    query.add(Message.CLIENT_UUID,new ArrayList<String>().add(request.getClientUUID()));
+                    query.add(Message.SERVICE_TYPE,new ArrayList<String>().add(request.getServiceType()));
+                    query.add(Message.SERVICE_DOMAIN,new ArrayList<String>().add(request.getServiceDomain()));
+                     **/
+
+                    ArrayList<String> list = new ArrayList<String>();
+                    list.add(request.getAccessPoint());
+                    query.add(Message.ACCESS_POINT,list);
+                    list = new ArrayList<String>();
+                    list.add(request.getClientUUID());
+                    query.add(Message.CLIENT_UUID,list);
+                    list = new ArrayList<String>();
+                    list.add(request.getServiceType());
+                    query.add(Message.SERVICE_TYPE,list);
+                    list = new ArrayList<String>();
+                    list.add(request.getServiceDomain());
+                    query.add(Message.SERVICE_DOMAIN,list);
 
                     ServiceDAOMongoDb.getInstance().queryAndPublishService(request,query);
                     response = new JSONRegisterResponse (request.getMap());

@@ -215,34 +215,12 @@ public class ServiceDAOMongoDb {
 	private BasicDBObject buildQuery(Message queryRequest){
 		Map<String, Object> serv =  queryRequest.getMap();
 		List <HashMap<String,Object>> keyValueList = new ArrayList<HashMap<String,Object>>();
-/**
-		Set<String> tKeys = serv.keySet();
-		if(!tKeys.isEmpty()){
-			Iterator<String> itr = tKeys.iterator();
-			//build the query
-			while(itr.hasNext()){
-				String newKey = itr.next(); 
-				if(!(newKey.equals(Message.QUERY_OPERATOR))){ 
-					HashMap<String, Object> tmpHash = new HashMap<String, Object>();
-					ArrayList <Object> values = (ArrayList<Object>) serv.get(newKey);
-					if(values.size()>1){
-						HashMap<String, Object> listvalues = new HashMap<String, Object>(); 
-						listvalues.put("$in", values);
-						tmpHash.put(newKey, listvalues);						
-					}else if(values.size()==1){
-						tmpHash.put(newKey, values.get(0));
-					}		
-					keyValueList.add(tmpHash);
-				}				
-			}
-		}
-**/
 
         for (Map.Entry<String,Object> entry : serv.entrySet()) {
             String newKey = entry.getKey();
             if ( ! newKey.equals(Message.QUERY_OPERATOR)) {
                 HashMap<String, Object> tmpHash = new HashMap<String, Object>();
-                ArrayList <Object> values = (ArrayList<Object>) serv.get(newKey);
+                List <Object> values = (List<Object>) serv.get(newKey);
                 if(values.size()>1){
                     HashMap<String, Object> listvalues = new HashMap<String, Object>();
                     listvalues.put("$in", values);
