@@ -48,20 +48,4 @@ public class JSONRegisterRequest extends RegisterRequest {
 
         this.status = JSONRegisterRequest.VALID;
     }
-
-    public String toString() {
-
-        JSONStringer stringer = new JSONStringer();
-
-        Map <String, Object> map = this.getMap();
-        Set<Entry <String, Object>> entries=  map.entrySet();
-        JSONBuilder builder = stringer.object();
-        for (Entry<String,Object> entry : entries) {
-            builder.object().key(entry.getKey()).value(entry.getValue()).endObject();
-        }
-        builder.endObject();
-
-        return stringer.toString();
-    }
-
 }

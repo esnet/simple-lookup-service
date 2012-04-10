@@ -1,6 +1,7 @@
 package net.es.lookup.resources;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.UUID;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.POST;
@@ -11,6 +12,7 @@ import net.es.lookup.common.DuplicateKeyException;
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
 import net.es.lookup.database.ServiceDAOMongoDb;
+import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
 import net.es.lookup.service.LookupService;
@@ -51,13 +53,6 @@ public class RegistrationResource {
                 if (gotLease) {
                     // Build the matching query request that must fail for the service to be published
                     Message query = new Message();
-                    /**
-                    query.add(Message.ACCESS_POINT,new ArrayList<String>().add(request.getAccessPoint()));
-                    query.add(Message.CLIENT_UUID,new ArrayList<String>().add(request.getClientUUID()));
-                    query.add(Message.SERVICE_TYPE,new ArrayList<String>().add(request.getServiceType()));
-                    query.add(Message.SERVICE_DOMAIN,new ArrayList<String>().add(request.getServiceDomain()));
-                     **/
-
                     ArrayList<String> list = new ArrayList<String>();
                     list.add(request.getAccessPoint());
                     query.add(Message.ACCESS_POINT,list);
@@ -72,8 +67,9 @@ public class RegistrationResource {
                     query.add(Message.SERVICE_DOMAIN,list);
 
                     ServiceDAOMongoDb.getInstance().queryAndPublishService(request,query);
+
                     response = new JSONRegisterResponse (request.getMap());
-                    return response.toString();
+                    return JSONMessage.toString(response);
                 }
 
                 // Build response
@@ -97,11 +93,6 @@ public class RegistrationResource {
     private boolean isValid(JSONRegisterRequest request) {
         // All mandatory key/value must be present
         boolean res = false;
-        System.out.println(request.getAccessPoint());
-        System.out.println(request.getTTL());
-        System.out.println(request.getClientUUID());
-        System.out.println(request.getServiceDomain());
-        System.out.println(request.getServiceType());
 
         res = ! (((request.getAccessPoint()== null) || request.getAccessPoint().isEmpty()) ||
                (request.getTTL() == 0) ||
