@@ -1,20 +1,14 @@
 package net.es.lookup.protocol.json;
 
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.joda.time.Duration;
-import org.joda.time.convert.ConverterManager;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 
 import net.es.lookup.common.DuplicateKeyException;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.RegisterRequest;
-import net.sf.json.JSONArray;
-import net.sf.json.util.JSONBuilder;
-import net.sf.json.util.JSONStringer;
 import net.sf.json.util.JSONTokener;
 import net.sf.json.JSONObject;
 

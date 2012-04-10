@@ -10,8 +10,8 @@ import net.sf.json.util.JSONTokener;
 import net.sf.json.JSONObject;
 
 public class JSONQueryRequest extends QueryRequest {
-    static final int VALID = 1;
-    static final int INCORRECT_FORMAT =  2;
+    static public final int VALID = 1;
+    static public final int INCORRECT_FORMAT =  2;
 
     private int status = 0;
 

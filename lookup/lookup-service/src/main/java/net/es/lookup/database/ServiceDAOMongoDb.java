@@ -261,8 +261,7 @@ public class ServiceDAOMongoDb {
 		Service result=null;
 		if (cur.size() == 1){
 			DBObject tmp = cur.next();
-			Message tmpmsg = new Message(tmp.toMap());
-			result = new Service(tmpmsg);
+			result = new Service(tmp.toMap());
 		}			
 		return result;
 	}

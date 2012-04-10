@@ -66,9 +66,9 @@ public class RegistrationResource {
                     list.add(request.getServiceDomain());
                     query.add(Message.SERVICE_DOMAIN,list);
 
-                    ServiceDAOMongoDb.getInstance().queryAndPublishService(request,query);
+                    Message res = ServiceDAOMongoDb.getInstance().queryAndPublishService(request,query);
 
-                    response = new JSONRegisterResponse (request.getMap());
+                    response = new JSONRegisterResponse (res.getMap());
                     return JSONMessage.toString(response);
                 }
 
