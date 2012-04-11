@@ -82,7 +82,7 @@ public class ServiceDAOMongoDb {
 			return response;		
 		}
 		
-		Map services = (Map) message.getMap();
+		Map<String, Object> services = message.getMap();
 		BasicDBObject doc = new BasicDBObject();
 		doc.putAll(services);
 		
@@ -181,9 +181,10 @@ public class ServiceDAOMongoDb {
 	public List<Service> query(Message queryRequest){
 		
 		BasicDBObject query = buildQuery(queryRequest);
-		
+		System.out.println(query);
 		DBCursor cur = coll.find(query);
-		System.out.println(query.toString());
+		
+		System.out.println("came here"+query.toString());
 		System.out.println(cur.count());
 		
 		ArrayList <Service> result = new ArrayList<Service>();
@@ -211,11 +212,13 @@ public class ServiceDAOMongoDb {
 	}
 	
 	
+	
 	//Builds the query from the given map
 	private BasicDBObject buildQuery(Message queryRequest){
 		Map<String, Object> serv =  queryRequest.getMap();
+		System.out.println(serv.toString());
 		List <HashMap<String,Object>> keyValueList = new ArrayList<HashMap<String,Object>>();
-
+		
         for (Map.Entry<String,Object> entry : serv.entrySet()) {
             String newKey = entry.getKey();
             if ( ! newKey.equals(Message.QUERY_OPERATOR)) {
@@ -232,8 +235,9 @@ public class ServiceDAOMongoDb {
                     }else if(values.size()==1){
                         tmpHash.put(newKey, values.get(0));
                     }
-                    keyValueList.add(tmpHash);
+                    
                 }
+                keyValueList.add(tmpHash);
             }
         }
 		
@@ -249,7 +253,7 @@ public class ServiceDAOMongoDb {
 				mongoOp = "$and";
 			}
 		}
-
+		
 		query.put(mongoOp, keyValueList);
 		
 		return query;

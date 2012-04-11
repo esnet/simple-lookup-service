@@ -22,11 +22,11 @@ public class JSONRegisterRequest extends RegisterRequest {
     }
 
     private void parseJSON (String message) throws DuplicateKeyException {
-
+    	
         JSONTokener tokener = new JSONTokener(message);
 
         Object obj = tokener.nextValue();
-
+        
         JSONObject jsonObj = (JSONObject) obj;
         Set keyValues = jsonObj.entrySet();
         for (Object o : ((JSONObject) obj).keySet()) {
