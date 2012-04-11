@@ -220,15 +220,20 @@ public class ServiceDAOMongoDb {
             String newKey = entry.getKey();
             if ( ! newKey.equals(Message.QUERY_OPERATOR)) {
                 HashMap<String, Object> tmpHash = new HashMap<String, Object>();
-                List <Object> values = (List<Object>) serv.get(newKey);
-                if(values.size()>1){
-                    HashMap<String, Object> listvalues = new HashMap<String, Object>();
-                    listvalues.put("$in", values);
-                    tmpHash.put(newKey, listvalues);
-                }else if(values.size()==1){
-                    tmpHash.put(newKey, values.get(0));
+                Object obj = serv.get(newKey);
+                if (obj instanceof String) {
+                    tmpHash.put(newKey, (String) obj);
+                } else if (obj instanceof List) {
+                    List <Object> values = (List<Object>) obj;
+                    if(values.size()>1){
+                        HashMap<String, Object> listvalues = new HashMap<String, Object>();
+                        listvalues.put("$in", values);
+                        tmpHash.put(newKey, listvalues);
+                    }else if(values.size()==1){
+                        tmpHash.put(newKey, values.get(0));
+                    }
+                    keyValueList.add(tmpHash);
                 }
-                keyValueList.add(tmpHash);
             }
         }
 		

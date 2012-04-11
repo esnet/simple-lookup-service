@@ -1,19 +1,22 @@
 package net.es.lookup.protocol.json;
 
+import net.es.lookup.common.Message;
 import net.es.lookup.common.QueryRequest;
 import net.es.lookup.common.DuplicateKeyException;
 import net.es.lookup.common.Service;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.json.JSONArray;
 import net.sf.json.util.JSONTokener;
 import net.sf.json.JSONObject;
+import org.joda.time.Duration;
+import org.joda.time.format.ISOPeriodFormat;
+import org.joda.time.format.PeriodFormatter;
 
 public class JSONQueryRequest extends QueryRequest {
     static public final int VALID = 1;
     static public final int INCORRECT_FORMAT =  2;
-
-    private int status = 0;
 
     public JSONQueryRequest (String message) throws DuplicateKeyException {
         this.parseJSON(message);
@@ -25,21 +28,11 @@ public class JSONQueryRequest extends QueryRequest {
 
         Object obj = tokener.nextValue();
 
-        if ((obj == null) || !(obj instanceof net.sf.json.JSONArray)) {
-            // Incorrect format.
-            this.status = JSONQueryRequest.INCORRECT_FORMAT;
-            return;
+        JSONObject jsonObj = (JSONObject) obj;
+        for (Object o : ((JSONObject) obj).keySet()) {
+            this.add(o.toString(), ((JSONObject) obj).get(o));
         }
-        
-        
 
-        JSONArray keyValues = (JSONArray) obj;
-        for (Object o : keyValues) {
-            JSONObject jo = (JSONObject) o;
-            for (Object o2 : jo.keySet()) {
-                this.add(o2.toString(), jo.get(o2));
-            }
-        }
-        this.status = JSONQueryRequest.VALID;
+        this.status = JSONRegisterRequest.VALID;
     }
 }
