@@ -181,11 +181,9 @@ public class ServiceDAOMongoDb {
 	public List<Service> query(Message queryRequest){
 		
 		BasicDBObject query = buildQuery(queryRequest);
-		System.out.println(query);
-		DBCursor cur = coll.find(query);
 		
-		System.out.println("came here"+query.toString());
-		System.out.println(cur.count());
+		DBCursor cur = coll.find(query);
+
 		
 		ArrayList <Service> result = new ArrayList<Service>();
 		while (cur.hasNext()){

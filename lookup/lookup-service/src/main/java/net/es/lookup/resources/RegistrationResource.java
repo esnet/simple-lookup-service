@@ -33,6 +33,7 @@ public class RegistrationResource {
     @Consumes("application/json")
     @Produces("application/json")
     public String registerService(String message) {
+    	
         // this.params = params;
         // Return some cliched textual content
         JSONRegisterResponse response;
@@ -46,7 +47,7 @@ public class RegistrationResource {
             // Verify that request is valid and authorized
             if (this.isValid(request) && this.isAuthed(request)) {
                 // Generate a new URI for this service and add it to the service key/value pairs
-                String uri = this.newURI ();
+                String uri = this.newURI (); 
                 request.add (Message.SERVICE_URI, uri);
                 // Request a lease
                 boolean gotLease = LeaseManager.getInstance().requestLease(request);
