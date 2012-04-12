@@ -1,19 +1,20 @@
 package net.es.lookup.protocol.json;
 
-import net.es.lookup.common.QueryRequest;
+
+import net.es.lookup.common.SubGetRequest;
 import net.es.lookup.common.DuplicateKeyException;
 
 import net.sf.json.util.JSONTokener;
 import net.sf.json.JSONObject;
 
-public class JSONQueryRequest extends QueryRequest {
+public class JSONSubGetRequest extends SubGetRequest {
     static public final int VALID = 1;
     static public final int INCORRECT_FORMAT =  2;
 
-    public JSONQueryRequest (String message) throws DuplicateKeyException {
+    public JSONSubGetRequest (String message) throws DuplicateKeyException {
         this.parseJSON(message);
     }
-	
+
     private void parseJSON (String message) throws DuplicateKeyException {
 
         JSONTokener tokener = new JSONTokener(message);
@@ -25,6 +26,8 @@ public class JSONQueryRequest extends QueryRequest {
             this.add(o.toString(), ((JSONObject) obj).get(o));
         }
 
-        this.status = JSONRegisterRequest.VALID;
+        this.status = JSONSubGetRequest.VALID;
     }
 }
+
+

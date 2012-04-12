@@ -1,36 +1,23 @@
-package net.es.lookup.resources;
+package net.es.lookup.api;
 
 import java.util.List;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 
 import net.es.lookup.common.DuplicateKeyException;
 import net.es.lookup.common.Service;
-import net.es.lookup.common.Message;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONQueryRequest;
-import net.es.lookup.protocol.json.JSONQueryResponse;
 
-@Path("/lookup/query")
-public class QueryResource {
+public class QueryServices {
 
 
     private String params;
 
-    // The Java method will process HTTP GET requests
-    @POST
-    // The Java method will produce content identified by the MIME Media
-    // type "text/plain"
+    public String query() {
 
-    @Consumes("application/json")
-    @Produces("application/json")
-    public String query(String message) {
-        // this.params = params;
-        // Return some cliched textual content
+        String message = ""; // TODO: needs to implements arguments
+
         String response;
         try {
             JSONQueryRequest request = new JSONQueryRequest(message);

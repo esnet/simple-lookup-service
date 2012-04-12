@@ -1,12 +1,7 @@
-package net.es.lookup.resources;
+package net.es.lookup.api;
 
 import java.util.ArrayList;
 import java.util.UUID;
-
-import javax.ws.rs.Path;
-import javax.ws.rs.POST;
-import javax.ws.rs.Produces;
-import javax.ws.rs.Consumes;
 
 import net.es.lookup.common.DuplicateKeyException;
 import net.es.lookup.common.LeaseManager;
@@ -20,18 +15,10 @@ import net.es.lookup.service.LookupService;
 /**
  *
  */
-@Path("/lookup/services")
-public class RegistrationResource {
+public class RegisterService {
 
     private String params;
 
-    // The Java method will process HTTP GET requests
-    @POST
-    // The Java method will produce content identified by the MIME Media
-    // type "text/plain"
-
-    @Consumes("application/json")
-    @Produces("application/json")
     public String registerService(String message) {
     	
         // this.params = params;
