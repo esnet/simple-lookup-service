@@ -43,7 +43,7 @@ public class WebServer {
          * clame SSL auth in the HTTP headers
          */
         httpNl.getFilterChain().add( httpNl.getFilterChain().size() - 1, 
-                new MPClientAuthProxyFilter(false));
+                new MPClientAuthProxyFilter(proxyMode));
     }
     
     public void addHttpsListener(int port, String keystore, 
