@@ -141,7 +141,7 @@ public class OWAMPJob  extends ExecCommandJob{
         Pattern startPattern = Pattern.compile("first:\\s+(.+)");
         Pattern endPattern = Pattern.compile("last:\\s+(.+)");
         Pattern lossPattern = Pattern.compile("\\d+\\s+sent,\\s+(\\d+)\\s+lost\\s+\\(\\d+(\\.\\d+)?%\\),\\s+(\\d+)\\s+duplicates");
-        Pattern delayPattern = Pattern.compile("one-way\\s+delay\\s+min/median/max\\s+=\\s+(.+)/(.+)/(.+)\\s+ms,\\s+\\((err=)?(\\d+)?.+\\)");
+        Pattern delayPattern = Pattern.compile("one-way\\s+delay\\s+min/median/max\\s+=\\s+(.+)/(.+)/(.+)\\s+ms,\\s+\\((err=)?(\\-?[0-9\\.]+)?.+?$\\)");
         Pattern ttlPattern1 = Pattern.compile("Hops\\s+=\\s+(\\d+)\\s+\\(consistently\\)");
         Pattern ttlPattern2 = Pattern.compile("TTL\\s+not\\s+reported");
         Pattern ttlPattern3 = Pattern.compile("Hops\\s+takes\\s+(\\d+)\\s+values;\\s+Min\\s+Hops\\s+=\\s+(\\d+),\\s+Max\\s+Hops\\s+=\\s+(\\d+)");
