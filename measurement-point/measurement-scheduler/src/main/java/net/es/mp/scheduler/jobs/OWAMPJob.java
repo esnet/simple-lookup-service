@@ -154,6 +154,8 @@ public class OWAMPJob  extends ExecCommandJob{
         boolean lossFound = false;
         boolean delayFound = false;
         boolean ttlFound = false;
+        String returnedSource = "";
+        String returnedDest = "";
         while((outputLine = stdout.readLine()) != null){
             log.debug(outputLine.trim());
             Matcher ipLineMatcher = ipLinePattern.matcher(outputLine.trim());
@@ -166,8 +168,8 @@ public class OWAMPJob  extends ExecCommandJob{
             Matcher ttlMatcher3 = ttlPattern3.matcher(outputLine.trim());
 
             if(ipLineMatcher.matches()){
-                measurement.setSourceIP(ipLineMatcher.group(1));
-                measurement.setDestinationIP(ipLineMatcher.group(2));
+                returnedSource = ipLineMatcher.group(1);
+                returnedDest = ipLineMatcher.group(2);
                 ipsFound = true;
             }else if(startMatcher.matches()){
                 result.setStartTime(dateParser.parseDateTime(startMatcher.group(1)).toDate());
@@ -254,24 +256,34 @@ public class OWAMPJob  extends ExecCommandJob{
 
         //figure out hostname of source and destination
         try{
-            String hostname = InetAddress.getByName(owampSchedule.getSource()).getCanonicalHostName();
+            InetAddress inet = InetAddress.getByName(returnedSource);
+            String hostname = inet.getCanonicalHostName();
+            String ip = inet.getHostAddress();
+            measurement.setSourceIP(ip);
             //if get back textual representation of IP then se to null
-            if(measurement.getSourceIP() != null && measurement.getSourceIP().equals(hostname)){
-                hostname = null;
+            if(!ip.equals(hostname)){
+                measurement.setSourceHostname(hostname);
+            }else if(!measurement.getSource().equals(hostname)){
+                //this only happens if for some reason can't get hostname but source was specified as host
+                measurement.setSourceHostname(measurement.getSource());
             }
-            measurement.setSourceHostname(hostname);
         }catch(Exception e){
             //can't resolve so set to null
             log.debug("Unable to set sourceHostname: " + e.getMessage());
             measurement.setSourceHostname(null);
-
         }
         try{
-            String hostname = InetAddress.getByName(owampSchedule.getDestination()).getCanonicalHostName();
-            if(measurement.getDestinationIP() != null && measurement.getDestinationIP().equals(hostname)){
-                hostname = null;
+            InetAddress inet = InetAddress.getByName(returnedDest);
+            String hostname = inet.getCanonicalHostName();
+            String ip = inet.getHostAddress();
+            measurement.setDestinationIP(ip);
+            //if get back textual representation of IP then se to null
+            if(!ip.equals(hostname)){
+                measurement.setDestinationHostname(hostname);
+            }else if(!measurement.getDestination().equals(hostname)){
+                //this only happens if for some reason can't get hostname but dest was specified as host
+                measurement.setDestinationHostname(measurement.getDestination());
             }
-            measurement.setDestinationHostname(hostname);
         }catch(Exception e){
             //can't resolve so set to null
             log.debug("Unable to set destinationHostname: " + e.getMessage());
