@@ -169,7 +169,12 @@ public class MPContainer {
         }
         
         //set resource URL
-        this.resourceURL = UriBuilder.fromPath("/").scheme(proto).host(host).port(port).build().toASCIIString();
+        UriBuilder builder = UriBuilder.fromPath("/").scheme(proto).host(host);
+        if(("http".equals(proto) && port == 80) || ("https".equals(proto) && port == 443)){
+            this.resourceURL = builder.build().toASCIIString();
+        }else{
+            this.resourceURL = builder.port(port).build().toASCIIString();
+        }
         log.debug("resourceURL=" + this.resourceURL);
     }
 

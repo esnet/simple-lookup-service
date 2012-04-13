@@ -142,7 +142,7 @@ public class OWAMPJob  extends ExecCommandJob{
         Pattern endPattern = Pattern.compile("last:\\s+(.+)");
         Pattern lossPattern = Pattern.compile("\\d+\\s+sent,\\s+(\\d+)\\s+lost\\s+\\(\\d+(\\.\\d+)?%\\),\\s+(\\d+)\\s+duplicates");
         Pattern delayPattern = Pattern.compile("one-way\\s+delay\\s+min/median/max\\s+=\\s+(.+)/(.+)/(.+)\\s+ms,\\s+\\((err=)?(\\d+)?.+\\)");
-        Pattern ttlPattern1 = Pattern.compile("Hops\\s+=\\s+(\\d+)\\s+(consistently)");
+        Pattern ttlPattern1 = Pattern.compile("Hops\\s+=\\s+(\\d+)\\s+\\(consistently\\)");
         Pattern ttlPattern2 = Pattern.compile("TTL\\s+not\\s+reported");
         Pattern ttlPattern3 = Pattern.compile("Hops\\s+takes\\s+(\\d+)\\s+values;\\s+Min\\s+Hops\\s+=\\s+(\\d+),\\s+Max\\s+Hops\\s+=\\s+(\\d+)");
         DateTimeFormatter dateParser = ISODateTimeFormat.localDateOptionalTimeParser().withZone(DateTimeZone.getDefault());
@@ -219,9 +219,34 @@ public class OWAMPJob  extends ExecCommandJob{
         String[] errArr = this.parseErrorMsg(stderr, DEFAULT_ERROR_MSG);
         if(errArr != null){
             result = this.buildErrorResult(errArr[0], errArr[1], result.getStartTime(), result.getEndTime());
-        }else if(!(ipsFound && startFound && endFound && lossFound && delayFound && ttlFound)){
+        }else if(!ipsFound){
             result = this.buildErrorResult(MeasurementResult.STATUS_ERROR, 
-                    DEFAULT_ERROR_MSG, 
+                    "Unable to parse IP addresses in owping output", 
+                    result.getStartTime(), 
+                    result.getEndTime());
+        }else if(!startFound){
+            result = this.buildErrorResult(MeasurementResult.STATUS_ERROR, 
+                    "Unable to parse start time in owping output", 
+                    result.getStartTime(), 
+                    result.getEndTime());
+        }else if(!endFound){
+            result = this.buildErrorResult(MeasurementResult.STATUS_ERROR, 
+                    "Unable to parse end time in owping output", 
+                    result.getStartTime(), 
+                    result.getEndTime());
+        }else if(!lossFound){
+            result = this.buildErrorResult(MeasurementResult.STATUS_ERROR, 
+                    "Unable to parse loss in owping output", 
+                    result.getStartTime(), 
+                    result.getEndTime());
+        }else if(!delayFound){
+            result = this.buildErrorResult(MeasurementResult.STATUS_ERROR, 
+                    "Unable to parse delay in owping output", 
+                    result.getStartTime(), 
+                    result.getEndTime());
+        }else if(!ttlFound){
+            result = this.buildErrorResult(MeasurementResult.STATUS_ERROR, 
+                    "Unable to parse TTL values in owping output", 
                     result.getStartTime(), 
                     result.getEndTime());
         }
