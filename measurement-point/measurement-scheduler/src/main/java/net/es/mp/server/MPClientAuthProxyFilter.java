@@ -2,6 +2,7 @@ package net.es.mp.server;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -11,6 +12,7 @@ import javax.net.ssl.SSLEngine;
 import org.glassfish.grizzly.filterchain.BaseFilter;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.filterchain.NextAction;
+import org.glassfish.grizzly.http.HttpHeader;
 import org.glassfish.grizzly.http.HttpPacket;
 import org.glassfish.grizzly.http.HttpContent;
 
@@ -24,7 +26,7 @@ import static org.glassfish.grizzly.ssl.SSLUtils.*;
  * @author Andy Lake <andy@es.net>
  *
  */
-public class HttpsClientAuthFilter extends BaseFilter{
+public class MPClientAuthProxyFilter extends BaseFilter{
     
     protected boolean proxyMode;
     
@@ -34,8 +36,10 @@ public class HttpsClientAuthFilter extends BaseFilter{
     static public final String SSL_CLIENT_I_DN = "SSL_CLIENT_I_DN";
     //Indicate the certificate was already checked (NONE, SUCCESS, GENEROUS or FAILED)
     static public final String SSL_CLIENT_VERIFY = "SSL_CLIENT_VERIFY";
+    //Field where proxy indicates IP of original client
+    static public final String X_FORWARDED_FOR = "X-Forwarded-For";
     
-    public HttpsClientAuthFilter(boolean proxyMode){
+    public MPClientAuthProxyFilter(boolean proxyMode){
         this.proxyMode = proxyMode;
     }
     
@@ -43,6 +47,10 @@ public class HttpsClientAuthFilter extends BaseFilter{
         if(HttpPacket.isHttp(ctx.getMessage())){
             HttpContent httpContent = (HttpContent) ctx.getMessage();
             
+            System.out.println("PEER ADDRESS=" + ctx.getConnection().getPeerAddress());
+            System.out.println("HTTP HEADERS:");
+            System.out.println(httpContent.getHttpHeader());
+
             /**
              * Clear out SSL headers to prevent identity spoofing. If proxy mode is on
              * then a proxy MUST be the only way to access this machine otherwise someone
@@ -60,7 +68,16 @@ public class HttpsClientAuthFilter extends BaseFilter{
             if(httpContent.getHttpHeader().containsHeader(SSL_CLIENT_VERIFY)){
                 httpContent.getHttpHeader().setHeader(SSL_CLIENT_VERIFY, null);
             }
+            if(httpContent.getHttpHeader().containsHeader(X_FORWARDED_FOR)){
+                httpContent.getHttpHeader().setHeader(X_FORWARDED_FOR, null);
+            }
             
+            /**
+             * Set client IP
+             */
+             this.extractIPAddress((InetSocketAddress) ctx.getConnection().getPeerAddress(), 
+                     httpContent.getHttpHeader());
+             
             /**
              * Check for SSL headers
              */
@@ -83,6 +100,9 @@ public class HttpsClientAuthFilter extends BaseFilter{
                 httpContent.getHttpHeader().addHeader(SSL_CLIENT_I_DN, x509Certs[0].getIssuerDN().getName());
             }
             httpContent.getHttpHeader().addHeader(SSL_CLIENT_VERIFY, "SUCCESS");
+            
+            System.out.println("MODIFIED HTTP HEADERS:");
+            System.out.println(httpContent.getHttpHeader());
         }
         return ctx.getInvokeAction();
     }
@@ -117,5 +137,12 @@ public class HttpsClientAuthFilter extends BaseFilter{
         } catch( Throwable t ) {
             return null;
         }
+    }
+    
+    private void extractIPAddress(InetSocketAddress peerAddress, HttpHeader httpHeader){
+        if(peerAddress == null || peerAddress.getAddress() == null){
+            return;
+        }
+        httpHeader.setHeader(X_FORWARDED_FOR, peerAddress.getAddress().getHostAddress());
     }
 }

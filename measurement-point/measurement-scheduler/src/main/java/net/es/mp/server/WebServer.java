@@ -43,7 +43,7 @@ public class WebServer {
          * clame SSL auth in the HTTP headers
          */
         httpNl.getFilterChain().add( httpNl.getFilterChain().size() - 1, 
-                new HttpsClientAuthFilter(false));
+                new MPClientAuthProxyFilter(false));
     }
     
     public void addHttpsListener(int port, String keystore, 
@@ -89,7 +89,7 @@ public class WebServer {
          * the Filters use values private to the HttpServer class
          */
         httpsNl.getFilterChain().add( httpsNl.getFilterChain().size() - 1, 
-                new HttpsClientAuthFilter(proxyMode));
+                new MPClientAuthProxyFilter(proxyMode));
         
         //debugging output to show the final filter chain
         for(Filter filter: httpsNl.getFilterChain()){
