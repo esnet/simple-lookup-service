@@ -1,0 +1,77 @@
+#!/bin/sh 
+#
+# Creates default certificates for RPM installation in localhost.jks and oscars.jks
+#Usage:
+#    gendefaultcerts <cert-directorty>
+#    gendefaultcerts <cert-directory> <cert-subject>
+
+ERROR=0
+ERR_MSG=''
+if [ $# -ne 1 ] && [ $# -ne 2 ]
+then
+    ERROR=1
+    ERR_MSG='Invalid number of arguments'
+fi
+
+
+if [ $ERROR -eq 0 ] && [ -z $1 ]
+then
+    ERROR=2
+    ERR_MSG='Empty build dir'
+fi
+
+
+if [ $ERROR -eq 0 ] && [ -e $1 ] && ! [ -d $1 ]
+then
+    ERROR=3
+    ERR_MSG='Target exists but is not a directory'
+fi
+
+if [ $ERROR -eq 0 ] && [ -d $1 ] && ! [ -w $1 ]
+then
+    ERROR=4
+    ERR_MSG='Target directory not writable'
+fi
+
+if [ $ERROR -ne 0 ]
+then
+    echo $ERR_MSG
+    echo "Usage: "
+    echo "   $0 <cert-directory>"
+    echo "   $0 <cert-directory> <subject>"
+    exit $ERROR
+fi
+
+BUILDDIR=$1
+CERTSUBJECT=$2
+
+if [ -z "$CERTSUBJECT" ]; then
+    HOSTNAME=`hostname -f`
+    if [ $? -ne 0 ]; then
+       HOSTNAME="mp-default"
+    fi
+    CERTSUBJECT="CN=localhost, OU=MP DEFAULT, O=MP, ST=CA, C=US"
+fi
+
+
+if ! [ -d $BUILDDIR ]
+then
+    mkdir -p $BUILDDIR
+fi
+
+cd $BUILDDIR
+
+# CN=localhost and the public hostname of the server used for SSL connections.
+# This procedure must be done in JKS, because we need to use a JKS keystore.
+# The current version of CXF using PCKS12 will not work for a number of
+# internal CXF reasons.
+KEYPASS="changeit"
+STOREPASS="changeit"
+
+rm -f mp.jks
+keytool -genkey \
+    -dname "${CERTSUBJECT}" \
+    -keystore mp.jks -keyalg RSA -storetype jks -storepass $STOREPASS -keypass $KEYPASS \
+    -alias mykey
+
+

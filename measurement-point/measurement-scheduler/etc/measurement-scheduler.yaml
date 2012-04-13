@@ -1,0 +1,81 @@
+##
+# Set the host where the REST server listens
+serverHost: "localhost"
+
+##
+# Sets the resource URL up to the path portion
+#resourceURL:
+#    protocol:"https"
+#    host: "proxy-host"
+#    port: 443
+
+##
+# Activate http and set the port where it listens
+http: 
+    port: 8519
+
+##
+# Activate https and set port and keystores
+https:
+    port: 8520
+    keystore: "/Users/alake/Programming/Java/measurement-point/measurement-scheduler/etc/mp.jks"
+    keystorePassword: "changeit"
+# want, require or off
+    clientAuth: "want" 
+
+##
+# Database settings
+database:
+    host: "localhost"
+    port: 27017
+
+##
+# Ordered list of authenticators to try
+authenticators:
+    - "net.es.mp.authn.HttpsAuthenticator"
+    - "net.es.mp.authn.GuestAuthenticator"
+    
+##
+# Select which services you want to run
+services:
+    - "net.es.mp.scheduler.MPSchedulingService"
+    - "net.es.mp.streaming.MPStreamingService"
+    - "net.es.mp.measurement.MPMeasurementService"
+    
+##
+# MPSchedulingService specific parameters
+MPSchedulingService:
+    ##
+    # Class used to authorize requests
+    authorizer: "net.es.mp.authz.AllowAllAuthorizer"
+    ##
+    # Associate test types with class to handle job scheduler
+    jobSchedulers:
+        - type: "bwctl"
+          class: "net.es.mp.scheduler.jobs.BWCTLJobScheduler"
+        - type: "owamp"
+          class: "net.es.mp.scheduler.jobs.OWAMPJobScheduler"
+          command: "/Users/alake/Programming/C:C++/owamp/trunk/owping/owping"
+##
+# MPMeasurementService specific parameters
+MPMeasurementService:
+    ##
+    # Class used to authorize requests
+    authorizer: "net.es.mp.authz.DenyWriteGuestAuthorizer"
+    ##
+    # Associate test types with class to validate contents
+    validators:
+        - type: "bwctl"
+          class: net.es.mp.measurement.types.validators.BWCTLMeasurementValidator
+        - type: "owamp"
+          class: net.es.mp.measurement.types.validators.OWAMPMeasurementValidator
+    ##
+    # If true then will throw error if try to store, 
+    #   false it will store unrecognized types with only basic checking
+    requireValidator: true
+##
+# MPStreamingService specific parameters
+MPStreamingService:
+    ##
+    # Class used to authorize requests
+    authorizer: "net.es.mp.authz.DenyWriteGuestAuthorizer"
