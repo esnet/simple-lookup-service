@@ -1,5 +1,6 @@
 package net.es.mp.measurement;
 
+
 import net.es.mp.authn.AuthnSubject;
 import net.es.mp.authz.AuthorizationException;
 import net.es.mp.authz.AuthzAction;
@@ -25,6 +26,7 @@ public class MeasurementManager {
     
     final private String CREATE_EVENT = "mp.measurement.MeasurementManager.createMeasurement";
     final private String GET_EVENT = "mp.measurement.MeasurementManager.getMeasurement";
+    final private String DELETE_EVENT = "mp.measurement.MeasurementManager.deleteMeasurement";
     
     public void createMeasurement(Measurement measurement, String uriPath) throws MPMeasurementException{
         NetLogger netLog = NetLogger.getTlogger();
@@ -75,7 +77,9 @@ public class MeasurementManager {
         try{
             //ObjectId constructor provides *some* validation
             DBObject dbObj = coll.findOne(new BasicDBObject("_id", new ObjectId(measurementId)));
-            measurement = new Measurement(dbObj);
+            if(dbObj != null){
+                measurement = new Measurement(dbObj);
+            }
         }catch(Exception e){
             log.debug("ID not found: " + e.getMessage());
         }
@@ -85,5 +89,37 @@ public class MeasurementManager {
         
         this.netLogger.debug(netLog.end(GET_EVENT));
         return measurement;
+    }
+
+    public boolean deleteMeasurement(String measurementId,
+            AuthnSubject authnSubject) throws AuthorizationException {
+        NetLogger netLog = NetLogger.getTlogger();
+        this.netLogger.debug(netLog.start(DELETE_EVENT));
+        
+        //get the measurement so we can verify user is authorized to delete it
+        Measurement measurement = this.getMeasurement(measurementId, authnSubject);
+        if(measurement == null){
+            this.netLogger.debug(netLog.end(DELETE_EVENT));
+            return false;
+        }
+        
+        //check if can query at all 
+        MPMeasurementService.getInstance().getAuthorizer().authorize(authnSubject, AuthzAction.DELETE, measurement);
+        
+        DB db = MPMeasurementService.getInstance().getDatabase();
+        DBCollection coll = db.getCollection(MEASUREMENT_COLLECTION);
+        try{
+            //ObjectId constructor provides *some* validation
+            coll.remove(new BasicDBObject("_id", new ObjectId(measurementId)));
+        }catch(Exception e){
+            log.error("Unable to delete measurement: " + e.getMessage());
+            this.netLogger.debug(netLog.error(DELETE_EVENT, e.getMessage()));
+            e.printStackTrace();
+            throw new RuntimeException("Unable to delete measurement because a database error occurred");
+        }
+        
+        this.netLogger.debug(netLog.end(DELETE_EVENT));
+        
+        return true;
     }
 }

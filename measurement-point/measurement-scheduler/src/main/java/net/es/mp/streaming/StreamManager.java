@@ -19,7 +19,6 @@ import net.es.mp.measurement.types.Measurement;
 import net.es.mp.scheduler.NetLogger;
 import net.es.mp.streaming.types.Stream;
 import net.es.mp.streaming.types.validators.StreamValidator;
-import net.es.mp.types.MPType;
 import net.es.mp.types.validators.InvalidMPTypeException;
 import net.es.mp.util.IDUtil;
 
@@ -33,6 +32,7 @@ public class StreamManager {
     final private String CREATE_EVENT = "mp.streaming.StreamManager.createStream";
     final private String ADD_MEAS_EVENT = "mp.streaming.StreamManager.addMeasurement";
     final private String GET_EVENT = "mp.streaming.StreamManager.getStream";
+    final private String DELETE_EVENT = "mp.streaming.StreamManager.deleteStream";
     
     public StreamManager(){
         this.streamValidator = new StreamValidator();
@@ -99,7 +99,9 @@ public class StreamManager {
         try{
             //ObjectId constructor provides *some* validation
             DBObject dbObj = coll.findOne(new BasicDBObject("_id", new ObjectId(streamId)));
-            stream = new Stream(dbObj);
+            if(dbObj != null){
+                stream = new Stream(dbObj);
+            }
         }catch(Exception e){
             log.debug("ID not found: " + e.getMessage());
         }
@@ -109,5 +111,36 @@ public class StreamManager {
         
         this.netLogger.debug(netLog.end(GET_EVENT));
         return stream;
+    }
+
+    public boolean deleteStream(String streamId, AuthnSubject authnSubject) throws AuthorizationException {
+        NetLogger netLog = NetLogger.getTlogger();
+        this.netLogger.debug(netLog.start(DELETE_EVENT));
+        
+        //get the stream so we can verify user is authorized to delete it
+        Stream stream = this.getStream(streamId, authnSubject);
+        if(stream == null){
+            this.netLogger.debug(netLog.end(DELETE_EVENT));
+            return false;
+        }
+        
+        //check if can query at all 
+        MPStreamingService.getInstance().getAuthorizer().authorize(authnSubject, AuthzAction.DELETE, stream);
+        
+        DB db = MPStreamingService.getInstance().getDatabase();
+        DBCollection coll = db.getCollection(STREAM_COLLECTION);
+        try{
+            //ObjectId constructor provides *some* validation
+            coll.remove(new BasicDBObject("_id", new ObjectId(streamId)));
+        }catch(Exception e){
+            log.error("Unable to delete stream: " + e.getMessage());
+            this.netLogger.debug(netLog.error(DELETE_EVENT, e.getMessage()));
+            e.printStackTrace();
+            throw new RuntimeException("Unable to delete stream because a database error occurred");
+        }
+        
+        this.netLogger.debug(netLog.end(DELETE_EVENT));
+        
+        return true;
     }
 }
