@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.es.mp.measurement.types.BWCTLMeasurement;
+import net.es.mp.measurement.types.Measurement;
 import net.es.mp.types.parameters.BWCTLParams;
 import net.es.mp.types.validators.EndpointValidator;
 import net.es.mp.types.validators.EnumStringValidator;
@@ -58,25 +59,30 @@ public class BWCTLMeasurementValidator extends MeasurementValidator{
         super.validate(objParam);
         
         //check protocol-specific parameters
-        BWCTLMeasurement bwctlSched = (BWCTLMeasurement) objParam;
-        if(!BWCTLParams.PROTOCOL_TCP.equals(bwctlSched.getProtocol())){
-            if(bwctlSched.getTCPWindowSize() != null){
+        BWCTLMeasurement bwctlMeas = null;
+        if(objParam instanceof Measurement){
+            bwctlMeas = new BWCTLMeasurement(((Measurement)objParam).getDBObject());
+        }else{
+            bwctlMeas = (BWCTLMeasurement) objParam;
+        }
+        if(!BWCTLParams.PROTOCOL_TCP.equals(bwctlMeas.getProtocol())){
+            if(bwctlMeas.getTCPWindowSize() != null){
                 throw new InvalidMPTypeException("Field " + BWCTLParams.TCP_WINDOW_SIZE + 
                         " can only be used when protocol is " + BWCTLParams.PROTOCOL_TCP + 
-                        ", but protocol is set to " + bwctlSched.getProtocol() + ".");
+                        ", but protocol is set to " + bwctlMeas.getProtocol() + ".");
             }
-            if(bwctlSched.getTCPDynamicWindowSize() != null){
+            if(bwctlMeas.getTCPDynamicWindowSize() != null){
                 throw new InvalidMPTypeException("Field " + BWCTLParams.TCP_DYN_WINDOW_SIZE + 
                         " can only be used when protocol is " + BWCTLParams.PROTOCOL_TCP + 
-                        ", but protocol is set to " + bwctlSched.getProtocol() + ".");
+                        ", but protocol is set to " + bwctlMeas.getProtocol() + ".");
             }
         }
         
-        if(!BWCTLParams.PROTOCOL_UDP.equals(bwctlSched.getProtocol())){
-            if(bwctlSched.getUDPBandwidth() != null){
+        if(!BWCTLParams.PROTOCOL_UDP.equals(bwctlMeas.getProtocol())){
+            if(bwctlMeas.getUDPBandwidth() != null){
                 throw new InvalidMPTypeException("Field " + BWCTLParams.UDP_BANDWIDTH + 
                         " can only be used when protocol is " + BWCTLParams.PROTOCOL_UDP + 
-                        ", but protocol is set to " + bwctlSched.getProtocol() + ".");
+                        ", but protocol is set to " + bwctlMeas.getProtocol() + ".");
             }
         }
     }

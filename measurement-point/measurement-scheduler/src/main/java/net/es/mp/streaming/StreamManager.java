@@ -45,9 +45,9 @@ public class StreamManager {
         NetLogger netLog = NetLogger.getTlogger();
         this.netLogger.debug(netLog.start(CREATE_EVENT));
         
-        //check if can query at all 
+        //check if can create at all 
         if(!LocalAuthnSubject.SUBJECT_TYPE.equals(authnSubject.getType())){
-            MPStreamingService.getInstance().getAuthorizer().authorize(authnSubject, AuthzAction.CREATE, stream);
+            MPStreamingService.getInstance().getAuthorizer().authorize(authnSubject, AuthzAction.CREATE, null);
         }
         
         //generate ID and uri
@@ -64,6 +64,11 @@ public class StreamManager {
             this.netLogger.debug(netLog.error(CREATE_EVENT, e.getMessage()));
             e.printStackTrace();
             throw new RuntimeException("Invalid stream request: " + e.getMessage());
+        }
+        
+        //check if can create validated resource
+        if(!LocalAuthnSubject.SUBJECT_TYPE.equals(authnSubject.getType())){
+            MPStreamingService.getInstance().getAuthorizer().authorize(authnSubject, AuthzAction.CREATE, stream);
         }
         
         //store
@@ -86,7 +91,7 @@ public class StreamManager {
             return false;
         }
         
-        //check if can query at all 
+        //check if can update
         if(!LocalAuthnSubject.SUBJECT_TYPE.equals(authnSubject.getType())){
             MPStreamingService.getInstance().getAuthorizer().authorize(authnSubject, AuthzAction.UPDATE, stream);
         }

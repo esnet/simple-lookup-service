@@ -2,6 +2,7 @@ package net.es.mp.measurement;
 
 
 import net.es.mp.authn.AuthnSubject;
+import net.es.mp.authn.LocalAuthnSubject;
 import net.es.mp.authz.AuthorizationException;
 import net.es.mp.authz.AuthzAction;
 import net.es.mp.measurement.types.Measurement;
@@ -28,10 +29,16 @@ public class MeasurementManager {
     final private String GET_EVENT = "mp.measurement.MeasurementManager.getMeasurement";
     final private String DELETE_EVENT = "mp.measurement.MeasurementManager.deleteMeasurement";
     
-    public void createMeasurement(Measurement measurement, String uriPath) throws MPMeasurementException{
+    public void createMeasurement(Measurement measurement, String uriPath, AuthnSubject authnSubject) throws AuthorizationException{
         NetLogger netLog = NetLogger.getTlogger();
         this.netLogger.debug(netLog.start(CREATE_EVENT));
         MPMeasurementService globals = MPMeasurementService.getInstance();
+        
+        //check if can create at all
+        if(!LocalAuthnSubject.SUBJECT_TYPE.equals(authnSubject.getType())){
+            MPMeasurementService.getInstance().getAuthorizer().authorize(authnSubject, AuthzAction.CREATE, null);
+        }
+        
         //generate ID and uri
         String baseURI = globals.getContainer().getResourceURL();
         ObjectId id = new ObjectId();
@@ -45,7 +52,7 @@ public class MeasurementManager {
                     globals.getValidatorMap().containsKey(measurement.getType())){
                 globals.getValidatorMap().get(measurement.getType()).validate(measurement);
             }else if(globals.getRequiresValidator()){
-                throw new MPMeasurementException("Measurements of type " + measurement.getType()
+                throw new RuntimeException("Measurements of type " + measurement.getType()
                         + " are not supported by this server.");
             }else{
                 (new MeasurementValidator()).validate(measurement);
@@ -53,7 +60,12 @@ public class MeasurementManager {
         } catch (InvalidMPTypeException e) {
             this.netLogger.debug(netLog.error(CREATE_EVENT, e.getMessage()));
             e.printStackTrace();
-            throw new MPMeasurementException("Invalid measurement request: " + e.getMessage());
+            throw new RuntimeException("Invalid measurement request: " + e.getMessage());
+        }
+        
+        //check if can create validated resource
+        if(!LocalAuthnSubject.SUBJECT_TYPE.equals(authnSubject.getType())){
+            MPMeasurementService.getInstance().getAuthorizer().authorize(authnSubject, AuthzAction.CREATE, measurement);
         }
         
         //store

@@ -13,6 +13,7 @@ import net.es.mp.authz.Authorizer;
 import net.es.mp.container.MPContainer;
 import net.es.mp.container.MPService;
 import net.es.mp.measurement.rest.MeasurementResource;
+import net.es.mp.measurement.rest.MeasurementsResource;
 import net.es.mp.measurement.types.Measurement;
 import net.es.mp.measurement.types.validators.MeasurementValidator;
 import net.es.mp.types.MPType;
@@ -108,6 +109,7 @@ public class MPMeasurementService implements MPService{
     
     public void addServiceResources(List<String> resourceList) {
         resourceList.add(MeasurementResource.class.getName());
+        resourceList.add(MeasurementsResource.class.getName());
     }
     
     /**

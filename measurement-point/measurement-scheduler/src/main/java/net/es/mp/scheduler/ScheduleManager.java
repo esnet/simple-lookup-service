@@ -41,8 +41,8 @@ public class ScheduleManager {
         NetLogger netLog = NetLogger.getTlogger();
         this.netLogger.debug(netLog.start(CREATE_EVENT));
         
-        //authorize 
-        AuthzConditions authzConditions = MPSchedulingService.getInstance().getAuthorizer().authorize(authnSubject, AuthzAction.CREATE, schedule);
+        //authorize ability to create at all 
+        AuthzConditions authzConditions = MPSchedulingService.getInstance().getAuthorizer().authorize(authnSubject, AuthzAction.CREATE, null);
         
         //generate ID and uri
         String baseURI = MPSchedulingService.getInstance().getContainer().getResourceURL();
@@ -54,6 +54,9 @@ public class ScheduleManager {
         //call JobRouter
         URI streamURI = this.jobRouter.submit(schedule, authzConditions);
         schedule.setStreamURI(streamURI.toASCIIString());
+        
+        //authorize validated resource
+        authzConditions = MPSchedulingService.getInstance().getAuthorizer().authorize(authnSubject, AuthzAction.CREATE, schedule);
         
         this.netLogger.debug(netLog.start(CREATE_EVENT+".store"));
         //store in DB
