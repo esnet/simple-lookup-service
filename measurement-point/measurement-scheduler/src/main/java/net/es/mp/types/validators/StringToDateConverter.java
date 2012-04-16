@@ -7,7 +7,7 @@ import org.joda.time.format.ISODateTimeFormat;
 public class StringToDateConverter implements TypeConverter{
 
     public Object convert(Object src) {
-        DateTimeFormatter isoFormatter = ISODateTimeFormat.dateTimeNoMillis();
+        DateTimeFormatter isoFormatter = ISODateTimeFormat.dateTimeParser();
         return isoFormatter.parseDateTime((String)src).toDateTimeISO().withZone(DateTimeZone.UTC).toDate();
     }
     

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;
 
 import net.es.mp.measurement.types.Measurement;
@@ -19,7 +20,7 @@ public class Stream extends MPType{
         super(dbo);
         if(!this.dbObject.containsField(MEASUREMENTS) ||
                 this.dbObject.get(MEASUREMENTS) == null){
-            this.dbObject.put(MEASUREMENTS, new ArrayList<DBObject>());
+            this.dbObject.put(MEASUREMENTS, new BasicDBList());
         }
     }
     

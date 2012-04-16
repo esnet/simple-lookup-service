@@ -37,8 +37,6 @@ public class SchedulesResource {
     final private String GET_EVENT = "mp.scheduler.rest.SchedulesResource.get";
     @Context UriInfo uriInfo;
     
-    
-    
     @Produces("application/json")
     @Consumes("application/json")
     @POST

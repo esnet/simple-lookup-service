@@ -7,9 +7,9 @@ import javax.ws.rs.core.UriBuilder;
 
 import com.mongodb.BasicDBObject;
 
+import net.es.mp.authn.LocalAuthnSubject;
 import net.es.mp.measurement.types.Measurement;
 import net.es.mp.scheduler.types.Schedule;
-import net.es.mp.streaming.MPStreamingException;
 import net.es.mp.streaming.MPStreamingService;
 import net.es.mp.streaming.StreamManager;
 import net.es.mp.streaming.types.Stream;
@@ -22,8 +22,8 @@ public class LocalStreamPublisher implements Publisher{
         stream.setType(schedule.getType());
         stream.setScheduleURI(schedule.getURI());
         try {
-            mgr.createStream(stream, "/mp/streams/");
-        } catch (MPStreamingException e) {
+            mgr.createStream(stream, "/mp/streams/", new LocalAuthnSubject());
+        } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
         
@@ -40,7 +40,11 @@ public class LocalStreamPublisher implements Publisher{
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
-        mgr.addMeasurements(id, measurements);
+        try {
+            mgr.addMeasurements(id, measurements, new LocalAuthnSubject());
+        } catch (Exception e) {
+            throw new RuntimeException("Not authorized to use local publisher: " + e.getMessage());
+        }
     }
 
 }

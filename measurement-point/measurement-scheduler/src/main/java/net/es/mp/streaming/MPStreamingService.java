@@ -13,6 +13,7 @@ import net.es.mp.authz.Authorizer;
 import net.es.mp.container.MPContainer;
 import net.es.mp.container.MPService;
 import net.es.mp.streaming.rest.StreamResource;
+import net.es.mp.streaming.rest.StreamsResource;
 import net.es.mp.streaming.types.Stream;
 
 public class MPStreamingService implements MPService {
@@ -90,6 +91,7 @@ public class MPStreamingService implements MPService {
     
     public void addServiceResources(List<String> resourceList) {
         resourceList.add(StreamResource.class.getName());
+        resourceList.add(StreamsResource.class.getName());
     }
     
     /**

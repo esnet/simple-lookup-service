@@ -1,6 +1,5 @@
 package net.es.mp.streaming;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,9 +12,11 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 
 import net.es.mp.authn.AuthnSubject;
+import net.es.mp.authn.LocalAuthnSubject;
 import net.es.mp.authz.AuthorizationException;
 import net.es.mp.authz.AuthzAction;
 import net.es.mp.measurement.types.Measurement;
+import net.es.mp.measurement.types.validators.MeasurementValidator;
 import net.es.mp.scheduler.NetLogger;
 import net.es.mp.streaming.types.Stream;
 import net.es.mp.streaming.types.validators.StreamValidator;
@@ -26,6 +27,7 @@ public class StreamManager {
     Logger log = Logger.getLogger(StreamManager.class);
     Logger netLogger = Logger.getLogger("netLogger");
     StreamValidator streamValidator;
+    MeasurementValidator measurementValidator;
     
     final private String STREAM_COLLECTION = "streams";
     
@@ -36,11 +38,17 @@ public class StreamManager {
     
     public StreamManager(){
         this.streamValidator = new StreamValidator();
+        this.measurementValidator =new MeasurementValidator();
     }
     
-    public void createStream(Stream stream, String uriPath) throws MPStreamingException{
+    public void createStream(Stream stream, String uriPath, AuthnSubject authnSubject) throws AuthorizationException{
         NetLogger netLog = NetLogger.getTlogger();
         this.netLogger.debug(netLog.start(CREATE_EVENT));
+        
+        //check if can query at all 
+        if(!LocalAuthnSubject.SUBJECT_TYPE.equals(authnSubject.getType())){
+            MPStreamingService.getInstance().getAuthorizer().authorize(authnSubject, AuthzAction.CREATE, stream);
+        }
         
         //generate ID and uri
         String baseURI = MPStreamingService.getInstance().getContainer().getResourceURL();
@@ -55,7 +63,7 @@ public class StreamManager {
         } catch (InvalidMPTypeException e) {
             this.netLogger.debug(netLog.error(CREATE_EVENT, e.getMessage()));
             e.printStackTrace();
-            throw new MPStreamingException("Invalid stream request: " + e.getMessage());
+            throw new RuntimeException("Invalid stream request: " + e.getMessage());
         }
         
         //store
@@ -66,14 +74,37 @@ public class StreamManager {
         this.netLogger.debug(netLog.end(CREATE_EVENT));
     }
     
-    public URI addMeasurements(String streamId, List<Measurement> measurements){
+    public boolean addMeasurements(String streamId, List<Measurement> measurements, AuthnSubject authnSubject) 
+            throws AuthorizationException{
         NetLogger netLog = NetLogger.getTlogger();
         this.netLogger.debug(netLog.start(ADD_MEAS_EVENT));
+        
+        //get the stream so we can verify user is authorized to delete it
+        Stream stream = this.getStream(streamId, authnSubject);
+        if(stream == null){
+            this.netLogger.debug(netLog.end(DELETE_EVENT));
+            return false;
+        }
+        
+        //check if can query at all 
+        if(!LocalAuthnSubject.SUBJECT_TYPE.equals(authnSubject.getType())){
+            MPStreamingService.getInstance().getAuthorizer().authorize(authnSubject, AuthzAction.UPDATE, stream);
+        }
+        
+        //get db objects
         ObjectId id = new ObjectId(streamId);
         List<DBObject> dbMeasurements = new ArrayList<DBObject>();
         for(Measurement meas : measurements){
+            try {
+                this.measurementValidator.validate(meas);
+            } catch (InvalidMPTypeException e) {
+                this.netLogger.debug(netLog.error(ADD_MEAS_EVENT, e.getMessage()));
+                e.printStackTrace();
+                throw new RuntimeException("Unable to parse measurement object");
+            }
             dbMeasurements.add(meas.getDBObject());
         }
+        
         DB db = MPStreamingService.getInstance().getDatabase();
         DBCollection coll = db.getCollection(STREAM_COLLECTION);
         BasicDBObject query = new BasicDBObject();
@@ -81,8 +112,9 @@ public class StreamManager {
         BasicDBObject update = new BasicDBObject();
         update.put("$pushAll", new BasicDBObject(Stream.MEASUREMENTS, dbMeasurements));
         coll.update(query, update);
+        
         this.netLogger.debug(netLog.end(ADD_MEAS_EVENT));
-        return null;
+        return true;
     }
     
     public Stream getStream(String streamId, AuthnSubject authnSubject) throws AuthorizationException {
@@ -90,8 +122,10 @@ public class StreamManager {
         this.netLogger.debug(netLog.start(GET_EVENT));
         
         //authorize
-        MPStreamingService.getInstance().getAuthorizer().authorize(authnSubject, 
+        if(!LocalAuthnSubject.SUBJECT_TYPE.equals(authnSubject.getType())){
+            MPStreamingService.getInstance().getAuthorizer().authorize(authnSubject, 
                 AuthzAction.QUERY, null);
+        }
         
         DB db = MPStreamingService.getInstance().getDatabase();
         DBCollection coll = db.getCollection(STREAM_COLLECTION);
@@ -106,8 +140,10 @@ public class StreamManager {
             log.debug("ID not found: " + e.getMessage());
         }
         
-        MPStreamingService.getInstance().getAuthorizer().authorize(authnSubject, 
+        if(!LocalAuthnSubject.SUBJECT_TYPE.equals(authnSubject.getType())){
+            MPStreamingService.getInstance().getAuthorizer().authorize(authnSubject, 
                 AuthzAction.QUERY, stream);
+        }
         
         this.netLogger.debug(netLog.end(GET_EVENT));
         return stream;
