@@ -3,6 +3,8 @@ package net.es.mp.scheduler.jobs;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +30,7 @@ public abstract class ExecCommandJob implements Job{
     protected List<String> providerCommandOpts;
     protected List<String> commandArgs;
     protected List<ExecCommandError> knownErrors;
+    protected SSHConfig sshConfig;
     
     public void execute(JobExecutionContext context) throws JobExecutionException {
         NetLogger netLog = NetLogger.getTlogger();
@@ -39,6 +42,7 @@ public abstract class ExecCommandJob implements Job{
         this.providerCommandOpts = new ArrayList<String>();
         this.commandArgs = new ArrayList<String>();
         this.knownErrors = new ArrayList<ExecCommandError>();
+        this.sshConfig = new SSHConfig();
         this.init(schedule, authzConditions);
         
         //build the command
@@ -85,7 +89,10 @@ public abstract class ExecCommandJob implements Job{
 
     protected String[] buildCommand(Schedule schedule){
         List<String> commandList = new ArrayList<String>();
-
+        
+        //add ssh parameters if needed
+        this.configureSSH(commandList, schedule);
+        
         //add tool name
         commandList.add(this.getToolName());
         //add user options
@@ -186,6 +193,71 @@ public abstract class ExecCommandJob implements Job{
     abstract protected void handleError(int resultCode, BufferedReader stdout, BufferedReader stderr, Schedule schedule) throws IOException;
     
     abstract protected void handleTimeout(Schedule schedule);
+    
+    protected void configureSSH(List<String> commandList, Schedule schedule){
+        if(!this.sshConfig.isEnabled()){
+           return;  
+        }
+        
+        String host = null;
+        for(String hostPref : this.sshConfig.getHostPrefs()){
+            if(SSHConfig.HOST_LOCAL.equals(hostPref)){
+                //not doing ssh
+                return;
+            }else if(hostPref.startsWith(SSHConfig.HOST_SSH_PREFIX)){
+                host = hostPref.replaceFirst(SSHConfig.HOST_SSH_PREFIX, "");
+                break;
+            }else if(schedule.getDBObject().containsField(hostPref) && 
+                    schedule.getDBObject().get(hostPref) != null){
+                host = (String)schedule.getDBObject().get(hostPref);
+                break;
+            }
+        }
+        
+        //check SSH host
+        if(host == null){
+            throw new RuntimeException("Unable to run command because no SSH host found");
+        }
+        try {
+            InetAddress hostInet = InetAddress.getByName(host);
+            if(hostInet.isLoopbackAddress()){
+                //don't ssh into local address
+                return;
+            }
+            InetAddress localInet = InetAddress.getByName(sshConfig.getLocalhost());
+            if(localInet.getHostAddress().equals(hostInet.getHostAddress())){
+                //this is the local host
+                return;
+            }
+        } catch (UnknownHostException e) {
+            log.warn("Unable to use ssh because invalid ssh host: " + e.getMessage());
+            e.printStackTrace();
+        }
+        if(this.sshConfig.getScheduleHostField() != null){
+            schedule.getDBObject().put(this.sshConfig.getScheduleHostField(), host);
+        }
+        //set command
+        commandList.add(this.sshConfig.getCommand());
+        
+        //disable password prompts
+        commandList.add("-o");
+        commandList.add("PasswordAuthentication=no");
+        
+        //set key to -i
+        if(this.sshConfig.getKey() != null){
+            commandList.add("-i");
+            commandList.add(this.sshConfig.getKey());
+        }
+        
+        //set user to -l
+        if(this.sshConfig.getUser() != null){
+            commandList.add("-l");
+            commandList.add(this.sshConfig.getUser());
+        }
+        
+        //set the host
+        commandList.add(host);
+    }
     
     private class WatchDog extends Thread{
         private Process process;

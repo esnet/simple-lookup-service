@@ -43,7 +43,9 @@ public class OWAMPJob  extends ExecCommandJob{
     final private static String PROP_TIMEOUT = "timeout";
     final private static String DEFAULT_COMMAND = "owping";
     final private static String DEFAULT_ERROR_MSG = "The owping command returned an unknown error";
-
+    final private static String[] ALLOWED_HOST_PREFS = {OWAMPParams.SOURCE, OWAMPParams.DESTINATION, 
+                                                            OWAMPParams.CONTROLLER};
+    
     public void init(Schedule schedule, AuthzConditions authzConditions){
         //read config
         MPSchedulingService globals = MPSchedulingService.getInstance();
@@ -78,6 +80,13 @@ public class OWAMPJob  extends ExecCommandJob{
                 wait = OWAMPParams.DEFAULT_PACKET_WAIT;
             }
             this.timeout = 3*((int)(count*wait)) + 30L ;
+        }
+        
+        //configure ssh
+        if(config.containsKey(SSHConfig.PROP_SSH)){
+            this.sshConfig = SSHConfig.fromYAML((Map)config.get(SSHConfig.PROP_SSH), ALLOWED_HOST_PREFS, 
+                    this.controller);
+            this.sshConfig.setScheduleHostField(OWAMPParams.CONTROLLER);
         }
         
         //user provided command arguments

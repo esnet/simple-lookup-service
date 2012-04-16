@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -43,6 +42,8 @@ public class BWCTLJob extends ExecCommandJob{
     final private static String PROP_TIMEOUT = "timeout";
     final private static String DEFAULT_COMMAND = "bwctl";
     final private static String DEFAULT_ERROR_MSG = "The bwctl command returned an unknown error";
+    final private static String[] ALLOWED_HOST_PREFS = {BWCTLParams.SOURCE, BWCTLParams.DESTINATION, 
+        BWCTLParams.CONTROLLER};
     
     public void init(Schedule schedule, AuthzConditions authzConditions){
         //read config
@@ -68,6 +69,13 @@ public class BWCTLJob extends ExecCommandJob{
         }else{
             //default based on duration
             this.timeout = ((BWCTLSchedule) schedule).getDuration() * 3L + 30L;
+        }
+        
+        //configure ssh
+        if(config.containsKey(SSHConfig.PROP_SSH)){
+            this.sshConfig = SSHConfig.fromYAML((Map)config.get(SSHConfig.PROP_SSH), 
+                    ALLOWED_HOST_PREFS, this.controller);
+            this.sshConfig.setScheduleHostField(BWCTLParams.CONTROLLER);
         }
         
         //user provided options
