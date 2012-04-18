@@ -176,9 +176,12 @@ public class ServiceDAOMongoDb {
 		response.setErrorMessage(errormsg);
 		return response;
 	}
+
+    public List<Service> query(Message queryRequest){
+        return this.query (queryRequest, 0, 0);
+    }
 	
-	
-	public List<Service> query(Message queryRequest){
+	public List<Service> query(Message queryRequest, int maxResults, int skip){
 		
 		BasicDBObject query = buildQuery(queryRequest);
 		

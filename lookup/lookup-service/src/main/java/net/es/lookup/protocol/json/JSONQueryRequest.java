@@ -13,6 +13,10 @@ public class JSONQueryRequest extends QueryRequest {
     public JSONQueryRequest (String message) throws DuplicateKeyException {
         this.parseJSON(message);
     }
+
+    public JSONQueryRequest () {
+        super();
+    }
 	
     private void parseJSON (String message) throws DuplicateKeyException {
 
