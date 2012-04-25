@@ -1,0 +1,9 @@
+type=>service-type
+address=>access-point
+site_location=>location
+site_project=>domain
+site_name=>domain
+owamp=>861
+bwctl=>4823
+traceroute=>NULL
+ping=>NULL

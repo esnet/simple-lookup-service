@@ -75,8 +75,8 @@ public class ServiceDAOMongoDb {
 		
 		//check for duplicates
 		List<Service> dupEntries = this.query(queryRequest);
-		
-		if(dupEntries.size()>1){
+		System.out.println("Duplicate Entries: "+dupEntries.size());
+		if(dupEntries.size()>0){
 			response.setError(500);
 			response.setErrorMessage("Duplicate entries found");
 			return response;		
@@ -186,7 +186,7 @@ public class ServiceDAOMongoDb {
 		BasicDBObject query = buildQuery(queryRequest);
 		
 		DBCursor cur = coll.find(query);
-
+		
 		
 		ArrayList <Service> result = new ArrayList<Service>();
 		while (cur.hasNext()){

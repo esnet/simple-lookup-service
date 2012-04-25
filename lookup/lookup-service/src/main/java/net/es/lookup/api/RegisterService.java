@@ -53,6 +53,7 @@ public class RegisterService {
                     list = new ArrayList<String>();
                     list.add(request.getServiceDomain());
                     query.add(Message.SERVICE_DOMAIN,list);
+                    System.out.println(request.getServiceDomain());
 
                     Message res = ServiceDAOMongoDb.getInstance().queryAndPublishService(request,query);
 
