@@ -99,13 +99,24 @@ def formatData(parsedData, mapFile):
         #for now forcefully converting to single value strings
         for k,v in data.iteritems():
             tmp[k] = v[0]
+        
+        print myMapping[data["service-type"][0]]
         if (len(data["access-point"])>1):
             for accesspt in data["access-point"]:
                 tmp["access-point"] = None
-                tmp["access-point"] = accesspt
+                print type(myMapping[data["service-type"][0]])
+                if (myMapping[data["service-type"][0]] != "NULL"):
+                    accesspoint = "tcp://" + accesspt + ":" + myMapping[data["service-type"][0]]
+                    tmp["access-point"] = accesspoint
+                else:
+                    tmp["access-point"] = accesspt
                 formattedData.append(tmp.copy())
         else:
             formattedData.append(tmp.copy())
+            if (len(data["access-point"])>0) and (myMapping[data["service-type"][0]] != "NULL"):
+                accesspoint = "tcp://" + data["access-point"][0] + ":" + myMapping[data["service-type"][0]]
+                tmp["access-point"] = accesspoint
+            
     newdata=None     
     return formattedData
 
