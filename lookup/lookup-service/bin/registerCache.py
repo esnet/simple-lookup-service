@@ -69,11 +69,11 @@ rmtree(dir)
 print len(fdata)
 for d in fdata:
     #print d
-    
+    # This hack is for data from Brazilians which does not get decoded by the default utf8
     try:
         params = json.dumps(d)
     except UnicodeDecodeError:
-        pass
+        params = json.dumps(d,encoding="cp860")
     #print params
     headers = {"Content-type": "application/json", "Accept": "application/json"}
     conn = httplib.HTTPConnection("localhost:8080")
