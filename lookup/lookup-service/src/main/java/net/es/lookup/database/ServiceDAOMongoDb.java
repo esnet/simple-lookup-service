@@ -255,7 +255,10 @@ public class ServiceDAOMongoDb {
 			}
 		}
 		
-		query.put(mongoOp, keyValueList);
+		if(!keyValueList.isEmpty()){
+			query.put(mongoOp, keyValueList);
+		}
+		
 		
 		return query;
 	}

@@ -24,7 +24,10 @@ tar.extractall(dir)
 #path = 'sequences/'
 fdata = []
 listing = os.listdir(dir)
+count=0
+filesprocessed=0
 for infile in listing:
+    count = count+1
     #print "current file is: " + infile
     #if any (infile in "list."+s for s in serviceFiles):
     fullpath = os.path.join(dir,infile)
@@ -50,7 +53,7 @@ for infile in listing:
               #  if(len(k)==2):
                #     keywordValues.append(k[1])
                # else:
-                #    keywordValues.append(k[0])
+                #    keywordValues.append(k[0]))
         else:
             break;
         if (len(s) == len(attributes)):
@@ -61,14 +64,20 @@ for infile in listing:
                 else:
                     tmpDict[attributes[i]] = s[i]
         
+        else:
+            break;
+
         fdata.append(tmpDict)
     f.close()
 #delete directory
 rmtree(dir)
 
 print len(fdata)
+print filesprocessed
+print count
+
 for d in fdata:
-    #print d
+    print d
     # This hack is for data from Brazilians which does not get decoded by the default utf8
     try:
         params = json.dumps(d)
@@ -76,9 +85,9 @@ for d in fdata:
         params = json.dumps(d,encoding="cp860")
     #print params
     headers = {"Content-type": "application/json", "Accept": "application/json"}
-    conn = httplib.HTTPConnection("localhost:8080")
+    conn = httplib.HTTPConnection("ps4.es.net:8085")
     conn.request("POST", "lookup/services", params, headers)
     response = conn.getresponse()
     #print response.status, response.reason
 
-print "Done"
+#print "Done"

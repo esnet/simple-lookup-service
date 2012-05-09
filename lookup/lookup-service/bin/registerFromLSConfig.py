@@ -140,7 +140,7 @@ if(len(mydata)>0):
 for d in fdata:
     params = json.dumps(d)
     headers = {"Content-type": "application/json", "Accept": "application/json"}
-    conn = httplib.HTTPConnection("localhost:8080")
+    conn = httplib.HTTPConnection("ps4.es.net:8085")
     conn.request("POST", "lookup/services", params, headers)
     response = conn.getresponse()
     print response.status, response.reason
