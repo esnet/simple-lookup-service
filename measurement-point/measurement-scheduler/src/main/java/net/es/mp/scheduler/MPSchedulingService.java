@@ -14,6 +14,7 @@ import net.es.mp.container.MPService;
 import net.es.mp.scheduler.jobs.MPJobScheduler;
 import net.es.mp.scheduler.types.Schedule;
 import net.es.mp.types.MPType;
+import net.es.mp.util.callbacks.CallbackClient;
 
 import org.apache.log4j.Logger;
 import org.quartz.Scheduler;
@@ -32,8 +33,11 @@ public class MPSchedulingService implements MPService{
     private Authorizer<Schedule> authorizer;
     private Scheduler threadScheduler;
     private Map<String, Map> toolConfigMap;
+    private CallbackClient callbackClient;
     
     final static private String PROP_AUTHORIZER = "authorizer";
+    final static private String PROP_CALLBACK_KEYSTORE = "callbackKeystore";
+    final static private String PROP_CALLBACK_KEYSTORE_PASSWORD = "callbackKeystorePassword";
     final private static String PROP_JOB_SCHEDULERS = "jobSchedulers";
     final private static String PROP_JOB_SCHEDULER_TYPE = "type";
     final private static String PROP_JOB_SCHEDULER_CLASS = "class";
@@ -77,6 +81,19 @@ public class MPSchedulingService implements MPService{
         } catch (Exception e) {
             throw new RuntimeException("Unable to load authorizer: " + e.getMessage());
         }
+        
+        //Create callback client
+        String cbKeystore = null;
+        String cbKeystorePass = null;
+        if(config.containsKey(PROP_CALLBACK_KEYSTORE) && 
+                config.get(PROP_CALLBACK_KEYSTORE) != null){
+            cbKeystore =  (String)config.get(PROP_CALLBACK_KEYSTORE);
+        }
+        if(config.containsKey(PROP_CALLBACK_KEYSTORE_PASSWORD) && 
+                config.get(PROP_CALLBACK_KEYSTORE_PASSWORD) != null){
+            cbKeystorePass =  (String)config.get(PROP_CALLBACK_KEYSTORE_PASSWORD);
+        }
+        this.callbackClient = new CallbackClient(cbKeystore, cbKeystorePass);
         
         //set container
         this.container = mpc;
@@ -195,6 +212,13 @@ public class MPSchedulingService implements MPService{
      */
     public Authorizer<Schedule> getAuthorizer() {
         return this.authorizer;
+    }
+
+    /**
+     * @return the callbackClient
+     */
+    public CallbackClient getCallbackClient() {
+        return this.callbackClient;
     }
     
 }

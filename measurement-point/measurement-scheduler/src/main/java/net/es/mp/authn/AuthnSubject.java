@@ -1,17 +1,19 @@
 package net.es.mp.authn;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AuthnSubject {
     String name;
     String type;
-    Map<String, String> attributes;
+    Map<String, List<String>> attributes;
     
     public AuthnSubject(String name, String type){
         this.name = name;
         this.type = type;
-        this.attributes = new HashMap<String,String>();
+        this.attributes = new HashMap<String,List<String>>();
     }
     
     /**
@@ -31,14 +33,14 @@ public class AuthnSubject {
     /**
      * @return the attributes
      */
-    public Map<String, String> getAttributes() {
+    public Map<String, List<String>> getAttributes() {
         return this.attributes;
     }
 
     /**
      * @param attributes the attributes to set
      */
-    public void setAttributes(Map<String, String> attributes) {
+    public void setAttributes(Map<String, List<String>> attributes) {
         this.attributes = attributes;
     }
 
@@ -54,5 +56,19 @@ public class AuthnSubject {
      */
     public void setType(String type) {
         this.type = type;
+    }
+    
+    public void addAttribute(String name, String value){
+        if(!this.attributes.containsKey(name) || this.attributes.get(name) == null){
+            this.attributes.put(name, new ArrayList<String>());
+        }
+        this.attributes.get(name).add(value);
+    }
+    
+    public List<String> getAttribute(String name){
+        if(!this.attributes.containsKey(name)){
+            return null;
+        }
+        return this.attributes.get(name);
     }
 }

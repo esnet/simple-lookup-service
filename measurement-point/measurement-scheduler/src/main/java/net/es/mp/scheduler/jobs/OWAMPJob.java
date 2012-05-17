@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -300,7 +299,7 @@ public class OWAMPJob  extends ExecCommandJob{
         }
 
         //archive and publish measurement
-        this.archiveAndPublish(measurement, schedule.getStreamURI());
+        this.archivePublishCallback(measurement, schedule);
 
         System.out.println(measurement.toJSONString());
 
@@ -324,7 +323,7 @@ public class OWAMPJob  extends ExecCommandJob{
         measurement.setResult(result);
         
         //archive and publish
-        this.archiveAndPublish(measurement, schedule.getStreamURI());
+        this.archivePublishCallback(measurement, schedule);
 
     }
 
@@ -336,7 +335,7 @@ public class OWAMPJob  extends ExecCommandJob{
                 "A timeout occurred because the owping command did not return after " + this.timeout + " seconds.", 
                 null, null);
         measurement.setResult(result);
-        this.archiveAndPublish(measurement, schedule.getStreamURI());
+        this.archivePublishCallback(measurement, schedule);
     }
 
     private OWAMPMeasurement buildMeasurement(OWAMPSchedule owampSchedule){
@@ -392,7 +391,7 @@ public class OWAMPJob  extends ExecCommandJob{
         return measurement;
     }
 
-    private void archiveAndPublish(OWAMPMeasurement measurement, String streamUri) {
+    private void archivePublishCallback(OWAMPMeasurement measurement, Schedule schedule) {
         //archive the measurement
         Archiver archiver = new LocalArchiver();
         archiver.archive(measurement);
@@ -401,7 +400,10 @@ public class OWAMPJob  extends ExecCommandJob{
         Publisher localPublisher = new LocalStreamPublisher();
         List<Measurement> measList = (new ArrayList<Measurement>());
         measList.add(measurement);
-        localPublisher.publish(measList, streamUri);
+        localPublisher.publish(measList, schedule.getStreamURI());
+
+        //do callbacks
+        MPSchedulingService.getInstance().getCallbackClient().callback(measurement, schedule);
     }
 
 }

@@ -209,7 +209,7 @@ public class BWCTLJob extends ExecCommandJob{
         }
         
         //archive and publish measurement
-        this.archiveAndPublish(measurement, schedule.getStreamURI());
+        this.archivePublishCallback(measurement, schedule);
         
         System.out.println(measurement.toJSONString());
     }
@@ -237,7 +237,7 @@ public class BWCTLJob extends ExecCommandJob{
         measurement.setResult(result);
         
         //archive and publish
-        this.archiveAndPublish(measurement, schedule.getStreamURI());
+        this.archivePublishCallback(measurement, schedule);
     }
     
     protected void handleTimeout(Schedule schedule) {
@@ -248,7 +248,7 @@ public class BWCTLJob extends ExecCommandJob{
                 "A timeout occurred because the bwctl command did not return after " + this.timeout + " seconds.", 
                 null, null);
         measurement.setResult(result);
-        this.archiveAndPublish(measurement, schedule.getStreamURI());
+        this.archivePublishCallback(measurement, schedule);
     }
     
     private BWCTLMeasurement buildMeasurement(BWCTLSchedule bwctlSchedule){
@@ -311,8 +311,8 @@ public class BWCTLJob extends ExecCommandJob{
         return measurement;
     }
     
-    private void archiveAndPublish(BWCTLMeasurement measurement, String streamUri) {
-        //archive the measurement
+    private void archivePublishCallback(BWCTLMeasurement measurement, Schedule schedule) {
+            //archive the measurement
           Archiver archiver = new LocalArchiver();
           archiver.archive(measurement);
           
@@ -320,7 +320,10 @@ public class BWCTLJob extends ExecCommandJob{
           Publisher localPublisher = new LocalStreamPublisher();
           List<Measurement> measList = (new ArrayList<Measurement>());
           measList.add(measurement);
-          localPublisher.publish(measList, streamUri);
+          localPublisher.publish(measList, schedule.getStreamURI());
+          
+          //do callbacks
+          MPSchedulingService.getInstance().getCallbackClient().callback(measurement, schedule);
       }
  
 }

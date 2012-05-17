@@ -48,6 +48,9 @@ MPSchedulingService:
     ##
     # Class used to authorize requests
     authorizer: "net.es.mp.authz.AllowAllAuthorizer"
+    callbackKeystore: "/Users/alake/Programming/Java/measurement-point/measurement-scheduler/etc/mp.jks"
+    callbackKeystorePassword: "changeit"
+    
     ##
     # Associate test types with class to handle job scheduler
     jobSchedulers:

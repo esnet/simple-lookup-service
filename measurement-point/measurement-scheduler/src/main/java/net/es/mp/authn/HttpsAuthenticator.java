@@ -23,7 +23,7 @@ public class HttpsAuthenticator implements Authenticator {
         if(headers.getRequestHeader(MPClientAuthProxyFilter.SSL_CLIENT_I_DN) != null &&
                 headers.getRequestHeader(MPClientAuthProxyFilter.SSL_CLIENT_I_DN).size() != 0){
             String issuer = headers.getRequestHeader(MPClientAuthProxyFilter.SSL_CLIENT_I_DN).get(0);
-            subject.getAttributes().put(ATTR_ISSUE_DN, issuer);
+            subject.addAttribute(ATTR_ISSUE_DN, issuer);
         }
         
         return subject;

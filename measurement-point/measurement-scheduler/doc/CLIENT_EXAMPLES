@@ -7,3 +7,6 @@ BWCTL
 OWAMP
 =======
  curl -i -X POST -H "Content-Type: application/json" -d"{type: \"owamp\",source: \"192.168.63.138\",destination: \"192.168.63.1\",}" http://localhost:8519/mp/schedules
+
+
+curl -i -X POST -H "Content-Type: application/json" -d"{type: \"owamp\",source: \"192.168.63.138\",destination: \"192.168.63.1\", callback-uris: [http://localhost/cgi-bin/test.cgi] }" http://localhost:8519/mp/schedules
