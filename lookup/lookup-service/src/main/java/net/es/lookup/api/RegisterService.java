@@ -1,6 +1,7 @@
 package net.es.lookup.api;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import net.es.lookup.common.DuplicateKeyException;
@@ -41,21 +42,34 @@ public class RegisterService {
                 if (gotLease) {
                     // Build the matching query request that must fail for the service to be published
                     Message query = new Message();
-                    ArrayList<String> list = new ArrayList<String>();
-                    list.add(request.getAccessPoint());
+                    Message operators = new Message();
+                    
+                    List<String> list;
+                    list=(List)request.getAccessPoint();
                     query.add(Message.ACCESS_POINT,list);
-                    list = new ArrayList<String>();
-                    list.add(request.getClientUUID());
+                    operators.add(Message.ACCESS_POINT, Message.OPERATOR_ALL);
+                    
+                    //list = new ArrayList<String>();
+                    list=null;
+                    list=(List)request.getClientUUID();
                     query.add(Message.CLIENT_UUID,list);
-                    list = new ArrayList<String>();
-                    list.add(request.getServiceType());
+                    operators.add(Message.CLIENT_UUID, Message.OPERATOR_ALL);
+                    
+                    //list = new ArrayList<String>();
+                    list=null;
+                    list=(List)request.getServiceType();
                     query.add(Message.SERVICE_TYPE,list);
-                    list = new ArrayList<String>();
-                    list.add(request.getServiceDomain());
+                    operators.add(Message.SERVICE_TYPE, Message.OPERATOR_ALL);
+                    
+                    //list = new ArrayList<String>();
+                    list=null;
+                    list=(List)request.getServiceDomain();
                     query.add(Message.SERVICE_DOMAIN,list);
+                    operators.add(Message.SERVICE_DOMAIN, Message.OPERATOR_ALL);
+                    
                     System.out.println(request.getServiceDomain());
 
-                    Message res = ServiceDAOMongoDb.getInstance().queryAndPublishService(request,query);
+                    Message res = ServiceDAOMongoDb.getInstance().queryAndPublishService(request,query,operators);
 
                     response = new JSONRegisterResponse (res.getMap());
                     return JSONMessage.toString(response);
@@ -83,7 +97,7 @@ public class RegisterService {
         // All mandatory key/value must be present
         boolean res = false;
 
-        res = ! (((request.getAccessPoint()== null) || request.getAccessPoint().isEmpty()) ||
+        res = ! (((request.getAccessPoint() == null) || request.getAccessPoint().isEmpty()) ||
                (request.getTTL() == 0) ||
                ((request.getServiceType()== null) || request.getServiceType().isEmpty()));
 

@@ -15,7 +15,7 @@ public class Subscribe {
     private String params;
 
     public String subscribe(String message) {
-        String response;
+      /*  String response;
         try {
             JSONSubRequest request = new JSONSubRequest(message);
             if (request.getStatus() == JSONSubRequest.INCORRECT_FORMAT) {
@@ -36,6 +36,9 @@ public class Subscribe {
             // TODO: Handle error
         }
         return "\n";
+        */
+    	
+    	return "Not yet implemented";
     }
 
     private boolean isAuthed(JSONSubRequest request) {

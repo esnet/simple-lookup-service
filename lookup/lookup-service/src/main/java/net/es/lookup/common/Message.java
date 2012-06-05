@@ -5,6 +5,7 @@ import org.apache.commons.lang.math.LongRange;
 import java.rmi.MarshalledObject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 public class  Message {
 
@@ -17,6 +18,9 @@ public class  Message {
     public static final String SERVICE_URI = "uri";
     public static final String QUERY_OPERATOR = "operator";
     public static final String EXPIRES = "expires";
+    public static final String DEFAULT_OPERATOR = "any";
+    public static final String OPERATOR_ALL = "all";
+    public static final String OPERATOR_ANY = "any";
 
     private final Map<String,Object> keyValues;
     protected int status = 0;
@@ -64,28 +68,28 @@ public class  Message {
         return res;
     }
 
-    public String getServiceType() {
-        return  (String) this.getMap().get(Message.SERVICE_TYPE);
+    public List<String> getServiceType() {
+        return  (List<String>) this.getMap().get(Message.SERVICE_TYPE);
     }
 
-    public String getAccessPoint() {
-        return  (String) this.getMap().get(Message.ACCESS_POINT);
+    public List<String> getAccessPoint() {
+        return  (List<String>) this.getMap().get(Message.ACCESS_POINT);
     }
 
-    public String getClientUUID() {
-        return  (String) this.getMap().get(Message.CLIENT_UUID);
+    public List<String> getServiceName() {
+        return  (List<String>) this.getMap().get(Message.SERVICE_NAME);
     }
 
-    public String getServiceName() {
-        return  (String) this.getMap().get(Message.SERVICE_NAME);
+    public List<String> getServiceDomain() {
+        return  (List<String>) this.getMap().get(Message.SERVICE_DOMAIN);
+    }
+    
+    public List<String> getClientUUID() {
+        return  (List<String>) this.getMap().get(Message.CLIENT_UUID);
     }
 
-    public String getServiceDomain() {
-        return  (String) this.getMap().get(Message.SERVICE_DOMAIN);
-    }
-
-    public String getOperator() {
-        return (String) this.getMap().get(Message.QUERY_OPERATOR);
+    public List<String> getOperator() {
+        return (List<String>) this.getMap().get(Message.QUERY_OPERATOR);
     }
 
     public synchronized void setError (int error) {

@@ -3,6 +3,7 @@ package net.es.lookup.database;
 import net.es.lookup.common.DuplicateKeyException;
 import net.es.lookup.common.Service;
 import net.es.lookup.common.Message;
+import net.es.lookup.resources.ServicesResource;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -68,13 +69,13 @@ public class ServiceDAOMongoDb {
 	}
 	
 	//should use json specific register request and response.
-	public Message queryAndPublishService(Message message, Message queryRequest){
+	public Message queryAndPublishService(Message message, Message queryRequest, Message operators){
 		int errorcode;
 		String errormsg;
 		Message response = new Message();
 		
 		//check for duplicates
-		List<Service> dupEntries = this.query(queryRequest);
+		List<Service> dupEntries = this.query(message,queryRequest,operators);
 		System.out.println("Duplicate Entries: "+dupEntries.size());
 		if(dupEntries.size()>0){
 			response.setError(500);
@@ -177,13 +178,13 @@ public class ServiceDAOMongoDb {
 		return response;
 	}
 
-    public List<Service> query(Message queryRequest){
-        return this.query (queryRequest, 0, 0);
+    public List<Service> query(Message message, Message queryRequest, Message operators){
+        return this.query (message, queryRequest, operators, 0, 0);
     }
 	
-	public List<Service> query(Message queryRequest, int maxResults, int skip){
+	public List<Service> query(Message message, Message queryRequest, Message operators, int maxResults, int skip){
 		
-		BasicDBObject query = buildQuery(queryRequest);
+		BasicDBObject query = buildQuery(queryRequest, operators);
 		
 		DBCursor cur = coll.find(query);
 		
@@ -215,42 +216,55 @@ public class ServiceDAOMongoDb {
 	
 	
 	//Builds the query from the given map
-	private BasicDBObject buildQuery(Message queryRequest){
+	private BasicDBObject buildQuery(Message queryRequest, Message operators){
 		Map<String, Object> serv =  queryRequest.getMap();
+		
+		Map<String, String> ops = operators.getMap();
+		
 		System.out.println(serv.toString());
+		
 		List <HashMap<String,Object>> keyValueList = new ArrayList<HashMap<String,Object>>();
 		
         for (Map.Entry<String,Object> entry : serv.entrySet()) {
             String newKey = entry.getKey();
-            if ( ! newKey.equals(Message.QUERY_OPERATOR)) {
-                HashMap<String, Object> tmpHash = new HashMap<String, Object>();
-                Object obj = serv.get(newKey);
-                if (obj instanceof String) {
-                    tmpHash.put(newKey, (String) obj);
-                } else if (obj instanceof List) {
-                    List <Object> values = (List<Object>) obj;
-                    if(values.size()>1){
-                        HashMap<String, Object> listvalues = new HashMap<String, Object>();
-                        listvalues.put("$in", values);
-                        tmpHash.put(newKey, listvalues);
-                    }else if(values.size()==1){
+            HashMap<String, Object> tmpHash = new HashMap<String, Object>();
+            Object obj = serv.get(newKey);
+            if (obj instanceof String) {
+                 tmpHash.put(newKey, (String) obj);
+            } else if (obj instanceof List) {
+                 List <Object> values = (List<Object>) obj;
+                 if(values.size()>1){
+                	 HashMap<String, Object> listvalues = new HashMap<String, Object>();
+                	 if(ops.containsKey(newKey)){
+                		 //get the operator
+                		 listvalues.put(ops.get(newKey), values);
+                	 }
+                     tmpHash.put(newKey, listvalues);
+                 }else if(values.size()==1){
                         tmpHash.put(newKey, values.get(0));
-                    }
+                 }
                     
                 }
                 keyValueList.add(tmpHash);
-            }
+           
         }
 		
 		BasicDBObject query = new BasicDBObject();
+		ArrayList queryOp = (ArrayList)operators.getOperator();
 		
-		String op = queryRequest.getOperator();
+		String op=null;
+		if( queryOp != null && !queryOp.isEmpty()){
+			op = (String)queryOp.get(0);
+		}else{
+			op = ServicesResource.DEFAULT_OPERATOR;
+		}
+		
 		String mongoOp = "$and";
 		
 		if(op != null && !op.isEmpty()){
-			if(op.equalsIgnoreCase("any")){
+			if(op.equalsIgnoreCase(ServicesResource.OPERATOR_ANY)){
 				mongoOp = "$or";
-			}else if(op.equalsIgnoreCase("all")){
+			}else if(op.equalsIgnoreCase(ServicesResource.OPERATOR_ALL)){
 				mongoOp = "$and";
 			}
 		}
