@@ -12,6 +12,7 @@ import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
 import net.es.lookup.service.LookupService;
+import net.es.lookup.resources.ServicesResource;
 
 /**
  *
@@ -47,25 +48,25 @@ public class RegisterService {
                     List<String> list;
                     list=(List)request.getAccessPoint();
                     query.add(Message.ACCESS_POINT,list);
-                    operators.add(Message.ACCESS_POINT, Message.OPERATOR_ALL);
+                    operators.add(Message.ACCESS_POINT, ServicesResource.OPERATOR_ALL);
                     
                     //list = new ArrayList<String>();
                     list=null;
                     list=(List)request.getClientUUID();
                     query.add(Message.CLIENT_UUID,list);
-                    operators.add(Message.CLIENT_UUID, Message.OPERATOR_ALL);
+                    operators.add(Message.CLIENT_UUID, ServicesResource.OPERATOR_ALL);
                     
                     //list = new ArrayList<String>();
                     list=null;
                     list=(List)request.getServiceType();
                     query.add(Message.SERVICE_TYPE,list);
-                    operators.add(Message.SERVICE_TYPE, Message.OPERATOR_ALL);
+                    operators.add(Message.SERVICE_TYPE, ServicesResource.OPERATOR_ALL);
                     
                     //list = new ArrayList<String>();
                     list=null;
                     list=(List)request.getServiceDomain();
                     query.add(Message.SERVICE_DOMAIN,list);
-                    operators.add(Message.SERVICE_DOMAIN, Message.OPERATOR_ALL);
+                    operators.add(Message.SERVICE_DOMAIN, ServicesResource.OPERATOR_ALL);
                     
                     System.out.println(request.getServiceDomain());
 

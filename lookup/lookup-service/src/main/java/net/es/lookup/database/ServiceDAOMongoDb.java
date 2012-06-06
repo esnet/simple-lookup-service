@@ -24,6 +24,10 @@ public class ServiceDAOMongoDb {
 	private DB db;
 	private DBCollection coll;
     private static ServiceDAOMongoDb instance = null;
+    
+	private static Map<String, String> operatorMapping = new HashMap();
+	private static Map<String, String> listOperatorMapping = new HashMap();
+	
 
     public static ServiceDAOMongoDb getInstance() {
         return ServiceDAOMongoDb.instance;
@@ -66,6 +70,11 @@ public class ServiceDAOMongoDb {
 		System.out.println(db.getName());
 		coll = db.getCollection(collname);
 		System.out.println(coll.getName());
+		
+		operatorMapping.put(ServicesResource.OPERATOR_ALL, "$and");
+		operatorMapping.put(ServicesResource.OPERATOR_ANY, "$or");
+		
+		listOperatorMapping.put(ServicesResource.OPERATOR_ANY, "$in");
 	}
 	
 	//should use json specific register request and response.
@@ -221,7 +230,7 @@ public class ServiceDAOMongoDb {
 		
 		Map<String, String> ops = operators.getMap();
 		
-		System.out.println(serv.toString());
+	
 		
 		List <HashMap<String,Object>> keyValueList = new ArrayList<HashMap<String,Object>>();
 		
@@ -235,11 +244,15 @@ public class ServiceDAOMongoDb {
                  List <Object> values = (List<Object>) obj;
                  if(values.size()>1){
                 	 HashMap<String, Object> listvalues = new HashMap<String, Object>();
-                	 if(ops.containsKey(newKey)){
+                	 if(ops.containsKey(newKey) && this.listOperatorMapping.containsKey(ops.get(newKey))){ 
                 		 //get the operator
-                		 listvalues.put(ops.get(newKey), values);
+                		 String curop = this.listOperatorMapping.get(ops.get(newKey));
+                		 listvalues.put(curop, values);
+                		 tmpHash.put(newKey, listvalues);
+                	 }else{
+                		 tmpHash.put(newKey, values);
                 	 }
-                     tmpHash.put(newKey, listvalues);
+                     
                  }else if(values.size()==1){
                         tmpHash.put(newKey, values.get(0));
                  }
@@ -273,7 +286,7 @@ public class ServiceDAOMongoDb {
 			query.put(mongoOp, keyValueList);
 		}
 		
-		
+		System.out.println(query);
 		return query;
 	}
 	
