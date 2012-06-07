@@ -20,21 +20,27 @@ public class QueryServices {
         String response;
         
         Map<String, Object> requestMap = request.getMap();
+        Map<String, Object> requestMapCopy = request.getMap();
         
         Message queryParameters = new Message();
         Message operators = new Message();
         
         try{    
         	queryParameters.add(ServicesResource.OPERATOR, request.getOperator());
+        	int size = requestMap.size();
+        	System.out.println("Total number of parameters passed in request="+size);
         
         	for (Map.Entry<String, Object> entry : requestMap.entrySet()) {
+        		
         		String key = entry.getKey();
         		Object value = entry.getValue();
-        		if (! key.contains(ServicesResource.OPERATOR)){
+		
+        		//generate the operator map
+        		if (!key.contains(ServicesResource.OPERATOR)){
         			queryParameters.add(key,value);
-            	
-        			if(requestMap.containsKey(key+"_"+ServicesResource.OPERATOR)){
-        				operators.add(key, value);
+        			String opKey = key+"-"+ServicesResource.OPERATOR;
+        			if(requestMap.containsKey(opKey)){
+        				operators.add(key,requestMap.get(opKey));
         			}else{
         				//add default
         				operators.add(key, ServicesResource.DEFAULT_OPERATOR);

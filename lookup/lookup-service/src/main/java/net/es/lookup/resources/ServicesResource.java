@@ -1,5 +1,10 @@
 package net.es.lookup.resources;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Iterator;
+
+
 import javax.ws.rs.POST;
 import javax.ws.rs.GET;
 import javax.ws.rs.Consumes;
@@ -20,8 +25,8 @@ import net.es.lookup.common.Message;
 @Path("/lookup/services")
 public class ServicesResource {
 
-    public static final String OPERATOR_ALL = "ALL";
-    public static final String OPERATOR_ANY = "ANY";
+    public static final String OPERATOR_ALL = "all";
+    public static final String OPERATOR_ANY = "any";
     public static final String DEFAULT_OPERATOR = ServicesResource.OPERATOR_ALL;
     public static final String OPERATOR = "operator";
     public static final String SKIP = "skip";
@@ -63,14 +68,18 @@ public class ServicesResource {
                 } else if (key.equals(ServicesResource.MAX_RESULTS)) {
                     maxResults = Integer.parseInt(queryParams.getFirst(key));
                 } else {
-                    // Not skip, operator or max-results. Must be a key/value pair for the query
-                    message.add (key, queryParams.getFirst(key));
+                    // Not skip, operator or max-results. Must be key/values pair for the query
+                	String strArr[] = queryParams.getFirst(key).split(",");
+                	if (strArr.length>1){
+                		message.add (key, Arrays.asList(strArr));
+                	}else{
+                		message.add (key, queryParams.getFirst(key));
+                	}            
                 }
             }
         } catch (DuplicateKeyException e) {
             e.printStackTrace(); // TODO: needs error handling
         }
-
         return this.queryServices.query(message, maxResults, skip);
     }
 

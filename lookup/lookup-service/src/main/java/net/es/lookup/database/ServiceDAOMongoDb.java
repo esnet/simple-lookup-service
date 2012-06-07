@@ -247,18 +247,23 @@ public class ServiceDAOMongoDb {
                 	 if(ops.containsKey(newKey) && this.listOperatorMapping.containsKey(ops.get(newKey))){ 
                 		 //get the operator
                 		 String curop = this.listOperatorMapping.get(ops.get(newKey));
+                		 
                 		 listvalues.put(curop, values);
                 		 tmpHash.put(newKey, listvalues);
                 	 }else{
                 		 tmpHash.put(newKey, values);
-                	 }
-                     
+                	 }                   
                  }else if(values.size()==1){
                         tmpHash.put(newKey, values.get(0));
                  }
                     
-                }
-                keyValueList.add(tmpHash);
+             }
+            
+            if(!tmpHash.isEmpty()){
+            	keyValueList.add(tmpHash);
+            }
+             
+            
            
         }
 		
