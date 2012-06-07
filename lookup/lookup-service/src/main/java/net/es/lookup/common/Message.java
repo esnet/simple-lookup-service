@@ -18,9 +18,6 @@ public class  Message {
     public static final String SERVICE_URI = "uri";
     public static final String QUERY_OPERATOR = "operator";
     public static final String EXPIRES = "expires";
-    public static final String DEFAULT_OPERATOR = "any";
-    public static final String OPERATOR_ALL = "all";
-    public static final String OPERATOR_ANY = "any";
 
     private final Map<String,Object> keyValues;
     protected int status = 0;

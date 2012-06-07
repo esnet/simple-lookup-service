@@ -3,6 +3,9 @@ package net.es.lookup.resources;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+
 
 
 import javax.ws.rs.POST;
@@ -28,7 +31,7 @@ public class ServicesResource {
     public static final String OPERATOR_ALL = "all";
     public static final String OPERATOR_ANY = "any";
     public static final String DEFAULT_OPERATOR = ServicesResource.OPERATOR_ALL;
-    public static final String OPERATOR = "operator";
+    public static final String OPERATOR = Message.QUERY_OPERATOR;
     public static final String SKIP = "skip";
     public static final String MAX_RESULTS = "max-results";
 
@@ -61,7 +64,9 @@ public class ServicesResource {
         try {
             for (String key : queryParams.keySet()) {
                 if (key.equals(ServicesResource.OPERATOR)) {
-                    message.add (key, queryParams.getFirst(key));
+                	List<String> ops = new ArrayList();
+                	ops.add(queryParams.getFirst(key));
+                    message.add (key, ops);
                     gotOperator = true;
                 } else if (key.equals(ServicesResource.SKIP)) {
                     skip = Integer.parseInt(queryParams.getFirst(key));

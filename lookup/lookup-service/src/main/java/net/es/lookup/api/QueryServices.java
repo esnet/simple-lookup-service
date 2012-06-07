@@ -1,6 +1,7 @@
 package net.es.lookup.api;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.es.lookup.common.Message;
@@ -25,10 +26,21 @@ public class QueryServices {
         Message queryParameters = new Message();
         Message operators = new Message();
         
+        int size = requestMap.size();
+    	System.out.println("Total number of parameters passed in request="+size);
+    	
         try{    
-        	queryParameters.add(ServicesResource.OPERATOR, request.getOperator());
-        	int size = requestMap.size();
-        	System.out.println("Total number of parameters passed in request="+size);
+        	if(request.getOperator() != null){
+        	
+        		List mainOp = request.getOperator();
+            	operators.add(ServicesResource.OPERATOR, mainOp);
+        	}else{
+        		List mainOp = new ArrayList();
+        		mainOp.add(ServicesResource.DEFAULT_OPERATOR);
+        		operators.add(ServicesResource.OPERATOR, mainOp);
+        	}
+        	
+        	
         
         	for (Map.Entry<String, Object> entry : requestMap.entrySet()) {
         		
