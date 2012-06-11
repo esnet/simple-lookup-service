@@ -12,7 +12,7 @@ import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
 import net.es.lookup.service.LookupService;
-import net.es.lookup.resources.ServicesResource;
+import net.es.lookup.common.ReservedKeywords;
 
 /**
  *
@@ -37,7 +37,7 @@ public class RegisterService {
             if (this.isValid(request) && this.isAuthed(request)) {
                 // Generate a new URI for this service and add it to the service key/value pairs
                 String uri = this.newURI (); 
-                request.add (Message.SERVICE_URI, uri);
+                request.add (ReservedKeywords.SERVICE_URI, uri);
                 // Request a lease
                 boolean gotLease = LeaseManager.getInstance().requestLease(request);
                 if (gotLease) {
@@ -47,26 +47,26 @@ public class RegisterService {
                     
                     List<String> list;
                     list=(List)request.getAccessPoint();
-                    query.add(Message.ACCESS_POINT,list);
-                    operators.add(Message.ACCESS_POINT, ServicesResource.OPERATOR_ALL);
+                    query.add(ReservedKeywords.ACCESS_POINT,list);
+                    operators.add(ReservedKeywords.ACCESS_POINT, ReservedKeywords.OPERATOR_ALL);
                     
                     //list = new ArrayList<String>();
                     list=null;
                     list=(List)request.getClientUUID();
-                    query.add(Message.CLIENT_UUID,list);
-                    operators.add(Message.CLIENT_UUID, ServicesResource.OPERATOR_ALL);
+                    query.add(ReservedKeywords.CLIENT_UUID,list);
+                    operators.add(ReservedKeywords.CLIENT_UUID, ReservedKeywords.OPERATOR_ALL);
                     
                     //list = new ArrayList<String>();
                     list=null;
                     list=(List)request.getServiceType();
-                    query.add(Message.SERVICE_TYPE,list);
-                    operators.add(Message.SERVICE_TYPE, ServicesResource.OPERATOR_ALL);
+                    query.add(ReservedKeywords.SERVICE_TYPE,list);
+                    operators.add(ReservedKeywords.SERVICE_TYPE, ReservedKeywords.OPERATOR_ALL);
                     
                     //list = new ArrayList<String>();
                     list=null;
                     list=(List)request.getServiceDomain();
-                    query.add(Message.SERVICE_DOMAIN,list);
-                    operators.add(Message.SERVICE_DOMAIN, ServicesResource.OPERATOR_ALL);
+                    query.add(ReservedKeywords.SERVICE_DOMAIN,list);
+                    operators.add(ReservedKeywords.SERVICE_DOMAIN, ReservedKeywords.OPERATOR_ALL);
                     
                     System.out.println(request.getServiceDomain());
 

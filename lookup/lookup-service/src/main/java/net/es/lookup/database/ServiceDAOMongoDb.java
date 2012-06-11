@@ -4,6 +4,7 @@ import net.es.lookup.common.DuplicateKeyException;
 import net.es.lookup.common.Service;
 import net.es.lookup.common.Message;
 import net.es.lookup.resources.ServicesResource;
+import net.es.lookup.common.ReservedKeywords;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -71,10 +72,10 @@ public class ServiceDAOMongoDb {
 		coll = db.getCollection(collname);
 		System.out.println(coll.getName());
 		
-		operatorMapping.put(ServicesResource.OPERATOR_ALL, "$and");
-		operatorMapping.put(ServicesResource.OPERATOR_ANY, "$or");
+		operatorMapping.put(ReservedKeywords.OPERATOR_ALL, "$and");
+		operatorMapping.put(ReservedKeywords.OPERATOR_ANY, "$or");
 		
-		listOperatorMapping.put(ServicesResource.OPERATOR_ANY, "$in");
+		listOperatorMapping.put(ReservedKeywords.OPERATOR_ANY, "$in");
 	}
 	
 	//should use json specific register request and response.
@@ -115,13 +116,14 @@ public class ServiceDAOMongoDb {
 	
 	
 	public Message deleteService(Message message){
+		
 		int errorcode;
 		String errormsg;
 	
 		BasicDBObject query = new BasicDBObject();
 		String uri = message.getURI();
 		//TODO: add check to see if only one elem is returned
-		query.put(Message.SERVICE_URI, uri);
+		query.put(ReservedKeywords.SERVICE_URI, uri);
 		WriteResult wrt = coll.remove(query);
 		
 		CommandResult cmdres = wrt.getLastError();
@@ -138,52 +140,46 @@ public class ServiceDAOMongoDb {
 		response.setError(errorcode);
 		response.setErrorMessage(errormsg);
 		return response;
+		
 	}
 	
-	public Message renewService(Message message){
+	public Message updateService(String serviceid, Message updateRequest){
 		
 		int errorcode;
 		String errormsg;
+        
+        
+        if(serviceid != null && !serviceid.isEmpty()){
+        	BasicDBObject query = new BasicDBObject();
+        	query.put(ReservedKeywords.SERVICE_URI, serviceid);
+        	
+        	System.out.println(query);
+        	
+        	BasicDBObject updateObject = new BasicDBObject();
+        	updateObject.putAll(updateRequest.getMap());
+        	
+        	System.out.println(updateObject);
+        	
+        	WriteResult wrt = coll.update(query, updateObject);
+        	CommandResult cmdres = wrt.getLastError();
+        	System.out.println(cmdres.ok());
+        	if(cmdres.ok()){
+        		errorcode=200;
+        		errormsg="SUCCESS";
+        	}else{
+           		errorcode=500;
+        		errormsg=cmdres.getErrorMessage();
+        	}
+    		
+        }else{
+        	errorcode=500;
+        	errormsg = "Service URI not specified!!!";
+        }
 		
-		String uri = message.getURI();
-        long ttl = message.getTTL();
-		BasicDBObject query = new BasicDBObject();
-		//TODO: add check to see if only one elem is returned
-		query.put("uri", uri);
-		
-		
-		DBCursor cur = coll.find(query);
-		
-		if (cur.size() == 1){
-			DBObject tmp = cur.next();
-			//DBObject tmp = new DBObject();
-			tmp.put("ttl", ttl);
-			WriteResult wrt = coll.save(tmp);
-			
-			CommandResult cmdres = wrt.getLastError();
-			
-			if(cmdres.ok()){
-				errorcode = 200;
-				errormsg = "SUCCESS";
-			}else{
-				errorcode = 500;
-				errormsg = cmdres.getErrorMessage();
-			}
-			
-		}else{
-			errorcode = 500;
-			
-			if(cur.size()>1){
-				errormsg = "Database corrupted";
-			}else{
-				errormsg = "Element not found";
-			}
-			
-		}
-	
 		Message response = new Message();
 		response.setError(errorcode);
 		response.setErrorMessage(errormsg);
+		System.out.println("Came here");
 		return response;
 	}
 
@@ -274,15 +270,15 @@ public class ServiceDAOMongoDb {
 		if( queryOp != null && !queryOp.isEmpty()){
 			op = (String)queryOp.get(0);
 		}else{
-			op = ServicesResource.DEFAULT_OPERATOR;
+			op = ReservedKeywords.DEFAULT_OPERATOR;
 		}
 		
 		String mongoOp = "$and";
 		
 		if(op != null && !op.isEmpty()){
-			if(op.equalsIgnoreCase(ServicesResource.OPERATOR_ANY)){
+			if(op.equalsIgnoreCase(ReservedKeywords.OPERATOR_ANY)){
 				mongoOp = "$or";
-			}else if(op.equalsIgnoreCase(ServicesResource.OPERATOR_ALL)){
+			}else if(op.equalsIgnoreCase(ReservedKeywords.OPERATOR_ALL)){
 				mongoOp = "$and";
 			}
 		}
@@ -300,9 +296,10 @@ public class ServiceDAOMongoDb {
 		String errormsg;
 		
 		BasicDBObject query = new BasicDBObject();
-		query.put("uri", URI);
+		query.put(ReservedKeywords.SERVICE_URI, URI);
 		DBCursor cur = coll.find(query);
 		
+		System.out.println("Came inside getServiceByURI");
 		Service result=null;
 		if (cur.size() == 1){
 			DBObject tmp = cur.next();

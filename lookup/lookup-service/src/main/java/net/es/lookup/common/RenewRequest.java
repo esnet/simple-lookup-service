@@ -10,4 +10,5 @@ public abstract class RenewRequest extends Message{
 	public RenewRequest(Map<String,Object> map) {
         super(map);
     }
+
 }

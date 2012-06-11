@@ -21,19 +21,13 @@ import net.es.lookup.api.QueryServices;
 import net.es.lookup.api.RegisterService;
 import net.es.lookup.common.DuplicateKeyException;
 import net.es.lookup.common.Message;
+import net.es.lookup.common.ReservedKeywords;
 
 /**
  *
  */
 @Path("/lookup/services")
 public class ServicesResource {
-
-    public static final String OPERATOR_ALL = "all";
-    public static final String OPERATOR_ANY = "any";
-    public static final String DEFAULT_OPERATOR = ServicesResource.OPERATOR_ALL;
-    public static final String OPERATOR = Message.QUERY_OPERATOR;
-    public static final String SKIP = "skip";
-    public static final String MAX_RESULTS = "max-results";
 
     private QueryServices queryServices = new QueryServices();
     private RegisterService registerService = new RegisterService();
@@ -63,14 +57,14 @@ public class ServicesResource {
 
         try {
             for (String key : queryParams.keySet()) {
-                if (key.equals(ServicesResource.OPERATOR)) {
+                if (key.equals(ReservedKeywords.OPERATOR)) {
                 	List<String> ops = new ArrayList();
                 	ops.add(queryParams.getFirst(key));
                     message.add (key, ops);
                     gotOperator = true;
-                } else if (key.equals(ServicesResource.SKIP)) {
+                } else if (key.equals(ReservedKeywords.SKIP)) {
                     skip = Integer.parseInt(queryParams.getFirst(key));
-                } else if (key.equals(ServicesResource.MAX_RESULTS)) {
+                } else if (key.equals(ReservedKeywords.MAX_RESULTS)) {
                     maxResults = Integer.parseInt(queryParams.getFirst(key));
                 } else {
                     // Not skip, operator or max-results. Must be key/values pair for the query

@@ -12,6 +12,8 @@ import net.es.lookup.common.RegisterRequest;
 import net.sf.json.util.JSONTokener;
 import net.sf.json.JSONObject;
 
+import net.es.lookup.common.ReservedKeywords;
+
 public class JSONRegisterRequest extends RegisterRequest {
 
     static public final int VALID = 1;
@@ -31,7 +33,7 @@ public class JSONRegisterRequest extends RegisterRequest {
         Set keyValues = jsonObj.entrySet();
         for (Object o : ((JSONObject) obj).keySet()) {
             // Decode TTL
-            if (o.toString().equals(Message.TTL)) {
+            if (o.toString().equals(ReservedKeywords.TTL)) {
                 PeriodFormatter fmt = ISOPeriodFormat.standard();
                 Duration duration = fmt.parsePeriod((String) ((JSONObject) obj).get(o)).toStandardDuration();
                 this.add(o.toString(), new Long(duration.getStandardSeconds()));

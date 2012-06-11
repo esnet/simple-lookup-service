@@ -9,15 +9,7 @@ import java.util.List;
 
 public class  Message {
 
-    public static final String ACCESS_POINT = "access-point";
-    public static final String CLIENT_UUID = "client-uuid";
-    public static final String TTL = "ttl";
-    public static final String SERVICE_NAME = "name";
-    public static final String SERVICE_DOMAIN = "domain";
-    public static final String SERVICE_TYPE = "service-type";
-    public static final String SERVICE_URI = "uri";
-    public static final String QUERY_OPERATOR = "operator";
-    public static final String EXPIRES = "expires";
+    
 
     private final Map<String,Object> keyValues;
     protected int status = 0;
@@ -54,11 +46,11 @@ public class  Message {
     }
 
     public String getURI() {
-        return (String) this.getMap().get(Message.SERVICE_URI);
+        return (String) this.getMap().get(ReservedKeywords.SERVICE_URI);
     }
 
     public long getTTL() {
-        Long res = (Long) this.getMap().get(Message.TTL);
+        Long res = (Long) this.getMap().get(ReservedKeywords.TTL);
         if (res == null) {
             return -1;
         }
@@ -66,27 +58,27 @@ public class  Message {
     }
 
     public List<String> getServiceType() {
-        return  (List<String>) this.getMap().get(Message.SERVICE_TYPE);
+        return  (List<String>) this.getMap().get(ReservedKeywords.SERVICE_TYPE);
     }
 
     public List<String> getAccessPoint() {
-        return  (List<String>) this.getMap().get(Message.ACCESS_POINT);
+        return  (List<String>) this.getMap().get(ReservedKeywords.ACCESS_POINT);
     }
 
     public List<String> getServiceName() {
-        return  (List<String>) this.getMap().get(Message.SERVICE_NAME);
+        return  (List<String>) this.getMap().get(ReservedKeywords.SERVICE_NAME);
     }
 
     public List<String> getServiceDomain() {
-        return  (List<String>) this.getMap().get(Message.SERVICE_DOMAIN);
+        return  (List<String>) this.getMap().get(ReservedKeywords.SERVICE_DOMAIN);
     }
     
     public List<String> getClientUUID() {
-        return  (List<String>) this.getMap().get(Message.CLIENT_UUID);
+        return  (List<String>) this.getMap().get(ReservedKeywords.CLIENT_UUID);
     }
 
     public List<String> getOperator() {
-        return (List<String>) this.getMap().get(Message.QUERY_OPERATOR);
+        return (List<String>) this.getMap().get(ReservedKeywords.OPERATOR);
     }
 
     public synchronized void setError (int error) {

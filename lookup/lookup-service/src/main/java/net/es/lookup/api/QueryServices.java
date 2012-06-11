@@ -9,7 +9,7 @@ import net.es.lookup.common.Service;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.common.DuplicateKeyException;
-import net.es.lookup.resources.ServicesResource;
+import net.es.lookup.common.ReservedKeywords;
 
 public class QueryServices {
 
@@ -33,11 +33,11 @@ public class QueryServices {
         	if(request.getOperator() != null){
         	
         		List mainOp = request.getOperator();
-            	operators.add(ServicesResource.OPERATOR, mainOp);
+            	operators.add(ReservedKeywords.OPERATOR, mainOp);
         	}else{
         		List mainOp = new ArrayList();
-        		mainOp.add(ServicesResource.DEFAULT_OPERATOR);
-        		operators.add(ServicesResource.OPERATOR, mainOp);
+        		mainOp.add(ReservedKeywords.DEFAULT_OPERATOR);
+        		operators.add(ReservedKeywords.OPERATOR, mainOp);
         	}
         	
         	
@@ -48,14 +48,14 @@ public class QueryServices {
         		Object value = entry.getValue();
 		
         		//generate the operator map
-        		if (!key.contains(ServicesResource.OPERATOR)){
+        		if (!key.contains(ReservedKeywords.OPERATOR)){
         			queryParameters.add(key,value);
-        			String opKey = key+"-"+ServicesResource.OPERATOR;
+        			String opKey = key+"-"+ReservedKeywords.OPERATOR;
         			if(requestMap.containsKey(opKey)){
         				operators.add(key,requestMap.get(opKey));
         			}else{
         				//add default
-        				operators.add(key, ServicesResource.DEFAULT_OPERATOR);
+        				operators.add(key, ReservedKeywords.DEFAULT_OPERATOR);
         			}
         		}
             
