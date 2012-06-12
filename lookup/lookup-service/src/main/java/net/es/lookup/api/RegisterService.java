@@ -37,7 +37,7 @@ public class RegisterService {
             if (this.isValid(request) && this.isAuthed(request)) {
                 // Generate a new URI for this service and add it to the service key/value pairs
                 String uri = this.newURI (); 
-                request.add (ReservedKeywords.SERVICE_URI, uri);
+                request.add (ReservedKeywords.RECORD_URI, uri);
                 // Request a lease
                 boolean gotLease = LeaseManager.getInstance().requestLease(request);
                 if (gotLease) {
@@ -47,26 +47,26 @@ public class RegisterService {
                     
                     List<String> list;
                     list=(List)request.getAccessPoint();
-                    query.add(ReservedKeywords.ACCESS_POINT,list);
-                    operators.add(ReservedKeywords.ACCESS_POINT, ReservedKeywords.OPERATOR_ALL);
+                    query.add(ReservedKeywords.RECORD_SERVICE_LOCATOR,list);
+                    operators.add(ReservedKeywords.RECORD_SERVICE_LOCATOR, ReservedKeywords.RECORD_OPERATOR_ALL);
                     
                     //list = new ArrayList<String>();
                     list=null;
                     list=(List)request.getClientUUID();
-                    query.add(ReservedKeywords.CLIENT_UUID,list);
-                    operators.add(ReservedKeywords.CLIENT_UUID, ReservedKeywords.OPERATOR_ALL);
+                    query.add(ReservedKeywords.RECORD_PRIVATEKEY,list);
+                    operators.add(ReservedKeywords.RECORD_PRIVATEKEY, ReservedKeywords.RECORD_OPERATOR_ALL);
                     
                     //list = new ArrayList<String>();
                     list=null;
                     list=(List)request.getServiceType();
-                    query.add(ReservedKeywords.SERVICE_TYPE,list);
-                    operators.add(ReservedKeywords.SERVICE_TYPE, ReservedKeywords.OPERATOR_ALL);
+                    query.add(ReservedKeywords.RECORD_SERVICE_TYPE,list);
+                    operators.add(ReservedKeywords.RECORD_SERVICE_TYPE, ReservedKeywords.RECORD_OPERATOR_ALL);
                     
                     //list = new ArrayList<String>();
                     list=null;
                     list=(List)request.getServiceDomain();
-                    query.add(ReservedKeywords.SERVICE_DOMAIN,list);
-                    operators.add(ReservedKeywords.SERVICE_DOMAIN, ReservedKeywords.OPERATOR_ALL);
+                    query.add(ReservedKeywords.RECORD_SERVICE_DOMAIN,list);
+                    operators.add(ReservedKeywords.RECORD_SERVICE_DOMAIN, ReservedKeywords.RECORD_OPERATOR_ALL);
                     
                     System.out.println(request.getServiceDomain());
 
@@ -99,7 +99,6 @@ public class RegisterService {
         boolean res = false;
 
         res = ! (((request.getAccessPoint() == null) || request.getAccessPoint().isEmpty()) ||
-               (request.getTTL() == 0) ||
                ((request.getServiceType()== null) || request.getServiceType().isEmpty()));
 
         return res;

@@ -30,7 +30,7 @@ public class AccessService {
     
     public String renewService(String serviceid, String service){
     	//return "Renew functionality coming soon!!!\n" + service + "\n";
-    	System.out.println("Came inside renewService");
+    	System.out.println("Processing renewService");
     	JSONRenewResponse response;
         try {
             JSONRenewRequest request = new JSONRenewRequest(service);
@@ -46,23 +46,23 @@ public class AccessService {
             	Service serviceRecord = ServiceDAOMongoDb.getInstance().getServiceByURI(serviceid);
             	
             	if(serviceRecord!= null){
-            		System.out.println("Came here: servicerecord not null ");
+            		System.out.println("servicerecord not null");
             		Map<String, Object> serviceMap = serviceRecord.getMap();
             		if(request.getTTL()>(long)0){
-            			serviceMap.put(ReservedKeywords.TTL, request.getTTL());
+            			serviceMap.put(ReservedKeywords.RECORD_TTL, request.getTTL());
             		}else{
-            			serviceMap.put(ReservedKeywords.TTL, (long)0);
+            			serviceMap.put(ReservedKeywords.RECORD_TTL, (long)0);
             		}
             		
-            		if(serviceMap.containsKey(ReservedKeywords.EXPIRES)){
-            			serviceMap.remove(ReservedKeywords.EXPIRES);
+            		if(serviceMap.containsKey(ReservedKeywords.RECORD_EXPIRES)){
+            			serviceMap.remove(ReservedKeywords.RECORD_EXPIRES);
             		}
             		
             		Message newRequest = new Message(serviceMap);
             		
                 	boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
                 	if(gotLease){
-                		System.out.println("Came here: gotLease for "+serviceid);
+                		System.out.println("gotLease for "+serviceid);
                 		Message res = ServiceDAOMongoDb.getInstance().updateService(serviceid,newRequest);
 
                         response = new JSONRenewResponse (res.getMap());

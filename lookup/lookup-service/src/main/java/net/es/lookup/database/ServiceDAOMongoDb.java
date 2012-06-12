@@ -72,10 +72,10 @@ public class ServiceDAOMongoDb {
 		coll = db.getCollection(collname);
 		System.out.println(coll.getName());
 		
-		operatorMapping.put(ReservedKeywords.OPERATOR_ALL, "$and");
-		operatorMapping.put(ReservedKeywords.OPERATOR_ANY, "$or");
+		operatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ALL, "$and");
+		operatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ANY, "$or");
 		
-		listOperatorMapping.put(ReservedKeywords.OPERATOR_ANY, "$in");
+		listOperatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ANY, "$in");
 	}
 	
 	//should use json specific register request and response.
@@ -123,7 +123,7 @@ public class ServiceDAOMongoDb {
 		BasicDBObject query = new BasicDBObject();
 		String uri = message.getURI();
 		//TODO: add check to see if only one elem is returned
-		query.put(ReservedKeywords.SERVICE_URI, uri);
+		query.put(ReservedKeywords.RECORD_URI, uri);
 		WriteResult wrt = coll.remove(query);
 		
 		CommandResult cmdres = wrt.getLastError();
@@ -151,7 +151,7 @@ public class ServiceDAOMongoDb {
         
         if(serviceid != null && !serviceid.isEmpty()){
         	BasicDBObject query = new BasicDBObject();
-        	query.put(ReservedKeywords.SERVICE_URI, serviceid);
+        	query.put(ReservedKeywords.RECORD_URI, serviceid);
         	
         	System.out.println(query);
         	
@@ -173,7 +173,7 @@ public class ServiceDAOMongoDb {
     		
         }else{
         	errorcode=500;
-        	errormsg = "Service URI not specified!!!";
+        	errormsg = "Record URI not specified!!!";
         }
 		
 		Message response = new Message();
@@ -270,15 +270,15 @@ public class ServiceDAOMongoDb {
 		if( queryOp != null && !queryOp.isEmpty()){
 			op = (String)queryOp.get(0);
 		}else{
-			op = ReservedKeywords.DEFAULT_OPERATOR;
+			op = ReservedKeywords.RECORD_OPERATOR_DEFAULT;
 		}
 		
 		String mongoOp = "$and";
 		
 		if(op != null && !op.isEmpty()){
-			if(op.equalsIgnoreCase(ReservedKeywords.OPERATOR_ANY)){
+			if(op.equalsIgnoreCase(ReservedKeywords.RECORD_OPERATOR_ANY)){
 				mongoOp = "$or";
-			}else if(op.equalsIgnoreCase(ReservedKeywords.OPERATOR_ALL)){
+			}else if(op.equalsIgnoreCase(ReservedKeywords.RECORD_OPERATOR_ALL)){
 				mongoOp = "$and";
 			}
 		}
@@ -296,7 +296,7 @@ public class ServiceDAOMongoDb {
 		String errormsg;
 		
 		BasicDBObject query = new BasicDBObject();
-		query.put(ReservedKeywords.SERVICE_URI, URI);
+		query.put(ReservedKeywords.RECORD_URI, URI);
 		DBCursor cur = coll.find(query);
 		
 		System.out.println("Came inside getServiceByURI");

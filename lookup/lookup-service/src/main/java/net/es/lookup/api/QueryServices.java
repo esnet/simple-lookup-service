@@ -33,11 +33,11 @@ public class QueryServices {
         	if(request.getOperator() != null){
         	
         		List mainOp = request.getOperator();
-            	operators.add(ReservedKeywords.OPERATOR, mainOp);
+            	operators.add(ReservedKeywords.RECORD_OPERATOR, mainOp);
         	}else{
         		List mainOp = new ArrayList();
-        		mainOp.add(ReservedKeywords.DEFAULT_OPERATOR);
-        		operators.add(ReservedKeywords.OPERATOR, mainOp);
+        		mainOp.add(ReservedKeywords.RECORD_OPERATOR_DEFAULT);
+        		operators.add(ReservedKeywords.RECORD_OPERATOR, mainOp);
         	}
         	
         	
@@ -48,14 +48,14 @@ public class QueryServices {
         		Object value = entry.getValue();
 		
         		//generate the operator map
-        		if (!key.contains(ReservedKeywords.OPERATOR)){
+        		if (!key.contains(ReservedKeywords.RECORD_OPERATOR_SUFFIX)){
         			queryParameters.add(key,value);
-        			String opKey = key+"-"+ReservedKeywords.OPERATOR;
+        			String opKey = key+"-"+ReservedKeywords.RECORD_OPERATOR_SUFFIX;
         			if(requestMap.containsKey(opKey)){
         				operators.add(key,requestMap.get(opKey));
         			}else{
         				//add default
-        				operators.add(key, ReservedKeywords.DEFAULT_OPERATOR);
+        				operators.add(key, ReservedKeywords.RECORD_OPERATOR_DEFAULT);
         			}
         		}
             

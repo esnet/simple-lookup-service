@@ -46,11 +46,11 @@ public class  Message {
     }
 
     public String getURI() {
-        return (String) this.getMap().get(ReservedKeywords.SERVICE_URI);
+        return (String) this.getMap().get(ReservedKeywords.RECORD_URI);
     }
 
     public long getTTL() {
-        Long res = (Long) this.getMap().get(ReservedKeywords.TTL);
+        Long res = (Long) this.getMap().get(ReservedKeywords.RECORD_TTL);
         if (res == null) {
             return -1;
         }
@@ -58,27 +58,27 @@ public class  Message {
     }
 
     public List<String> getServiceType() {
-        return  (List<String>) this.getMap().get(ReservedKeywords.SERVICE_TYPE);
+        return  (List<String>) this.getMap().get(ReservedKeywords.RECORD_SERVICE_TYPE);
     }
 
     public List<String> getAccessPoint() {
-        return  (List<String>) this.getMap().get(ReservedKeywords.ACCESS_POINT);
+        return  (List<String>) this.getMap().get(ReservedKeywords.RECORD_SERVICE_LOCATOR);
     }
 
     public List<String> getServiceName() {
-        return  (List<String>) this.getMap().get(ReservedKeywords.SERVICE_NAME);
+        return  (List<String>) this.getMap().get(ReservedKeywords.RECORD_SERVICE_NAME);
     }
 
     public List<String> getServiceDomain() {
-        return  (List<String>) this.getMap().get(ReservedKeywords.SERVICE_DOMAIN);
+        return  (List<String>) this.getMap().get(ReservedKeywords.RECORD_SERVICE_DOMAIN);
     }
     
     public List<String> getClientUUID() {
-        return  (List<String>) this.getMap().get(ReservedKeywords.CLIENT_UUID);
+        return  (List<String>) this.getMap().get(ReservedKeywords.RECORD_PRIVATEKEY);
     }
 
     public List<String> getOperator() {
-        return (List<String>) this.getMap().get(ReservedKeywords.OPERATOR);
+        return (List<String>) this.getMap().get(ReservedKeywords.RECORD_OPERATOR);
     }
 
     public synchronized void setError (int error) {

@@ -2,19 +2,26 @@ package net.es.lookup.common;
 
 
 public class ReservedKeywords{
-	public static final String ACCESS_POINT = "access-point";
-	public static final String CLIENT_UUID = "client-uuid";
-	public static final String TTL = "ttl";
-	public static final String SERVICE_NAME = "name";
-	public static final String SERVICE_DOMAIN = "domain";
-	public static final String SERVICE_TYPE = "service-type";
-	public static final String SERVICE_URI = "uri";
-	public static final String OPERATOR = "operator";
-	public static final String EXPIRES = "expires";
-	public static final String OPERATOR_ALL = "all";
-	public static final String OPERATOR_ANY = "any";
-	public static final String DEFAULT_OPERATOR = OPERATOR_ALL;
-	public static final String SKIP = "skip";
-	public static final String MAX_RESULTS = "max-results";
+	//record-level keys
+	public static final String RECORD_TYPE = "record-type";
+	public static final String RECORD_TTL = "record-ttl";
+	public static final String RECORD_URI = "record-uri";
+	public static final String RECORD_OPERATOR = "record-operator";
+	public static final String RECORD_EXPIRES = "record-expires";
+	public static final String RECORD_SKIP = "record-skip";
+	public static final String RECORD_MAXRESULTS = "record-maxresults";
+	public static final String RECORD_PRIVATEKEY = "record-privatekey";
+	
+	//operator keys
+	public static final String RECORD_OPERATOR_SUFFIX = "operator";
+	public static final String RECORD_OPERATOR_ALL = "all";
+	public static final String RECORD_OPERATOR_ANY = "any";
+	public static final String RECORD_OPERATOR_DEFAULT = RECORD_OPERATOR_ALL;
+	
+	//service level keys
+	public static final String RECORD_SERVICE_LOCATOR = "record-service-locator";
+	public static final String RECORD_SERVICE_NAME = "record-service-name";
+	public static final String RECORD_SERVICE_DOMAIN = "record-service-domain";
+	public static final String RECORD_SERVICE_TYPE = "record-service-type";	
     
 }
