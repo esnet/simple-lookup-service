@@ -1,3 +1,3 @@
 #!/bin/sh
 
-curl -v -H "Content-Type: application/json" -X POST -d '{"client-uuid":["myuuid"]}' http://localhost:8080/lookup/service/d3e639e4-2a38-45da-ad8c-204202cd72c3
+curl -v -H "Content-Type: application/json" -X POST -d '{"client-uuid":["myuuid"]}' http://localhost:8080/lookup/service/21c3aff2-723e-4a9b-bd5a-0acf8a5617cd

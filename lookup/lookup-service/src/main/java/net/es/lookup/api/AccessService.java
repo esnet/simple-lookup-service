@@ -7,12 +7,14 @@ import java.util.Map;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRenewRequest;
 import net.es.lookup.protocol.json.JSONRenewResponse;
+import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
-import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.common.DuplicateKeyException;
 import net.es.lookup.common.Service;
 import net.es.lookup.common.ReservedKeywords;
+import net.es.lookup.common.BadRequestException;
+import net.es.lookup.common.ServiceNotFoundException;
 
 
 
@@ -32,17 +34,19 @@ public class AccessService {
     	//return "Renew functionality coming soon!!!\n" + service + "\n";
     	System.out.println("Processing renewService");
     	JSONRenewResponse response;
-        try {
-            JSONRenewRequest request = new JSONRenewRequest(service);
-            if (request.getStatus() == JSONRenewRequest.INCORRECT_FORMAT) {
+    	
+    	Message errorResponse = new Message();
+    	
+        JSONRenewRequest request = new JSONRenewRequest(service);
+        if (request.getStatus() == JSONRenewRequest.INCORRECT_FORMAT) {
                 System.out.println("INCORRECT FORMAT");
                 // TODO: return correct error code
-                return "402\n";
+                throw new BadRequestException("Incorrect format");
             }
             
             // Verify that request is valid and authorized
             if (this.isValid(request) && this.isAuthed(serviceid, request)) {
-            	//TODO: change to getService
+            	
             	Service serviceRecord = ServiceDAOMongoDb.getInstance().getServiceByURI(serviceid);
             	
             	if(serviceRecord!= null){
@@ -68,13 +72,20 @@ public class AccessService {
                         response = new JSONRenewResponse (res.getMap());
                         return JSONMessage.toString(response);
                 	}	
+            	}else{
+            		throw new ServiceNotFoundException("Service Not Found in DB\n");
             	}
 
+            }else{
+            	if(!this.isValid(request)){
+            		errorResponse.setErrorMessage("Invalid service renewal request");
+            		errorResponse.setError(400);
+            	}else if(!this.isAuthed(serviceid, request)){
+            		errorResponse.setErrorMessage("Unauthorized renewal request");
+            		errorResponse.setError(403);
+            	}
+            	return JSONMessage.toString(errorResponse);        	
             }
-        }catch (DuplicateKeyException e) {
-            Thread.dumpStack();
-            // TODO: Handle error
-        }
         return "\n";
     	
     }
