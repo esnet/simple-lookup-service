@@ -95,21 +95,26 @@ def formatData(parsedData, mapFile):
                 
     #some configuration may have more than one accesspoint info
     for data in newdata:
-        tmp ={};
+        tmp = {};
         #for now forcefully converting to single value strings
         for k,v in data.iteritems():
-            tmp[k] = v[0]
+            #tmp[k] = v[0]
+            tmp[k] = v
         
         print myMapping[data["service-type"][0]]
+        
         if (len(data["access-point"])>1):
             for accesspt in data["access-point"]:
-                tmp["access-point"] = None
+                tmp["access-point"] = []
+                i=0
                 print type(myMapping[data["service-type"][0]])
                 if (myMapping[data["service-type"][0]] != "NULL"):
                     accesspoint = "tcp://" + accesspt + ":" + myMapping[data["service-type"][0]]
-                    tmp["access-point"] = accesspoint
+                    tmp["access-point"][i] = accesspoint
+                    i= 
                 else:
-                    tmp["access-point"] = accesspt
+                    tmp["access-point"][i] = accesspt
+                    i++
                 formattedData.append(tmp.copy())
         else:
             formattedData.append(tmp.copy())
@@ -140,7 +145,7 @@ if(len(mydata)>0):
 for d in fdata:
     params = json.dumps(d)
     headers = {"Content-type": "application/json", "Accept": "application/json"}
-    conn = httplib.HTTPConnection("ps4.es.net:8085")
+    conn = httplib.HTTPConnection("localhost:8080")
     conn.request("POST", "lookup/services", params, headers)
     response = conn.getresponse()
     print response.status, response.reason
