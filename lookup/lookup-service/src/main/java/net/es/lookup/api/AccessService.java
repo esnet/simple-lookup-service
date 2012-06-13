@@ -15,6 +15,7 @@ import net.es.lookup.common.Service;
 import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.BadRequestException;
 import net.es.lookup.common.ServiceNotFoundException;
+import net.es.lookup.common.UnauthorizedRequestException;
 
 
 
@@ -31,7 +32,6 @@ public class AccessService {
     }
     
     public String renewService(String serviceid, String service){
-    	//return "Renew functionality coming soon!!!\n" + service + "\n";
     	System.out.println("Processing renewService");
     	JSONRenewResponse response;
     	
