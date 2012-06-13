@@ -41,7 +41,7 @@ public class AccessService {
         if (request.getStatus() == JSONRenewRequest.INCORRECT_FORMAT) {
                 System.out.println("INCORRECT FORMAT");
                 // TODO: return correct error code
-                throw new BadRequestException("Incorrect format");
+                throw new BadRequestException("Service request format is Incorrect\n");
             }
             
             // Verify that request is valid and authorized
@@ -78,11 +78,9 @@ public class AccessService {
 
             }else{
             	if(!this.isValid(request)){
-            		errorResponse.setErrorMessage("Invalid service renewal request");
-            		errorResponse.setError(400);
+            		throw new BadRequestException("Service Request is invalid\n");
             	}else if(!this.isAuthed(serviceid, request)){
-            		errorResponse.setErrorMessage("Unauthorized renewal request");
-            		errorResponse.setError(403);
+            		throw new UnauthorizedRequestException("The private-key is not authorized to access this service\n");
             	}
             	return JSONMessage.toString(errorResponse);        	
             }
