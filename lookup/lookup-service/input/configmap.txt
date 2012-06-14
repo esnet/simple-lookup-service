@@ -1,0 +1,17 @@
+type=>record-service-type
+address=>record-service-locator
+site_location=>site_location
+site_project=>record-service-domain
+site_name=>record-service-domain
+description=>record-service-description
+location=>site_location
+access-point=>record-service-locator
+owamp=>861
+bwctl=>4823
+traceroute=>NULL
+ping=>NULL
+gridftp=>NULL
+ndt=>NULL
+npad=>NULL
+phoebus=>NULL
+reddnet=>NULL
