@@ -6,7 +6,7 @@ import org.joda.time.Duration;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 
-import net.es.lookup.common.DuplicateKeyException;
+import net.es.lookup.common.exception.internal.DuplicateKeyException;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.RegisterRequest;
 import net.sf.json.util.JSONTokener;
@@ -17,7 +17,7 @@ import net.es.lookup.common.ReservedKeywords;
 public class JSONRegisterRequest extends RegisterRequest {
 
     static public final int VALID = 1;
-    static public final int INCORRECT_FORMAT =  2;
+    static public final int INCORRECT_FORMAT = 2;
 
     public JSONRegisterRequest (String message) throws DuplicateKeyException {
         this.parseJSON(message);
@@ -33,7 +33,7 @@ public class JSONRegisterRequest extends RegisterRequest {
         Set keyValues = jsonObj.entrySet();
         for (Object o : ((JSONObject) obj).keySet()) {
             // Decode TTL
-            if (o.toString().equals(ReservedKeywords.TTL)) {
+            if (o.toString().equals(ReservedKeywords.RECORD_TTL)) {
                 PeriodFormatter fmt = ISOPeriodFormat.standard();
                 Duration duration = fmt.parsePeriod((String) ((JSONObject) obj).get(o)).toStandardDuration();
                 this.add(o.toString(), new Long(duration.getStandardSeconds()));

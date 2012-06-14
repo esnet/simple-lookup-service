@@ -1,4 +1,4 @@
-package net.es.lookup.common;
+package net.es.lookup.common.exception.api;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;

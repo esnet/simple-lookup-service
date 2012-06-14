@@ -10,12 +10,12 @@ import net.es.lookup.protocol.json.JSONRenewResponse;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
-import net.es.lookup.common.DuplicateKeyException;
+import net.es.lookup.common.exception.internal.DuplicateKeyException;
 import net.es.lookup.common.Service;
 import net.es.lookup.common.ReservedKeywords;
-import net.es.lookup.common.BadRequestException;
-import net.es.lookup.common.ServiceNotFoundException;
-import net.es.lookup.common.UnauthorizedRequestException;
+import net.es.lookup.common.exception.api.BadRequestException;
+import net.es.lookup.common.exception.api.NotFoundException;
+import net.es.lookup.common.exception.api.ForbiddenRequestException;
 
 
 
@@ -37,6 +37,7 @@ public class AccessService {
     	
     	Message errorResponse = new Message();
     	
+    	try{
         JSONRenewRequest request = new JSONRenewRequest(service);
         if (request.getStatus() == JSONRenewRequest.INCORRECT_FORMAT) {
                 System.out.println("INCORRECT FORMAT");
@@ -73,17 +74,20 @@ public class AccessService {
                         return JSONMessage.toString(response);
                 	}	
             	}else{
-            		throw new ServiceNotFoundException("Service Not Found in DB\n");
+            		throw new NotFoundException("Service Not Found in DB\n");
             	}
 
             }else{
             	if(!this.isValid(request)){
             		throw new BadRequestException("Service Request is invalid\n");
             	}else if(!this.isAuthed(serviceid, request)){
-            		throw new UnauthorizedRequestException("The private-key is not authorized to access this service\n");
+            		throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
             	}
             	return JSONMessage.toString(errorResponse);        	
             }
+    	}catch(DuplicateKeyException e){
+    		throw new BadRequestException("Duplicate Keys Found");
+    	}
         return "\n";
     	
     }

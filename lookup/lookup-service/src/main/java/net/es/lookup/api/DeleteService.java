@@ -5,7 +5,7 @@ import net.es.lookup.protocol.json.JSONDeleteRequest;
 import net.es.lookup.protocol.json.JSONDeleteResponse;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
-import net.es.lookup.common.DuplicateKeyException;
+import net.es.lookup.common.exception.internal.DuplicateKeyException;
 
 
 public class DeleteService {

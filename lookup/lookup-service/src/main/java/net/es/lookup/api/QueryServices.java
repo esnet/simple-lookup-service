@@ -8,7 +8,7 @@ import net.es.lookup.common.Message;
 import net.es.lookup.common.Service;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
-import net.es.lookup.common.DuplicateKeyException;
+import net.es.lookup.common.exception.internal.DuplicateKeyException;
 import net.es.lookup.common.ReservedKeywords;
 
 public class QueryServices {

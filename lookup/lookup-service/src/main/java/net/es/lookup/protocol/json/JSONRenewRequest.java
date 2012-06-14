@@ -5,7 +5,7 @@ import java.util.Set;
 import net.sf.json.util.JSONTokener;
 import net.sf.json.JSONObject;
 
-import net.es.lookup.common.DuplicateKeyException;
+import net.es.lookup.common.exception.internal.DuplicateKeyException;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.RenewRequest;
 

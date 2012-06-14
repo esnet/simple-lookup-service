@@ -1,6 +1,6 @@
 package net.es.lookup.protocol.json;
 
-import net.es.lookup.common.DuplicateKeyException;
+import net.es.lookup.common.exception.internal.DuplicateKeyException;
 import net.es.lookup.common.DeleteRequest;
 import net.es.lookup.common.Service;
 import java.util.Map;

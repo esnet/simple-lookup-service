@@ -1,6 +1,6 @@
 package net.es.lookup.database;
 
-import net.es.lookup.common.DuplicateKeyException;
+import net.es.lookup.common.exception.internal.DuplicateKeyException;
 import net.es.lookup.common.Service;
 import net.es.lookup.common.Message;
 import net.es.lookup.resources.ServicesResource;

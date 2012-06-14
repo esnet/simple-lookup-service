@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import net.es.lookup.common.DuplicateKeyException;
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
 import net.es.lookup.database.ServiceDAOMongoDb;
@@ -13,6 +12,8 @@ import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
 import net.es.lookup.service.LookupService;
 import net.es.lookup.common.ReservedKeywords;
+import net.es.lookup.common.exception.api.BadRequestException;
+import net.es.lookup.common.exception.internal.DuplicateKeyException;
 
 /**
  *
@@ -80,8 +81,7 @@ public class RegisterService {
                 response = new JSONRegisterResponse (request.getMap());
             }
         } catch (DuplicateKeyException e) {
-            Thread.dumpStack();
-            // TODO: Handle error
+            throw new BadRequestException("Service record contains duplicate keys");
         }
         return "\n";
     }
@@ -98,8 +98,7 @@ public class RegisterService {
         // All mandatory key/value must be present
         boolean res = false;
 
-        res = ! (((request.getAccessPoint() == null) || request.getAccessPoint().isEmpty()) ||
-               ((request.getServiceType()== null) || request.getServiceType().isEmpty()));
+        res = ! (((request.getRecordType() == null) || request.getRecordType().isEmpty()));
 
         return res;
     }

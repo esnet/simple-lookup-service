@@ -19,7 +19,7 @@ import javax.ws.rs.core.UriInfo;
 
 import net.es.lookup.api.QueryServices;
 import net.es.lookup.api.RegisterService;
-import net.es.lookup.common.DuplicateKeyException;
+import net.es.lookup.common.exception.internal.DuplicateKeyException;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeywords;
 
@@ -57,14 +57,14 @@ public class ServicesResource {
 
         try {
             for (String key : queryParams.keySet()) {
-                if (key.equals(ReservedKeywords.OPERATOR)) {
+                if (key.equals(ReservedKeywords.RECORD_OPERATOR)) {
                 	List<String> ops = new ArrayList();
                 	ops.add(queryParams.getFirst(key));
                     message.add (key, ops);
                     gotOperator = true;
-                } else if (key.equals(ReservedKeywords.SKIP)) {
+                } else if (key.equals(ReservedKeywords.RECORD_SKIP)) {
                     skip = Integer.parseInt(queryParams.getFirst(key));
-                } else if (key.equals(ReservedKeywords.MAX_RESULTS)) {
+                } else if (key.equals(ReservedKeywords.RECORD_MAXRESULTS)) {
                     maxResults = Integer.parseInt(queryParams.getFirst(key));
                 } else {
                     // Not skip, operator or max-results. Must be key/values pair for the query

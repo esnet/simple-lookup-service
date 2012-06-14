@@ -1,7 +1,7 @@
 package net.es.lookup.protocol.json;
 
 import net.es.lookup.common.QueryRequest;
-import net.es.lookup.common.DuplicateKeyException;
+import net.es.lookup.common.exception.internal.DuplicateKeyException;
 
 import net.sf.json.util.JSONTokener;
 import net.sf.json.JSONObject;

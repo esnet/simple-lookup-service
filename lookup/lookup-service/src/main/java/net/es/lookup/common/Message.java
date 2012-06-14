@@ -1,11 +1,11 @@
 package net.es.lookup.common;
 
 import org.apache.commons.lang.math.LongRange;
-
 import java.rmi.MarshalledObject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import net.es.lookup.common.exception.internal.DuplicateKeyException;
 
 public class  Message {
 
@@ -59,6 +59,10 @@ public class  Message {
 
     public List<String> getServiceType() {
         return  (List<String>) this.getMap().get(ReservedKeywords.RECORD_SERVICE_TYPE);
+    }
+    
+    public List<String> getRecordType(){
+    	return  (List<String>) this.getMap().get(ReservedKeywords.RECORD_TYPE);
     }
 
     public List<String> getAccessPoint() {
