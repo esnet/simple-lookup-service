@@ -135,7 +135,7 @@ def formatData(parsedData, mapFile):
             if (len(data["record-service-locator"])>1):
                 temp = []
                 for accesspt in data["record-service-locator"]:
-                    tmp["record-service-locator"] = None
+                    #tmp["record-service-locator"] = None
                 #print type(myMapping[data["service-type"][0]])
                # print myMapping[data["service-type"][0]]
                     if (myMapping[data["record-service-type"][0]] != "NULL"):
@@ -143,7 +143,7 @@ def formatData(parsedData, mapFile):
                         tmp["record-service-locator"] = accesspoint
                     else:
                         tmp["record-service-locator"] = accesspt
-                        temp.append(tmp["record-service-locator"])
+                    temp.append(tmp["record-service-locator"])
                 tmp["record-service-locator"] = temp
                 formattedData.append(tmp.copy())
             else:
@@ -160,16 +160,7 @@ def formatData(parsedData, mapFile):
 
 
 
-
-
-with open(sys.argv[1], "w") as myfile:
-    #for eachLine in myfile:
-    #    sys.stdout.write(eachLine)
-     myfile = os.path.join(os.path.dirname(__file__),"..","input",sys.argv[1])
-#sys.stdout.flush()
-
-
-#myfile = os.path.join(os.path.dirname(__file__),"..","input",'ls_registration.conf')
+myfile = os.path.join(os.path.dirname(__file__),"..","input",'ls_registration.conf')
 #myfile = os.path.join(os.path.dirname(__file__),"..","input",'ls.conf')
 #myfile = os.path.join(os.path.dirname(__file__),"..","input",'reg.conf')
 #mapFile = os.path.join(os.path.dirname(__file__),"..","input",'configdatamap.txt')
