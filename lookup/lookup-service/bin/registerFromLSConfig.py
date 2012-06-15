@@ -3,7 +3,8 @@ import urllib, httplib
 import json
 import os
 import sys
-
+import getopt
+import argparse
 
 def readMap(mapFile):
     fileh=open(mapFile)
@@ -12,7 +13,6 @@ def readMap(mapFile):
         line = line.strip()
         mapping=line.split("=>")
         myMap[mapping[0]] = mapping[1]
-       #print myMap[mapping[0]]
     
     return myMap
 
@@ -33,24 +33,15 @@ def parseData(file):
             line=line.strip('<>/')
             #print "End Tag detected"
             mytag=tagstack.pop()
-            #print mytag  1 site and 4 service
             if(len(tagstack)<1):
                 site.clear()
-            #print mytag
             if(len(site)>0):
                 data.append(site.copy()) #cannot do data.append(site) - assignment creates binding between target and the object
-            #print mytag
             for k,v in site.iteritems():
                 mystr = k
-                #print mytag #just service
-                #print mystr
-                #print v
+
                 if (mytag in k):
-                   # print mytag
                     site[mystr] = []
-                    #site[mystr] = v
-                   # print mystr
-                   # print site[mystr]
         
                 #Start tag        
         elif (line.startswith('<')):
@@ -67,32 +58,21 @@ def parseData(file):
             if(len(s)==2) and len(tagstack)>0:
                 if(len(tagstack)>0): 
                     mytag = tagstack.pop()
-                   # print mytag #4site 12 service
-               # if mytag =='service':        
-               #     site['record'+ '-'+ mytag+'-'+s[0]].append(s[1]) 
-               # elif mytag == 'site':
+
                 site[ mytag+'_'+s[0]].append(s[1])  
                 if(mytag != ''):
                     tagstack.append(mytag)        
     f.close()
-    #print data
     newdata=[]
     for d in data:
         newdict={}
         for k,v in d.iteritems():
-            #print k
             newKey = k.split("_",1)
-            #print newKey
-            #print len(newKey)
             if(len(newKey)>1):
                 newdict[newKey[1]] = v
-              #  print newKey[1]
-              #  print newdict[newKey[1]]
             else:
                 newdict[newKey[0]]=v
-               # print [newKey[0]]
         newdata.append(newdict.copy()) 
-    #print newdata
     data = []   
     return newdata
     
@@ -106,17 +86,11 @@ def formatData(parsedData, mapFile):
         for k,v in data.iteritems():
             if myMapping.has_key(k):
                 tmpKey=myMapping[k]
-              #  print tmpKey
-                newdict[tmpKey] = v
-               # print newdict[tmpKey]
-               # print tmpKey
-                
+                newdict[tmpKey] = v    
             else:
                 newdict[k]=v
-               # print k #change one ap to port is ok
                 
         newdata.append(newdict.copy())
-    #print newdata
     parsedData=None
                 
     #some configuration may have more than one accesspoint info
@@ -124,20 +98,14 @@ def formatData(parsedData, mapFile):
         tmp ={};
         #for now forcefully converting to single value strings
         for k,v in data.iteritems():
-           # tmp[k] = v[0]
             tmp[k] = v
-           # print v
-           # print k
-           # print tmp[k]
+   
            
         #print myMapping[data["service-type"][0]] #type->number
         if tmp.has_key("record-service-locator"):
             if (len(data["record-service-locator"])>1):
                 temp = []
                 for accesspt in data["record-service-locator"]:
-                    #tmp["record-service-locator"] = None
-                #print type(myMapping[data["service-type"][0]])
-               # print myMapping[data["service-type"][0]]
                     if (myMapping[data["record-service-type"][0]] != "NULL"):
                         accesspoint = "tcp://" + accesspt + ":" + myMapping[data["record-service-type"][0]]
                         tmp["record-service-locator"] = accesspoint
@@ -158,15 +126,23 @@ def formatData(parsedData, mapFile):
     print formattedData    
     return formattedData
 
+print "Select a configfile to input:"
+print ""
+for item in os.listdir('../input'):
+    print item
+configfile = raw_input()  
+print "" 
+print "Select a mapfile to input:"
+print ""
+mapfile = raw_input()
+
+with open(configfile, "w") as myfile:
+    myfile = os.path.join(os.path.dirname(__file__),"..","input",configfile)
+
+with open(mapfile, "w") as mapFile:
+    mapFile = os.path.join(os.path.dirname(__file__),"..","input", mapfile)
 
 
-myfile = os.path.join(os.path.dirname(__file__),"..","input",'ls_registration.conf')
-#myfile = os.path.join(os.path.dirname(__file__),"..","input",'ls.conf')
-#myfile = os.path.join(os.path.dirname(__file__),"..","input",'reg.conf')
-#mapFile = os.path.join(os.path.dirname(__file__),"..","input",'configdatamap.txt')
-mapFile = os.path.join(os.path.dirname(__file__),"..","input",'configmap.txt')
-#myfile="/Users/sowmya/Documents/workspace/esnet-lookupservice/lookup-service/input/ls_registration.conf"
-#mapFile="/Users/sowmya/Documents/workspace/esnet-lookupservice/lookup-service/input/configdatamap.txt"
 mydata=parseData(myfile)
 
 if(len(mydata)>0):
