@@ -123,6 +123,7 @@ def formatData(parsedData, mapFile):
         else:
             formattedData.append(tmp.copy())
     newdata=None 
+    print "FormattedData:"
     print formattedData    
     return formattedData
 
