@@ -11,11 +11,13 @@ import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DuplicateKeyException;
+import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.Service;
 import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.api.ForbiddenRequestException;
+import net.es.lookup.common.exception.api.InternalErrorException;
 
 
 
@@ -48,35 +50,38 @@ public class AccessService {
             // Verify that request is valid and authorized
             if (this.isValid(request) && this.isAuthed(serviceid, request)) {
             	
-            	Service serviceRecord = ServiceDAOMongoDb.getInstance().getServiceByURI(serviceid);
+            	try{
+            		Service serviceRecord = ServiceDAOMongoDb.getInstance().getServiceByURI(serviceid);
             	
-            	if(serviceRecord!= null){
-            		System.out.println("servicerecord not null");
-            		Map<String, Object> serviceMap = serviceRecord.getMap();
-            		if(request.getTTL()>(long)0){
-            			serviceMap.put(ReservedKeywords.RECORD_TTL, request.getTTL());
-            		}else{
-            			serviceMap.put(ReservedKeywords.RECORD_TTL, (long)0);
-            		}
+            			if(serviceRecord!= null){
+            				System.out.println("servicerecord not null");
+            				Map<String, Object> serviceMap = serviceRecord.getMap();
+            			if(request.getTTL()>(long)0){
+            				serviceMap.put(ReservedKeywords.RECORD_TTL, request.getTTL());
+            			}else{
+            				serviceMap.put(ReservedKeywords.RECORD_TTL, (long)0);
+            			}
             		
-            		if(serviceMap.containsKey(ReservedKeywords.RECORD_EXPIRES)){
-            			serviceMap.remove(ReservedKeywords.RECORD_EXPIRES);
-            		}
+            			if(serviceMap.containsKey(ReservedKeywords.RECORD_EXPIRES)){
+            				serviceMap.remove(ReservedKeywords.RECORD_EXPIRES);
+            			}
             		
-            		Message newRequest = new Message(serviceMap);
+            			Message newRequest = new Message(serviceMap);
             		
-                	boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
-                	if(gotLease){
-                		System.out.println("gotLease for "+serviceid);
-                		Message res = ServiceDAOMongoDb.getInstance().updateService(serviceid,newRequest);
+            			boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
+            			if(gotLease){
+            				System.out.println("gotLease for "+serviceid);
+            				Message res = ServiceDAOMongoDb.getInstance().updateService(serviceid,newRequest);
 
-                        response = new JSONRenewResponse (res.getMap());
-                        return JSONMessage.toString(response);
-                	}	
-            	}else{
-            		throw new NotFoundException("Service Not Found in DB\n");
+            				response = new JSONRenewResponse (res.getMap());
+            				return JSONMessage.toString(response);
+            			}	
+            			}else{
+            				throw new NotFoundException("Service Not Found in DB\n");
+            			}
+            	}catch(DatabaseException e){
+            		throw new InternalErrorException("Database error\n");
             	}
-
             }else{
             	if(!this.isValid(request)){
             		throw new BadRequestException("Service Request is invalid\n");

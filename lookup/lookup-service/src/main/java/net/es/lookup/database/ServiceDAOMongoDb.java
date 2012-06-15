@@ -1,10 +1,6 @@
 package net.es.lookup.database;
 
-import net.es.lookup.common.exception.internal.DuplicateKeyException;
-import net.es.lookup.common.Service;
-import net.es.lookup.common.Message;
-import net.es.lookup.resources.ServicesResource;
-import net.es.lookup.common.ReservedKeywords;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -14,6 +10,13 @@ import java.util.Set;
 
 import com.mongodb.*;
 import java.net.UnknownHostException;
+
+import net.es.lookup.common.Service;
+import net.es.lookup.common.Message;
+import net.es.lookup.resources.ServicesResource;
+import net.es.lookup.common.ReservedKeywords;
+import net.es.lookup.common.exception.internal.DatabaseException;
+import net.es.lookup.common.exception.internal.DuplicateKeyException;
 
 public class ServiceDAOMongoDb {
 	private String dburl="127.0.0.1";
@@ -150,6 +153,7 @@ public class ServiceDAOMongoDb {
         
         
         if(serviceid != null && !serviceid.isEmpty()){
+        	
         	BasicDBObject query = new BasicDBObject();
         	query.put(ReservedKeywords.RECORD_URI, serviceid);
         	
@@ -163,6 +167,7 @@ public class ServiceDAOMongoDb {
         	WriteResult wrt = coll.update(query, updateObject);
         	CommandResult cmdres = wrt.getLastError();
         	System.out.println(cmdres.ok());
+        	
         	if(cmdres.ok()){
         		errorcode=200;
         		errormsg="SUCCESS";
@@ -291,21 +296,27 @@ public class ServiceDAOMongoDb {
 		return query;
 	}
 	
-	public Service getServiceByURI(String URI){
+	public Service getServiceByURI(String URI) throws DatabaseException{
 		int errorcode;
 		String errormsg;
 		
 		BasicDBObject query = new BasicDBObject();
 		query.put(ReservedKeywords.RECORD_URI, URI);
-		DBCursor cur = coll.find(query);
-		
-		System.out.println("Came inside getServiceByURI");
 		Service result=null;
-		if (cur.size() == 1){
-			DBObject tmp = cur.next();
-			result = new Service(tmp.toMap());
-		}			
-		return result;
+		
+		try{
+			DBCursor cur = coll.find(query);
+		
+			System.out.println("Came inside getServiceByURI");
+			
+			if (cur.size() == 1){
+				DBObject tmp = cur.next();
+				result = new Service(tmp.toMap());
+			}
+		}catch(MongoException e){
+			throw new DatabaseException(e.getMessage());
+		}
+			return result;
 	}
 	
 }
