@@ -40,6 +40,9 @@ public class ServicesResource {
 
     @Consumes("application/json")
     @Produces("application/json")
+    
+    
+    
     public String postHandler (String message) {
         return this.registerService.registerService(message);
     }
