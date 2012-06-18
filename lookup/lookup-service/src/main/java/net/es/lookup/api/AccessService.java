@@ -72,9 +72,15 @@ public class AccessService {
             			if(gotLease){
             				System.out.println("gotLease for "+serviceid);
             				Message res = ServiceDAOMongoDb.getInstance().updateService(serviceid,newRequest);
-
-            				response = new JSONRenewResponse (res.getMap());
-            				return JSONMessage.toString(response);
+            				
+            				if(res.getError() == 200){
+            					response = new JSONRenewResponse (res.getMap());
+            					return JSONMessage.toString(response);
+            				}else{
+            					
+            				}
+            				
+            				
             			}	
             			}else{
             				throw new NotFoundException("Service Not Found in DB\n");

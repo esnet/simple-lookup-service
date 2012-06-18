@@ -39,20 +39,20 @@ public class ServiceDAOMongoDb {
 
 	// retrieves default - mongodb running on localhost and default port - 27017 and dbname- "lookupservice", collection name - "services" 
 	//creates a new one if it cannot find one 
-	public ServiceDAOMongoDb() throws UnknownHostException{
+	public ServiceDAOMongoDb() throws DatabaseException{
 		init();
 	}
 	
 	//uses default url and port - mongodb running on localhost and default port - 27017
 	//creates a new one if it cannot find one
-	public ServiceDAOMongoDb(String dbname, String collname) throws UnknownHostException{
+	public ServiceDAOMongoDb(String dbname, String collname) throws DatabaseException{
 		this.dbname = dbname;
 		this.collname = collname;
 		init();
 	}
 	
 	//retrieves the db and collection(table); creates a new one if it cannot find one
-	public ServiceDAOMongoDb (String dburl, int dbport, String dbname, String collname)  throws UnknownHostException{
+	public ServiceDAOMongoDb (String dburl, int dbport, String dbname, String collname) throws DatabaseException{
 		this.dburl = dburl;
 		this.dbport = dbport;
 		this.dbname = dbname;
@@ -60,29 +60,34 @@ public class ServiceDAOMongoDb {
 		init();
 	}
 	
-	private void init() throws UnknownHostException {
+	private void init() throws DatabaseException {
         if (ServiceDAOMongoDb.instance != null) {
             // An instance has been already created.
-            throw new RuntimeException("Attempt to create a second instance of ServiceDAOMongoDb");
+            throw new DatabaseException("Attempt to create a second instance of ServiceDAOMongoDb");
         }
         ServiceDAOMongoDb.instance = this;
-
-		mongo = new Mongo(dburl,dbport);
-		System.out.println(mongo.getAddress().toString());
+        try{
+        	mongo = new Mongo(dburl,dbport);
+        	System.out.println(mongo.getAddress().toString());
 		
-		db = mongo.getDB(dbname);
-		System.out.println(db.getName());
-		coll = db.getCollection(collname);
-		System.out.println(coll.getName());
+        	db = mongo.getDB(dbname);
+        	System.out.println(db.getName());
+        	coll = db.getCollection(collname);
+        	System.out.println(coll.getName());
+        }catch(UnknownHostException e){
+        	throw new DatabaseException(e.getMessage());
+        }catch(Exception e){
+        	throw new DatabaseException(e.getMessage());
+        }
 		
-		operatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ALL, "$and");
-		operatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ANY, "$or");
+        operatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ALL, "$and");
+        operatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ANY, "$or");
 		
-		listOperatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ANY, "$in");
+        listOperatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ANY, "$in");
 	}
 	
 	//should use json specific register request and response.
-	public Message queryAndPublishService(Message message, Message queryRequest, Message operators){
+	public Message queryAndPublishService(Message message, Message queryRequest, Message operators) throws DatabaseException{
 		int errorcode;
 		String errormsg;
 		Message response = new Message();
@@ -146,7 +151,7 @@ public class ServiceDAOMongoDb {
 		
 	}
 	
-	public Message updateService(String serviceid, Message updateRequest){
+	public Message updateService(String serviceid, Message updateRequest) throws DatabaseException{
 		
 		int errorcode;
 		String errormsg;
@@ -164,16 +169,20 @@ public class ServiceDAOMongoDb {
         	
         	System.out.println(updateObject);
         	
-        	WriteResult wrt = coll.update(query, updateObject);
-        	CommandResult cmdres = wrt.getLastError();
-        	System.out.println(cmdres.ok());
+        	try{
+        		WriteResult wrt = coll.update(query, updateObject);
+        		CommandResult cmdres = wrt.getLastError();
+        		System.out.println(cmdres.ok());
         	
-        	if(cmdres.ok()){
-        		errorcode=200;
-        		errormsg="SUCCESS";
-        	}else{
-           		errorcode=500;
-        		errormsg=cmdres.getErrorMessage();
+        		if(cmdres.ok()){
+        			errorcode=200;
+        			errormsg="SUCCESS";
+        		}else{
+        			errorcode=500;
+        			errormsg=cmdres.getErrorMessage();
+        		}
+        	}catch(MongoException e){
+        		throw new DatabaseException(e.getMessage());
         	}
     		
         }else{
@@ -181,45 +190,50 @@ public class ServiceDAOMongoDb {
         	errormsg = "Record URI not specified!!!";
         }
 		
-		Message response = new Message();
-		response.setError(errorcode);
-		response.setErrorMessage(errormsg);
-		System.out.println("Came here");
+        Message response = new Message();
+        response.setError(errorcode);
+        response.setErrorMessage(errormsg);
+        System.out.println("came here");
 		return response;
 	}
 
-    public List<Service> query(Message message, Message queryRequest, Message operators){
+    public List<Service> query(Message message, Message queryRequest, Message operators) throws DatabaseException{
         return this.query (message, queryRequest, operators, 0, 0);
     }
 	
-	public List<Service> query(Message message, Message queryRequest, Message operators, int maxResults, int skip){
+	public List<Service> query(Message message, Message queryRequest, Message operators, int maxResults, int skip) throws DatabaseException{
 		
 		BasicDBObject query = buildQuery(queryRequest, operators);
 		
-		DBCursor cur = coll.find(query);
-		
-		
 		ArrayList <Service> result = new ArrayList<Service>();
-		while (cur.hasNext()){
-			Service tmpserv = new Service();
-			DBObject tmp = cur.next();
-			Set<String> keys = tmp.keySet();
-			if (!keys.isEmpty()){
-				Iterator<String> it = keys.iterator();
-				while(it.hasNext()){	
-					String tmpKey = it.next();
-                    try {
-					    tmpserv.add (tmpKey,tmp.get(tmpKey));
-                    } catch (DuplicateKeyException e) {
-                        // Since the key/value pairs are coming from the database, we are guaranteed to be valid
-                        // therefore, any DuplicateKeyException would indicate a bug in the code
-                        // TODO: better error handling
-                        Thread.dumpStack();
-                    }
+		
+		try{
+			DBCursor cur = coll.find(query);	
+			
+			while (cur.hasNext()){
+				Service tmpserv = new Service();
+				DBObject tmp = cur.next();
+				Set<String> keys = tmp.keySet();
+				if (!keys.isEmpty()){
+					Iterator<String> it = keys.iterator();
+					while(it.hasNext()){	
+						String tmpKey = it.next();
+	                    try {
+						    tmpserv.add (tmpKey,tmp.get(tmpKey));
+	                    } catch (DuplicateKeyException e) {
+	                        // Since the key/value pairs are coming from the database, we are guaranteed to be valid
+	                        // therefore, any DuplicateKeyException would indicate a bug in the code
+	                        // TODO: better error handling
+	                        Thread.dumpStack();
+	                    }
+					}
 				}
+				result.add(tmpserv);
 			}
-			result.add(tmpserv);
+		}catch(MongoException e){
+			throw new DatabaseException(e.getMessage());
 		}
+
 		return result;
 	}
 	
