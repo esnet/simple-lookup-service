@@ -39,8 +39,9 @@ public class AccessServiceResource {
     // type "text/plain"
 
     @Produces("application/json")
-    public String deleteHandler (@PathParam("service") String serviceid) {
-        return this.deleteService.delete(serviceid);
+    public String deleteHandler (@PathParam("service") String serviceid, String service) {
+//    	return this.deleteService.delete(serviceid);
+    	return this.accessService.deleteService(serviceid, service);
     }
     
     
