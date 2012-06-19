@@ -25,29 +25,17 @@ public class JSONDeleteRequest extends DeleteRequest{
 	}
 
 	private void parseJSON (String message) throws DuplicateKeyException {
-		try{
-			if(!message.isEmpty()){
-				JSONTokener tokener = new JSONTokener(message);
+		if(!message.isEmpty()){
+			JSONTokener tokener = new JSONTokener(message);
 
-				Object obj = tokener.nextValue();
+			Object obj = tokener.nextValue();
 
-				JSONObject jsonObj = (JSONObject) obj;
-				Set keyValues = jsonObj.entrySet();//
-				for (Object o : ((JSONObject) obj).keySet()) {
-					if (o.toString().equals(ReservedKeywords.RECORD_TTL)) {
-						PeriodFormatter fmt = ISOPeriodFormat.standard();
-						Duration duration = fmt.parsePeriod((String) ((JSONObject) obj).get(o)).toStandardDuration();
-						this.add(o.toString(), new Long(duration.getStandardSeconds()));
-					}
-					else{
-						this.add(o.toString(), ((JSONObject) obj).get(o));
-					}	
-				}
+			JSONObject jsonObj = (JSONObject) obj;
+			for (Object o : ((JSONObject) obj).keySet()) {
+				this.add(o.toString(), ((JSONObject) obj).get(o));
 			}
-			this.status = JSONDeleteRequest.VALID;
 		}
-		catch(JSONException e){
-			this.status = JSONDeleteRequest.INCORRECT_FORMAT;
-		}
+		this.status = JSONDeleteRequest.VALID;
+
 	}
 }
