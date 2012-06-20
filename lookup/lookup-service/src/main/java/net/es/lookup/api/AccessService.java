@@ -130,7 +130,11 @@ public class AccessService {
 				if(serviceRecord!= null){
 					System.out.println("servicerecord not null");
 					Map<String, Object> serviceMap = serviceRecord.getMap();
-
+						
+						
+						if(serviceMap.containsKey(ReservedKeywords.RECORD_EXPIRES)){
+							serviceMap.remove(ReservedKeywords.RECORD_EXPIRES);
+						}
 					Message newRequest = new Message(serviceMap);
 
 					boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
