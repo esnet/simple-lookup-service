@@ -95,7 +95,7 @@ def formatData(parsedData, mapFile):
                 
     #some configuration may have more than one accesspoint info
     for data in newdata:
-        tmp ={};
+        tmp ={'record-type':['service']};
         #for now forcefully converting to single value strings
         for k,v in data.iteritems():
             tmp[k] = v
