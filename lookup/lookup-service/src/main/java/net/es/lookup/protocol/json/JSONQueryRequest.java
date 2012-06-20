@@ -1,7 +1,6 @@
 package net.es.lookup.protocol.json;
 
 import net.es.lookup.common.QueryRequest;
-import net.es.lookup.common.exception.internal.DuplicateKeyException;
 
 import net.sf.json.util.JSONTokener;
 import net.sf.json.JSONObject;
@@ -10,7 +9,7 @@ public class JSONQueryRequest extends QueryRequest {
     static public final int VALID = 1;
     static public final int INCORRECT_FORMAT =  2;
 
-    public JSONQueryRequest (String message) throws DuplicateKeyException {
+    public JSONQueryRequest (String message) {
         this.parseJSON(message);
     }
 
@@ -18,7 +17,7 @@ public class JSONQueryRequest extends QueryRequest {
         super();
     }
 	
-    private void parseJSON (String message) throws DuplicateKeyException {
+    private void parseJSON (String message){
 
         JSONTokener tokener = new JSONTokener(message);
 

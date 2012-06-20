@@ -5,7 +5,6 @@ import java.util.Set;
 import net.sf.json.util.JSONTokener;
 import net.sf.json.JSONObject;
 
-import net.es.lookup.common.exception.internal.DuplicateKeyException;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.RenewRequest;
 
@@ -21,12 +20,12 @@ public class JSONRenewRequest extends RenewRequest {
 	   static public final int VALID = 1;
 	    static public final int INCORRECT_FORMAT =  2;
 
-	    public JSONRenewRequest (String message) throws DuplicateKeyException {
+	    public JSONRenewRequest (String message) {
 	    		this.parseJSON(message);
 	    		
 	    }
 
-	    private void parseJSON (String message) throws DuplicateKeyException {
+	    private void parseJSON (String message) {
 	    	try{
 	    		JSONTokener tokener = new JSONTokener(message);
 

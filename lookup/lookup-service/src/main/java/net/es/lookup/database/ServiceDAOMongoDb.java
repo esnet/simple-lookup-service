@@ -16,7 +16,6 @@ import net.es.lookup.common.Message;
 import net.es.lookup.resources.ServicesResource;
 import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.common.exception.internal.DuplicateKeyException;
 
 public class ServiceDAOMongoDb {
 	private String dburl="127.0.0.1";
@@ -217,14 +216,7 @@ public class ServiceDAOMongoDb {
 					Iterator<String> it = keys.iterator();
 					while(it.hasNext()){	
 						String tmpKey = it.next();
-	                    try {
-						    tmpserv.add (tmpKey,tmp.get(tmpKey));
-	                    } catch (DuplicateKeyException e) {
-	                        // Since the key/value pairs are coming from the database, we are guaranteed to be valid
-	                        // therefore, any DuplicateKeyException would indicate a bug in the code
-	                        // TODO: better error handling
-	                        Thread.dumpStack();
-	                    }
+						tmpserv.add (tmpKey,tmp.get(tmpKey));  
 					}
 				}
 				result.add(tmpserv);

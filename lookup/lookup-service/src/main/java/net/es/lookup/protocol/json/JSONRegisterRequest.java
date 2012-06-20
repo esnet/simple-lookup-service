@@ -14,7 +14,6 @@ import net.sf.json.JSONException;
 
 import net.es.lookup.common.ReservedKeywords;
 
-import net.es.lookup.common.exception.internal.DuplicateKeyException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 
 public class JSONRegisterRequest extends RegisterRequest {
@@ -22,11 +21,11 @@ public class JSONRegisterRequest extends RegisterRequest {
     static public final int VALID = 1;
     static public final int INCORRECT_FORMAT = 2;
 
-    public JSONRegisterRequest (String message) throws DuplicateKeyException {
+    public JSONRegisterRequest (String message) {
         this.parseJSON(message);
     }
 
-    private void parseJSON (String message) throws DuplicateKeyException{
+    private void parseJSON (String message) {
     	
     	JSONTokener tokener = new JSONTokener(message);
     	Object obj;

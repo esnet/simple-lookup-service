@@ -4,7 +4,6 @@ import org.joda.time.Instant;
 import org.joda.time.format.ISODateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import net.es.lookup.common.ReservedKeywords;
-import net.es.lookup.common.exception.internal.DuplicateKeyException;
 
 
 public class LeaseManager {
@@ -36,11 +35,7 @@ public class LeaseManager {
         }
         Instant expires = now.plus(ttl);
         // Add expires key/value in the message
-        try {
-            message.add(ReservedKeywords.RECORD_EXPIRES, this.fmt.print(expires));
-            return true;
-        } catch (DuplicateKeyException e) {
-            return false;
-        }
+        message.add(ReservedKeywords.RECORD_EXPIRES, this.fmt.print(expires));
+        return true;
     }
 }

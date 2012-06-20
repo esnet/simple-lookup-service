@@ -5,7 +5,6 @@ import java.rmi.MarshalledObject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
-import net.es.lookup.common.exception.internal.DuplicateKeyException;
 
 public class  Message {
 
@@ -38,10 +37,7 @@ public class  Message {
         return this.keyValues;
     }
 
-    public synchronized void add (String key, Object value) throws DuplicateKeyException {
-        if (this.keyValues.containsKey(key)) {
-            throw new DuplicateKeyException("Duplicate key: " + key);
-        }
+    public synchronized void add (String key, Object value) {
         this.keyValues.put(key, value);
     }
 

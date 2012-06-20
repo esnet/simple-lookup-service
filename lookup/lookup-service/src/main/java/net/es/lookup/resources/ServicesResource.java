@@ -19,7 +19,6 @@ import javax.ws.rs.core.UriInfo;
 
 import net.es.lookup.api.QueryServices;
 import net.es.lookup.api.RegisterService;
-import net.es.lookup.common.exception.internal.DuplicateKeyException;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeywords;
 
@@ -57,8 +56,6 @@ public class ServicesResource {
         boolean gotOperator = false;
         int maxResults = 0;
         int skip = 0;
-
-        try {
             for (String key : queryParams.keySet()) {
                 if (key.equals(ReservedKeywords.RECORD_OPERATOR)) {
                 	List<String> ops = new ArrayList();
@@ -79,9 +76,6 @@ public class ServicesResource {
                 	}            
                 }
             }
-        } catch (DuplicateKeyException e) {
-            e.printStackTrace(); // TODO: needs error handling
-        }
         return this.queryServices.query(message, maxResults, skip);
     }
 

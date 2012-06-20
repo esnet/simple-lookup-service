@@ -1,6 +1,5 @@
 package net.es.lookup.protocol.json;
 
-import net.es.lookup.common.exception.internal.DuplicateKeyException;
 import net.es.lookup.common.DeleteRequest;
 import net.es.lookup.common.Service;
 import java.util.Map;
@@ -20,11 +19,11 @@ import net.es.lookup.common.ReservedKeywords;
 public class JSONDeleteRequest extends DeleteRequest{
 	static public final int VALID = 1;
 	static public final int INCORRECT_FORMAT =  2;
-	public JSONDeleteRequest (String message) throws DuplicateKeyException {
+	public JSONDeleteRequest (String message) {
 		this.parseJSON(message);
 	}
 
-	private void parseJSON (String message) throws DuplicateKeyException {
+	private void parseJSON (String message) {
 		if(!message.isEmpty()){
 			JSONTokener tokener = new JSONTokener(message);
 

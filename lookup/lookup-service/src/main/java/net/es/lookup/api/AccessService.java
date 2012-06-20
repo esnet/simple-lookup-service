@@ -43,72 +43,70 @@ public class AccessService {
 
 		Message errorResponse = new Message();
 
-		try{
-			JSONRenewRequest request = new JSONRenewRequest(service);
-			if (request.getStatus() == JSONRenewRequest.INCORRECT_FORMAT) {
-				System.out.println("INCORRECT FORMAT");
-				// TODO: return correct error code
-				throw new BadRequestException("Service request format is Incorrect\n");
-			}
 
-			// Verify that request is valid and authorized
-			if (this.isValid(request) && this.isAuthed(serviceid, request)) {
-
-				try{
-					Service serviceRecord = ServiceDAOMongoDb.getInstance().getServiceByURI(serviceid);
-
-					if(serviceRecord!= null){
-						System.out.println("servicerecord not null");
-						Map<String, Object> serviceMap = serviceRecord.getMap();
-						if(request.getTTL()>(long)0){
-							serviceMap.put(ReservedKeywords.RECORD_TTL, request.getTTL());
-						}else{
-							serviceMap.put(ReservedKeywords.RECORD_TTL, (long)0);
-						}
-
-						if(serviceMap.containsKey(ReservedKeywords.RECORD_EXPIRES)){
-							serviceMap.remove(ReservedKeywords.RECORD_EXPIRES);
-						}
-
-						Message newRequest = new Message(serviceMap);
-
-						boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
-						if(gotLease){
-							System.out.println("gotLease for "+serviceid);
-							Message res = ServiceDAOMongoDb.getInstance().updateService(serviceid,newRequest);
-
-							if(res.getError() == 200){
-								response = new JSONRenewResponse (res.getMap());
-								try{
-									return JSONMessage.toString(response);
-								}catch(DataFormatException e){
-									throw new InternalErrorException("Data formatting exception");
-								}
-							}else{
-
-							}
-						}	
-					}else{
-						throw new NotFoundException("Service Not Found in DB\n");
-					}
-				}catch(DatabaseException e){
-					throw new InternalErrorException("Database error\n");
-				}
-			}else{
-				if(!this.isValid(request)){
-					throw new BadRequestException("Service Request is invalid\n");
-				}else if(!this.isAuthed(serviceid, request)){
-					throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
-				}
-				try{
-					return JSONMessage.toString(errorResponse);    
-				}catch(DataFormatException e){
-					throw new InternalErrorException("Data formatting exception");
-				}
-			}
-		}catch(DuplicateKeyException e){
-			throw new BadRequestException("Duplicate Keys Found");
+		JSONRenewRequest request = new JSONRenewRequest(service);
+		if (request.getStatus() == JSONRenewRequest.INCORRECT_FORMAT) {
+			System.out.println("INCORRECT FORMAT");
+			// TODO: return correct error code
+			throw new BadRequestException("Service request format is Incorrect\n");
 		}
+
+		// Verify that request is valid and authorized
+		if (this.isValid(request) && this.isAuthed(serviceid, request)) {
+
+			try{
+				Service serviceRecord = ServiceDAOMongoDb.getInstance().getServiceByURI(serviceid);
+
+				if(serviceRecord!= null){
+					System.out.println("servicerecord not null");
+					Map<String, Object> serviceMap = serviceRecord.getMap();
+					if(request.getTTL()>(long)0){
+						serviceMap.put(ReservedKeywords.RECORD_TTL, request.getTTL());
+					}else{
+						serviceMap.put(ReservedKeywords.RECORD_TTL, (long)0);
+					}
+
+					if(serviceMap.containsKey(ReservedKeywords.RECORD_EXPIRES)){
+						serviceMap.remove(ReservedKeywords.RECORD_EXPIRES);
+					}
+
+					Message newRequest = new Message(serviceMap);
+
+					boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
+					if(gotLease){
+						System.out.println("gotLease for "+serviceid);
+						Message res = ServiceDAOMongoDb.getInstance().updateService(serviceid,newRequest);
+
+						if(res.getError() == 200){
+							response = new JSONRenewResponse (res.getMap());
+							try{
+								return JSONMessage.toString(response);
+							}catch(DataFormatException e){
+								throw new InternalErrorException("Data formatting exception");
+							}
+						}else{
+
+						}
+					}	
+				}else{
+					throw new NotFoundException("Service Not Found in DB\n");
+				}
+			}catch(DatabaseException e){
+				throw new InternalErrorException("Database error\n");
+			}
+		}else{
+			if(!this.isValid(request)){
+				throw new BadRequestException("Service Request is invalid\n");
+			}else if(!this.isAuthed(serviceid, request)){
+				throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
+			}
+			try{
+				return JSONMessage.toString(errorResponse);    
+			}catch(DataFormatException e){
+				throw new InternalErrorException("Data formatting exception");
+			}
+		}
+
 		return "\n";
 
 	}
@@ -118,67 +116,62 @@ public class AccessService {
 		JSONDeleteResponse response;
 
 		Message errorResponse = new Message();
+		JSONDeleteRequest request = new JSONDeleteRequest(service);
+		if (request.getStatus() == JSONDeleteRequest.INCORRECT_FORMAT) {
+			System.out.println("INCORRECT FORMAT");
+			// TODO: return correct error code
+			throw new BadRequestException("Service request format is Incorrect\n");
+		}
 
-		try{
-			JSONDeleteRequest request = new JSONDeleteRequest(service);
-			if (request.getStatus() == JSONDeleteRequest.INCORRECT_FORMAT) {
-				System.out.println("INCORRECT FORMAT");
-				// TODO: return correct error code
-				throw new BadRequestException("Service request format is Incorrect\n");
-			}
+		// Verify that request is valid and authorized
+		if (this.isValid(request) && this.isAuthed(serviceid, request)) {
+			try{
+				Service serviceRecord = ServiceDAOMongoDb.getInstance().getServiceByURI(serviceid);
 
-			// Verify that request is valid and authorized
-			if (this.isValid(request) && this.isAuthed(serviceid, request)) {
-				try{
-					Service serviceRecord = ServiceDAOMongoDb.getInstance().getServiceByURI(serviceid);
+				if(serviceRecord!= null){
+					System.out.println("servicerecord not null");
+					Map<String, Object> serviceMap = serviceRecord.getMap();
 
-					if(serviceRecord!= null){
-						System.out.println("servicerecord not null");
-						Map<String, Object> serviceMap = serviceRecord.getMap();
+					Message newRequest = new Message(serviceMap);
 
-						Message newRequest = new Message(serviceMap);
-
-						boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
-						if(gotLease){
-							System.out.println("gotLease for "+serviceid);
-							
+					boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
+					if(gotLease){
+						System.out.println("gotLease for "+serviceid);
+						
 //							Message res = ServiceDAOMongoDb.getInstance().updateService(serviceid,newRequest);
-							Message res = ServiceDAOMongoDb.getInstance().deleteService(newRequest);
-							if(res.getError() == 200){
-								response = new JSONDeleteResponse (res.getMap());
-								try{
-									return JSONMessage.toString(response);
-								}catch(DataFormatException e){
-										throw new InternalErrorException("Data formatting exception");
-								}
-								
-							}	
-							else{
+						Message res = ServiceDAOMongoDb.getInstance().deleteService(newRequest);
+						if(res.getError() == 200){
+							response = new JSONDeleteResponse (res.getMap());
+							try{
+								return JSONMessage.toString(response);
+							}catch(DataFormatException e){
+									throw new InternalErrorException("Data formatting exception");
 							}
+							
+						}	
+						else{
 						}
-					}else{
-						throw new NotFoundException("Service Not Found in DB\n");
 					}
-				}
-				catch(DatabaseException e){
-					throw new InternalErrorException("Database error\n");
-				}
-			}
-			else{
-				if(!this.isValid(request)){
-					throw new BadRequestException("Service Request is invalid\n");
-				}
-				else if(!this.isAuthed(serviceid, request)){
-					throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
-				}
-				try{
-					return JSONMessage.toString(errorResponse);   
-				}catch(DataFormatException e){
-					throw new InternalErrorException("Data formatting exception");
+				}else{
+					throw new NotFoundException("Service Not Found in DB\n");
 				}
 			}
-		}catch(DuplicateKeyException e){
-			throw new BadRequestException("Duplicate Keys Found");
+			catch(DatabaseException e){
+				throw new InternalErrorException("Database error\n");
+			}
+		}
+		else{
+			if(!this.isValid(request)){
+				throw new BadRequestException("Service Request is invalid\n");
+			}
+			else if(!this.isAuthed(serviceid, request)){
+				throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
+			}
+			try{
+				return JSONMessage.toString(errorResponse);   
+			}catch(DataFormatException e){
+				throw new InternalErrorException("Data formatting exception");
+			}
 		}
 		return "\n";
 
