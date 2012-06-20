@@ -41,7 +41,8 @@ public class AccessServiceResource {
     @Produces("application/json")
     public String deleteHandler (@PathParam("service") String serviceid, String service) {
 //    	return this.deleteService.delete(serviceid);
-    	return this.accessService.deleteService(serviceid, service);
+    	String serviceuri = "service/"+serviceid;
+    	return this.accessService.deleteService(serviceuri, service);
     }
     
     
