@@ -12,7 +12,6 @@ import net.es.lookup.protocol.json.JSONDeleteResponse;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
-import net.es.lookup.common.exception.internal.DuplicateKeyException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.Service;
