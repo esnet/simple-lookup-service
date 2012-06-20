@@ -14,6 +14,7 @@ public class ReservedKeywords{
 	
 	//operator keys
 	public static final String RECORD_OPERATOR_SUFFIX = "operator";
+	//operator values
 	public static final String RECORD_OPERATOR_ALL = "all";
 	public static final String RECORD_OPERATOR_ANY = "any";
 	public static final String RECORD_OPERATOR_DEFAULT = RECORD_OPERATOR_ALL;

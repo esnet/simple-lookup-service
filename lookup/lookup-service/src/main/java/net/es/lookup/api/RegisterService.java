@@ -13,7 +13,11 @@ import net.es.lookup.protocol.json.JSONRegisterResponse;
 import net.es.lookup.service.LookupService;
 import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.api.BadRequestException;
+import net.es.lookup.common.exception.api.InternalErrorException;
+import net.es.lookup.common.exception.api.ConflictException;
 import net.es.lookup.common.exception.internal.DuplicateKeyException;
+import net.es.lookup.common.exception.internal.DataFormatException;
+import net.es.lookup.common.exception.internal.DatabaseException;
 
 /**
  *
@@ -32,7 +36,8 @@ public class RegisterService {
             if (request.getStatus() == JSONRegisterRequest.INCORRECT_FORMAT) {
                 System.out.println("INCORRECT FORMAT");
                 // TODO: return correct error code
-                return "402\n";
+                throw new BadRequestException("Error in JSON data");
+               
             }
             // Verify that request is valid and authorized
             if (this.isValid(request) && this.isAuthed(request)) {
@@ -70,18 +75,27 @@ public class RegisterService {
                     operators.add(ReservedKeywords.RECORD_SERVICE_DOMAIN, ReservedKeywords.RECORD_OPERATOR_ALL);
                     
                     System.out.println(request.getServiceDomain());
+                   try{
+                	    Message res = ServiceDAOMongoDb.getInstance().queryAndPublishService(request,query,operators);
 
-                    Message res = ServiceDAOMongoDb.getInstance().queryAndPublishService(request,query,operators);
-
-                    response = new JSONRegisterResponse (res.getMap());
-                    return JSONMessage.toString(response);
+                    	response = new JSONRegisterResponse (res.getMap());
+                    	System.out.println(JSONMessage.toString(response));
+                    	return JSONMessage.toString(response);
+                    }catch(DataFormatException e){
+                    	throw new InternalErrorException("Data formatting exception");
+                    }catch(DatabaseException e){
+                    	throw new InternalErrorException(e.getMessage());
+                    }
+                }else{
+                    // Build response
+                   // response = new JSONRegisterResponse (request.getMap());
+                   throw new InternalErrorException("Failed to secure lease for the registration record");
                 }
 
-                // Build response
-                response = new JSONRegisterResponse (request.getMap());
+    
             }
         } catch (DuplicateKeyException e) {
-            throw new BadRequestException("Service record contains duplicate keys");
+            throw new ConflictException("Service record contains duplicate keys");
         }
         return "\n";
     }

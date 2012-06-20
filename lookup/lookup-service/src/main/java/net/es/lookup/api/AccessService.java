@@ -14,6 +14,7 @@ import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DuplicateKeyException;
 import net.es.lookup.common.exception.internal.DatabaseException;
+import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.Service;
 import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.api.BadRequestException;
@@ -78,7 +79,11 @@ public class AccessService {
 
 							if(res.getError() == 200){
 								response = new JSONRenewResponse (res.getMap());
-								return JSONMessage.toString(response);
+								try{
+									return JSONMessage.toString(response);
+								}catch(DataFormatException e){
+									throw new InternalErrorException("Data formatting exception");
+								}
 							}else{
 
 							}
@@ -95,7 +100,11 @@ public class AccessService {
 				}else if(!this.isAuthed(serviceid, request)){
 					throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
 				}
-				return JSONMessage.toString(errorResponse);        	
+				try{
+					return JSONMessage.toString(errorResponse);    
+				}catch(DataFormatException e){
+					throw new InternalErrorException("Data formatting exception");
+				}
 			}
 		}catch(DuplicateKeyException e){
 			throw new BadRequestException("Duplicate Keys Found");
@@ -137,7 +146,12 @@ public class AccessService {
 							Message res = ServiceDAOMongoDb.getInstance().deleteService(newRequest);
 							if(res.getError() == 200){
 								response = new JSONDeleteResponse (res.getMap());
-								return JSONMessage.toString(response);
+								try{
+									return JSONMessage.toString(response);
+								}catch(DataFormatException e){
+										throw new InternalErrorException("Data formatting exception");
+								}
+								
 							}	
 							else{
 							}
@@ -157,7 +171,11 @@ public class AccessService {
 				else if(!this.isAuthed(serviceid, request)){
 					throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
 				}
-				return JSONMessage.toString(errorResponse);        	
+				try{
+					return JSONMessage.toString(errorResponse);   
+				}catch(DataFormatException e){
+					throw new InternalErrorException("Data formatting exception");
+				}
 			}
 		}catch(DuplicateKeyException e){
 			throw new BadRequestException("Duplicate Keys Found");

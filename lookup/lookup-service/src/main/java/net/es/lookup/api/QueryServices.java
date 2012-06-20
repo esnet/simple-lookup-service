@@ -9,6 +9,10 @@ import net.es.lookup.common.Service;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.common.exception.internal.DuplicateKeyException;
+import net.es.lookup.common.exception.internal.DatabaseException;
+import net.es.lookup.common.exception.internal.DataFormatException;
+import net.es.lookup.common.exception.api.ConflictException;
+import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.ReservedKeywords;
 
 public class QueryServices {
@@ -39,9 +43,7 @@ public class QueryServices {
         		mainOp.add(ReservedKeywords.RECORD_OPERATOR_DEFAULT);
         		operators.add(ReservedKeywords.RECORD_OPERATOR, mainOp);
         	}
-        	
-        	
-        
+
         	for (Map.Entry<String, Object> entry : requestMap.entrySet()) {
         		
         		String key = entry.getKey();
@@ -57,19 +59,22 @@ public class QueryServices {
         				//add default
         				operators.add(key, ReservedKeywords.RECORD_OPERATOR_DEFAULT);
         			}
-        		}
-            
-        	}
-        
-        	// Query DB
-        	List<Service> res = ServiceDAOMongoDb.getInstance().query(request, queryParameters, operators, maxResult, skip);
-        	// Build response
-            response = JSONMessage.toString(res);
-            return response;
+        		}           
+        	}   
         }catch(DuplicateKeyException dke){
-        	return "Duplicate Key Found"; 
+        	throw new ConflictException("Service record contains duplicate keys");
         }
-        
+        	// Query DB
+        	try{
+        		List<Service> res = ServiceDAOMongoDb.getInstance().query(request, queryParameters, operators, maxResult, skip);
+            	// Build response
+                response = JSONMessage.toString(res);
+                return response;
+        	}catch(DatabaseException e){
+        		throw new InternalErrorException("Error retrieving results");
+        	}catch(DataFormatException e){
+        		throw new InternalErrorException("Error formatting data");
+        	}  
     }
 
 }

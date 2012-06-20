@@ -96,9 +96,8 @@ public class ServiceDAOMongoDb {
 		List<Service> dupEntries = this.query(message,queryRequest,operators);
 		System.out.println("Duplicate Entries: "+dupEntries.size());
 		if(dupEntries.size()>0){
-			response.setError(500);
-			response.setErrorMessage("Duplicate entries found");
-			return response;		
+			
+			throw new DatabaseException("Record already exists");		
 		}
 		
 		Map<String, Object> services = message.getMap();
@@ -112,18 +111,16 @@ public class ServiceDAOMongoDb {
 			errorcode = 200;
 			errormsg = "SUCCESS";
 		}else{
-			errorcode = 500;
-			errormsg = cmdres.getErrorMessage();
+			throw new DatabaseException("Error inserting record");
 		}
-		
-		
+	
 		response.setError(errorcode);
 		response.setErrorMessage(errormsg);
 		return response;
 	}
 	
 	
-	public Message deleteService(Message message){
+	public Message deleteService(Message message) throws DatabaseException{
 		
 		int errorcode;
 		String errormsg;
@@ -132,16 +129,20 @@ public class ServiceDAOMongoDb {
 		String uri = message.getURI();
 		//TODO: add check to see if only one elem is returned
 		query.put(ReservedKeywords.RECORD_URI, uri);
-		WriteResult wrt = coll.remove(query);
 		
-		CommandResult cmdres = wrt.getLastError();
+		try{
+			WriteResult wrt = coll.remove(query);
 		
-		if(cmdres.ok()){
-			errorcode = 200;
-			errormsg = "SUCCESS";
-		}else{
-			errorcode = 500;
-			errormsg = cmdres.getErrorMessage();
+			CommandResult cmdres = wrt.getLastError();
+		
+			if(cmdres.ok()){
+				errorcode = 200;
+				errormsg = "SUCCESS";
+			}else{
+				throw new DatabaseException(cmdres.getErrorMessage());
+			}
+		}catch(MongoException e){
+			throw new DatabaseException(e.getMessage());
 		}
 		
 		Message response = new Message();
@@ -178,16 +179,14 @@ public class ServiceDAOMongoDb {
         			errorcode=200;
         			errormsg="SUCCESS";
         		}else{
-        			errorcode=500;
-        			errormsg=cmdres.getErrorMessage();
+        			throw new DatabaseException(cmdres.getErrorMessage());
         		}
         	}catch(MongoException e){
         		throw new DatabaseException(e.getMessage());
         	}
     		
         }else{
-        	errorcode=500;
-        	errormsg = "Record URI not specified!!!";
+        	throw new DatabaseException("Record URI not specified!!!");
         }
 		
         Message response = new Message();
@@ -231,7 +230,7 @@ public class ServiceDAOMongoDb {
 				result.add(tmpserv);
 			}
 		}catch(MongoException e){
-			throw new DatabaseException(e.getMessage());
+			throw new DatabaseException("Error retrieving results");
 		}
 
 		return result;
