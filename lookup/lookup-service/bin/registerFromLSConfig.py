@@ -3,8 +3,7 @@ import urllib, httplib
 import json
 import os
 import sys
-import getopt
-import argparse
+import re
 
 def readMap(mapFile):
     fileh=open(mapFile)
@@ -95,7 +94,8 @@ def formatData(parsedData, mapFile):
                 
     #some configuration may have more than one accesspoint info
     for data in newdata:
-        tmp ={'record-type':['service']};
+        #tmp ={'record-type':'service'}
+        tmp = {}
         #for now forcefully converting to single value strings
         for k,v in data.iteritems():
             tmp[k] = v
@@ -128,13 +128,19 @@ def formatData(parsedData, mapFile):
     return formattedData
 
 print "Select a configfile to input:"
-print ""
-for item in os.listdir('../input'):
-    print item
+#print "config files:"
+files = os.listdir('../input')
+for items in files:
+    if items.endswith(".conf"):
+        print items
+    
 configfile = raw_input()  
 print "" 
 print "Select a mapfile to input:"
-print ""
+files = os.listdir('../input')
+for items in files:
+    if items.endswith(".txt"):
+        print items
 mapfile = raw_input()
 
 with open(configfile, "w") as myfile:
