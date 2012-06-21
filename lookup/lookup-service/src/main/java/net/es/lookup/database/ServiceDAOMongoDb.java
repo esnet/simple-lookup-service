@@ -92,11 +92,14 @@ public class ServiceDAOMongoDb {
 		Message response = new Message();
 		
 		//check for duplicates
-		List<Service> dupEntries = this.query(message,queryRequest,operators);
-		System.out.println("Duplicate Entries: "+dupEntries.size());
-		if(dupEntries.size()>0){
-			
-			throw new DatabaseException("Record already exists");		
+		try{
+			List<Service> dupEntries = this.query(message,queryRequest,operators);
+			System.out.println("Duplicate Entries: "+dupEntries.size());
+			if(dupEntries.size()>0){
+				throw new DatabaseException("Record already exists");		
+			}
+		}catch(DatabaseException e){
+			throw new DatabaseException("Error inserting record");
 		}
 		
 		Map<String, Object> services = message.getMap();
@@ -191,7 +194,6 @@ public class ServiceDAOMongoDb {
         Message response = new Message();
         response.setError(errorcode);
         response.setErrorMessage(errormsg);
-        System.out.println("came here");
 		return response;
 	}
 
@@ -235,9 +237,7 @@ public class ServiceDAOMongoDb {
 		Map<String, Object> serv =  queryRequest.getMap();
 		
 		Map<String, String> ops = operators.getMap();
-		
 	
-		
 		List <HashMap<String,Object>> keyValueList = new ArrayList<HashMap<String,Object>>();
 		
         for (Map.Entry<String,Object> entry : serv.entrySet()) {

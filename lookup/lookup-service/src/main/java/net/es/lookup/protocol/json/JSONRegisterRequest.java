@@ -57,7 +57,13 @@ public class JSONRegisterRequest extends RegisterRequest {
     	                this.add(o.toString(), ((JSONObject) obj).get(o));
     	            }
     	        }
-    	        this.status = JSONRegisterRequest.VALID;
+    	        if(this.validate()){
+    	        	 this.status = JSONRegisterRequest.VALID;
+    	        	 System.out.println("Service valid");
+    	        }else{
+    	        	this.status = JSONRegisterRequest.INCORRECT_FORMAT;
+    	        }
+    	       
     	}else{
     		this.status = JSONRegisterRequest.INCORRECT_FORMAT;
     	}

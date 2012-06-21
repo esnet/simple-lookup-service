@@ -3,12 +3,13 @@ package net.es.lookup.common;
 import org.apache.commons.lang.math.LongRange;
 import java.rmi.MarshalledObject;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
 
 public class  Message {
-
-    
 
     private final Map<String,Object> keyValues;
     protected int status = 0;
@@ -96,4 +97,50 @@ public class  Message {
     public synchronized String getErrorMessage () {
         return this.errorMessage;
     }
+   
+    //validates the values of the keys
+    public boolean validate(){
+    	
+    	boolean returnVal=true;
+    	
+    	for(String key : this.keyValues.keySet()){
+    		Object o = this.keyValues.get(key);
+    		
+    		if(key.equals(ReservedKeywords.RECORD_URI)){
+    			if(o instanceof String){
+    				returnVal = returnVal & true;
+    			}else{
+    				returnVal = returnVal & false;
+    				return returnVal;
+    			}
+    		}else if(key.equals(ReservedKeywords.RECORD_TTL)){
+    			if(o instanceof Long){
+    				returnVal = returnVal & true;
+    			}else{
+    				returnVal = returnVal & false;
+    				return returnVal;
+    			}
+    		}else{
+    			if(o instanceof List<?>){
+    				for(Object obj : (List)o){
+    					if(obj instanceof String){
+    						returnVal = returnVal & true;
+    					}else{
+    						returnVal = returnVal & false;
+    	    				return returnVal;
+    					}
+    				}
+    				returnVal = returnVal & true;
+    			}else{
+    				returnVal = returnVal & false;
+    				return returnVal;
+    			}
+    		}
+    }
+    	
+    return returnVal;
+    	
+}
+    
+    
 }
