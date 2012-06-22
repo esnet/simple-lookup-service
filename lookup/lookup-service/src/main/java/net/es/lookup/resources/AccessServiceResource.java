@@ -27,9 +27,9 @@ public class AccessServiceResource {
     // type "text/plain"
 
     @Produces("application/json")
-    public String getHandler (@PathParam("service") String serviceid) {
-    
-        return this.accessService.getService(serviceid);
+    public String getHandler (@PathParam("service") String serviceid, String service) {
+    	String serviceuri = "service/"+serviceid;
+        return this.accessService.getService(serviceuri,service);
     }
 
 
