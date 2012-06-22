@@ -57,6 +57,7 @@ public class JSONRegisterRequest extends RegisterRequest {
     	                this.add(o.toString(), ((JSONObject) obj).get(o));
     	            }
     	        }
+  
     	       
     	}else{
     		this.status = JSONRegisterRequest.INCORRECT_FORMAT;

@@ -37,8 +37,14 @@ public class JSONRenewRequest extends RenewRequest {
 	            // Decode TTL
 	    			if (o.toString().equals(ReservedKeywords.RECORD_TTL)) {
 	    				PeriodFormatter fmt = ISOPeriodFormat.standard();
-	    				Duration duration = fmt.parsePeriod((String) ((JSONObject) obj).get(o)).toStandardDuration();
-	    				this.add(o.toString(), new Long(duration.getStandardSeconds()));
+	    				try{
+	    					Duration duration = fmt.parsePeriod((String) ((JSONObject) obj).get(o)).toStandardDuration();
+		    				this.add(o.toString(), new Long(duration.getStandardSeconds()));
+	    				}catch(IllegalArgumentException e){
+	    					this.status = JSONRenewRequest.INCORRECT_FORMAT;
+	    					return;
+	    				}
+	    				
 	    			} else {
 	    				this.add(o.toString(), ((JSONObject) obj).get(o));
 	    			}

@@ -95,7 +95,7 @@ public class AccessService {
 			}
 		}else{
 			if(!this.isValid(request)){
-				throw new BadRequestException("Service Request is invalid\n");
+				throw new BadRequestException("Request is invalid\n");
 			}else if(!this.isAuthed(serviceid, request)){
 				throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
 			}
@@ -185,8 +185,10 @@ public class AccessService {
 
 
 	private boolean isValid(JSONRenewRequest request) {
-		// TODO: needs to be implemented. Check for client-uuid     
-		return true;
+		//TODO: add privatekey as mandatory key-value
+	       boolean res = ((request.validate()) && (request.getTTL()>0));
+
+	       return res;  
 	}
 
 	private boolean isAuthed(String serviceid, JSONDeleteRequest request) {
