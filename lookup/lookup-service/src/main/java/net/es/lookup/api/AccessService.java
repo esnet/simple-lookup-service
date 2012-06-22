@@ -248,7 +248,7 @@ public class AccessService {
 
 	private boolean isValid(JSONSubGetRequest request) {
 		// TODO: needs to be implemented. Check for client-uuid    
-		boolean res = ((request.validate()) );
+		boolean res = request.validate();
 
 		return res;
 //		return true;
@@ -271,7 +271,7 @@ public class AccessService {
 	private boolean isAuthed(String serviceid, JSONDeleteRequest request) {
 
 		// TODO: needs to be implemented. Check if client uuid matches
-		boolean res = ((request.validate()) && (request.getTTL()>0));
+		boolean res = request.validate();
 
 		return res;
 //		return true;
