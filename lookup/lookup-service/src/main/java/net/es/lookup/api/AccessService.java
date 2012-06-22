@@ -9,6 +9,8 @@ import net.es.lookup.protocol.json.JSONRenewRequest;
 import net.es.lookup.protocol.json.JSONRenewResponse;
 import net.es.lookup.protocol.json.JSONDeleteRequest;
 import net.es.lookup.protocol.json.JSONDeleteResponse;
+import net.es.lookup.protocol.json.JSONSubGetRequest;
+import net.es.lookup.protocol.json.JSONSubGetResponse;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
@@ -29,11 +31,71 @@ import net.es.lookup.common.exception.internal.DataFormatException;
 
 public class AccessService {
 
-
-
-	public String getService(String service) {
+	public String getService(String serviceid, String service) {
 		// Return some cliched textual content
-		return "/lookup/service/" + service + "\n";
+		System.out.println("Processing getService");
+		JSONSubGetResponse response;
+		Service serviceRecord= new Service();
+		Message errorResponse = new Message();
+
+
+		JSONSubGetRequest request = new JSONSubGetRequest(service);
+		if (request.getStatus() == JSONSubGetRequest.INCORRECT_FORMAT) {
+			System.out.println("INCORRECT FORMAT");
+			// TODO: return correct error code
+			throw new BadRequestException("Service request format is Incorrect\n");
+		}
+
+		// Verify that request is valid and authorized
+		if (this.isValid(request) && this.isAuthed(serviceid, request)) {
+
+			try{
+				serviceRecord = ServiceDAOMongoDb.getInstance().getServiceByURI(serviceid);
+
+				if(serviceRecord!= null){
+					System.out.println("servicerecord not null");
+					Map<String, Object> serviceMap = serviceRecord.getMap();	
+
+					Message newRequest = new Message(serviceMap);
+
+					boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
+					if(gotLease){
+						System.out.println("gotLease for "+serviceid);
+
+						if(newRequest.getError() == 200){
+							response = new JSONSubGetResponse (newRequest.getMap());
+							try{
+								return JSONMessage.toString(response);
+							}catch(DataFormatException e){
+								throw new InternalErrorException("Data formatting exception");
+							}
+						}else{
+
+						}
+					}	
+				}else{
+					throw new NotFoundException("Service Not Found in DB\n");
+				}
+			}catch(DatabaseException e){
+				throw new InternalErrorException("Database error\n");
+			}
+		}else{
+			if(!this.isValid(request)){
+				throw new BadRequestException("Service Request is invalid\n");
+			}else if(!this.isAuthed(serviceid, request)){
+				throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
+			}
+			try{
+				return JSONMessage.toString(errorResponse);    
+			}catch(DataFormatException e){
+				throw new InternalErrorException("Data formatting exception");
+			}
+		}
+
+//		return "\n";
+	
+		
+		return "/lookup/service/" + serviceRecord + "\n";
 	}
 
 	public String renewService(String serviceid, String service){
@@ -176,6 +238,18 @@ public class AccessService {
 		return "\n";
 
 	}
+	
+	private boolean isAuthed(String serviceid, JSONSubGetRequest request) {
+
+		// TODO: needs to be implemented. Check if client uuid matches
+		return true;
+	}
+
+
+	private boolean isValid(JSONSubGetRequest request) {
+		// TODO: needs to be implemented. Check for client-uuid     
+		return true;
+	}
 
 
 	private boolean isAuthed(String serviceid, JSONRenewRequest request) {
@@ -202,5 +276,7 @@ public class AccessService {
 		// TODO: needs to be implemented. Check for client-uuid     
 		return true;
 	}
+	
+	
 }
 
