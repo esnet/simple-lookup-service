@@ -95,8 +95,86 @@ public class AccessService {
 		//		return "\n";
 
 
-		return "/lookup/service/" + serviceRecord + "\n";
+		return "/lookup/service/" + serviceRecord.getMap() + "\n";
 	}
+	
+	
+	
+	
+	
+	public String getKeyService(String serviceid, String service, String key) {
+		// Return some cliched textual content
+		System.out.println("Processing getService");
+		JSONSubGetResponse response;
+		Service serviceRecord= new Service();
+		Message errorResponse = new Message();
+
+
+		JSONSubGetRequest request = new JSONSubGetRequest(service);
+		if (request.getStatus() == JSONSubGetRequest.INCORRECT_FORMAT) {
+			System.out.println("INCORRECT FORMAT");
+			// TODO: return correct error code
+			throw new BadRequestException("Service request format is Incorrect\n");
+		}
+
+		// Verify that request is valid and authorized
+		if (this.isValid(request) && this.isAuthed(serviceid, request)) {
+
+			try{
+				serviceRecord = ServiceDAOMongoDb.getInstance().getServiceByURI(serviceid);
+
+				if(serviceRecord!= null){
+					System.out.println("servicerecord not null");
+					Map<String, Object> serviceMap = serviceRecord.getMap();	
+
+					Message newRequest = new Message(serviceMap);
+
+					boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
+					if(gotLease){
+						System.out.println("gotLease for "+serviceid);
+
+						if(newRequest.getError() == 200){
+							response = new JSONSubGetResponse (newRequest.getMap());
+							try{
+								return JSONMessage.toString(response);
+							}catch(DataFormatException e){
+								throw new InternalErrorException("Data formatting exception");
+							}
+						}else{
+
+						}
+					}	
+				}else{
+					throw new NotFoundException("Service Not Found in DB\n");
+				}
+			}catch(DatabaseException e){
+				throw new InternalErrorException("Database error\n");
+			}
+		}else{
+			if(!this.isValid(request)){
+				throw new BadRequestException("Service Request is invalid\n");
+			}else if(!this.isAuthed(serviceid, request)){
+				throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
+			}
+			try{
+				return JSONMessage.toString(errorResponse);    
+			}catch(DataFormatException e){
+				throw new InternalErrorException("Data formatting exception");
+			}
+		}
+
+		//		return "\n";
+//		return "/lookup/service/" + serviceRecord.getMap() + "\n";
+
+		return "/lookup/service/" + serviceRecord.getKey(key) + "\n";
+	}
+	
+	
+	
+	
+	
+	
+	
 
 	public String renewService(String serviceid, String service){
 		System.out.println("Processing renewService");
