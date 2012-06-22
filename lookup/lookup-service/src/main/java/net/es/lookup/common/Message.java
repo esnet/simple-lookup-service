@@ -37,6 +37,10 @@ public class  Message {
     public final Map getMap() {
         return this.keyValues;
     }
+    
+    public final Object getKey(Object key){
+    	return this.keyValues.get(key);
+    }
 
     public synchronized void add (String key, Object value) {
         this.keyValues.put(key, value);
