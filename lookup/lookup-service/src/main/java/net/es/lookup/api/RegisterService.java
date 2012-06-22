@@ -14,6 +14,7 @@ import net.es.lookup.service.LookupService;
 import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
+import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 
@@ -37,6 +38,7 @@ public class RegisterService {
            
         }
         // Verify that request is valid and authorized
+        System.out.println(this.isValid(request));
         if (this.isValid(request) && this.isAuthed(request)) {
             // Generate a new URI for this service and add it to the service key/value pairs
             String uri = this.newURI (); 
@@ -90,6 +92,12 @@ public class RegisterService {
             }
 
 
+        }else{
+        	if(!this.isValid(request)){
+        		throw new BadRequestException("Invalid request");
+        	}else if(!this.isAuthed(request)){
+        		throw new ForbiddenRequestException("Not authorized to perform the request");
+        	}
         }
         return "\n";
     }
@@ -104,9 +112,26 @@ public class RegisterService {
 
     private boolean isValid(JSONRegisterRequest request) {
         // All mandatory key/value must be present
-        boolean res = false;
-
-        res = ! (((request.getRecordType() == null) || request.getRecordType().isEmpty()));
+        boolean res = request.validate();
+        
+        if(res){
+            List<String> recordType = request.getRecordType();
+          
+            if((recordType == null) || recordType.isEmpty()){
+            	return false;
+            }
+            
+            if(recordType.size() > 1){
+            	return false;
+            }
+            
+        	if(recordType.get(0).equals(ReservedKeywords.RECORD_VALUE_DEFAULT)){
+            	res = !((request.getAccessPoint() == null) || (request.getServiceType() == null));
+            }else{
+            	res=true;
+            }
+        
+        }
 
         return res;
     }

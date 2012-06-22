@@ -12,14 +12,14 @@ import net.es.lookup.protocol.json.JSONDeleteResponse;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
-import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.Service;
 import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
+import net.es.lookup.common.exception.internal.DatabaseException;
+import net.es.lookup.common.exception.internal.DataFormatException;
 
 
 
@@ -151,8 +151,6 @@ public class AccessService {
 									throw new InternalErrorException("Data formatting exception");
 							}
 							
-						}	
-						else{
 						}
 					}
 				}else{
@@ -166,8 +164,7 @@ public class AccessService {
 		else{
 			if(!this.isValid(request)){
 				throw new BadRequestException("Service Request is invalid\n");
-			}
-			else if(!this.isAuthed(serviceid, request)){
+			}else if(!this.isAuthed(serviceid, request)){
 				throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
 			}
 			try{
@@ -182,7 +179,6 @@ public class AccessService {
 
 
 	private boolean isAuthed(String serviceid, JSONRenewRequest request) {
-
 		// TODO: needs to be implemented. Check if client uuid matches
 		return true;
 	}

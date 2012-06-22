@@ -98,11 +98,11 @@ public class  Message {
         return this.errorMessage;
     }
    
-    //validates the values of the keys
+    //validates the type of value
     public boolean validate(){
     	
     	boolean returnVal=true;
-    	
+    
     	for(String key : this.keyValues.keySet()){
     		Object o = this.keyValues.get(key);
     		

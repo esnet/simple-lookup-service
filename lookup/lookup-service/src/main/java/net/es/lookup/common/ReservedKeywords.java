@@ -24,5 +24,8 @@ public class ReservedKeywords{
 	public static final String RECORD_SERVICE_NAME = "record-service-name";
 	public static final String RECORD_SERVICE_DOMAIN = "record-service-domain";
 	public static final String RECORD_SERVICE_TYPE = "record-service-type";	
-    
+	
+	//record-values
+	public static final String RECORD_VALUE_PS = "service";
+	public static final String RECORD_VALUE_DEFAULT = RECORD_VALUE_PS;
 }
