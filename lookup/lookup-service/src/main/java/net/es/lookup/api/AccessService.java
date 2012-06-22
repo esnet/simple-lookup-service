@@ -92,9 +92,9 @@ public class AccessService {
 			}
 		}
 
-//		return "\n";
-	
-		
+		//		return "\n";
+
+
 		return "/lookup/service/" + serviceRecord + "\n";
 	}
 
@@ -192,27 +192,27 @@ public class AccessService {
 				if(serviceRecord!= null){
 					System.out.println("servicerecord not null");
 					Map<String, Object> serviceMap = serviceRecord.getMap();
-						
-						
-						if(serviceMap.containsKey(ReservedKeywords.RECORD_EXPIRES)){
-							serviceMap.remove(ReservedKeywords.RECORD_EXPIRES);
-						}
+
+
+					if(serviceMap.containsKey(ReservedKeywords.RECORD_EXPIRES)){
+						serviceMap.remove(ReservedKeywords.RECORD_EXPIRES);
+					}
 					Message newRequest = new Message(serviceMap);
 
 					boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
 					if(gotLease){
 						System.out.println("gotLease for "+serviceid);
-						
-//							Message res = ServiceDAOMongoDb.getInstance().updateService(serviceid,newRequest);
+
+						//							Message res = ServiceDAOMongoDb.getInstance().updateService(serviceid,newRequest);
 						Message res = ServiceDAOMongoDb.getInstance().deleteService(newRequest);
 						if(res.getError() == 200){
 							response = new JSONDeleteResponse (res.getMap());
 							try{
 								return JSONMessage.toString(response);
 							}catch(DataFormatException e){
-									throw new InternalErrorException("Data formatting exception");
+								throw new InternalErrorException("Data formatting exception");
 							}
-							
+
 						}
 					}
 				}else{
@@ -238,7 +238,7 @@ public class AccessService {
 		return "\n";
 
 	}
-	
+
 	private boolean isAuthed(String serviceid, JSONSubGetRequest request) {
 
 		// TODO: needs to be implemented. Check if client uuid matches
@@ -247,8 +247,11 @@ public class AccessService {
 
 
 	private boolean isValid(JSONSubGetRequest request) {
-		// TODO: needs to be implemented. Check for client-uuid     
-		return true;
+		// TODO: needs to be implemented. Check for client-uuid    
+		boolean res = ((request.validate()) );
+
+		return res;
+//		return true;
 	}
 
 
@@ -260,15 +263,18 @@ public class AccessService {
 
 	private boolean isValid(JSONRenewRequest request) {
 		//TODO: add privatekey as mandatory key-value
-	       boolean res = ((request.validate()) && (request.getTTL()>0));
+		boolean res = ((request.validate()) && (request.getTTL()>0));
 
-	       return res;  
+		return res;  
 	}
 
 	private boolean isAuthed(String serviceid, JSONDeleteRequest request) {
 
 		// TODO: needs to be implemented. Check if client uuid matches
-		return true;
+		boolean res = ((request.validate()) && (request.getTTL()>0));
+
+		return res;
+//		return true;
 	}
 
 
@@ -276,7 +282,7 @@ public class AccessService {
 		// TODO: needs to be implemented. Check for client-uuid     
 		return true;
 	}
-	
-	
+
+
 }
 
