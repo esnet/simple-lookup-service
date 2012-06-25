@@ -10,7 +10,6 @@ import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DataFormatException;
-import net.es.lookup.common.exception.api.ConflictException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.ReservedKeywords;
 
