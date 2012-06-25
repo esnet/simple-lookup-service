@@ -95,7 +95,8 @@ public class AccessService {
 		//		return "\n";
 
 
-		return "/lookup/service/" + serviceRecord.getMap() + "\n";
+//		return "/lookup/service/" + serviceRecord.getMap() + "\n";
+		return "Service record:  " + serviceRecord.getMap() + "\n";
 	}
 	
 	
@@ -140,8 +141,8 @@ public class AccessService {
 							}catch(DataFormatException e){
 								throw new InternalErrorException("Data formatting exception");
 							}
-						}else{
-
+						}else if(serviceRecord.getKey(key)==null){
+							throw new NotFoundException("The key does not exist\n");
 						}
 					}	
 				}else{
@@ -166,7 +167,7 @@ public class AccessService {
 		//		return "\n";
 //		return "/lookup/service/" + serviceRecord.getMap() + "\n";
 
-		return "/lookup/service/" + serviceRecord.getKey(key) + "\n";
+		return key + ":" + serviceRecord.getKey(key) + "\n";
 	}
 	
 	
