@@ -15,8 +15,10 @@ import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.ForbiddenRequestException;
+import net.es.lookup.common.exception.api.UnauthorizedException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
+import net.es.lookup.common.exception.internal.DuplicateEntryException;
 
 /**
  *
@@ -82,6 +84,8 @@ public class RegisterService {
                 	return JSONMessage.toString(response);
                 }catch(DataFormatException e){
                 	throw new InternalErrorException("Data formatting exception");
+                }catch(DuplicateEntryException e){
+                	throw new ForbiddenRequestException(e.getMessage());
                 }catch(DatabaseException e){
                 	throw new InternalErrorException(e.getMessage());
                 }
@@ -96,7 +100,7 @@ public class RegisterService {
         	if(!this.isValid(request)){
         		throw new BadRequestException("Invalid request");
         	}else if(!this.isAuthed(request)){
-        		throw new ForbiddenRequestException("Not authorized to perform the request");
+        		throw new UnauthorizedException("Not authorized to perform the request");
         	}
         }
         return "\n";

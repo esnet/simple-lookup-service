@@ -16,6 +16,7 @@ import net.es.lookup.common.Message;
 import net.es.lookup.resources.ServicesResource;
 import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.internal.DatabaseException;
+import net.es.lookup.common.exception.internal.DuplicateEntryException;
 
 public class ServiceDAOMongoDb {
 	private String dburl="127.0.0.1";
@@ -96,7 +97,7 @@ public class ServiceDAOMongoDb {
 			List<Service> dupEntries = this.query(message,queryRequest,operators);
 			System.out.println("Duplicate Entries: "+dupEntries.size());
 			if(dupEntries.size()>0){
-				throw new DatabaseException("Record already exists");		
+				throw new DuplicateEntryException("Record already exists");		
 			}
 		}catch(DatabaseException e){
 			throw new DatabaseException("Error inserting record");
