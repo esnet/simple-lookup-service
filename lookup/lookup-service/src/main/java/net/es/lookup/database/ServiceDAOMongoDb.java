@@ -90,7 +90,7 @@ public class ServiceDAOMongoDb {
 	public Message queryAndPublishService(Message message, Message queryRequest, Message operators) throws DatabaseException{
 		int errorcode;
 		String errormsg;
-		Message response = new Message();
+		Message response;
 		
 		//check for duplicates
 		try{
@@ -116,7 +116,8 @@ public class ServiceDAOMongoDb {
 		}else{
 			throw new DatabaseException("Error inserting record");
 		}
-	
+		
+		response = new Message(services);
 		response.setError(errorcode);
 		response.setErrorMessage(errormsg);
 		return response;

@@ -35,7 +35,7 @@ public class RegistrationTest {
 		data.put("record-type",value);
 		
 		value.clear();
-		value.add("http://localhost/accesspoint3");
+		value.add("http://localhost/accesspoint4");
 		data.put("record-service-locator",value);
 	
 		
