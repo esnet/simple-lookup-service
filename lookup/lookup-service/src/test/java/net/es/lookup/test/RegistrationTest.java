@@ -73,7 +73,7 @@ public class RegistrationTest {
 			
 			StatusLine responseStatus = response.getStatusLine();
 			assertEquals(200, responseStatus.getStatusCode());
-			assertEquals(200, responseStatus);
+//			assertEquals(200, responseStatus.);
 			
 		}catch(IOException e){
 			fail("Connection error: "+e.getMessage());
