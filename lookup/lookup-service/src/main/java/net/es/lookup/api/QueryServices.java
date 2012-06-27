@@ -56,7 +56,8 @@ public class QueryServices {
     				//add default
     				operators.add(key, ReservedKeywords.RECORD_OPERATOR_DEFAULT);
     			}
-    		}           
+    		}
+    		
     	}   
 
         	// Query DB

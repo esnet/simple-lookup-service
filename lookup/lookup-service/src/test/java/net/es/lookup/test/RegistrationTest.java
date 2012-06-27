@@ -65,7 +65,7 @@ public class RegistrationTest {
         
         
         httppost.setHeader("Accept", "application/json");
-        httppost.setHeader("Content-type", "application/json");
+        httppost.setHeader("Content-type", "application/js");
 		
 		try{
 			HttpResponse response = httpclient.execute(httppost);

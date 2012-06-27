@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.mongodb.*;
 import java.net.UnknownHostException;
+import java.util.regex.Pattern;
 
 import net.es.lookup.common.Service;
 import net.es.lookup.common.Message;
@@ -247,22 +248,72 @@ public class ServiceDAOMongoDb {
             HashMap<String, Object> tmpHash = new HashMap<String, Object>();
             Object obj = serv.get(newKey);
             if (obj instanceof String) {
-                 tmpHash.put(newKey, (String) obj);
+                 
+            	String val = (String) obj;
+            	//deal with metacharacter
+            	 if(val.endsWith("*")){
+            		 val = val.substring(0, val.length()-1);
+            		 System.out.println(val);
+            		 Pattern newVal = Pattern.compile("^"+val);
+            		 tmpHash.put(newKey, newVal);
+            	 }else if(val.startsWith("*")){
+            		 val = val.substring(1, val.length());
+            		 System.out.println(val);
+            		 Pattern newVal = Pattern.compile(val+"$");
+            		 tmpHash.put(newKey, newVal);
+            	 }else{
+            		 tmpHash.put(newKey, (String) obj);
+            	 }
             } else if (obj instanceof List) {
                  List <Object> values = (List<Object>) obj;
+                 ArrayList newValues = new ArrayList();
                  if(values.size()>1){
+                	 for(int i=0; i<values.size();i++){
+                		 String val = (String)values.get(i);
+                		 if(val.endsWith("*")){
+                    		 val = val.substring(0, val.length()-1);
+                    		 System.out.println(val);
+                    		 Pattern newVal = Pattern.compile("^"+val);
+                    		 newValues.add(newVal);
+                    	 }else if(val.startsWith("*")){
+                    		 val = val.substring(1, val.length());
+                    		 System.out.println(val);
+                    		 Pattern newVal = Pattern.compile(val+"$");
+                    		 newValues.add(newVal);
+                    	 }else{
+                    		 newValues.add(val);
+                    	 }
+                		 
+                	 }
                 	 HashMap<String, Object> listvalues = new HashMap<String, Object>();
-                	 if(ops.containsKey(newKey) && this.listOperatorMapping.containsKey(ops.get(newKey))){ 
+                	 if(ops.containsKey(newKey) && this.listOperatorMapping.containsKey(ops.get(newKey))){
+                		 
                 		 //get the operator
                 		 String curop = this.listOperatorMapping.get(ops.get(newKey));
                 		 
-                		 listvalues.put(curop, values);
+                		 listvalues.put(curop, newValues);
                 		 tmpHash.put(newKey, listvalues);
                 	 }else{
-                		 tmpHash.put(newKey, values);
-                	 }                   
+                		 tmpHash.put(newKey, newValues);
+                	 }  
+                	 
+                	
                  }else if(values.size()==1){
-                        tmpHash.put(newKey, values.get(0));
+                	 String val = (String)values.get(0);
+                	 if(val.endsWith("*")){
+                		 val = val.substring(0, val.length()-1);
+                		 System.out.println(val);
+                		 Pattern newVal = Pattern.compile("^"+val);
+                		 tmpHash.put(newKey, newVal);
+                	 }else if(val.startsWith("*")){
+                		 val = val.substring(1, val.length());
+                		 System.out.println(val);
+                		 Pattern newVal = Pattern.compile(val+"$");
+                		 newValues.add(newVal);
+                	 }else{
+                		 tmpHash.put(newKey, values.get(0));
+                	 }
+                        
                  }
                     
              }
