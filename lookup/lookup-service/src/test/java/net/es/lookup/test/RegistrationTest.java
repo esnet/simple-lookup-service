@@ -73,6 +73,8 @@ public class RegistrationTest {
 			
 			StatusLine responseStatus = response.getStatusLine();
 			assertEquals(200, responseStatus.getStatusCode());
+			assertEquals(200, responseStatus);
+			
 		}catch(IOException e){
 			fail("Connection error: "+e.getMessage());
 		}
@@ -82,7 +84,7 @@ public class RegistrationTest {
 	
 	//double entry, data.put() will overwirte the existing value
 	@Test
-	public void testRegistration1(){
+	public void testDoubleEntry(){
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services");
 		
@@ -144,7 +146,7 @@ public class RegistrationTest {
 	
 	//typo of the key: "service-type"->"service-typo"
 	@Test
-	public void testRegistration2(){
+	public void testTypoServiceType(){
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services");
 		
@@ -203,7 +205,7 @@ public class RegistrationTest {
 	
 	//typo of the value of the key "service type"
 	@Test
-	public void testRegistration003(){
+	public void testWrongServiceType(){
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services");
 		
@@ -245,7 +247,7 @@ public class RegistrationTest {
 		}
         
         httppost.setHeader("Accept", "application/json");
-        httppost.setHeader("Content-type", "application/js");
+        httppost.setHeader("Content-type", "application/json");
     
 		
 		try{
@@ -264,7 +266,7 @@ public class RegistrationTest {
 	
 	// Leave the “service-type” field as blank
 	@Test
-	public void testRegistration3(){
+	public void testBlankServiceType(){
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services");
 		
@@ -322,7 +324,7 @@ public class RegistrationTest {
 	
 	//Typo any key besides “service-type”
 	@Test
-	public void testRegistration4(){
+	public void testTypoAnyKey(){
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services");
 		
@@ -381,9 +383,9 @@ public class RegistrationTest {
 	}
 	
 	
-	//leave any value besides "record type" as blank
+	//leave any value besides "record-type" as blank
 	@Test
-	public void testRegistration5(){
+	public void testBlankAnyValue{
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services");
 		
@@ -442,7 +444,7 @@ public class RegistrationTest {
 	
 	//leave any field besides "record-type" as blank
 	@Test
-	public void testRegistration6(){
+	public void testBlankAnyField(){
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services");
 		
@@ -503,7 +505,7 @@ public class RegistrationTest {
 	
 	//typo the value of  "record-service-type"
 	@Test
-	public void testRegistration7(){
+	public void testTypoAnyValue(){
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services");
 		
@@ -563,7 +565,7 @@ public class RegistrationTest {
 	
 	//Typo the value of “Content-type”
 	@Test
-	public void testRegistration8(){
+	public void testWrongContentTypeValue(){
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services");
 		
@@ -624,7 +626,7 @@ public class RegistrationTest {
 	
 	//leave the value of the "Content-type" as blank
 	@Test
-	public void testRegistration9(){
+	public void testBlankContentTypeValue(){
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services");
 		
@@ -685,7 +687,7 @@ public class RegistrationTest {
 	
 	// write a wrong directory
 	@Test
-	public void testRegistration10(){
+	public void testWrongDirectory(){
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost("http://localhost:8080/services");
 		
@@ -745,7 +747,7 @@ public class RegistrationTest {
 	
 	//Remove the “Content-Type” field
 	@Test
-	public void testRegistration011(){
+	public void testRemoveContentType(){
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services");
 		
