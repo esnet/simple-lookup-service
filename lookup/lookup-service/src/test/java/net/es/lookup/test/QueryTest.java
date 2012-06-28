@@ -101,7 +101,7 @@ public class QueryTest {
 			params.setParameter("record-service-locator","wash-owamp.es.net");
 			
 			params.setParameter("record-service-type","ping");
-
+			System.out.println("PARAMS:"+params.getParameter("record-service-type"));
 			
 //			JSONObject data=new JSONObject();
 //			JSONArray value = new JSONArray();
@@ -141,17 +141,18 @@ public class QueryTest {
 	        httpget.setHeader("Accept", "application/json");
 	        httpget.setHeader("Content-type", "application/json");
 	        
-	        System.out.println("11111111"+httpget.getParams());
+	        System.out.println("11111111"+httpget.getParams().toString());
+
 			
 			try{
 				HttpResponse response = httpclient.execute(httpget);
 				
 				System.out.println(response.getStatusLine());
 //				
-				HttpEntity entity = response.getEntity();
-				System.out.println(entity.getContentType());
-				String httpresponse = EntityUtils.toString(entity);
-				System.out.println("Response Content: "+httpresponse);
+//				HttpEntity entity = response.getEntity();
+//				System.out.println(entity.getContentType());
+//				String httpresponse = EntityUtils.toString(entity);
+//				System.out.println("Response Content: "+httpresponse);
 				
 				StatusLine responseStatus = response.getStatusLine();
 				assertEquals(200, responseStatus.getStatusCode());
