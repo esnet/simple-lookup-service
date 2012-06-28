@@ -93,16 +93,12 @@ public class AccessService {
 		}
 
 		//		return "\n";
-
-
-//		return "/lookup/service/" + serviceRecord.getMap() + "\n";
+		//		return "/lookup/service/" + serviceRecord.getMap() + "\n";
 		return "Service record:  " + serviceRecord.getMap() + "\n";
 	}
-	
-	
-	
-	
-	
+
+
+
 	public String getKeyService(String serviceid, String service, String key) {
 		// Return some cliched textual content
 		System.out.println("Processing getService");
@@ -165,24 +161,18 @@ public class AccessService {
 		}
 
 		//		return "\n";
-//		return "/lookup/service/" + serviceRecord.getMap() + "\n";
+		//		return "/lookup/service/" + serviceRecord.getMap() + "\n";
 
 		return key + ":" + serviceRecord.getKey(key) + "\n";
 	}
-	
-	
-	
-	
-	
-	
-	
+
+
 
 	public String renewService(String serviceid, String service){
 		System.out.println("Processing renewService");
 		JSONRenewResponse response;
 
 		Message errorResponse = new Message();
-
 
 		JSONRenewRequest request = new JSONRenewRequest(service);
 		if (request.getStatus() == JSONRenewRequest.INCORRECT_FORMAT) {
@@ -291,7 +281,6 @@ public class AccessService {
 							}catch(DataFormatException e){
 								throw new InternalErrorException("Data formatting exception");
 							}
-
 						}
 					}
 				}else{
@@ -330,7 +319,7 @@ public class AccessService {
 		boolean res = request.validate();
 
 		return res;
-//		return true;
+		//		return true;
 	}
 
 
@@ -353,7 +342,7 @@ public class AccessService {
 		boolean res = request.validate();
 
 		return res;
-//		return true;
+		//		return true;
 	}
 
 
