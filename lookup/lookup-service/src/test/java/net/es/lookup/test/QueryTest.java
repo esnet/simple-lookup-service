@@ -101,7 +101,7 @@ public class QueryTest {
 			params.setParameter("record-service-locator","wash-owamp.es.net");
 			
 			params.setParameter("record-service-type","ping");
-			System.out.println("PARAMS:"+params.getParameter("record-service-type"));
+			System.out.println("PARAMS:"+params.getParameter("record-service-locator"));
 			
 //			JSONObject data=new JSONObject();
 //			JSONArray value = new JSONArray();
