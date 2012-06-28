@@ -99,7 +99,7 @@ public class RegistrationTest {
 		data.put("record-type",value);
 
 		value.clear();
-		value.add("http://localhost/accesspointtttttttt");
+		value.add("http://localhost/accesspointtttt232t2ttt");
 		data.put("record-service-locator",value);
 
 
@@ -139,7 +139,8 @@ public class RegistrationTest {
 			System.out.println(entity.getContentType());
 			String httpresponse = EntityUtils.toString(entity);
 			System.out.println("Response Content: "+httpresponse);
-
+			System.out.println(response.getStatusLine());
+			
 			int n=0;
 			String[] words;
 			httpresponse= httpresponse.replace("\"","");
@@ -148,12 +149,11 @@ public class RegistrationTest {
 				if(httpresponse.charAt(i)==',') n++; 
 			} 
 			words=httpresponse.trim().split(","); 
-			for(int i=0; i<httpresponse.length()-n; i++) { 
+			
+			for(int i=0; i<words.length-1; i++) { 
 				if(words[i].contains("record-uri"))
 					System.out.print(words[i]+"\n"); 
 			} 
-
-			System.out.println(response.getStatusLine());
 
 			StatusLine responseStatus = response.getStatusLine();
 			assertEquals(200, responseStatus.getStatusCode());
