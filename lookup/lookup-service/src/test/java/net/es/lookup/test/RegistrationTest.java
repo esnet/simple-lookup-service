@@ -86,83 +86,83 @@ public class RegistrationTest {
 	//		}
 	//	}
 
-	@Test
-	public void testOutPutUri(){
-		HttpClient httpclient = new DefaultHttpClient();
-		HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services");
-
-		//BasicHttpParams params = new BasicHttpParams();
-
-		JSONObject data=new JSONObject();
-		JSONArray value = new JSONArray();
-		value.add("service");
-		data.put("record-type",value);
-
-		value.clear();
-		value.add("http://localhost/accesspointtttt232t2ttt");
-		data.put("record-service-locator",value);
-
-
-		value.clear();
-		value.add("privatekey1");
-		data.put("record-privatekey",value);
-
-		value.clear();
-		value.add("bwctl");
-		data.put("record-service-type",value);
-
-
-
-		value.clear();
-		value.add("ESnet");
-		value.add("LHC");
-		data.put("record-service-domain",value);
-
-		System.out.println(data.toString());
-		try{
-			StringEntity se=new StringEntity (data.toString());
-
-			httppost.setEntity(se);
-			System.out.println(se);
-		}catch(UnsupportedEncodingException e){
-			fail("Connection error: "+e.getMessage());
-		}
-
-		httppost.setHeader("Accept", "application/json");
-		httppost.setHeader("Content-type", "application/json");
-
-		try{
-			HttpResponse response = httpclient.execute(httppost);
-			//			System.out.println("!!!!!!!!"+response.getEntity().getContentType());
-
-			HttpEntity entity = response.getEntity();
-			System.out.println(entity.getContentType());
-			String httpresponse = EntityUtils.toString(entity);
-			System.out.println("Response Content: "+httpresponse);
-			System.out.println(response.getStatusLine());
-			
-			int n=0;
-			String[] words;
-			httpresponse= httpresponse.replace("\"","");
-
-			for(int i=0;i<httpresponse.length();i++){ 
-				if(httpresponse.charAt(i)==',') n++; 
-			} 
-			words=httpresponse.trim().split(","); 
-			
-			for(int i=0; i<words.length-1; i++) { 
-				if(words[i].contains("record-uri"))
-					System.out.print(words[i]+"\n"); 
-			} 
-
-			StatusLine responseStatus = response.getStatusLine();
-			assertEquals(200, responseStatus.getStatusCode());
-			//			assertEquals(200, responseStatus.);
-
-		}catch(IOException e){
-			fail("Connection error: "+e.getMessage());
-		}
-	}
+//	@Test
+//	public void testOutPutUri(){
+//		HttpClient httpclient = new DefaultHttpClient();
+//		HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services");
+//
+//		//BasicHttpParams params = new BasicHttpParams();
+//
+//		JSONObject data=new JSONObject();
+//		JSONArray value = new JSONArray();
+//		value.add("service");
+//		data.put("record-type",value);
+//
+//		value.clear();
+//		value.add("http://localhost/accesspointtttt232t2ttt");
+//		data.put("record-service-locator",value);
+//
+//
+//		value.clear();
+//		value.add("privatekey1");
+//		data.put("record-privatekey",value);
+//
+//		value.clear();
+//		value.add("bwctl");
+//		data.put("record-service-type",value);
+//
+//
+//
+//		value.clear();
+//		value.add("ESnet");
+//		value.add("LHC");
+//		data.put("record-service-domain",value);
+//
+//		System.out.println(data.toString());
+//		try{
+//			StringEntity se=new StringEntity (data.toString());
+//
+//			httppost.setEntity(se);
+//			System.out.println(se);
+//		}catch(UnsupportedEncodingException e){
+//			fail("Connection error: "+e.getMessage());
+//		}
+//
+//		httppost.setHeader("Accept", "application/json");
+//		httppost.setHeader("Content-type", "application/json");
+//
+//		try{
+//			HttpResponse response = httpclient.execute(httppost);
+//			//			System.out.println("!!!!!!!!"+response.getEntity().getContentType());
+//
+//			HttpEntity entity = response.getEntity();
+//			System.out.println(entity.getContentType());
+//			String httpresponse = EntityUtils.toString(entity);
+//			System.out.println("Response Content: "+httpresponse);
+//			System.out.println(response.getStatusLine());
+//			
+//			int n=0;
+//			String[] words;
+//			httpresponse= httpresponse.replace("\"","");
+//
+//			for(int i=0;i<httpresponse.length();i++){ 
+//				if(httpresponse.charAt(i)==',') n++; 
+//			} 
+//			words=httpresponse.trim().split(","); 
+//			
+//			for(int i=0; i<words.length-1; i++) { 
+//				if(words[i].contains("record-uri"))
+//					System.out.print(words[i]+"\n"); 
+//			} 
+//
+//			StatusLine responseStatus = response.getStatusLine();
+//			assertEquals(200, responseStatus.getStatusCode());
+//			//			assertEquals(200, responseStatus.);
+//
+//		}catch(IOException e){
+//			fail("Connection error: "+e.getMessage());
+//		}
+//	}
 
 
 
