@@ -31,8 +31,9 @@ public class QueryServices {
     int size = requestMap.size();
 	System.out.println("Total number of parameters passed in request="+size);
 	  
+	System.out.println("request:"+requestMap.toString());
     	if(request.getOperator() != null){
-    	
+    		System.out.println("ddddd"+request.getOperator());
     		List mainOp = request.getOperator();
         	operators.add(ReservedKeywords.RECORD_OPERATOR, mainOp);
     	}else{
@@ -40,11 +41,13 @@ public class QueryServices {
     		mainOp.add(ReservedKeywords.RECORD_OPERATOR_DEFAULT);
     		operators.add(ReservedKeywords.RECORD_OPERATOR, mainOp);
     	}
-
+    	System.out.println("operatooooooor"+operators.getMap());
     	for (Map.Entry<String, Object> entry : requestMap.entrySet()) {
     		
     		String key = entry.getKey();
     		Object value = entry.getValue();
+    		
+    		System.out.println("key= "+key);
 	
     		//generate the operator map
     		if (!key.contains(ReservedKeywords.RECORD_OPERATOR_SUFFIX)){
@@ -52,12 +55,13 @@ public class QueryServices {
     			String opKey = key+"-"+ReservedKeywords.RECORD_OPERATOR_SUFFIX;
     			if(requestMap.containsKey(opKey)){
     				operators.add(key,requestMap.get(opKey));
+//    				System.out.println("operators::"+operators.getMap());////
     			}else{
     				//add default
     				operators.add(key, ReservedKeywords.RECORD_OPERATOR_DEFAULT);
     			}
+    			System.out.println("operators::"+operators.getMap());////
     		}
-    		
     	}   
 
         	// Query DB
@@ -65,6 +69,7 @@ public class QueryServices {
         		List<Service> res = ServiceDAOMongoDb.getInstance().query(request, queryParameters, operators, maxResult, skip);
             	// Build response
                 response = JSONMessage.toString(res);
+                System.out.println(response);
                 return response;
         	}catch(DatabaseException e){
         		throw new InternalErrorException("Error retrieving results");
