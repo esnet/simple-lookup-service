@@ -137,7 +137,7 @@ public class GetKeyServiceTest {
 	
 	
 	@Test
-	public void testWrongDirectory(){
+	public void testWrongPath(){
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpGet httpget = new HttpGet("http://localhost:8080/lookup/81c8089b-bd61-4ff3-a966-d8a6affa2599/site_location");
 
