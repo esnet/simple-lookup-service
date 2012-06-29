@@ -94,7 +94,7 @@ public class QueryTest {
 		@Test
 		public void testMultiValue(){
 			HttpClient httpclient = new DefaultHttpClient();
-			HttpGet httpget = new HttpGet("http://localhost:8080/lookup/services");
+			HttpGet httpget = new HttpGet("http://localhost:8080/lookup/services?record-service-type=ping");
 			
 			BasicHttpParams params = new BasicHttpParams();
 			
