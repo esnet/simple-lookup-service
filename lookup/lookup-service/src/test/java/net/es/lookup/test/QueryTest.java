@@ -27,132 +27,58 @@ import org.apache.http.HttpEntity;
 
 public class QueryTest {
 
-//		@Test
-//		public void testSingleValue(){
-//			HttpClient httpclient = new DefaultHttpClient();
-//			HttpGet httpget = new HttpGet("http://localhost:8080/lookup/services");
-//			
-//			//BasicHttpParams params = new BasicHttpParams();
-//			
-//			JSONObject data=new JSONObject();
-//			JSONArray value = new JSONArray();
-////			value.add("service");
-////			data.put("record-type",value);
-////			
-////			value.clear();
-////			value.add("http://localhost/accesspointa11");
-////			data.put("record-service-locator",value);
-////		
-////			
-////			value.clear();
-////			value.add("privatekey1");
-////			data.put("record-privatekey",value);
-////			
-////			value.clear();
-////			value.add("bwctl");
-////			data.put("record-service-type",value);
-//			
-//			
-//			
-//			value.clear();
-//			value.add("ESnet");
-//			value.add("LHC");
-//			data.put("record-service-domain",value);
-//			
-//			System.out.println(data.toString());
-////			try{
-////				StringEntity se=new StringEntity (data.toString());
-////			
-////				httpget.setEntity(se);
-////				System.out.println(se);
-////			}catch(UnsupportedEncodingException e){
-////				fail("Connection error: "+e.getMessage());
-////			}
-//	        
-//	        httpget.setHeader("Accept", "application/json");
-//	        httpget.setHeader("Content-type", "application/json");
-//			
-//			try{
-//				HttpResponse response = httpclient.execute(httpget);
-//				
-//				System.out.println(response.getStatusLine());
-//				
-//				HttpEntity entity = response.getEntity();
-//				System.out.println(entity.getContentType());
-//				String httpresponse = EntityUtils.toString(entity);
-//				System.out.println("Response Content: "+httpresponse);
-//				
-//				StatusLine responseStatus = response.getStatusLine();
-//				assertEquals(200, responseStatus.getStatusCode());
-//				
-//			}catch(IOException e){
-//				fail("Connection error: "+e.getMessage());
-//			}
-//		}
+		@Test
+		public void testSingleValue(){
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpGet httpget = new HttpGet("http://localhost:8080/lookup/services?record-service-locator=tcp://nash-pt1.es.net:4823");
+	        
+	        httpget.setHeader("Accept", "application/json");
+	        httpget.setHeader("Content-type", "application/json");
+			
+			try{
+				HttpResponse response = httpclient.execute(httpget);
+				
+				System.out.println(response.getStatusLine());
+				
+				HttpEntity entity = response.getEntity();
+				System.out.println(entity.getContentType());
+				String httpresponse = EntityUtils.toString(entity);
+				System.out.println("Response Content: "+httpresponse);
+				
+				StatusLine responseStatus = response.getStatusLine();
+				assertEquals(200, responseStatus.getStatusCode());
+				
+			}catch(IOException e){
+				fail("Connection error: "+e.getMessage());
+			}
+		}
 		
 		
 		@Test
 		public void testMultiValue(){
 			HttpClient httpclient = new DefaultHttpClient();
-			HttpGet httpget = new HttpGet("http://localhost:8080/lookup/services?record-service-type=ping");
+			HttpGet httpget = new HttpGet("http://localhost:8080/lookup/services?record-service-type=ping&record-service-domain=ESnet&record-service-locator=tcp://nash-pt1.es.net:4823");
 			
-			BasicHttpParams params = new BasicHttpParams();
-			
-			params.setParameter("record-service-locator","wash-owamp.es.net");
-			
-			params.setParameter("record-service-type","ping");
-			System.out.println("PARAMS:"+params.getParameter("record-service-locator"));
-			
-//			JSONObject data=new JSONObject();
-//			JSONArray value = new JSONArray();
-//			value.add("service");
-//			data.put("record-type",value);
-//			
-//			value.clear();
-//			value.add("wash-owamp.es.net");
-//			data.put("record-service-locator",value);
-//		
-//			
-////			value.clear();
-////			value.add("privatekey1");
-////			data.put("record-privatekey",value);
-////			
-//			value.clear();
-//			value.add("ping");
-//			data.put("record-service-type",value);
-//			
-//			
-//			
-//			value.clear();
-//			value.add("ESnet");
-////			value.add("LHC");
-//			data.put("record-service-domain",value);
-//			
-//			System.out.println("11111111"+params.toString());
-//			try{
-//				HttpEntity se=data.toString();
-			
-			httpget.setParams(params);
-//				System.out.println(se);
-//			}catch(UnsupportedEncodingException e){
-//				fail("Connection error: "+e.getMessage());
-//			}
+//			BasicHttpParams params = new BasicHttpParams();	
+//			params.setParameter("record-service-locator","wash-owamp.es.net");		
+//			params.setParameter("record-service-type","ping");
+//			System.out.println("PARAMS:"+params.getParameter("record-service-locator"));
 	        
 	        httpget.setHeader("Accept", "application/json");
 	        httpget.setHeader("Content-type", "application/json");
 	        
-	        System.out.println("11111111"+httpget.getParams().toString());
+//	        System.out.println("11111111"+httpget.getParams().toString());
 
 			
 			try{
 				HttpResponse response = httpclient.execute(httpget);
 				
 				System.out.println(response.getStatusLine());
-//				
-//				HttpEntity entity = response.getEntity();
-//				System.out.println(entity.getContentType());
-//				String httpresponse = EntityUtils.toString(entity);
-//				System.out.println("Response Content: "+httpresponse);
+				
+				HttpEntity entity = response.getEntity();
+				System.out.println(entity.getContentType());
+				String httpresponse = EntityUtils.toString(entity);
+				System.out.println("Response Content: "+httpresponse);
 				
 				StatusLine responseStatus = response.getStatusLine();
 				assertEquals(200, responseStatus.getStatusCode());
@@ -163,153 +89,251 @@ public class QueryTest {
 		}
 
 		
-//		
-//		@Test
-//		public void testOperator(){
-//			HttpClient httpclient = new DefaultHttpClient();
-//			HttpGet httpget = new HttpGet("http://localhost:8080/lookup/services");
-//			
-//			//BasicHttpParams params = new BasicHttpParams();
-//			
-//			JSONObject data=new JSONObject();
-//			JSONArray value = new JSONArray();
-//			value.add("service");
-//			data.put("record-type",value);
-//			
-//			value.clear();
-//			value.add("http://localhost/accesspointa11");
-//			data.put("record-service-locator",value);
-//		
-//				
-//			
-//			value.clear();
-//			value.add("bwctl");
-//			data.put("record-service-type",value);
-//			
-//			
-//			value.clear();
-//			value.add("ESnet");
-//			value.add("LHC");
-//			data.put("record-service-domain",value);
-//			
-//			value.clear();
-//			value.add("all");
-//			data.put("record-operator",value);
-//			
-//			System.out.println(data.toString());
-////			try{
-////				StringEntity se=new StringEntity (data.toString());
-////			
-////				httpget.setEntity(se);
-////				System.out.println(se);
-////			}catch(UnsupportedEncodingException e){
-////				fail("Connection error: "+e.getMessage());
-////			}
-//	        
-//	        httpget.setHeader("Accept", "application/json");
-//	        httpget.setHeader("Content-type", "application/json");
-//			
-//			try{
-//				HttpResponse response = httpclient.execute(httpget);
-//				
-//				System.out.println(response.getStatusLine());
-//				
-//				HttpEntity entity = response.getEntity();
-//				System.out.println(entity.getContentType());
-//				String httpresponse = EntityUtils.toString(entity);
-//				System.out.println("Response Content: "+httpresponse);
-//				
-//				StatusLine responseStatus = response.getStatusLine();
-//				assertEquals(200, responseStatus.getStatusCode());
-//				
-//			}catch(IOException e){
-//				fail("Connection error: "+e.getMessage());
-//			}
-//		}
+		
+		@Test
+		public void testOperator(){
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpGet httpget = new HttpGet("http://localhost:8080/lookup/services" +
+					"?record-service-type=ping&record-service-domain=ESnet&record-service-locator=tcp://nash-pt1.es.net:4823&record-operator=any");
+			
+			//BasicHttpParams params = new BasicHttpParams();
+			
+	        httpget.setHeader("Accept", "application/json");
+	        httpget.setHeader("Content-type", "application/json");
+			
+			try{
+				HttpResponse response = httpclient.execute(httpget);
+				
+				System.out.println(response.getStatusLine());
+				
+				HttpEntity entity = response.getEntity();
+				System.out.println(entity.getContentType());
+				String httpresponse = EntityUtils.toString(entity);
+				System.out.println("Response Content: "+httpresponse);
+				
+				StatusLine responseStatus = response.getStatusLine();
+				assertEquals(200, responseStatus.getStatusCode());
+				
+			}catch(IOException e){
+				fail("Connection error: "+e.getMessage());
+			}
+		}
+		
+		//In this case, the key operator does not work. 
+		//When the record-service-domain-operator=all,the lookup service treats it as "any"
+		@Test
+		public void testKeyOperator(){
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpGet httpget = new HttpGet("http://localhost:8080/lookup/services" +
+					"?record-service-type=ping&record-service-domain=ESnet,LHC&record-service-domain-operator=all&record-service-locator=tcp://nash-pt1.es.net:4823&record-operator=any");
+			
+			//BasicHttpParams params = new BasicHttpParams();
+		    
+	        httpget.setHeader("Accept", "application/json");
+	        httpget.setHeader("Content-type", "application/json");
+			
+			try{
+				HttpResponse response = httpclient.execute(httpget);
+				
+				System.out.println(response.getStatusLine());
+				
+				HttpEntity entity = response.getEntity();
+				System.out.println(entity.getContentType());
+				String httpresponse = EntityUtils.toString(entity);
+				System.out.println("Response Content: "+httpresponse);
+				
+				StatusLine responseStatus = response.getStatusLine();
+				assertEquals(200, responseStatus.getStatusCode());
+				
+			}catch(IOException e){
+				fail("Connection error: "+e.getMessage());
+			}
+		}
+		
+		
+		@Test
+		public void testSingleStar(){
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpGet httpget = new HttpGet("http://localhost:8080/lookup/services" +
+					"?record-service-type=ping&record-service-domain=ES*,LHC&record-service-domain-operator=all&record-service-locator=tcp://nash-pt1.es.net:4823&record-operator=any");
+			
+			//BasicHttpParams params = new BasicHttpParams();
+		    
+	        httpget.setHeader("Accept", "application/json");
+	        httpget.setHeader("Content-type", "application/json");
+			
+			try{
+				HttpResponse response = httpclient.execute(httpget);
+				
+				System.out.println(response.getStatusLine());
+				
+				HttpEntity entity = response.getEntity();
+				System.out.println(entity.getContentType());
+				String httpresponse = EntityUtils.toString(entity);
+				System.out.println("Response Content: "+httpresponse);
+				
+				StatusLine responseStatus = response.getStatusLine();
+				assertEquals(200, responseStatus.getStatusCode());
+				
+			}catch(IOException e){
+				fail("Connection error: "+e.getMessage());
+			}
+		}
 
+		//In this test case, the record which is not included in the specified in certain field are also responsed
+		//eg: record-service-domain=ES*,L*, but the response result also incoude "Ecenter";
+		@Test
+		public void testMultiStar(){
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpGet httpget = new HttpGet("http://localhost:8080/lookup/services" +
+					"?record-service-type=ping&record-service-domain=ES*,L*&record-service-domain-operator=all&record-service-locator=tcp://nash-pt1.es.net:4823&record-operator=any");
+			
+			//BasicHttpParams params = new BasicHttpParams();
+		    
+	        httpget.setHeader("Accept", "application/json");
+	        httpget.setHeader("Content-type", "application/json");
+			
+			try{
+				HttpResponse response = httpclient.execute(httpget);
+				
+				System.out.println(response.getStatusLine());
+				
+				HttpEntity entity = response.getEntity();
+				System.out.println(entity.getContentType());
+				String httpresponse = EntityUtils.toString(entity);
+				System.out.println("Response Content: "+httpresponse);
+				
+				StatusLine responseStatus = response.getStatusLine();
+				assertEquals(200, responseStatus.getStatusCode());
+				
+			}catch(IOException e){
+				fail("Connection error: "+e.getMessage());
+			}
+		}
 		
 		
 		
+		@Test
+		public void testWrongKey(){
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpGet httpget = new HttpGet("http://localhost:8080/lookup/services" +
+					"?record-service-type=ping&record-service-domain=ESnet&record-operator=all");
+			
+			//BasicHttpParams params = new BasicHttpParams();
+		    
+	        httpget.setHeader("Accept", "application/json");
+	        httpget.setHeader("Content-type", "application/json");
+			
+			try{
+				HttpResponse response = httpclient.execute(httpget);
+				
+				System.out.println(response.getStatusLine());
+				
+				HttpEntity entity = response.getEntity();
+				System.out.println(entity.getContentType());
+				String httpresponse = EntityUtils.toString(entity);
+				System.out.println("Response Content: "+httpresponse);
+				
+				StatusLine responseStatus = response.getStatusLine();
+				assertEquals(200, responseStatus.getStatusCode());
+				
+			}catch(IOException e){
+				fail("Connection error: "+e.getMessage());
+			}
+		}
+		
+		
+		
+		//return 200 OK. Only typo the value of "Accept", it will return 406 Not Acceptable
+		@Test
+		public void testWrongContentType(){
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpGet httpget = new HttpGet("http://localhost:8080/lookup/services" +
+					"?record-service-type=ping&record-service-domain=ESnet&record-operator=all");
+			
+			//BasicHttpParams params = new BasicHttpParams();
+		    
+	        httpget.setHeader("Accept", "application/json");
+	        httpget.setHeader("Content-type", "");
+			
+			try{
+				HttpResponse response = httpclient.execute(httpget);
+				
+				System.out.println(response.getStatusLine());
+				
+				HttpEntity entity = response.getEntity();
+				System.out.println(entity.getContentType());
+				String httpresponse = EntityUtils.toString(entity);
+				System.out.println("Response Content: "+httpresponse);
+				
+				StatusLine responseStatus = response.getStatusLine();
+				assertEquals(200, responseStatus.getStatusCode());
+				
+			}catch(IOException e){
+				fail("Connection error: "+e.getMessage());
+			}
+		}
+		
+		
+		//404 Not Found
+		@Test
+		public void testWrongDirectory(){
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpGet httpget = new HttpGet("http://localhost:8080/lookup" +
+					"?record-service-type=ping&record-service-domain=ESnet&record-operator=all");
+			
+			//BasicHttpParams params = new BasicHttpParams();
+		    
+	        httpget.setHeader("Accept", "application/json");
+	        httpget.setHeader("Content-type", "application/json");
+			
+			try{
+				HttpResponse response = httpclient.execute(httpget);
+				
+				System.out.println(response.getStatusLine());
+				
+				HttpEntity entity = response.getEntity();
+				System.out.println(entity.getContentType());
+				String httpresponse = EntityUtils.toString(entity);
+				System.out.println("Response Content: "+httpresponse);
+				
+				StatusLine responseStatus = response.getStatusLine();
+				assertEquals(404, responseStatus.getStatusCode());
+				
+			}catch(IOException e){
+				fail("Connection error: "+e.getMessage());
+			}
+		}
 
-//	@Test
-//	public void testOutPutUri(){
-//		HttpClient httpclient = new DefaultHttpClient();
-//		HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services");
-//
-//		//BasicHttpParams params = new BasicHttpParams();
-//
-//		JSONObject data=new JSONObject();
-//		JSONArray value = new JSONArray();
-//		value.add("service");
-//		data.put("record-type",value);
-//
-//		value.clear();
-//		value.add("http://localhost/accesspointtttt232t2ttt");
-//		data.put("record-service-locator",value);
-//
-//
-//		value.clear();
-//		value.add("privatekey1");
-//		data.put("record-privatekey",value);
-//
-//		value.clear();
-//		value.add("bwctl");
-//		data.put("record-service-type",value);
-//
-//
-//
-//		value.clear();
-//		value.add("ESnet");
-//		value.add("LHC");
-//		data.put("record-service-domain",value);
-//
-//		System.out.println(data.toString());
-//		try{
-//			StringEntity se=new StringEntity (data.toString());
-//
-//			httppost.setEntity(se);
-//			System.out.println(se);
-//		}catch(UnsupportedEncodingException e){
-//			fail("Connection error: "+e.getMessage());
-//		}
-//
-//		httppost.setHeader("Accept", "application/json");
-//		httppost.setHeader("Content-type", "application/json");
-//
-//		try{
-//			HttpResponse response = httpclient.execute(httppost);
-//			//			System.out.println("!!!!!!!!"+response.getEntity().getContentType());
-//
-//			HttpEntity entity = response.getEntity();
-//			System.out.println(entity.getContentType());
-//			String httpresponse = EntityUtils.toString(entity);
-//			System.out.println("Response Content: "+httpresponse);
-//			System.out.println(response.getStatusLine());
-//			
-//			int n=0;
-//			String[] words;
-//			httpresponse= httpresponse.replace("\"","");
-//
-//			for(int i=0;i<httpresponse.length();i++){ 
-//				if(httpresponse.charAt(i)==',') n++; 
-//			} 
-//			words=httpresponse.trim().split(","); 
-//			
-//			for(int i=0; i<words.length-1; i++) { 
-//				if(words[i].contains("record-uri"))
-//					System.out.print(words[i]+"\n"); 
-//			} 
-//
-//			StatusLine responseStatus = response.getStatusLine();
-//			assertEquals(200, responseStatus.getStatusCode());
-//			//			assertEquals(200, responseStatus.);
-//
-//		}catch(IOException e){
-//			fail("Connection error: "+e.getMessage());
-//		}
-//	}
-
-
-
+		
+		//500 Internal Server Error
+		@Test
+		public void testTurnOffDB(){
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpGet httpget = new HttpGet("http://localhost:8080/lookup/services" +
+					"?record-service-type=ping&record-service-domain=ESnet&record-operator=all");
+			
+			//BasicHttpParams params = new BasicHttpParams();
+		    
+	        httpget.setHeader("Accept", "application/json");
+	        httpget.setHeader("Content-type", "application/json");
+			
+			try{
+				HttpResponse response = httpclient.execute(httpget);
+				
+				System.out.println(response.getStatusLine());
+				
+				HttpEntity entity = response.getEntity();
+				System.out.println(entity.getContentType());
+				String httpresponse = EntityUtils.toString(entity);
+				System.out.println("Response Content: "+httpresponse);
+				
+				StatusLine responseStatus = response.getStatusLine();
+				assertEquals(500, responseStatus.getStatusCode());
+				
+			}catch(IOException e){
+				fail("Connection error: "+e.getMessage());
+			}
+		}
 
 }
