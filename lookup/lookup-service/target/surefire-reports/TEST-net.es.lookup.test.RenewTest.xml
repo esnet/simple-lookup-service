@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite failures="1" time="5.341" errors="0" skipped="0" tests="1" name="net.es.lookup.test.RenewTest">
+  <properties>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="sun.boot.library.path" value="/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Libraries"/>
+    <property name="java.vm.version" value="20.6-b01-415"/>
+    <property name="awt.nativeDoubleBuffering" value="true"/>
+    <property name="gopherProxySet" value="false"/>
+    <property name="mrj.build" value="10M3646"/>
+    <property name="java.vm.vendor" value="Apple Inc."/>
+    <property name="java.vendor.url" value="http://www.apple.com/"/>
+    <property name="path.separator" value=":"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="file.encoding.pkg" value="sun.io"/>
+    <property name="user.country" value="US"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="sun.os.patch.level" value="unknown"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="user.dir" value="/Users/cwei/Documents/workspace/lookup/lookup-service"/>
+    <property name="java.runtime.version" value="1.6.0_31-b04-415-10M3646"/>
+    <property name="java.awt.graphicsenv" value="apple.awt.CGraphicsEnvironment"/>
+    <property name="basedir" value="/Users/cwei/Documents/workspace/lookup/lookup-service"/>
+    <property name="java.endorsed.dirs" value="/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/endorsed"/>
+    <property name="os.arch" value="x86_64"/>
+    <property name="surefire.real.class.path" value="/Users/cwei/Documents/workspace/lookup/lookup-service/target/surefire/surefirebooter1206311259911824717.jar"/>
+    <property name="java.io.tmpdir" value="/var/folders/Jx/JxUr8rwcGKaXA1eBMn9VdE+++TU/-Tmp-/"/>
+    <property name="line.separator" value="
+"/>
+    <property name="java.vm.specification.vendor" value="Sun Microsystems Inc."/>
+    <property name="os.name" value="Mac OS X"/>
+    <property name="sun.jnu.encoding" value="MacRoman"/>
+    <property name="java.library.path" value=".:/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java"/>
+    <property name="surefire.test.class.path" value="/Users/cwei/Documents/workspace/lookup/lookup-service/target/test-classes:/Users/cwei/Documents/workspace/lookup/lookup-service/target/classes:/Users/cwei/.m2/repository/com/sun/jersey/jersey-server/1.12/jersey-server-1.12.jar:/Users/cwei/.m2/repository/asm/asm/3.1/asm-3.1.jar:/Users/cwei/.m2/repository/com/sun/jersey/jersey-core/1.12/jersey-core-1.12.jar:/Users/cwei/.m2/repository/com/sun/jersey/jersey-grizzly2/1.12/jersey-grizzly2-1.12.jar:/Users/cwei/.m2/repository/org/glassfish/grizzly/grizzly-http/2.2.1/grizzly-http-2.2.1.jar:/Users/cwei/.m2/repository/org/glassfish/grizzly/grizzly-framework/2.2.1/grizzly-framework-2.2.1.jar:/Users/cwei/.m2/repository/org/glassfish/gmbal/gmbal-api-only/3.0.0-b023/gmbal-api-only-3.0.0-b023.jar:/Users/cwei/.m2/repository/org/glassfish/external/management-api/3.0.0-b012/management-api-3.0.0-b012.jar:/Users/cwei/.m2/repository/org/glassfish/grizzly/grizzly-http-server/2.2.1/grizzly-http-server-2.2.1.jar:/Users/cwei/.m2/repository/org/glassfish/grizzly/grizzly-rcm/2.2.1/grizzly-rcm-2.2.1.jar:/Users/cwei/.m2/repository/net/sf/json-lib/json-lib/2.4/json-lib-2.4-jdk15.jar:/Users/cwei/.m2/repository/commons-beanutils/commons-beanutils/1.8.0/commons-beanutils-1.8.0.jar:/Users/cwei/.m2/repository/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar:/Users/cwei/.m2/repository/commons-lang/commons-lang/2.5/commons-lang-2.5.jar:/Users/cwei/.m2/repository/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar:/Users/cwei/.m2/repository/net/sf/ezmorph/ezmorph/1.0.6/ezmorph-1.0.6.jar:/Users/cwei/.m2/repository/org/mongodb/mongo-java-driver/2.7.3/mongo-java-driver-2.7.3.jar:/Users/cwei/.m2/repository/joda-time/joda-time/2.1/joda-time-2.1.jar:/Users/cwei/.m2/repository/junit/junit/4.8.1/junit-4.8.1.jar:/Users/cwei/.m2/repository/org/apache/httpcomponents/httpclient/4.2/httpclient-4.2.jar:/Users/cwei/.m2/repository/commons-codec/commons-codec/1.6/commons-codec-1.6.jar:/Users/cwei/.m2/repository/org/apache/httpcomponents/httpcore/4.2.1/httpcore-4.2.1.jar:/Users/cwei/.m2/repository/net/sf/jopt-simple/jopt-simple/3.0.1/jopt-simple-3.0.1.jar:"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="java.class.version" value="50.0"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="os.version" value="10.6.8"/>
+    <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="user.home" value="/Users/cwei"/>
+    <property name="user.timezone" value=""/>
+    <property name="java.awt.printerjob" value="apple.awt.CPrinterJob"/>
+    <property name="java.specification.version" value="1.6"/>
+    <property name="file.encoding" value="MacRoman"/>
+    <property name="user.name" value="cwei"/>
+    <property name="java.class.path" value="/Users/cwei/Documents/workspace/lookup/lookup-service/target/test-classes:/Users/cwei/Documents/workspace/lookup/lookup-service/target/classes:/Users/cwei/.m2/repository/com/sun/jersey/jersey-server/1.12/jersey-server-1.12.jar:/Users/cwei/.m2/repository/asm/asm/3.1/asm-3.1.jar:/Users/cwei/.m2/repository/com/sun/jersey/jersey-core/1.12/jersey-core-1.12.jar:/Users/cwei/.m2/repository/com/sun/jersey/jersey-grizzly2/1.12/jersey-grizzly2-1.12.jar:/Users/cwei/.m2/repository/org/glassfish/grizzly/grizzly-http/2.2.1/grizzly-http-2.2.1.jar:/Users/cwei/.m2/repository/org/glassfish/grizzly/grizzly-framework/2.2.1/grizzly-framework-2.2.1.jar:/Users/cwei/.m2/repository/org/glassfish/gmbal/gmbal-api-only/3.0.0-b023/gmbal-api-only-3.0.0-b023.jar:/Users/cwei/.m2/repository/org/glassfish/external/management-api/3.0.0-b012/management-api-3.0.0-b012.jar:/Users/cwei/.m2/repository/org/glassfish/grizzly/grizzly-http-server/2.2.1/grizzly-http-server-2.2.1.jar:/Users/cwei/.m2/repository/org/glassfish/grizzly/grizzly-rcm/2.2.1/grizzly-rcm-2.2.1.jar:/Users/cwei/.m2/repository/net/sf/json-lib/json-lib/2.4/json-lib-2.4-jdk15.jar:/Users/cwei/.m2/repository/commons-beanutils/commons-beanutils/1.8.0/commons-beanutils-1.8.0.jar:/Users/cwei/.m2/repository/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar:/Users/cwei/.m2/repository/commons-lang/commons-lang/2.5/commons-lang-2.5.jar:/Users/cwei/.m2/repository/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar:/Users/cwei/.m2/repository/net/sf/ezmorph/ezmorph/1.0.6/ezmorph-1.0.6.jar:/Users/cwei/.m2/repository/org/mongodb/mongo-java-driver/2.7.3/mongo-java-driver-2.7.3.jar:/Users/cwei/.m2/repository/joda-time/joda-time/2.1/joda-time-2.1.jar:/Users/cwei/.m2/repository/junit/junit/4.8.1/junit-4.8.1.jar:/Users/cwei/.m2/repository/org/apache/httpcomponents/httpclient/4.2/httpclient-4.2.jar:/Users/cwei/.m2/repository/commons-codec/commons-codec/1.6/commons-codec-1.6.jar:/Users/cwei/.m2/repository/org/apache/httpcomponents/httpcore/4.2.1/httpcore-4.2.1.jar:/Users/cwei/.m2/repository/net/sf/jopt-simple/jopt-simple/3.0.1/jopt-simple-3.0.1.jar:"/>
+    <property name="java.vm.specification.version" value="1.0"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.home" value="/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home"/>
+    <property name="sun.java.command" value="/Users/cwei/Documents/workspace/lookup/lookup-service/target/surefire/surefirebooter1206311259911824717.jar /Users/cwei/Documents/workspace/lookup/lookup-service/target/surefire/surefire1990667276990390034tmp /Users/cwei/Documents/workspace/lookup/lookup-service/target/surefire/surefire4461955760750565713tmp"/>
+    <property name="java.specification.vendor" value="Sun Microsystems Inc."/>
+    <property name="user.language" value="en"/>
+    <property name="awt.toolkit" value="apple.awt.CToolkit"/>
+    <property name="java.vm.info" value="mixed mode"/>
+    <property name="java.version" value="1.6.0_31"/>
+    <property name="java.ext.dirs" value="/Library/Java/Extensions:/System/Library/Java/Extensions:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext"/>
+    <property name="sun.boot.class.path" value="/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/jsfd.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/classes.jar:/System/Library/Frameworks/JavaVM.framework/Frameworks/JavaRuntimeSupport.framework/Resources/Java/JavaRuntimeSupport.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/ui.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/laf.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/sunrsasign.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/jsse.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/jce.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/charsets.jar"/>
+    <property name="java.vendor" value="Apple Inc."/>
+    <property name="localRepository" value="/Users/cwei/.m2/repository"/>
+    <property name="file.separator" value="/"/>
+    <property name="java.vendor.url.bug" value="http://bugreport.apple.com/"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="mrj.version" value="1060.1.6.0_31-415"/>
+    <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="sun.cpu.isalist" value=""/>
+  </properties>
+  <testcase time="5.129" classname="net.es.lookup.test.RenewTest" name="testSimpleRegistration">
+    <failure message="expected:&lt;200&gt; but was:&lt;500&gt;" type="java.lang.AssertionError">java.lang.AssertionError: expected:&lt;200&gt; but was:&lt;500&gt;
+	at org.junit.Assert.fail(Assert.java:91)
+	at org.junit.Assert.failNotEquals(Assert.java:645)
+	at org.junit.Assert.assertEquals(Assert.java:126)
+	at org.junit.Assert.assertEquals(Assert.java:470)
+	at org.junit.Assert.assertEquals(Assert.java:454)
+	at net.es.lookup.test.RenewTest.testSimpleRegistration(RenewTest.java:90)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:597)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:44)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:15)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:41)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:20)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:76)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:50)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:193)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:52)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:191)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:42)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:184)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:236)
+	at org.apache.maven.surefire.junit4.JUnit4TestSet.execute(JUnit4TestSet.java:35)
+	at org.apache.maven.surefire.junit4.JUnit4Provider.executeTestSet(JUnit4Provider.java:115)
+	at org.apache.maven.surefire.junit4.JUnit4Provider.invoke(JUnit4Provider.java:97)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:597)
+	at org.apache.maven.surefire.booter.ProviderFactory$ClassLoaderProxy.invoke(ProviderFactory.java:103)
+	at $Proxy0.invoke(Unknown Source)
+	at org.apache.maven.surefire.booter.SurefireStarter.invokeProvider(SurefireStarter.java:150)
+	at org.apache.maven.surefire.booter.SurefireStarter.runSuitesInProcess(SurefireStarter.java:91)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:69)
+</failure>
+    <system-out>@HL
+@HL-------------------------------------------------------
+@HL T E S T S
+@HL-------------------------------------------------------
+@SLRunning net.es.lookup.test.RenewTest
+org.apache.http.entity.StringEntity@39dd3812
+HTTP/1.1 500 Internal Error
+Content-Type: text/html; charset=iso-8859-1
+Response Content: 
+HTTP/1.1 500 Internal Error
+</system-out>
+  </testcase>
+</testsuite>
