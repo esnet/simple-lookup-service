@@ -331,6 +331,7 @@ public class AccessService {
 
 	private boolean isValid(JSONRenewRequest request) {
 		//TODO: add privatekey as mandatory key-value
+		System.out.println("Request's TTL= "+request.getTTL());
 		boolean res = ((request.validate()) && (request.getTTL()>0));
 
 		return res;  
