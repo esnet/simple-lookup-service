@@ -41,7 +41,7 @@ public class QueryServices {
     		mainOp.add(ReservedKeywords.RECORD_OPERATOR_DEFAULT);
     		operators.add(ReservedKeywords.RECORD_OPERATOR, mainOp);
     	}
-    	System.out.println("operatooooooor"+operators.getMap());
+    	System.out.println("operator"+operators.getMap());
     	for (Map.Entry<String, Object> entry : requestMap.entrySet()) {
     		
     		String key = entry.getKey();
@@ -59,6 +59,7 @@ public class QueryServices {
     			}else{
     				//add default
     				operators.add(key, ReservedKeywords.RECORD_OPERATOR_DEFAULT);
+    				
     			}
     			System.out.println("operators::"+operators.getMap());////
     		}

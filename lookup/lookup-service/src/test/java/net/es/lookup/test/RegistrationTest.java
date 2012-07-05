@@ -16,6 +16,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.http.HttpEntity;
 
 import net.sf.json.JSONObject;
 import net.sf.json.JSONArray;

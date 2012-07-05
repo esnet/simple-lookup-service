@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.net.URI;
 
 
+import net.es.lookup.resources.*;
+
+
 
 /**
  *
@@ -60,7 +63,8 @@ public class LookupService {
 
     protected HttpServer startServer() throws IOException {
         System.out.println("Creating Resource...");
-        ResourceConfig rc = new PackagesResourceConfig("net.es.lookup.service","net.es.lookup.resources");
+        ResourceConfig rc = new PackagesResourceConfig("net.es.lookup.resources","net.es.lookup.service");
+        System.out.println();
         System.out.println(("Starting grizzly..."));
         return GrizzlyServerFactory.createHttpServer(UriBuilder.fromUri("http://localhost/").port(this.port).build(),
                                                      rc);

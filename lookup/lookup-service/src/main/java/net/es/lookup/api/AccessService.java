@@ -190,10 +190,10 @@ public class AccessService {
 				if(serviceRecord!= null){
 					System.out.println("servicerecord not null");
 					Map<String, Object> serviceMap = serviceRecord.getMap();
-					if(request.getTTL()>(long)0){
+					if(request.getTTL() != null && request.getTTL() != ""){
 						serviceMap.put(ReservedKeywords.RECORD_TTL, request.getTTL());
 					}else{
-						serviceMap.put(ReservedKeywords.RECORD_TTL, (long)0);
+						serviceMap.put(ReservedKeywords.RECORD_TTL, "");
 					}
 
 					if(serviceMap.containsKey(ReservedKeywords.RECORD_EXPIRES)){
@@ -332,7 +332,7 @@ public class AccessService {
 	private boolean isValid(JSONRenewRequest request) {
 		//TODO: add privatekey as mandatory key-value
 		System.out.println("Request's TTL= "+request.getTTL());
-		boolean res = ((request.validate()) && (request.getTTL()>0));
+		boolean res = ((request.validate()) && (request.getTTL() != null && request.getTTL() != ""));
 
 		return res;  
 	}

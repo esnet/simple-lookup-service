@@ -41,24 +41,8 @@ public class JSONRegisterRequest extends RegisterRequest {
     	        Set keyValues = jsonObj.entrySet();
     	        System.out.println(obj.toString());
     	        for (Object o : ((JSONObject) obj).keySet()) {
-    	            // Decode TTL
-    	            if (o.toString().equals(ReservedKeywords.RECORD_TTL)) {
-    	                PeriodFormatter fmt = ISOPeriodFormat.standard();
-    	                Duration duration;
-    	                try{
-    	                	duration = fmt.parsePeriod((String) ((JSONObject) obj).get(o)).toStandardDuration();
-    	                }catch(IllegalArgumentException e){
-    	                	this.status=JSONRegisterRequest.INCORRECT_FORMAT;
-    	                	return;
-    	                }
-    	                
-    	                this.add(o.toString(), new Long(duration.getStandardSeconds()));
-    	            } else {
-    	                this.add(o.toString(), ((JSONObject) obj).get(o));
-    	            }
+    	            this.add(o.toString(), ((JSONObject) obj).get(o));
     	        }
-  
-    	       
     	}else{
     		this.status = JSONRegisterRequest.INCORRECT_FORMAT;
     	}

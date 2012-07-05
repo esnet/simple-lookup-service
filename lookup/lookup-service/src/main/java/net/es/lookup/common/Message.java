@@ -50,12 +50,9 @@ public class  Message {
         return (String) this.getMap().get(ReservedKeywords.RECORD_URI);
     }
 
-    public long getTTL() {
-        Long res = (Long) this.getMap().get(ReservedKeywords.RECORD_TTL);
-        if (res == null) {
-            return -1;
-        }
-        return res;
+    public String getTTL() {
+        return (String) this.getMap().get(ReservedKeywords.RECORD_TTL);
+        
     }
 
     public List<String> getServiceType() {
@@ -110,15 +107,8 @@ public class  Message {
     	for(String key : this.keyValues.keySet()){
     		Object o = this.keyValues.get(key);
     		
-    		if(key.equals(ReservedKeywords.RECORD_URI)){
+    		if(key.equals(ReservedKeywords.RECORD_URI) || key.equals(ReservedKeywords.RECORD_TTL)){
     			if(o instanceof String){
-    				returnVal = returnVal & true;
-    			}else{
-    				returnVal = returnVal & false;
-    				return returnVal;
-    			}
-    		}else if(key.equals(ReservedKeywords.RECORD_TTL)){
-    			if(o instanceof Long){
     				returnVal = returnVal & true;
     			}else{
     				returnVal = returnVal & false;

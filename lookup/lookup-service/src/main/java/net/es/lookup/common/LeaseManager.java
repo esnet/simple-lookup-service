@@ -5,6 +5,10 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import net.es.lookup.common.ReservedKeywords;
 
+import org.joda.time.Duration;
+import org.joda.time.format.ISOPeriodFormat;
+import org.joda.time.format.PeriodFormatter;
+
 
 public class LeaseManager {
 
@@ -27,15 +31,29 @@ public class LeaseManager {
     public boolean requestLease (Message message) {
         Instant now = new Instant();
         // Retrieve requested TTL
-        long requestedTTL = message.getTTL();
-        long ttl = requestedTTL;
-        
-        if (requestedTTL ==0 || requestedTTL > LeaseManager.MAX_LEASE ) {
-            ttl = LeaseManager.MAX_LEASE;
+        String requestedTTL = message.getTTL();
+        long ttl = 0;
+        if(requestedTTL != null && requestedTTL != ""){
+        	PeriodFormatter fmt = ISOPeriodFormat.standard();
+        	
+            try{
+            	Duration duration = fmt.parsePeriod(requestedTTL).toStandardDuration();
+                ttl  = new Long(duration.getStandardSeconds());
+            }catch(IllegalArgumentException e){
+            	return false;
+            }
+            if (ttl ==0 || ttl > LeaseManager.MAX_LEASE ) {
+                ttl = LeaseManager.MAX_LEASE;
+            }
+           
+        }else {
+        	ttl = LeaseManager.MAX_LEASE;
         }
+        
         Instant expires = now.plus(ttl);
         // Add expires key/value in the message
         message.add(ReservedKeywords.RECORD_EXPIRES, this.fmt.print(expires));
         return true;
+ 
     }
 }
