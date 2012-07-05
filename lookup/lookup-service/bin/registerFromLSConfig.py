@@ -65,7 +65,7 @@ def parseData(file):
     newdata=[]
     for d in data:
         newdict={}
-        newdict["record-type"] = "service"
+        newdict["record-type"] = ["service"]
         for k,v in d.iteritems():
             newKey = k.split("_",1)
             if(len(newKey)>1):
