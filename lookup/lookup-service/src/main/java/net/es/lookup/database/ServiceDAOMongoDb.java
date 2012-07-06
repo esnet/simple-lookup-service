@@ -85,6 +85,7 @@ public class ServiceDAOMongoDb {
         operatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ANY, "$or");
 		
         listOperatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ANY, "$in");
+        listOperatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ALL, "$all");
 	}
 	
 	//should use json specific register request and response.
