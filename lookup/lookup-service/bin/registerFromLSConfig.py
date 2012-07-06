@@ -164,12 +164,12 @@ if(len(mydata)>0):
 #response = conn.getresponse()
 #print response.status, response.reason
 
+print "Input the url:"
+url = raw_input()
 for d in fdata:
     params = json.dumps(d)
     print d
     headers = {"Content-type": "application/json", "Accept": "application/json"}
-    print "Input the url:"
-    url = raw_input()
     conn = httplib.HTTPConnection(url)
     #conn = httplib.HTTPConnection("ps4.es.net:8085")
     conn.request("POST", "lookup/services", params, headers)

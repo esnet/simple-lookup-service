@@ -470,7 +470,7 @@ public class RegistrationTest {
 		
 		//leave any value besides "record-type" as blank
 		@Test
-		public void testBlankAnyValue{
+		public void testBlankAnyValue(){
 			HttpClient httpclient = new DefaultHttpClient();
 			HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services");
 			
