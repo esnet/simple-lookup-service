@@ -89,7 +89,7 @@ public class ServiceDAOMongoDb {
 	}
 	
 	//should use json specific register request and response.
-	public Message queryAndPublishService(Message message, Message queryRequest, Message operators) throws DatabaseException{
+	public Message queryAndPublishService(Message message, Message queryRequest, Message operators) throws DatabaseException, DuplicateEntryException{
 		int errorcode;
 		String errormsg;
 		Message response;
