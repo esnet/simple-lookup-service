@@ -28,15 +28,16 @@ import org.apache.http.HttpEntity;
 public class RenewTest {
 
 		@Test
-		public void testSimpleRegistration(){
+		public void testSimpleRenew(){
 			HttpClient httpclient = new DefaultHttpClient();
-			HttpPost httppost = new HttpPost("http://localhost:8080/lookup/service/9a113c60-1f28-4e3a-9b7b-073955d84219");
+			HttpPost httppost = new HttpPost("http://localhost:8080/lookup/service/78986dd0-f41b-4568-bfe7-14340ac736bf");
 			
 			//BasicHttpParams params = new BasicHttpParams();
 			
 			JSONObject data=new JSONObject();
-			JSONArray value = new JSONArray();
-			value.add(10);
+//			JSONArray value = new JSONArray();
+			String value="PT2H5M2S";
+//			value.add("PT2H5M2S");
 			data.put("record-ttl",value);
 //			
 //			value.clear();
@@ -59,7 +60,7 @@ public class RenewTest {
 //			value.add("LHC");
 //			data.put("record-service-domain",value);
 //			
-//			System.out.println(data.toString());
+			System.out.println(data.toString());
 			try{
 				StringEntity se=new StringEntity (data.toString());
 			
@@ -72,18 +73,19 @@ public class RenewTest {
 	        httppost.setHeader("Accept", "application/json");
 	        httppost.setHeader("Content-type", "application/json");
 			
-			try{
+			try{		
+				
 				HttpResponse response = httpclient.execute(httppost);
-				
+
 				System.out.println(response.getStatusLine());
-				
-				
 
 				HttpEntity entity = response.getEntity();
 				System.out.println(entity.getContentType());
-				String httpresponse = EntityUtils.toString(entity);
-				System.out.println("Response Content: "+httpresponse);
-				System.out.println(response.getStatusLine());
+				String httpres = EntityUtils.toString(entity);
+				System.out.println("Response Content: "+ httpres);
+				
+
+
 				
 				
 				StatusLine responseStatus = response.getStatusLine();
@@ -96,353 +98,412 @@ public class RenewTest {
 		}
 
 
-		
-		@Test
-		public void testTTLNoBiggerThanZero(){
-			HttpClient httpclient = new DefaultHttpClient();
-			HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services/9a113c60-1f28-4e3a-9b7b-073955d84219");
-			
-			//BasicHttpParams params = new BasicHttpParams();
-			
-			JSONObject data=new JSONObject();
-			JSONArray value = new JSONArray();
-			value.add(10);
-			data.put("record-ttl",value);
-//			
-//			value.clear();
-//			value.add("http://localhost/accesspointa11");
-//			data.put("record-service-locator",value);
 //		
+//		@Test
+//		public void testBlankTTL(){
+//			HttpClient httpclient = new DefaultHttpClient();
+//			HttpPost httppost = new HttpPost("http://localhost:8080/lookup/service/78986dd0-f41b-4568-bfe7-14340ac736bf");
 //			
-//			value.clear();
-//			value.add("privatekey1");
-//			data.put("record-privatekey",value);
+//			//BasicHttpParams params = new BasicHttpParams();
 //			
-//			value.clear();
-//			value.add("bwctl");
-//			data.put("record-service-type",value);
+//			JSONObject data=new JSONObject();
+//
+////			String value="PT2H5M2S";
+////			data.put("record-ttl",value);
+////			
+////			value.clear();
+////			value.add("http://localhost/accesspointa11");
+////			data.put("record-service-locator",value);
+////		
+////			
+////			value.clear();
+////			value.add("privatekey1");
+////			data.put("record-privatekey",value);
+////			
+////			value.clear();
+////			value.add("bwctl");
+////			data.put("record-service-type",value);
+////			
+////			
+////			
+////			value.clear();
+////			value.add("ESnet");
+////			value.add("LHC");
+////			data.put("record-service-domain",value);
+////			
+////			System.out.println(data.toString());
+//			try{
+//				StringEntity se=new StringEntity (data.toString());
 //			
+//				httppost.setEntity(se);
+//				System.out.println(se);
+//			}catch(UnsupportedEncodingException e){
+//				fail("Connection error: "+e.getMessage());
+//			}
+//	        
+//	        httppost.setHeader("Accept", "application/json");
+//	        httppost.setHeader("Content-type", "application/json");
 //			
-//			
-//			value.clear();
-//			value.add("ESnet");
-//			value.add("LHC");
-//			data.put("record-service-domain",value);
-//			
-//			System.out.println(data.toString());
-			try{
-				StringEntity se=new StringEntity (data.toString());
-			
-				httppost.setEntity(se);
-				System.out.println(se);
-			}catch(UnsupportedEncodingException e){
-				fail("Connection error: "+e.getMessage());
-			}
-	        
-	        httppost.setHeader("Accept", "application/json");
-	        httppost.setHeader("Content-type", "application/json");
-			
-			try{
-				HttpResponse response = httpclient.execute(httppost);
-				
-				System.out.println(response.getStatusLine());
-				
-				
-
-				HttpEntity entity = response.getEntity();
-				System.out.println(entity.getContentType());
-				String httpresponse = EntityUtils.toString(entity);
-				System.out.println("Response Content: "+httpresponse);
-				System.out.println(response.getStatusLine());
-				
-				
-				StatusLine responseStatus = response.getStatusLine();
-				assertEquals(200, responseStatus.getStatusCode());
-	
-				
-			}catch(IOException e){
-				fail("Connection error: "+e.getMessage());
-			}
-		}
-		
-		
-		@Test
-		public void testtestWrongUri(){
-			HttpClient httpclient = new DefaultHttpClient();
-			HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services/9a113c60-1f28-4e3a-9b7b-073955d842");
-			
-			//BasicHttpParams params = new BasicHttpParams();
-			
-			JSONObject data=new JSONObject();
-			JSONArray value = new JSONArray();
-			value.add(10);
-			data.put("record-ttl",value);
-//			
-//			value.clear();
-//			value.add("http://localhost/accesspointa11");
-//			data.put("record-service-locator",value);
+//			try{
+//				HttpResponse response = httpclient.execute(httppost);
+//				
+//				System.out.println(response.getStatusLine());
+//				
+//				
+//
+//				HttpEntity entity = response.getEntity();
+//				System.out.println(entity.getContentType());
+//				String httpresponse = EntityUtils.toString(entity);
+//				System.out.println("Response Content: "+httpresponse);
+//				System.out.println(response.getStatusLine());
+//				
+//				
+//				StatusLine responseStatus = response.getStatusLine();
+//				assertEquals(400, responseStatus.getStatusCode());
+//	
+//				
+//			}catch(IOException e){
+//				fail("Connection error: "+e.getMessage());
+//			}
+//		}
 //		
+//		@Test
+//		public void testTTLisNull(){
+//			HttpClient httpclient = new DefaultHttpClient();
+//			HttpPost httppost = new HttpPost("http://localhost:8080/lookup/service/78986dd0-f41b-4568-bfe7-14340ac736bf");
 //			
-//			value.clear();
-//			value.add("privatekey1");
-//			data.put("record-privatekey",value);
+//			//BasicHttpParams params = new BasicHttpParams();
 //			
-//			value.clear();
-//			value.add("bwctl");
-//			data.put("record-service-type",value);
+//			JSONObject data=new JSONObject();
+//			String value="";
+//			data.put("record-ttl",value);
+////			
+////			value.clear();
+////			value.add("http://localhost/accesspointa11");
+////			data.put("record-service-locator",value);
+////		
+////			
+////			value.clear();
+////			value.add("privatekey1");
+////			data.put("record-privatekey",value);
+////			
+////			value.clear();
+////			value.add("bwctl");
+////			data.put("record-service-type",value);
+////			
+////			
+////			
+////			value.clear();
+////			value.add("ESnet");
+////			value.add("LHC");
+////			data.put("record-service-domain",value);
+////			
+////			System.out.println(data.toString());
+//			try{
+//				StringEntity se=new StringEntity (data.toString());
 //			
+//				httppost.setEntity(se);
+////				System.out.println(se);
+//			}catch(UnsupportedEncodingException e){
+//				fail("Connection error: "+e.getMessage());
+//			}
+//	        
+//	        httppost.setHeader("Accept", "application/json");
+//	        httppost.setHeader("Content-type", "application/json");
 //			
-//			
-//			value.clear();
-//			value.add("ESnet");
-//			value.add("LHC");
-//			data.put("record-service-domain",value);
-//			
-//			System.out.println(data.toString());
-			try{
-				StringEntity se=new StringEntity (data.toString());
-			
-				httppost.setEntity(se);
-				System.out.println(se);
-			}catch(UnsupportedEncodingException e){
-				fail("Connection error: "+e.getMessage());
-			}
-	        
-	        httppost.setHeader("Accept", "application/json");
-	        httppost.setHeader("Content-type", "application/json");
-			
-			try{
-				HttpResponse response = httpclient.execute(httppost);
-				
-				System.out.println(response.getStatusLine());
-				
-				
-
-				HttpEntity entity = response.getEntity();
-				System.out.println(entity.getContentType());
-				String httpresponse = EntityUtils.toString(entity);
-				System.out.println("Response Content: "+httpresponse);
-				System.out.println(response.getStatusLine());
-				
-				
-				StatusLine responseStatus = response.getStatusLine();
-				assertEquals(200, responseStatus.getStatusCode());
-	
-				
-			}catch(IOException e){
-				fail("Connection error: "+e.getMessage());
-			}
-		}
-		
-		
-		
-		@Test
-		public void testtestWrongPath(){
-			HttpClient httpclient = new DefaultHttpClient();
-			HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services/9a113c60-1f28-4e3a-9b7b-073955d842");
-			
-			//BasicHttpParams params = new BasicHttpParams();
-			
-			JSONObject data=new JSONObject();
-			JSONArray value = new JSONArray();
-			value.add(10);
-			data.put("record-ttl",value);
-//			
-//			value.clear();
-//			value.add("http://localhost/accesspointa11");
-//			data.put("record-service-locator",value);
+//			try{
+//				HttpResponse response = httpclient.execute(httppost);
+//				
+//				System.out.println(response.getStatusLine());
+//				
+//				
+//
+//				HttpEntity entity = response.getEntity();
+////				System.out.println(entity.getContentType());
+//				String httpresponse = EntityUtils.toString(entity);
+//				System.out.println("Response Content: "+httpresponse);
+////				System.out.println(response.getStatusLine());
+//				
+//				
+//				StatusLine responseStatus = response.getStatusLine();
+//				assertEquals(200, responseStatus.getStatusCode());
+//	
+//				
+//			}catch(IOException e){
+//				fail("Connection error: "+e.getMessage());
+//			}
+//		}
 //		
-//			
-//			value.clear();
-//			value.add("privatekey1");
-//			data.put("record-privatekey",value);
-//			
-//			value.clear();
-//			value.add("bwctl");
-//			data.put("record-service-type",value);
-//			
-//			
-//			
-//			value.clear();
-//			value.add("ESnet");
-//			value.add("LHC");
-//			data.put("record-service-domain",value);
-//			
-//			System.out.println(data.toString());
-			try{
-				StringEntity se=new StringEntity (data.toString());
-			
-				httppost.setEntity(se);
-				System.out.println(se);
-			}catch(UnsupportedEncodingException e){
-				fail("Connection error: "+e.getMessage());
-			}
-	        
-	        httppost.setHeader("Accept", "application/json");
-	        httppost.setHeader("Content-type", "application/json");
-			
-			try{
-				HttpResponse response = httpclient.execute(httppost);
-				
-				System.out.println(response.getStatusLine());
-				
-				
-
-				HttpEntity entity = response.getEntity();
-				System.out.println(entity.getContentType());
-				String httpresponse = EntityUtils.toString(entity);
-				System.out.println("Response Content: "+httpresponse);
-				System.out.println(response.getStatusLine());
-				
-				
-				StatusLine responseStatus = response.getStatusLine();
-				assertEquals(200, responseStatus.getStatusCode());
-	
-				
-			}catch(IOException e){
-				fail("Connection error: "+e.getMessage());
-			}
-		}
-		
-		
-		
-		
-		@Test
-		public void testtestWrongContentType(){
-			HttpClient httpclient = new DefaultHttpClient();
-			HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services/9a113c60-1f28-4e3a-9b7b-073955d84219");
-			
-			//BasicHttpParams params = new BasicHttpParams();
-			
-			JSONObject data=new JSONObject();
-			JSONArray value = new JSONArray();
-			value.add(10);
-			data.put("record-ttl",value);
-//			
-//			value.clear();
-//			value.add("http://localhost/accesspointa11");
-//			data.put("record-service-locator",value);
 //		
+//		@Test
+//		public void testtestWrongUri(){
+//			HttpClient httpclient = new DefaultHttpClient();
+//			HttpPost httppost = new HttpPost("http://localhost:8080/lookup/service/9a113c60-1f28-4e3a-9b7b-073955d842");
 //			
-//			value.clear();
-//			value.add("privatekey1");
-//			data.put("record-privatekey",value);
+//			//BasicHttpParams params = new BasicHttpParams();
 //			
-//			value.clear();
-//			value.add("bwctl");
-//			data.put("record-service-type",value);
+//			JSONObject data=new JSONObject();
+//			String value="PT2H5M2S";
+//			data.put("record-ttl",value);
+////			
+////			value.clear();
+////			value.add("http://localhost/accesspointa11");
+////			data.put("record-service-locator",value);
+////		
+////			
+////			value.clear();
+////			value.add("privatekey1");
+////			data.put("record-privatekey",value);
+////			
+////			value.clear();
+////			value.add("bwctl");
+////			data.put("record-service-type",value);
+////			
+////			
+////			
+////			value.clear();
+////			value.add("ESnet");
+////			value.add("LHC");
+////			data.put("record-service-domain",value);
+////			
+////			System.out.println(data.toString());
+//			try{
+//				StringEntity se=new StringEntity (data.toString());
 //			
+//				httppost.setEntity(se);
+//				System.out.println(se);
+//			}catch(UnsupportedEncodingException e){
+//				fail("Connection error: "+e.getMessage());
+//			}
+//	        
+//	        httppost.setHeader("Accept", "application/json");
+//	        httppost.setHeader("Content-type", "application/json");
 //			
-//			
-//			value.clear();
-//			value.add("ESnet");
-//			value.add("LHC");
-//			data.put("record-service-domain",value);
-//			
-//			System.out.println(data.toString());
-			try{
-				StringEntity se=new StringEntity (data.toString());
-			
-				httppost.setEntity(se);
-				System.out.println(se);
-			}catch(UnsupportedEncodingException e){
-				fail("Connection error: "+e.getMessage());
-			}
-	        
-	        httppost.setHeader("Accept", "application/json");
-	        httppost.setHeader("Content-type", "applicat");
-			
-			try{
-				HttpResponse response = httpclient.execute(httppost);
-				
-				System.out.println(response.getStatusLine());
-				
-				
-
-				HttpEntity entity = response.getEntity();
-				System.out.println(entity.getContentType());
-				String httpresponse = EntityUtils.toString(entity);
-				System.out.println("Response Content: "+httpresponse);
-				System.out.println(response.getStatusLine());
-				
-				
-				StatusLine responseStatus = response.getStatusLine();
-				assertEquals(200, responseStatus.getStatusCode());
-	
-				
-			}catch(IOException e){
-				fail("Connection error: "+e.getMessage());
-			}
-		}
-		
-		
-		@Test
-		public void testtestNoneContentType(){
-			HttpClient httpclient = new DefaultHttpClient();
-			HttpPost httppost = new HttpPost("http://localhost:8080/lookup/services/9a113c60-1f28-4e3a-9b7b-073955d84219");
-			
-			//BasicHttpParams params = new BasicHttpParams();
-			
-			JSONObject data=new JSONObject();
-			JSONArray value = new JSONArray();
-			value.add(10);
-			data.put("record-ttl",value);
-//			
-//			value.clear();
-//			value.add("http://localhost/accesspointa11");
-//			data.put("record-service-locator",value);
+//			try{
+//				HttpResponse response = httpclient.execute(httppost);
+//				
+//				System.out.println(response.getStatusLine());
+//
+//				HttpEntity entity = response.getEntity();
+//				System.out.println(entity.getContentType());
+//				String httpresponse = EntityUtils.toString(entity);
+//				System.out.println("Response Content: "+httpresponse);
+//				System.out.println(response.getStatusLine());
+//				
+//				
+//				StatusLine responseStatus = response.getStatusLine();
+//				assertEquals(404, responseStatus.getStatusCode());
+//	
+//				
+//			}catch(IOException e){
+//				fail("Connection error: "+e.getMessage());
+//			}
+//		}
 //		
+//		
+//		
+//		@Test
+//		public void testtestWrongPath(){
+//			HttpClient httpclient = new DefaultHttpClient();
+//			HttpPost httppost = new HttpPost("http://localhost:8080/lookup/service/9a113c60-1f28-4e3a-9b7b-073955d842");
 //			
-//			value.clear();
-//			value.add("privatekey1");
-//			data.put("record-privatekey",value);
+//			//BasicHttpParams params = new BasicHttpParams();
 //			
-//			value.clear();
-//			value.add("bwctl");
-//			data.put("record-service-type",value);
+//			JSONObject data=new JSONObject();
+//			String value="PT2H5M2S";
+//			data.put("record-ttl",value);
+////			
+////			value.clear();
+////			value.add("http://localhost/accesspointa11");
+////			data.put("record-service-locator",value);
+////		
+////			
+////			value.clear();
+////			value.add("privatekey1");
+////			data.put("record-privatekey",value);
+////			
+////			value.clear();
+////			value.add("bwctl");
+////			data.put("record-service-type",value);
+////			
+////			
+////			
+////			value.clear();
+////			value.add("ESnet");
+////			value.add("LHC");
+////			data.put("record-service-domain",value);
+////			
+////			System.out.println(data.toString());
+//			try{
+//				StringEntity se=new StringEntity (data.toString());
 //			
+//				httppost.setEntity(se);
+//				System.out.println(se);
+//			}catch(UnsupportedEncodingException e){
+//				fail("Connection error: "+e.getMessage());
+//			}
+//	        
+//	        httppost.setHeader("Accept", "application/json");
+//	        httppost.setHeader("Content-type", "application/json");
 //			
+//			try{
+//				HttpResponse response = httpclient.execute(httppost);
+//				
+//				System.out.println(response.getStatusLine());
+//				
+//				HttpEntity entity = response.getEntity();
+//				System.out.println(entity.getContentType());
+//				String httpresponse = EntityUtils.toString(entity);
+//				System.out.println("Response Content: "+httpresponse);
+//				System.out.println(response.getStatusLine());
+//				
+//				
+//				StatusLine responseStatus = response.getStatusLine();
+//				assertEquals(404, responseStatus.getStatusCode());
+//	
+//				
+//			}catch(IOException e){
+//				fail("Connection error: "+e.getMessage());
+//			}
+//		}
+//		
+//		
+//		
+//		
+//		@Test
+//		public void testtestWrongContentType(){
+//			HttpClient httpclient = new DefaultHttpClient();
+//			HttpPost httppost = new HttpPost("http://localhost:8080/lookup/service/9a113c60-1f28-4e3a-9b7b-073955d84219");
 //			
-//			value.clear();
-//			value.add("ESnet");
-//			value.add("LHC");
-//			data.put("record-service-domain",value);
+//			//BasicHttpParams params = new BasicHttpParams();
 //			
-//			System.out.println(data.toString());
-			try{
-				StringEntity se=new StringEntity (data.toString());
-			
-				httppost.setEntity(se);
-				System.out.println(se);
-			}catch(UnsupportedEncodingException e){
-				fail("Connection error: "+e.getMessage());
-			}
-	        
-	        httppost.setHeader("Accept", "application/json");
-	     
-			
-			try{
-				HttpResponse response = httpclient.execute(httppost);
-				
-				System.out.println(response.getStatusLine());
-				
-				
-
-				HttpEntity entity = response.getEntity();
-				System.out.println(entity.getContentType());
-				String httpresponse = EntityUtils.toString(entity);
-				System.out.println("Response Content: "+httpresponse);
-				System.out.println(response.getStatusLine());
-				
-				
-				StatusLine responseStatus = response.getStatusLine();
-				assertEquals(200, responseStatus.getStatusCode());
-	
-				
-			}catch(IOException e){
-				fail("Connection error: "+e.getMessage());
-			}
-		}
+//			JSONObject data=new JSONObject();
+//			String value="PT2H5M2S";
+//			data.put("record-ttl",value);
+////			
+////			value.clear();
+////			value.add("http://localhost/accesspointa11");
+////			data.put("record-service-locator",value);
+////		
+////			
+////			value.clear();
+////			value.add("privatekey1");
+////			data.put("record-privatekey",value);
+////			
+////			value.clear();
+////			value.add("bwctl");
+////			data.put("record-service-type",value);
+////			
+////			
+////			
+////			value.clear();
+////			value.add("ESnet");
+////			value.add("LHC");
+////			data.put("record-service-domain",value);
+////			
+////			System.out.println(data.toString());
+//			try{
+//				StringEntity se=new StringEntity (data.toString());
+//			
+//				httppost.setEntity(se);
+//				System.out.println(se);
+//			}catch(UnsupportedEncodingException e){
+//				fail("Connection error: "+e.getMessage());
+//			}
+//	        
+//	        httppost.setHeader("Accept", "application/json");
+//	        httppost.setHeader("Content-type", "applicat");
+//			
+//			try{
+//				HttpResponse response = httpclient.execute(httppost);
+//				
+//				System.out.println(response.getStatusLine());
+//				
+//				
+//
+//				HttpEntity entity = response.getEntity();
+//				System.out.println(entity.getContentType());
+//				String httpresponse = EntityUtils.toString(entity);
+//				System.out.println("Response Content: "+httpresponse);
+//				System.out.println(response.getStatusLine());
+//				
+//				
+//				StatusLine responseStatus = response.getStatusLine();
+//				assertEquals(400, responseStatus.getStatusCode());
+//	
+//				
+//			}catch(IOException e){
+//				fail("Connection error: "+e.getMessage());
+//			}
+//		}
+//		
+//		
+//		@Test
+//		public void testtestNoneContentType(){
+//			HttpClient httpclient = new DefaultHttpClient();
+//			HttpPost httppost = new HttpPost("http://localhost:8080/lookup/service/9a113c60-1f28-4e3a-9b7b-073955d84219");
+//			
+//			//BasicHttpParams params = new BasicHttpParams();
+//			
+//			JSONObject data=new JSONObject();
+//			String value="PT2H5M2S";
+//			data.put("record-ttl",value);
+////			
+////			value.clear();
+////			value.add("http://localhost/accesspointa11");
+////			data.put("record-service-locator",value);
+////		
+////			
+////			value.clear();
+////			value.add("privatekey1");
+////			data.put("record-privatekey",value);
+////			
+////			value.clear();
+////			value.add("bwctl");
+////			data.put("record-service-type",value);
+////			
+////			
+////			
+////			value.clear();
+////			value.add("ESnet");
+////			value.add("LHC");
+////			data.put("record-service-domain",value);
+////			
+////			System.out.println(data.toString());
+//			try{
+//				StringEntity se=new StringEntity (data.toString());
+//			
+//				httppost.setEntity(se);
+//				System.out.println(se);
+//			}catch(UnsupportedEncodingException e){
+//				fail("Connection error: "+e.getMessage());
+//			}
+//	        
+//	        httppost.setHeader("Accept", "application/json");
+//	     
+//			
+//			try{
+//				HttpResponse response = httpclient.execute(httppost);
+//				
+//				System.out.println(response.getStatusLine());
+//				
+//				
+//
+//				HttpEntity entity = response.getEntity();
+//				System.out.println(entity.getContentType());
+//				String httpresponse = EntityUtils.toString(entity);
+//				System.out.println("Response Content: "+httpresponse);
+//				System.out.println(response.getStatusLine());
+//				
+//				
+//				StatusLine responseStatus = response.getStatusLine();
+//				assertEquals(200, responseStatus.getStatusCode());
+//	
+//				
+//			}catch(IOException e){
+//				fail("Connection error: "+e.getMessage());
+//			}
+//		}
 		
 		
 		
