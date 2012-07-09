@@ -19,6 +19,8 @@ import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 
+import net.es.lookup.utils.DatabaseConfigReader;
+
 public class ServiceDAOMongoDb {
 	private String dburl="127.0.0.1";
 	private int dbport=27017;
@@ -41,9 +43,19 @@ public class ServiceDAOMongoDb {
 	// retrieves default - mongodb running on localhost and default port - 27017 and dbname- "lookupservice", collection name - "services" 
 	//creates a new one if it cannot find one 
 	public ServiceDAOMongoDb() throws DatabaseException{
+		
+		DatabaseConfigReader dcfg = DatabaseConfigReader.getInstance();
+		this.dburl = dcfg.getDburl();
+		this.dbport = dcfg.getDbport();
+		this.dbname = dcfg.getDbname();
+		this.collname = dcfg.getCollname();
 		init();
 	}
 	
+//public ServiceDAOMongoDb() throws DatabaseException{
+		
+	//	init();
+	//}
 	//uses default url and port - mongodb running on localhost and default port - 27017
 	//creates a new one if it cannot find one
 	public ServiceDAOMongoDb(String dbname, String collname) throws DatabaseException{
@@ -60,6 +72,8 @@ public class ServiceDAOMongoDb {
 		this.collname = collname;
 		init();
 	}
+	
+
 	
 	private void init() throws DatabaseException {
         if (ServiceDAOMongoDb.instance != null) {
