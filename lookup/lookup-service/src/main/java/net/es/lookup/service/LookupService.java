@@ -22,6 +22,7 @@ public class LookupService {
     public static String SERVICE_URI_PREFIX="service";
 
     private int port = 8080;
+    private String host = "localhost";
     private HttpServer httpServer = null;
     private static LookupService instance = null;
 
@@ -42,12 +43,19 @@ public class LookupService {
     }
 
     public LookupService () {
-        // Default port is 8080
+        // Default port is 8080 and default host is localhost
+    	this.host = "localhost";
         this.port = 8080;
         init();
     }
 
     public LookupService (int port) {
+        this.port = port;
+        init();
+    }
+    
+    public LookupService (String host, int port) {
+    	this.host = host;
         this.port = port;
         init();
     }
@@ -66,7 +74,8 @@ public class LookupService {
         ResourceConfig rc = new PackagesResourceConfig("net.es.lookup.resources","net.es.lookup.service");
         System.out.println();
         System.out.println(("Starting grizzly..."));
-        return GrizzlyServerFactory.createHttpServer(UriBuilder.fromUri("http://localhost/").port(this.port).build(),
+        String hosturl = "http://"+this.host+"/";
+        return GrizzlyServerFactory.createHttpServer(UriBuilder.fromUri(hosturl).port(this.port).build(),
                                                      rc);
     }
 

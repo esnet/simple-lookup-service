@@ -8,13 +8,15 @@ import net.es.lookup.common.ReservedKeywords;
 import org.joda.time.Duration;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
+import net.es.lookup.utils.LookupServiceConfigReader;
 
 
 public class LeaseManager {
-
-    private static long MAX_LEASE=2*60*60;
+	private static long DEFAULT_MAX_LEASE=2*60*60;
+    private static long MAX_LEASE=DEFAULT_MAX_LEASE;
     private static LeaseManager instance = null;
     private DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+    private LookupServiceConfigReader lcfg;
 
     static {
         LeaseManager.instance = new LeaseManager();
@@ -25,7 +27,8 @@ public class LeaseManager {
     }
 
     private LeaseManager () {
-
+    	 lcfg = LookupServiceConfigReader.getInstance();
+    	 MAX_LEASE = lcfg.getMaxleasetime();
     }
 
     public boolean requestLease (Message message) {
@@ -51,6 +54,7 @@ public class LeaseManager {
         }
         
         Instant expires = now.plus(ttl);
+        System.out.println(expires.toString());
         // Add expires key/value in the message
         message.add(ReservedKeywords.RECORD_EXPIRES, this.fmt.print(expires));
         return true;

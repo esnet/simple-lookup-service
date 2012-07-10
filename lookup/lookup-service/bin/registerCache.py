@@ -27,16 +27,23 @@ listing = os.listdir(dir)
 count=0
 filesprocessed=0
 for infile in listing:
-    count = count+1
+    
     #print "current file is: " + infile
     #if any (infile in "list."+s for s in serviceFiles):
     fullpath = os.path.join(dir,infile)
     f = open(fullpath,'r')
+    index=0
     for line in f:
         tmpDict = {}
         line=line.strip()
         #print line
         s= line.split("|")
+        index = line.find("hLS")
+        if index > 0:
+            index2 = line.find("Korea")
+            if(index2>0):
+                count = count+1
+                print line
         #print s
         #keywordValues=[]
         keywordValues=""
@@ -72,22 +79,22 @@ for infile in listing:
 #delete directory
 rmtree(dir)
 
-print len(fdata)
-print filesprocessed
+#print len(fdata)
+#print filesprocessed
 print count
 
-for d in fdata:
-    print d
+#for d in fdata:
+    #print d
     # This hack is for data from Brazilians which does not get decoded by the default utf8
-    try:
-        params = json.dumps(d)
-    except UnicodeDecodeError:
-        params = json.dumps(d,encoding="cp860")
+    #try:
+       # params = json.dumps(d)
+    #except UnicodeDecodeError:
+        #params = json.dumps(d,encoding="cp860")
     #print params
-    headers = {"Content-type": "application/json", "Accept": "application/json"}
-    conn = httplib.HTTPConnection("ps4.es.net:8085")
-    conn.request("POST", "lookup/services", params, headers)
-    response = conn.getresponse()
+    #headers = {"Content-type": "application/json", "Accept": "application/json"}
+    #conn = httplib.HTTPConnection("ps4.es.net:8085")
+    #conn.request("POST", "lookup/services", params, headers)
+    #response = conn.getresponse()
     #print response.status, response.reason
 
 #print "Done"

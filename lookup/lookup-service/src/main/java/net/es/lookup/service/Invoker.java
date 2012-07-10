@@ -7,6 +7,7 @@ import joptsimple.OptionSpec;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.Service;
+import net.es.lookup.utils.LookupServiceConfigReader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +16,11 @@ import java.util.List;
 
 public class Invoker {
 
-    private static String port = "8080";
+    private static int port = 8080;
     private static LookupService lookupService = null;
     private static ServiceDAOMongoDb dao = null;
+    private static String host = "localhost";
+    private static LookupServiceConfigReader lcfg;
 
     /**
      * Main program to start the Lookup Service
@@ -28,13 +31,20 @@ public class Invoker {
     public static void main(String[] args) throws Exception {
 
         parseArgs( args );
+        
+       
+        lcfg = LookupServiceConfigReader.getInstance();
+        port = lcfg.getPort();
+        host = lcfg.getHost();
+        
 
         System.out.println("starting ServiceDAOMongoDb");
         Invoker.dao = new ServiceDAOMongoDb();
 
         System.out.println("starting Lookup Service");
+        
         // Create the REST service
-        Invoker.lookupService = new LookupService(Integer.parseInt(Invoker.port));
+        Invoker.lookupService = new LookupService(Invoker.host,Invoker.port);
         // Start the service
         Invoker.lookupService.startService();
                 
@@ -50,6 +60,7 @@ public class Invoker {
         OptionParser parser = new OptionParser();
         parser.acceptsAll( asList( "h", "?" ), "show help then exit" );
         OptionSpec<String> PORT = parser.accepts("p", "server port").withRequiredArg().ofType(String.class);
+        OptionSpec<String> HOST = parser.accepts("h", "host").withRequiredArg().ofType(String.class);
         OptionSet options = parser.parse( args );
 
         // check for help
@@ -58,8 +69,13 @@ public class Invoker {
             System.exit(0);
         }
         if (options.has(PORT) ){
-            port = options.valueOf(PORT);
+            port = Integer.parseInt(options.valueOf(PORT));
         }
+        if (options.has(HOST) ){
+            host = options.valueOf(HOST);
+        }
+        
+        
    }
 
 }
