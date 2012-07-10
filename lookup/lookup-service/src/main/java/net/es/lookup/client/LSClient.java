@@ -18,8 +18,7 @@ public class LSClient{
 	try{  
 
 		URL url = new URL(this.urlStrs);  
-		HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
-		//connection.connect();  
+		HttpURLConnection connection= (HttpURLConnection)url.openConnection();   
 		connection.setAllowUserInteraction(true);  
 		connection.setRequestMethod("GET");  
 		connection.setDoInput(true);
@@ -28,7 +27,6 @@ public class LSClient{
 		System.out.println("Msg: "+ connection.getResponseMessage());
 		System.out.println("Error code: "+ connection.getResponseCode());
 
-		//			connection.disconnect(); 
 		BufferedReader in = new BufferedReader(
 				new InputStreamReader(connection.getInputStream()));
 
@@ -54,7 +52,6 @@ public class LSClient{
 			URL url = new URL(urlStr);  
 
 			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
-			//connection.connect();  
 			connection.setAllowUserInteraction(true);  
 			connection.setRequestMethod("GET");  
 			connection.setDoInput(true);
@@ -62,8 +59,6 @@ public class LSClient{
 			connection.setUseCaches(false);
 			System.out.println("Msg: "+ connection.getResponseMessage());
 			System.out.println("Error code: "+ connection.getResponseCode());
-			//connection.setRequestProperty("Content-Length","application/x-www-form-urlencoded");  
-			//        DataInputStream dis = new DataInputStream(connection.getInputStream());
 
 			BufferedReader in = new BufferedReader(
 					new InputStreamReader(connection.getInputStream()));
@@ -92,14 +87,11 @@ public class LSClient{
 			}
 			else
 				urlStr=this.urlStr+recorduri;
-		}
-
-		//		String urlStr = "http://localhost:8080/lookup/service/1fc9ef7a-23ab-4600-afcb-aeecdb2a3fe2/record-service-domain";  
+		} 
 		try{  
 			URL url = new URL(urlStr);  
 
 			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
-			//connection.connect();  
 			connection.setAllowUserInteraction(true);  
 			connection.setRequestMethod("GET");  
 			connection.setDoInput(true);
@@ -122,9 +114,6 @@ public class LSClient{
 	}
 
 	public void deleteService(String recorduri){
-		//		String urlStr = "http://localhost:8080/lookup/service/faa2dfab-2fe9-4e48-a444-cb87f27779d3";  
-		//		
-		//		final String parturl = "http://localhost:8080/lookup/service/";
 		String urlStr=null;
 		if (recorduri!=null)
 			urlStr = this.urlStr+recorduri;  
@@ -132,7 +121,6 @@ public class LSClient{
 			URL url = new URL(urlStr);  
 
 			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
-			//connection.connect();  
 			connection.setAllowUserInteraction(true);  
 			connection.setRequestMethod("DELETE");  
 			connection.setDoInput(true);
@@ -168,11 +156,9 @@ public class LSClient{
 		}
 		System.out.println("urlstr"+urlStr);
 		try{  
-			//			String params = "{\"record-ttl\":\"PT2H5M2S\",\"client-uuid\":[\"myuuid\"]}";
 			URL url = new URL(urlStr);  
-
 			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
-			//connection.connect();  
+
 			connection.setAllowUserInteraction(true);  
 			connection.setRequestMethod("POST");  
 			connection.setDoInput(true);
@@ -186,7 +172,6 @@ public class LSClient{
 			out.close();
 
 			System.out.println("Msg: "+ connection.getResponseMessage());
-			//			System.out.println("urlstr: "+ urlStr);
 			System.out.println("Error code: "+ connection.getResponseCode());
 			BufferedReader in = new BufferedReader(
 					new InputStreamReader(connection.getInputStream()));
@@ -201,27 +186,23 @@ public class LSClient{
 		}  
 	}
 
-	public void registerService(){
+	public void registerService(String params){
 
-
-		String urlStr = "http://localhost:8080/lookup/services";  
-		try{  
-			String params = "{\"record-type\":[\"service\"]}";
-			System.out.println("param:"+params);
-			//				String params = null;
-			URL url = new URL(urlStr); 
+		try{  	
+			URL url = new URL(this.urlStrs); 
 			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
-			//connection.connect();  
 			connection.setAllowUserInteraction(true);  
 			connection.setRequestMethod("POST");  
 			connection.setDoInput(true);
 			connection.setDoOutput(true);  
 			connection.setUseCaches(false);  
-
-
+			connection.setRequestProperty("Content-type",
+					"application/json");
+			connection.setRequestProperty("Accept",
+					"application/json");
 			DataOutputStream out=new DataOutputStream (connection.getOutputStream ()); 
 
-			out.writeChars(params);
+			out.writeBytes(params);
 			out.close();
 
 			System.out.println("Msg: "+ connection.getResponseMessage());
@@ -242,8 +223,7 @@ public class LSClient{
 
 
 	public void queryService(String message){
-		//		String urlStr = "http://localhost:8080/lookup/services?record-service-type=ping&record-service-type-operator=any&record-service-domain=ESnet&record-service-locator=tcp://nash-pt1.es.net:4823&record-operator=any";  
-//		final String parturl="http://localhost:8080/lookup/services";
+
 		String[] words;
 		String []eachkey=new String[2];
 		StringBuilder mes = new StringBuilder();
@@ -251,24 +231,20 @@ public class LSClient{
 
 		if(message!=null){
 			words=message.trim().split("&");
-			//			for(int i =0;i<words.length;i++)
-			//			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!worsd"+words[i]);
-
-
 			for(int i =0;i<words.length;i++){
 				eachkey=words[i].trim().split("=");
 				System.out.println("eachkey:"+eachkey[0]);
 				if(
-//						eachkey[0].equals("record-type")||
-//						eachkey[0].equals("record-service-type")||
-//						eachkey[0].equals("record-service-domain")||
-//						eachkey[0].equals("record-service-locator")||
-//						eachkey[0].equals("record-privatekey")||
-//						eachkey[0].equals("record-operator")||
-//						eachkey[0].equals("record-service-type-operator")||
-//						eachkey[0].equals("record-service-domain-operator")||
-//						eachkey[0].equals("record-service-locator-operator")||
-//						eachkey[0].equals("record-privatekey-operator")&&
+						//						eachkey[0].equals("record-type")||
+						//						eachkey[0].equals("record-service-type")||
+						//						eachkey[0].equals("record-service-domain")||
+						//						eachkey[0].equals("record-service-locator")||
+						//						eachkey[0].equals("record-privatekey")||
+						//						eachkey[0].equals("record-operator")||
+						//						eachkey[0].equals("record-service-type-operator")||
+						//						eachkey[0].equals("record-service-domain-operator")||
+						//						eachkey[0].equals("record-service-locator-operator")||
+						//						eachkey[0].equals("record-privatekey-operator")&&
 						eachkey[1]!=null
 						){
 					if(eachkey[0].contains("operator")&&eachkey[1]=="any"||eachkey[1]=="all"){
@@ -285,7 +261,6 @@ public class LSClient{
 			URL url = new URL(urlStr);  
 
 			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
-			//connection.connect();  
 			connection.setAllowUserInteraction(true);  
 			connection.setRequestMethod("GET");  
 			connection.setDoInput(true);
@@ -309,26 +284,21 @@ public class LSClient{
 
 
 	public static void main(String[] args){  
-		//		getDataOnServer();
-		//		getService("62cd211e-ccf8-40e6-b875-56fe18d635c3");
-		//				getServiceKey("62cd211e-ccf8-40e6-b875-56fe18d635c3","record-service-locator");
-		//				deleteService("62cd211e-ccf8-40e6-b875-56fe18d635c3");
-		//				queryService("record-service-type=ping&record-service-domain=ESnet,L*&record-service-locator=tcp://nash-pt1.es.net:4823&record-operator=all");
-		//				renewService();
-		//				registerService();
 		String urls="http://localhost:8080/lookup/services";
 		String url="http://localhost:8080/lookup/service/";
 		String recorduri= "2bb4ab51-1c8a-4a62-81ab-0f935705c192";
 		String key= "record-service-domain";
+		String renewparams = "{\"record-ttl\":\"PT2H5M2S\",\"client-uuid\":[\"myuuid\"]}";
+		String message = "record-service-type=ping&record-service-domain=ESnet,L*&record-service-locator=tcp://nash-pt1.es.net:4823&record-operator=any";
+		String regparams="{\"record-type\":[\"service\"],\"record-service-locator\":[\"http://localhost/accesspointasjdfoi\"],\"record-privatekey\":[\"myuuid\"],\"record-service-type\":[\"owamp\"],\"record-service-domain\":[\"es.net\"]}";
 		LSClient client = new LSClient(url,urls);
 		//		client.getDataOnServer();
 		//		client.getService(recorduri);
 		//		client.getServiceKey(recorduri,key);
 		//		client.deleteService(recorduri);
-//		String params = "{\"record-ttl\":\"PT2H5M2S\",\"client-uuid\":[\"myuuid\"]}";
-//		client.renewService(recorduri,params);
-		String message = "record-service-type=ping&record-service-domain=ESnet,L*&record-service-locator=tcp://nash-pt1.es.net:4823&record-operator=any";
-		client.queryService(message);
+		//		client.renewService(recorduri,renewparams);
+		//		client.queryService(message);
+		client.registerService(regparams);
 	}  
 
 
