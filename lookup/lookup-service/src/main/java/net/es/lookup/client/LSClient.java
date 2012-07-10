@@ -14,30 +14,30 @@ public class LSClient{
 		this.urlStrs=urls;
 	}
 
-	public  void getDataOnServer(){;  
-	try{  
+	public  void getDataOnServer(){
+		try{  
 
-		URL url = new URL(this.urlStrs);  
-		HttpURLConnection connection= (HttpURLConnection)url.openConnection();   
-		connection.setAllowUserInteraction(true);  
-		connection.setRequestMethod("GET");  
-		connection.setDoInput(true);
-		connection.setDoOutput(true);  
-		connection.setUseCaches(false);  
-		System.out.println("Msg: "+ connection.getResponseMessage());
-		System.out.println("Error code: "+ connection.getResponseCode());
+			URL url = new URL(this.urlStrs);  
+			HttpURLConnection connection= (HttpURLConnection)url.openConnection();   
+			connection.setAllowUserInteraction(true);  
+			connection.setRequestMethod("GET");  
+			connection.setDoInput(true);
+			connection.setDoOutput(true);  
+			connection.setUseCaches(false);  
+			System.out.println("Msg: "+ connection.getResponseMessage());
+			System.out.println("Error code: "+ connection.getResponseCode());
 
-		BufferedReader in = new BufferedReader(
-				new InputStreamReader(connection.getInputStream()));
+			BufferedReader in = new BufferedReader(
+					new InputStreamReader(connection.getInputStream()));
 
-		String inputLine;
-		while ((inputLine = in.readLine()) != null)
-			System.out.println(inputLine);
-		in.close();
+			String inputLine;
+			while ((inputLine = in.readLine()) != null)
+				System.out.println(inputLine);
+			in.close();
 
-	}catch(Exception e){  
-		e.printStackTrace();  
-	}  
+		}catch(Exception e){  
+			e.printStackTrace();  
+		}  
 	}
 
 
@@ -235,16 +235,16 @@ public class LSClient{
 				eachkey=words[i].trim().split("=");
 				System.out.println("eachkey:"+eachkey[0]);
 				if(
-						//						eachkey[0].equals("record-type")||
-						//						eachkey[0].equals("record-service-type")||
-						//						eachkey[0].equals("record-service-domain")||
-						//						eachkey[0].equals("record-service-locator")||
-						//						eachkey[0].equals("record-privatekey")||
-						//						eachkey[0].equals("record-operator")||
-						//						eachkey[0].equals("record-service-type-operator")||
-						//						eachkey[0].equals("record-service-domain-operator")||
-						//						eachkey[0].equals("record-service-locator-operator")||
-						//						eachkey[0].equals("record-privatekey-operator")&&
+//						eachkey[0].equals("record-type")||
+//						eachkey[0].equals("record-service-type")||
+//						eachkey[0].equals("record-service-domain")||
+//						eachkey[0].equals("record-service-locator")||
+//						eachkey[0].equals("record-privatekey")||
+//						eachkey[0].equals("record-operator")||
+//						eachkey[0].equals("record-service-type-operator")||
+//						eachkey[0].equals("record-service-domain-operator")||
+//						eachkey[0].equals("record-service-locator-operator")||
+//						eachkey[0].equals("record-privatekey-operator")&&
 						eachkey[1]!=null
 						){
 					if(eachkey[0].contains("operator")&&eachkey[1]=="any"||eachkey[1]=="all"){
@@ -292,12 +292,12 @@ public class LSClient{
 		String message = "record-service-type=ping&record-service-domain=ESnet,L*&record-service-locator=tcp://nash-pt1.es.net:4823&record-operator=any";
 		String regparams="{\"record-type\":[\"service\"],\"record-service-locator\":[\"http://localhost/accesspointasjdfoi\"],\"record-privatekey\":[\"myuuid\"],\"record-service-type\":[\"owamp\"],\"record-service-domain\":[\"es.net\"]}";
 		LSClient client = new LSClient(url,urls);
-		//		client.getDataOnServer();
-		//		client.getService(recorduri);
-		//		client.getServiceKey(recorduri,key);
-		//		client.deleteService(recorduri);
-		//		client.renewService(recorduri,renewparams);
-		//		client.queryService(message);
+//		client.getDataOnServer();
+//		client.getService(recorduri);
+//		client.getServiceKey(recorduri,key);
+//		client.deleteService(recorduri);
+//		client.renewService(recorduri,renewparams);
+//		client.queryService(message);
 		client.registerService(regparams);
 	}  
 
