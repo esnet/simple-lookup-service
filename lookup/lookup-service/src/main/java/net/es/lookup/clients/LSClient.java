@@ -121,10 +121,6 @@ public class LSClient{
 		String returnString="";
 		if(recorduri!=null){
 			if (key!=null){
-				//				if(key.equals("record-service-domain")||
-				//						key.equals("record-service-locator")||
-				//						key.equals("record-service-type")||
-				//						key.equals("record-type"))
 				urlStr = this.urlStr+recorduri+"/"+key;  
 			}
 			else
@@ -326,6 +322,6 @@ public class LSClient{
 //		client.register(regmap);
 		client.query(querymap);
 	}  
-
-
+	
+	
 }
