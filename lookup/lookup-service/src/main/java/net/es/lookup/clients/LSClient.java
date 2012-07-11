@@ -3,6 +3,9 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+
+import net.sf.json.JSONObject;
+import net.sf.json.JSONArray;
 //import net.es.lookup.common.ReservedKeywords;
 
 
@@ -88,6 +91,11 @@ public class LSClient{
 			e.printStackTrace();  
 		}  
 		System.out.println("============"+returnString);
+		
+//		returnString=returnString.net.URLDecoder.decode(data,"UTF-8");
+		JSONArray jsonData = JSONArray.fromObject(returnString);
+		System.out.println(jsonData.toString());
+		
 		return returnString;
 	}
 
@@ -307,10 +315,10 @@ public class LSClient{
 
 		HashMap<String, Object> querymap = new HashMap();
 		querymap.put("record-type","service");
-		querymap.put("record-service-locator","tcp://nash-pt1.es.net:4823");
-		querymap.put("record-service-type","owamp");
+//		querymap.put("record-service-locator","tcp://nash-pt1.es.net:4823");
+		querymap.put("record-service-type","ping");
 		querymap.put("record-service-domain","es.net,L*");
-		querymap.put("record-service-domain-operator","all");
+		querymap.put("record-service-domain-operator","any");
 
 
 		String renewparams = "{\"record-ttl\":\"PT2H5M2S\",\"client-uuid\":[\"myuuid\"]}";
@@ -318,13 +326,13 @@ public class LSClient{
 		String regparams="{\"record-type\":[\"service\"],\"record-service-locator\":[\"http://localhost/accesspointasjdfoddddi\"],\"record-privatekey\":[\"myuuid\"],\"record-service-type\":[\"owamp\"],\"record-service-domain\":[\"es.net\"]}";
 
 		LSClient client = new LSClient(url,urls);
-		//		client.getDataOnServer();
+				client.getDataOnServer();
 		//		client.getService(recorduri);
 		//		client.getServiceKey(recorduri,key);
 		//		client.deleteService(recorduri);
 		//		client.renew(recorduri,renewmap);
 		//		client.register(regmap);
-		client.query(querymap);
+//		client.query(querymap);
 	}  
 
 
