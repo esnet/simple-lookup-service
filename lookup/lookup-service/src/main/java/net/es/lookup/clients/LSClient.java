@@ -292,6 +292,9 @@ public class LSClient{
 	public static void main(String[] args){  
 		String urls="http://localhost:8080/lookup/services";
 		String url="http://localhost:8080/lookup/service/";
+		
+		String recorduri= "19afe8f8-5efc-4dff-82e8-11b451004ca2";
+		String key= "record-service-domain";
 
 		HashMap<String, Object> renewmap = new HashMap();
 		renewmap.put("record-ttl","PT2H5M2S");
@@ -309,20 +312,18 @@ public class LSClient{
 		querymap.put("record-service-domain","es.net,L*");
 		querymap.put("record-service-domain-operator","all");
 
-		String recorduri= "19afe8f8-5efc-4dff-82e8-11b451004ca2";
-		String key= "record-service-domain";
+		
 		String renewparams = "{\"record-ttl\":\"PT2H5M2S\",\"client-uuid\":[\"myuuid\"]}";
-		//		System.out.println("renewparam:"+renewparams);
 		String message = "record-service-type=ping&record-service-domain=ESnet,L*&record-service-locator=tcp://nash-pt1.es.net:4823&record-operator=any";
 		String regparams="{\"record-type\":[\"service\"],\"record-service-locator\":[\"http://localhost/accesspointasjdfoddddi\"],\"record-privatekey\":[\"myuuid\"],\"record-service-type\":[\"owamp\"],\"record-service-domain\":[\"es.net\"]}";
+		
 		LSClient client = new LSClient(url,urls);
-		//		client.getDataOnServer();
-		//		client.getService(recorduri);
-		//		client.getServiceKey(recorduri,key);
-		//		client.deleteService(recorduri);
-		//		client.renew(recorduri,renewmap);
-		//		client.queryService(message);
-		//				client.register(regmap);
+//		client.getDataOnServer();
+//		client.getService(recorduri);
+//		client.getServiceKey(recorduri,key);
+//		client.deleteService(recorduri);
+//		client.renew(recorduri,renewmap);
+//		client.register(regmap);
 		client.query(querymap);
 	}  
 
