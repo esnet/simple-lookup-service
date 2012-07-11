@@ -45,9 +45,8 @@ public class LSClient{
 		connection.setDoInput(true);
 		connection.setDoOutput(true);  
 		connection.setUseCaches(false);  
-		System.out.println("Msg: "+ connection.getResponseMessage());
-		System.out.println("Error code: "+ connection.getResponseCode());
-	
+		connection.setRequestProperty("Content-type",
+				"application/json");
 		}catch(Exception e){  
 			e.printStackTrace();  
 		}  
@@ -65,7 +64,6 @@ public class LSClient{
 		connection.setUseCaches(false);  
 		System.out.println("Msg: "+ connection.getResponseMessage());
 		System.out.println("Error code: "+ connection.getResponseCode());
-	
 		}catch(Exception e){  
 			e.printStackTrace();  
 		}  
@@ -74,23 +72,14 @@ public class LSClient{
 	
 	public  String getDataOnServer(){
 		String returnString="";
-//		DataInputStream in=null;
 		try{  
 
 			URL url = new URL(this.urlStrs);  
 			HttpURLConnection connection=getConnection(url);
-//			HttpURLConnection connection= (HttpURLConnection)url.openConnection();   
-//			connection.setAllowUserInteraction(true);  
-//			connection.setRequestMethod("GET");  
-//			connection.setDoInput(true);
-//			connection.setDoOutput(true);  
-//			connection.setUseCaches(false);  
-			
 			
 			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
 			String inputLine;
 			while (null!=((inputLine = in.readLine()))){
-//				System.out.println(inputLine);
 			    returnString +=inputLine;
 			}
 			in.close();
@@ -99,7 +88,6 @@ public class LSClient{
 			e.printStackTrace();  
 		}  
 		System.out.println("============"+returnString);
-
 		return returnString;
 	}
 
@@ -114,27 +102,12 @@ public class LSClient{
 		try{  
 			URL url = new URL(urlStr);  
 			HttpURLConnection connection=getConnection(url);
-//			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
-//			connection.setAllowUserInteraction(true);  
-//			connection.setRequestMethod("GET");  
-//			connection.setDoInput(true);
-//			connection.setDoOutput(true);  
-//			connection.setUseCaches(false);
-//			System.out.println("Msg: "+ connection.getResponseMessage());
-//			System.out.println("Error code: "+ connection.getResponseCode());
-
 			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
-//			BufferedReader in = new BufferedReader(
-//					new InputStreamReader(connection.getInputStream()));
-
 			String inputLine;
 			while (null!=((inputLine = in.readLine()))){
-//				System.out.println(inputLine);
 			    returnString +=inputLine;
 			}
-			
 			in.close();
-
 		}catch(Exception e){  
 			e.printStackTrace();  
 		}  
@@ -148,10 +121,10 @@ public class LSClient{
 		String returnString="";
 		if(recorduri!=null){
 			if (key!=null){
-				//				if(key.equals("record-service-domain")||
-				//						key.equals("record-service-locator")||
-				//						key.equals("record-service-type")||
-				//						key.equals("record-type"))
+//				if(key.equals("record-service-domain")||
+//						key.equals("record-service-locator")||
+//						key.equals("record-service-type")||
+//						key.equals("record-type"))
 				urlStr = this.urlStr+recorduri+"/"+key;  
 			}
 			else
@@ -160,27 +133,12 @@ public class LSClient{
 		try{  
 			URL url = new URL(urlStr);  
 			HttpURLConnection connection=getConnection(url);
-//			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
-//			connection.setAllowUserInteraction(true);  
-//			connection.setRequestMethod("GET");  
-//			connection.setDoInput(true);
-//			connection.setDoOutput(true);  
-//			connection.setUseCaches(false); 
-//			System.out.println("Msg: "+ connection.getResponseMessage());
-//			System.out.println("Error code: "+ connection.getResponseCode());
-
 			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
-//			BufferedReader in = new BufferedReader(
-//					new InputStreamReader(connection.getInputStream()));
-
 			String inputLine;
 			while (null!=((inputLine = in.readLine()))){
-//				System.out.println(inputLine);
 			    returnString +=inputLine;
 			}
-			
 			in.close();
-
 		}catch(Exception e){  
 			e.printStackTrace();  
 		}  
@@ -195,37 +153,35 @@ public class LSClient{
 			urlStr = this.urlStr+recorduri;  
 		try{  
 			URL url = new URL(urlStr);  
-
-			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
-			connection.setAllowUserInteraction(true);  
-			connection.setRequestMethod("DELETE");  
-			connection.setDoInput(true);
-			connection.setDoOutput(true);  
-			connection.setUseCaches(false);  
-
-			System.out.println("Msg: "+ connection.getResponseMessage());
-			System.out.println("Error code: "+ connection.getResponseCode());
+			HttpURLConnection connection=deleteConnection(url);
 			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
 
 			String inputLine;
 			while (null!=((inputLine = in.readLine()))){
-//				System.out.println(inputLine);
 			    returnString +=inputLine;
 			}
 			in.close();
-
 		}catch(Exception e){  
 			e.printStackTrace();  
 		}  
-//		System.out.println("============"+returnString);
+		System.out.println("============"+returnString);
 		return returnString;
 	}
 
+	public renewService(String recorduri,HashMap<String,String> map){
+		String urlStr=null;
+		if(map.containsKey("record-ttl")&&map.get("record-ttl")!=null&&map.get("record-ttl")!=""){
+			urlStr = this.urlStr+recorduri;
+		}
+	}
+	
+	
 	public String renewService(String recorduri,String params){
 		String urlStr=null;
 		String [] words = null;
 		String returnString="";
-		words=params.trim().split(",");
+		words=params.trim().split("\"],\"");
+//		words=params.trim().split(",");
 		if (recorduri!=null&&params!=null){
 			for(int i=0;i<words.length;i++){
 				if(words[i].contains("record-ttl")){
@@ -238,20 +194,16 @@ public class LSClient{
 		System.out.println("urlstr"+urlStr);
 		try{  
 			URL url = new URL(urlStr);  
-			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
-
-			connection.setAllowUserInteraction(true);  
-			connection.setRequestMethod("POST");  
-			connection.setDoInput(true);
-			connection.setDoOutput(true);  
-			connection.setUseCaches(false);  
-
-
+			HttpURLConnection connection=postConnection(url);
+//			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
+//			connection.setAllowUserInteraction(true);  
+//			connection.setRequestMethod("POST");  
+//			connection.setDoInput(true);
+//			connection.setDoOutput(true);  
+//			connection.setUseCaches(false);  
 			DataOutputStream out=new DataOutputStream (connection.getOutputStream ()); 
-
 			out.writeBytes(params);
 			out.close();
-
 			System.out.println("Msg: "+ connection.getResponseMessage());
 			System.out.println("Error code: "+ connection.getResponseCode());
 			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
@@ -262,7 +214,6 @@ public class LSClient{
 			    returnString +=inputLine;
 			}
 			in.close();
-
 		}catch(Exception e){  
 			e.printStackTrace();  
 		}  
@@ -272,23 +223,38 @@ public class LSClient{
 
 	public String registerService(String params){
 		String returnString="";
+		
+		
+		String [] words = null;
+		words=params.trim().split("\"],\"");
+		if (params!=null){
+			for(int i=0;i<words.length;i++){
+				if(words[i].contains("record-type")&&){
+//				if(words[i].contains(keyword.RECORD_TTL)){
+					urlStr = this.urlStr+recorduri; 
+					break;
+				}
+			}
+		}
+		
+		
+		
 		try{  	
 			URL url = new URL(this.urlStrs); 
-			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
-			connection.setAllowUserInteraction(true);  
-			connection.setRequestMethod("POST");  
-			connection.setDoInput(true);
-			connection.setDoOutput(true);  
-			connection.setUseCaches(false);  
-			connection.setRequestProperty("Content-type",
-					"application/json");
-			connection.setRequestProperty("Accept",
-					"application/json");
+			HttpURLConnection connection=postConnection(url);
+//			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
+//			connection.setAllowUserInteraction(true);  
+//			connection.setRequestMethod("POST");  
+//			connection.setDoInput(true);
+//			connection.setDoOutput(true);  
+//			connection.setUseCaches(false);  
+//			connection.setRequestProperty("Content-type",
+//					"application/json");
+//			connection.setRequestProperty("Accept",
+//					"application/json");
 			DataOutputStream out=new DataOutputStream (connection.getOutputStream ()); 
-
 			out.writeBytes(params);
 			out.close();
-
 			System.out.println("Msg: "+ connection.getResponseMessage());
 			System.out.println("Error code: "+ connection.getResponseCode());
 			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
@@ -299,7 +265,6 @@ public class LSClient{
 			    returnString +=inputLine;
 			}
 			in.close();
-
 		}catch(Exception e){  
 			e.printStackTrace();  
 		}  
@@ -347,16 +312,16 @@ public class LSClient{
 		}
 		try{  
 			URL url = new URL(urlStr);  
-
-			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
-			connection.setAllowUserInteraction(true);  
-			connection.setRequestMethod("GET");  
-			connection.setDoInput(true);
-			connection.setDoOutput(true);  
-			connection.setUseCaches(false);  
-
-			System.out.println("Msg: "+ connection.getResponseMessage());
-			System.out.println("Error code: "+ connection.getResponseCode());
+			HttpURLConnection connection=getConnection(url);
+//			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
+//			connection.setAllowUserInteraction(true);  
+//			connection.setRequestMethod("GET");  
+//			connection.setDoInput(true);
+//			connection.setDoOutput(true);  
+//			connection.setUseCaches(false);  
+//
+//			System.out.println("Msg: "+ connection.getResponseMessage());
+//			System.out.println("Error code: "+ connection.getResponseCode());
 			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
 
 			String inputLine;
@@ -379,17 +344,17 @@ public class LSClient{
 		String url="http://localhost:8080/lookup/service/";
 //		String urls=null;
 //		String url=null;
-		String recorduri= "c1fca1cb-6fb7-4bfb-91e0-cad36f52a3bd";
+		String recorduri= "19afe8f8-5efc-4dff-82e8-11b451004ca2";
 		String key= "record-service-domain";
 		String renewparams = "{\"record-ttl\":\"PT2H5M2S\",\"client-uuid\":[\"myuuid\"]}";
 		String message = "record-service-type=ping&record-service-domain=ESnet,L*&record-service-locator=tcp://nash-pt1.es.net:4823&record-operator=any";
-		String regparams="{\"record-type\":[\"service\"],\"record-service-locator\":[\"http://localhost/accesspointasjdfoddi\"],\"record-privatekey\":[\"myuuid\"],\"record-service-type\":[\"owamp\"],\"record-service-domain\":[\"es.net\"]}";
+		String regparams="{\"record-type\":[\"service\"],\"record-service-locator\":[\"http://localhost/accesspointasjdfoddddi\"],\"record-privatekey\":[\"myuuid\"],\"record-service-type\":[\"owamp\"],\"record-service-domain\":[\"es.net\"]}";
 		LSClient client = new LSClient(url,urls);
 //		client.getDataOnServer();
 //		client.getService(recorduri);
-		client.getServiceKey(recorduri,key);
+//		client.getServiceKey(recorduri,key);
 //		client.deleteService(recorduri);
-//		client.renewService(recorduri,renewparams);
+		client.renewService(recorduri,renewparams);
 //		client.queryService(message);
 //		client.registerService(regparams);
 	}  
