@@ -1,40 +1,93 @@
-package net.es.lookup.client;
+//package net.es.lookup.client;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import net.es.lookup.common.ReservedKeywords;
+//import net.es.lookup.common.ReservedKeywords;
 
 
 
 public class LSClient{
 	private String urlStr = null;  
 	private String urlStrs = null;
-	ReservedKeywords keyword = new ReservedKeywords();
+//	ReservedKeywords keyword = new ReservedKeywords();
 
 	public LSClient(String url,String urls){
 		this.urlStr=url;
 		this.urlStrs=urls;
 	}
 
+	
+	public HttpURLConnection getConnection(URL url){
+		HttpURLConnection connection=null;
+		try{  
+		connection= (HttpURLConnection)url.openConnection();   
+		connection.setAllowUserInteraction(true);  
+		connection.setRequestMethod("GET");  
+		connection.setDoInput(true);
+		connection.setDoOutput(true);  
+		connection.setUseCaches(false);  
+		System.out.println("Msg: "+ connection.getResponseMessage());
+		System.out.println("Error code: "+ connection.getResponseCode());
+	
+		}catch(Exception e){  
+			e.printStackTrace();  
+		}  
+		return connection;
+	}
+	
+	public HttpURLConnection postConnection(URL url){
+		HttpURLConnection connection=null;
+		try{  
+		connection= (HttpURLConnection)url.openConnection();   
+		connection.setAllowUserInteraction(true);  
+		connection.setRequestMethod("POST");  
+		connection.setDoInput(true);
+		connection.setDoOutput(true);  
+		connection.setUseCaches(false);  
+		System.out.println("Msg: "+ connection.getResponseMessage());
+		System.out.println("Error code: "+ connection.getResponseCode());
+	
+		}catch(Exception e){  
+			e.printStackTrace();  
+		}  
+		return connection;
+	}
+	
+	public HttpURLConnection deleteConnection(URL url){
+		HttpURLConnection connection=null;
+		try{  
+		connection= (HttpURLConnection)url.openConnection();   
+		connection.setAllowUserInteraction(true);  
+		connection.setRequestMethod("DELETE");  
+		connection.setDoInput(true);
+		connection.setDoOutput(true);  
+		connection.setUseCaches(false);  
+		System.out.println("Msg: "+ connection.getResponseMessage());
+		System.out.println("Error code: "+ connection.getResponseCode());
+	
+		}catch(Exception e){  
+			e.printStackTrace();  
+		}  
+		return connection;
+	}
+	
 	public  String getDataOnServer(){
 		String returnString="";
 //		DataInputStream in=null;
 		try{  
 
 			URL url = new URL(this.urlStrs);  
-			HttpURLConnection connection= (HttpURLConnection)url.openConnection();   
-			connection.setAllowUserInteraction(true);  
-			connection.setRequestMethod("GET");  
-			connection.setDoInput(true);
-			connection.setDoOutput(true);  
-			connection.setUseCaches(false);  
-			System.out.println("Msg: "+ connection.getResponseMessage());
-			System.out.println("Error code: "+ connection.getResponseCode());
+			HttpURLConnection connection=getConnection(url);
+//			HttpURLConnection connection= (HttpURLConnection)url.openConnection();   
+//			connection.setAllowUserInteraction(true);  
+//			connection.setRequestMethod("GET");  
+//			connection.setDoInput(true);
+//			connection.setDoOutput(true);  
+//			connection.setUseCaches(false);  
+			
 			
 			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
-//			BufferedReader in = new BufferedReader(
-//					new InputStreamReader(connection.getInputStream()));
-
 			String inputLine;
 			while (null!=((inputLine = in.readLine()))){
 //				System.out.println(inputLine);
@@ -60,15 +113,15 @@ public class LSClient{
 
 		try{  
 			URL url = new URL(urlStr);  
-
-			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
-			connection.setAllowUserInteraction(true);  
-			connection.setRequestMethod("GET");  
-			connection.setDoInput(true);
-			connection.setDoOutput(true);  
-			connection.setUseCaches(false);
-			System.out.println("Msg: "+ connection.getResponseMessage());
-			System.out.println("Error code: "+ connection.getResponseCode());
+			HttpURLConnection connection=getConnection(url);
+//			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
+//			connection.setAllowUserInteraction(true);  
+//			connection.setRequestMethod("GET");  
+//			connection.setDoInput(true);
+//			connection.setDoOutput(true);  
+//			connection.setUseCaches(false);
+//			System.out.println("Msg: "+ connection.getResponseMessage());
+//			System.out.println("Error code: "+ connection.getResponseCode());
 
 			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
 //			BufferedReader in = new BufferedReader(
@@ -106,15 +159,15 @@ public class LSClient{
 		} 
 		try{  
 			URL url = new URL(urlStr);  
-
-			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
-			connection.setAllowUserInteraction(true);  
-			connection.setRequestMethod("GET");  
-			connection.setDoInput(true);
-			connection.setDoOutput(true);  
-			connection.setUseCaches(false); 
-			System.out.println("Msg: "+ connection.getResponseMessage());
-			System.out.println("Error code: "+ connection.getResponseCode());
+			HttpURLConnection connection=getConnection(url);
+//			HttpURLConnection connection= (HttpURLConnection)url.openConnection();  
+//			connection.setAllowUserInteraction(true);  
+//			connection.setRequestMethod("GET");  
+//			connection.setDoInput(true);
+//			connection.setDoOutput(true);  
+//			connection.setUseCaches(false); 
+//			System.out.println("Msg: "+ connection.getResponseMessage());
+//			System.out.println("Error code: "+ connection.getResponseCode());
 
 			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
 //			BufferedReader in = new BufferedReader(
@@ -176,6 +229,7 @@ public class LSClient{
 		if (recorduri!=null&&params!=null){
 			for(int i=0;i<words.length;i++){
 				if(words[i].contains("record-ttl")){
+//				if(words[i].contains(keyword.RECORD_TTL)){
 					urlStr = this.urlStr+recorduri; 
 					break;
 				}
@@ -280,7 +334,8 @@ public class LSClient{
 //						eachkey[0].equals("record-privatekey-operator")&&
 						eachkey[1]!=null
 						){
-					if(eachkey[0].contains("operator")&&eachkey[1]==keyword.RECORD_OPERATOR_ANY||eachkey[1]==keyword.RECORD_OPERATOR_ALL){
+//					if(eachkey[0].contains(keyword.RECORD_OPERATOR_SUFFIX)&&eachkey[1]==keyword.RECORD_OPERATOR_ANY||eachkey[1]==keyword.RECORD_OPERATOR_ALL){
+						if(eachkey[0].contains("operator")&&eachkey[1]=="any"||eachkey[1]=="all"){
 						mes.append(eachkey[0]+"="+eachkey[1]+"&");
 					}
 					mes.append(eachkey[0]+"="+eachkey[1]+"&");
@@ -332,10 +387,10 @@ public class LSClient{
 		LSClient client = new LSClient(url,urls);
 //		client.getDataOnServer();
 //		client.getService(recorduri);
-//		client.getServiceKey(recorduri,key);
+		client.getServiceKey(recorduri,key);
 //		client.deleteService(recorduri);
 //		client.renewService(recorduri,renewparams);
-		client.queryService(message);
+//		client.queryService(message);
 //		client.registerService(regparams);
 	}  
 
