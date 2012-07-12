@@ -9,17 +9,6 @@ import java.util.*;
 
 
 
-//package net.es.lookup.clients;
-
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-
-//import net.es.lookup.client.ServiceKeywords;
-
-
-
 public class LSClient{
 	private String urlStr = null;  
 	private String urlStrs = null;
@@ -318,7 +307,7 @@ public class LSClient{
 
 		HashMap<String, Object> regmap = new HashMap();
 		regmap.put("record-type","service");
-		regmap.put("record-service-locator","http://localhost/accesspointadfsdddgt");
+		regmap.put("record-service-locator","http://localhost/accesspointadfsddsdfrddgt");
 		regmap.put("record-service-type","owamp");
 		regmap.put("record-service-domain","es.net");
 
@@ -335,13 +324,13 @@ public class LSClient{
 		String regparams="{\"record-type\":[\"service\"],\"record-service-locator\":[\"http://localhost/accesspointasjdfoddddi\"],\"record-privatekey\":[\"myuuid\"],\"record-service-type\":[\"owamp\"],\"record-service-domain\":[\"es.net\"]}";
 
 		LSClient client = new LSClient(url,urls);
-		client.getDataOnServer();
+//		client.getDataOnServer();
 //		client.getService(recorduri);
 //		client.getServiceKey(recorduri,key);
 //		client.deleteService(recorduri);
 //		client.renew(recorduri,renewmap);
 //		client.register(regmap);
-//		client.query(querymap);
+		client.query(querymap);
 	}  
 
 
