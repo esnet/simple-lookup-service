@@ -144,12 +144,13 @@ public class ServiceDAOMongoDb {
 		
 		int errorcode;
 		String errormsg;
-	
+		
+		Message response = new Message();
 		BasicDBObject query = new BasicDBObject();
 		String uri = message.getURI();
 		//TODO: add check to see if only one elem is returned
 		query.put(ReservedKeywords.RECORD_URI, uri);
-		
+		response = getServiceByURI(uri);
 		try{
 			WriteResult wrt = coll.remove(query);
 		
@@ -165,7 +166,7 @@ public class ServiceDAOMongoDb {
 			throw new DatabaseException(e.getMessage());
 		}
 		
-		Message response = new Message();
+		
 		response.setError(errorcode);
 		response.setErrorMessage(errormsg);
 		return response;
@@ -177,6 +178,7 @@ public class ServiceDAOMongoDb {
 		int errorcode;
 		String errormsg;
         
+		Message response = new Message();
         
         if(serviceid != null && !serviceid.isEmpty()){
         	
@@ -190,12 +192,15 @@ public class ServiceDAOMongoDb {
         	
         	System.out.println(updateObject);
         	
+        	
+        	
         	try{
         		WriteResult wrt = coll.update(query, updateObject);
         		CommandResult cmdres = wrt.getLastError();
         		System.out.println(cmdres.ok());
         	
         		if(cmdres.ok()){
+        			response = (Message) getServiceByURI(serviceid);
         			errorcode=200;
         			errormsg="SUCCESS";
         		}else{
@@ -209,7 +214,7 @@ public class ServiceDAOMongoDb {
         	throw new DatabaseException("Record URI not specified!!!");
         }
 		
-        Message response = new Message();
+        
         response.setError(errorcode);
         response.setErrorMessage(errormsg);
 		return response;

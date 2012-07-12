@@ -9,12 +9,13 @@ import java.util.*;
 
 
 
-public class LSClient{
+public class LSClients{
 	private String urlStr = null;  
 	private String urlStrs = null;
 //	ServiceKeywords keyword = new ServiceKeywords();
 
-	public LSClient(String url,String urls){
+	public LSClients
+	(String url,String urls){
 		this.urlStr=url;
 		this.urlStrs=urls;
 	}
