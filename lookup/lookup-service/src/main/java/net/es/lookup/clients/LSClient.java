@@ -184,8 +184,7 @@ public class LSClient{
 
 	public String renewService(String urlString, String recorduri,String params){
 		String returnString="";
-//		System.out.println("urlstr"+urlString);
-//		System.out.println("params"+params);
+
 		try{  
 			URL url = new URL(urlString);  
 			HttpURLConnection connection=postConnection(url);
@@ -231,7 +230,6 @@ public class LSClient{
 
 	public String registerService(String params){
 		String returnString="";
-//		System.out.println("params"+params);
 
 		try{  	
 			URL url = new URL(this.urlStrs); 
@@ -272,9 +270,8 @@ public class LSClient{
 
 	public String queryService(String message){
 		String returnString="";
-//		System.out.println("MESSAGE:"+message);
 		urlStr=this.urlStrs+"?"+message;
-//		System.out.println("url:"+urlStr);
+
 		try{  
 			URL url = new URL(urlStr);  
 			HttpURLConnection connection=getConnection(url);
