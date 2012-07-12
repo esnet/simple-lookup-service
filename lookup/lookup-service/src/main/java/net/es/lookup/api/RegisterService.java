@@ -2,6 +2,8 @@ package net.es.lookup.api;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Iterator;
 import java.util.UUID;
 
 import net.es.lookup.common.LeaseManager;
@@ -48,34 +50,42 @@ public class RegisterService {
             // Request a lease
             boolean gotLease = LeaseManager.getInstance().requestLease(request);
             if (gotLease) {
+            	List<String> recordType = request.getRecordType();
                 // Build the matching query request that must fail for the service to be published
                 Message query = new Message();
                 Message operators = new Message();
                 
                 List<String> list;
-                list=(List)request.getAccessPoint();
-                query.add(ReservedKeywords.RECORD_SERVICE_LOCATOR,list);
-                operators.add(ReservedKeywords.RECORD_SERVICE_LOCATOR, ReservedKeywords.RECORD_OPERATOR_ALL);
                 
-                //list = new ArrayList<String>();
-                list=null;
-                list=(List)request.getClientUUID();
-                query.add(ReservedKeywords.RECORD_PRIVATEKEY,list);
-                operators.add(ReservedKeywords.RECORD_PRIVATEKEY, ReservedKeywords.RECORD_OPERATOR_ALL);
                 
-                //list = new ArrayList<String>();
-                list=null;
-                list=(List)request.getServiceType();
-                query.add(ReservedKeywords.RECORD_SERVICE_TYPE,list);
-                operators.add(ReservedKeywords.RECORD_SERVICE_TYPE, ReservedKeywords.RECORD_OPERATOR_ALL);
                 
-                //list = new ArrayList<String>();
-                list=null;
-                list=(List)request.getServiceDomain();
-                query.add(ReservedKeywords.RECORD_SERVICE_DOMAIN,list);
-                operators.add(ReservedKeywords.RECORD_SERVICE_DOMAIN, ReservedKeywords.RECORD_OPERATOR_ALL);
+                List<String> queryKeyList = new ArrayList();
                 
-                System.out.println(request.getServiceDomain());
+                if(recordType.get(0).equals(ReservedKeywords.RECORD_VALUE_DEFAULT)){
+                	queryKeyList = getServiceRecordQueryKeys();
+                	
+                	for(int i =0; i<queryKeyList.size(); i++){
+                		list=(List)request.getKey(queryKeyList.get(i));
+                		query.add(queryKeyList.get(i),list);
+                        operators.add(queryKeyList.get(i), ReservedKeywords.RECORD_OPERATOR_ALL);
+                	}
+                	
+                }else{
+                	
+                	Map<String, Object> keyValues = request.getMap();
+                	Iterator it = keyValues.entrySet().iterator();
+                	
+                    while (it.hasNext()) {
+                        Map.Entry<String,Object> pairs = (Map.Entry)it.next();
+                        if(!isIgnoreKey(pairs.getKey())){
+                        	System.out.println(pairs.getKey() + " = " + pairs.getValue());
+                        	operators.add(pairs.getKey(), ReservedKeywords.RECORD_OPERATOR_ALL);
+                        	query.add(pairs.getKey(),pairs.getValue());
+                        	
+                        }
+                    }
+                }
+ 
                try{
             	    Message res = ServiceDAOMongoDb.getInstance().queryAndPublishService(request,query,operators);
 
@@ -143,6 +153,24 @@ public class RegisterService {
     private String newURI() {
         String uri = LookupService.SERVICE_URI_PREFIX + "/" + UUID.randomUUID().toString();
         return uri;
+    }
+    
+    private List<String> getServiceRecordQueryKeys(){
+    	List<String> qList = new ArrayList();
+    	qList.add(ReservedKeywords.RECORD_TYPE);
+    	qList.add(ReservedKeywords.RECORD_SERVICE_LOCATOR);
+    	qList.add(ReservedKeywords.RECORD_PRIVATEKEY);
+    	qList.add(ReservedKeywords.RECORD_SERVICE_TYPE);
+    	qList.add(ReservedKeywords.RECORD_SERVICE_DOMAIN);
+    	return qList;
+    }
+    
+    private boolean isIgnoreKey(String key){
+    	if (key.equals(ReservedKeywords.RECORD_TTL) || key.equals(ReservedKeywords.RECORD_EXPIRES) || key.equals(ReservedKeywords.RECORD_URI)){
+    		return true;
+    	}else{
+    		return false;
+    	}
     }
 
 }

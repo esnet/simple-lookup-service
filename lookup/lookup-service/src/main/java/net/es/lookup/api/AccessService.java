@@ -268,21 +268,16 @@ public class AccessService {
 					}
 					Message newRequest = new Message(serviceMap);
 
-					boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
-					if(gotLease){
-						System.out.println("gotLease for "+serviceid);
-
-						//							Message res = ServiceDAOMongoDb.getInstance().updateService(serviceid,newRequest);
-						Message res = ServiceDAOMongoDb.getInstance().deleteService(newRequest);
-						if(res.getError() == 200){
-							response = new JSONDeleteResponse (res.getMap());
-							try{
-								return JSONMessage.toString(response);
-							}catch(DataFormatException e){
-								throw new InternalErrorException("Data formatting exception");
-							}
+					Message res = ServiceDAOMongoDb.getInstance().deleteService(newRequest);
+					if(res.getError() == 200){
+						response = new JSONDeleteResponse (res.getMap());
+						try{
+							return JSONMessage.toString(response);
+						}catch(DataFormatException e){
+							throw new InternalErrorException("Data formatting exception");
 						}
 					}
+					
 				}else{
 					throw new NotFoundException("Service Not Found in DB\n");
 				}
