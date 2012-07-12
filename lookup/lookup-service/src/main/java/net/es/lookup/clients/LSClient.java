@@ -1,19 +1,18 @@
-//package net.es.lookup.client;
+//package net.es.lookup.clients;
 
 import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import net.sf.json.JSONObject;
-import net.sf.json.JSONArray;
-//import net.es.lookup.common.ReservedKeywords;
+
+//import net.es.lookup.client.ServiceKeywords;
 
 
 
 public class LSClient{
 	private String urlStr = null;  
 	private String urlStrs = null;
-	//	ReservedKeywords keyword = new ReservedKeywords();
+//	ServiceKeywords keyword = new ServiceKeywords();
 
 	public LSClient(String url,String urls){
 		this.urlStr=url;
@@ -79,8 +78,8 @@ public class LSClient{
 
 			URL url = new URL(this.urlStrs);  
 			HttpURLConnection connection=getConnection(url);
-
-			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
+			BufferedReader in = new BufferedReader (new InputStreamReader(connection.getInputStream ()));  
+//			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
 			String inputLine;
 			while (null!=((inputLine = in.readLine()))){
 				returnString +=inputLine;
@@ -92,9 +91,6 @@ public class LSClient{
 		}  
 		System.out.println("============"+returnString);
 		
-//		returnString=returnString.net.URLDecoder.decode(data,"UTF-8");
-		JSONArray jsonData = JSONArray.fromObject(returnString);
-		System.out.println(jsonData.toString());
 		
 		return returnString;
 	}
@@ -110,7 +106,8 @@ public class LSClient{
 		try{  
 			URL url = new URL(urlStr);  
 			HttpURLConnection connection=getConnection(url);
-			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
+//			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
+			BufferedReader in = new BufferedReader (new InputStreamReader(connection.getInputStream ())); 
 			String inputLine;
 			while (null!=((inputLine = in.readLine()))){
 				returnString +=inputLine;
@@ -137,7 +134,8 @@ public class LSClient{
 		try{  
 			URL url = new URL(urlStr);  
 			HttpURLConnection connection=getConnection(url);
-			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
+//			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
+			BufferedReader in = new BufferedReader (new InputStreamReader(connection.getInputStream ())); 
 			String inputLine;
 			while (null!=((inputLine = in.readLine()))){
 				returnString +=inputLine;
@@ -158,8 +156,8 @@ public class LSClient{
 		try{  
 			URL url = new URL(urlStr);  
 			HttpURLConnection connection=deleteConnection(url);
-			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
-
+//			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
+			BufferedReader in = new BufferedReader (new InputStreamReader(connection.getInputStream ())); 
 			String inputLine;
 			while (null!=((inputLine = in.readLine()))){
 				returnString +=inputLine;
@@ -176,6 +174,7 @@ public class LSClient{
 		String urlStr=null;
 		String params="";
 		if(recorduri!=null&&!map.isEmpty()){
+//			if(map.containsKey(keyword.RECORD_TTL)&&map.get(keyword.RECORD_TTL)!=null&&map.get(keyword.RECORD_TTL)!=""){
 			if(map.containsKey("record-ttl")&&map.get("record-ttl")!=null&&map.get("record-ttl")!=""){
 				urlStr = this.urlStr+recorduri;
 			}
@@ -199,8 +198,8 @@ public class LSClient{
 			out.close();
 			System.out.println("Msg: "+ connection.getResponseMessage());
 			System.out.println("Error code: "+ connection.getResponseCode());
-			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
-
+//			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
+			BufferedReader in = new BufferedReader (new InputStreamReader(connection.getInputStream ())); 
 			String inputLine;
 			while (null!=((inputLine = in.readLine()))){
 				returnString +=inputLine;
@@ -218,6 +217,9 @@ public class LSClient{
 	public void register(HashMap<String,Object> map){
 		String params="";
 		if(!map.isEmpty()){
+//			if(map.containsKey(keyword.RECORD_TYPE)&&map.get(keyword.RECORD_TYPE)!=null&&
+//					map.containsKey(keyword.RECORD_SERVICE_LOCATOR)&&map.get(keyword.RECORD_SERVICE_LOCATOR)!=null&&
+//					map.containsKey(keyword.RECORD_SERVICE_TYPE)&&map.get(keyword.RECORD_SERVICE_TYPE)!=null){
 			if(map.containsKey("record-type")&&map.get("record-type")!=null&&
 					map.containsKey("record-service-locator")&&map.get("record-service-locator")!=null&&
 					map.containsKey("record-service-type")&&map.get("record-service-type")!=null){
@@ -244,8 +246,8 @@ public class LSClient{
 			out.close();
 			System.out.println("Msg: "+ connection.getResponseMessage());
 			System.out.println("Error code: "+ connection.getResponseCode());
-			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
-
+//			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
+			BufferedReader in = new BufferedReader (new InputStreamReader(connection.getInputStream ())); 
 			String inputLine;
 			while (null!=((inputLine = in.readLine()))){
 				returnString +=inputLine;
@@ -262,6 +264,7 @@ public class LSClient{
 		String params = "";
 		if(!map.isEmpty()){
 			for(String eachKey:map.keySet()){
+//				if(eachKey.contains(keyword.RECORD_OPERATOR_SUFFIX)&&map.get(eachKey)==keyword.RECORD_OPERATOR_ALL||map.get(eachKey)==keyword.RECORD_OPERATOR_ANY){
 				if(eachKey.contains("operator")&&map.get(eachKey)=="all"||map.get(eachKey)=="any"){
 					params+= eachKey+"="+map.get(eachKey)+"&";	
 				}else{
@@ -281,8 +284,8 @@ public class LSClient{
 		try{  
 			URL url = new URL(urlStr);  
 			HttpURLConnection connection=getConnection(url);
-			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
-
+//			DataInputStream in = new DataInputStream (connection.getInputStream ()); 
+			BufferedReader in = new BufferedReader (new InputStreamReader(connection.getInputStream ())); 
 			String inputLine;
 			while (null!=((inputLine = in.readLine()))){
 				returnString +=inputLine;
