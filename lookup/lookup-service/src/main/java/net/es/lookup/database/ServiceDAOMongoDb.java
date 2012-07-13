@@ -241,7 +241,11 @@ public class ServiceDAOMongoDb {
 					Iterator<String> it = keys.iterator();
 					while(it.hasNext()){	
 						String tmpKey = it.next();
-						tmpserv.add (tmpKey,tmp.get(tmpKey));  
+						//remove key added by mongodb
+						if(!tmpKey.equals("_id")){
+							tmpserv.add (tmpKey,tmp.get(tmpKey));
+						}
+						  
 					}
 				}
 				result.add(tmpserv);
@@ -389,7 +393,9 @@ public class ServiceDAOMongoDb {
 			
 			if (cur.size() == 1){
 				DBObject tmp = cur.next();
-				result = new Service(tmp.toMap());
+				Map<String,Object> tmpMap= tmp.toMap();
+				tmpMap.remove("_id");
+				result = new Service(tmpMap);
 			}
 		}catch(MongoException e){
 			throw new DatabaseException(e.getMessage());
