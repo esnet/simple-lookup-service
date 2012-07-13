@@ -5,7 +5,7 @@ import java.net.*;
 import java.util.*;
 
 
-//import net.es.lookup.client.ServiceKeywords;
+//import net.es.lookup.clients.ServiceKeywords;
 
 
 
