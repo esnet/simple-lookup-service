@@ -58,21 +58,14 @@ public class AccessService {
 
 					Message newRequest = new Message(serviceMap);
 
-					boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
-					if(gotLease){
-						System.out.println("gotLease for "+serviceid);
-
-						if(newRequest.getError() == 200){
-							response = new JSONSubGetResponse (newRequest.getMap());
-							try{
-								return JSONMessage.toString(response);
-							}catch(DataFormatException e){
-								throw new InternalErrorException("Data formatting exception");
-							}
-						}else{
-
+					if(newRequest.getError() == 200){
+						response = new JSONSubGetResponse (newRequest.getMap());
+						try{
+							return JSONMessage.toString(response);
+						}catch(DataFormatException e){
+							throw new InternalErrorException("Data formatting exception");
 						}
-					}	
+					}
 				}else{
 					throw new NotFoundException("Service Not Found in DB\n");
 				}
@@ -126,21 +119,17 @@ public class AccessService {
 
 					Message newRequest = new Message(serviceMap);
 
-					boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
-					if(gotLease){
-						System.out.println("gotLease for "+serviceid);
-
-						if(newRequest.getError() == 200){
-							response = new JSONSubGetResponse (newRequest.getMap());
-							try{
-								return JSONMessage.toString(response);
-							}catch(DataFormatException e){
-								throw new InternalErrorException("Data formatting exception");
-							}
-						}else if(serviceRecord.getKey(key)==null){
-							throw new NotFoundException("The key does not exist\n");
+					if(newRequest.getError() == 200){
+						response = new JSONSubGetResponse (newRequest.getMap());
+						try{
+							return JSONMessage.toString(response);
+						}catch(DataFormatException e){
+							throw new InternalErrorException("Data formatting exception");
 						}
-					}	
+					}else if(serviceRecord.getKey(key)==null){
+						throw new NotFoundException("The key does not exist\n");
+					}
+						
 				}else{
 					throw new NotFoundException("Service Not Found in DB\n");
 				}
@@ -175,7 +164,8 @@ public class AccessService {
 		Message errorResponse = new Message();
 
 		JSONRenewRequest request = new JSONRenewRequest(service);
-		if (request.getStatus() == JSONRenewRequest.INCORRECT_FORMAT) {
+		//renew can be empty for now. next version will require the privatekey
+		if (!service.isEmpty() && request.getStatus() == JSONRenewRequest.INCORRECT_FORMAT) {
 			System.out.println("INCORRECT FORMAT");
 			// TODO: return correct error code
 			throw new BadRequestException("Service request format is Incorrect\n");
@@ -327,7 +317,14 @@ public class AccessService {
 	private boolean isValid(JSONRenewRequest request) {
 		//TODO: add privatekey as mandatory key-value
 		System.out.println("Request's TTL= "+request.getTTL());
-		boolean res = ((request.validate()) && (request.getTTL() != null && request.getTTL() != ""));
+		boolean res;
+		if(request != null){
+			res = ((request.validate()));
+		}else{
+			//can be empty for renew
+			res = true;
+		}
+		
 
 		return res;  
 	}
