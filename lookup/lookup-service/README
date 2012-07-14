@@ -1,0 +1,41 @@
+SIMPLE LOOKUP SERVICE
+
+INTRODUCTION
+Simple Lookup Service is used to register records. A record is a list of key-value pairs that is used to describe any network
+element (Eg: services, hosts, tests, etc). These records can be retrieved by searching for one or more of the registered key-value pairs.
+The REGISTRATION API is used to register records. The QUERY API and SERVICE API is used to retrieve/modify records.
+
+
+DEPENDENCIES:
+This software requires the following:
+	1. maven
+	2. svn
+	3. MongoDB
+	
+MongoDB installation
+Download Mongo DB and install it. It’s official site: http://www.mongodb.org/downloads
+
+To run the database, open a new terminal and go into the mongodb folder and into "bin", then
+type the command: ./mongod --dbpath=<datapath> --bind_ip=127.0.0.1
+
+INSTALLATION
+svn checkout the source code from http://esnet-perfsonar.googlecode.com/svn/trunk/
+
+cd <project-dir>/lookup-service
+sh run.sh
+
+
+TEST PROGRAMS
+Sample curl clients are available in the bin directory.
+
+SAMPLE REGISTRATION RECORD
+{
+record-type: “service”,
+record-service-site_name: “ESnet-nersc”,
+record-service-site_location: “NERSC, Oakland, CA, USA”,
+record-service-domain:[“ESnet”,”Ecenter”],
+record-service-locator:[“nersc-owamp.es.net”, “nersc-owamp-v6.es.net”,
+record-service-type: ”ping”,
+record-service-eventtype: "http://ggf.org/ns/nmwg/tools/ping/1.0",
+}
+
