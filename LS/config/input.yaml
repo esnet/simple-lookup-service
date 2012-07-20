@@ -1,0 +1,28 @@
+---
+input:
+    urls: 'http://localhost:8080/lookup/services'
+    url: 'http://localhost:8080/lookup/service/'
+    recorduri: 'e0879a5b-54dd-469c-8f7d-6e50ed896449'
+    deleteuri: '0c28d22d-8ff4-4efc-a7bd-dea21930357f'
+    key: 'record-service-domain'
+    record-ttl-renew: 'PT2H5M2S'
+    record-type-reg: 'service'
+    record-service-locator-reg: 'http://localhost/accesspoint'
+    record-service-type-reg: 'owamp'
+    record-service-domain-reg: 'es.net'
+    record-privatekey-reg: 'privatekey1'
+    record-type-query: 'service'
+    record-service-locator-query: 'tcp://nash-pt1.es.net:4823'
+    record-service-type-query: 'ping'
+    record-service-domain-query: 'es.net,L*'
+    record-service-domain-operator-query: 'any'
+    record-operator-query: 'all'
+    Benchmark: 'sequencial'
+    API: 'getService,renewService,queryService,registerService'
+    Outputunit: 's'
+    runs: '10,20'
+ 
+		
+		
+ 
+    
