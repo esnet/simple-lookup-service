@@ -17,8 +17,8 @@ input:
     record-service-domain-query: 'es.net,L*'
     record-service-domain-operator-query: 'any'
     record-operator-query: 'all'
-    Benchmark: 'sequencial'
-    API: 'getService,renewService,queryService,registerService'
+    Benchmark: 'parallel'
+    API: 'getService,getServiceKey'
     Outputunit: 's'
     runs: '10,20'
  

@@ -18,62 +18,68 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import utils.InputConfigReader;
 
 
 public class LSPerformance {
-	private String urls = "http://localhost:8080/lookup/services";
-	private String  url= "http://localhost:8080/lookup/service/";
-	private String  recorduri= "e0879a5b-54dd-469c-8f7d-6e50ed896449";
-	private String deleteuri = "0c28d22d-8ff4-4efc-a7bd-dea21930357f";
-	private String  key = "record-service-domain";
+	public String urls = "http://localhost:8080/lookup/services";
+	public String  url= "http://localhost:8080/lookup/service/";
+	public String  recorduri= "e0879a5b-54dd-469c-8f7d-6e50ed896449";
+	public String deleteuri = "0c28d22d-8ff4-4efc-a7bd-dea21930357f";
+	public String  key = "record-service-domain";
 	
-	private String Benchmark= "sequencial";
-	private String API = "getService";
-	private String Outputunit = "s";
-	private String run;
-	private int [] Runs = new int [RUNMAX];
-	private String [] temp;
-	private String [] APIS = new String [APIMAX];
+	public String Benchmark= "sequencial";
+	public String API = "getService";
+	public String Outputunit = "s";
+	public String run;
+	public int [] Runs = new int [RUNMAX];
+	public String [] temp;
+	public String [] APIS = new String [APIMAX];
 
-	private String recordttlrenew = "PT2H5M2S";
-	private String recordtypereg ="service";
-	private String recordservicelocatorreg= "http://localhost/accesspoint";
-	private String recordservicetypereg= "owamp";
-	private String recordservicedomainreg= "es.net";
-	private String recordprivatekeyreg= "privatekey1";
+	public String recordttlrenew = "PT2H5M2S";
+	public String recordtypereg ="service";
+	public String recordservicelocatorreg= "http://localhost/accesspoint";
+	public String recordservicetypereg= "owamp";
+	public String recordservicedomainreg= "es.net";
+	public String recordprivatekeyreg= "privatekey1";
 	
-	private String recordtypequery= "service";
-	private String recordservicelocatorquery= "tcp://nash-pt1.es.net:4823";
-	private String recordservicetypequery= "ping";
-	private String recordservicedomainquery= "es.net,L*";
-	private String recordservicedomainoperatorquery= "any";
-	private String recordoperatorquery = "all";
+	public String recordtypequery= "service";
+	public String recordservicelocatorquery= "tcp://nash-pt1.es.net:4823";
+	public String recordservicetypequery= "ping";
+	public String recordservicedomainquery= "es.net,L*";
+	public String recordservicedomainoperatorquery= "any";
+	public String recordoperatorquery = "all";
 
-	private HashMap<String, Object> renewmap;
-	private HashMap<String, Object> regmap;
-	private HashMap<String, Object> querymap;
+	public HashMap<String, Object> renewmap;
+	public HashMap<String, Object> regmap;
+	public HashMap<String, Object> querymap;
 
-	private static final String INPUT_FILE_NAME = "config.txt";
-	private static final String OUTPUT_FILE_NAME = "output.txt";
-	private int BENCHMARKMAX=3;
-	private static int RUNMAX=10;
-	private static int APIMAX=6;
-	private static int UNITMAX=3;
-	private static int TOTALRUNMAX=APIMAX*RUNMAX;
-	private String[] Benchmarks = new String [BENCHMARKMAX];
+	public static final String INPUT_FILE_NAME = "config.txt";
+	public static final String OUTPUT_FILE_NAME = "output.txt";
+	public int BENCHMARKMAX=3;
+	public static int RUNMAX=10;
+	public static int APIMAX=6;
+	public static int UNITMAX=3;
+	public static int TOTALRUNMAX=APIMAX*RUNMAX;
+	public String[] Benchmarks = new String [BENCHMARKMAX];
 	
-	private char [] outPutUnit = new char [UNITMAX];
-	private LSClient client;
-	private static int serialNo=0;
+	public char [] outPutUnit = new char [UNITMAX];
+	public LSClient client;
+	public static int serialNo=0;
 //	private String API;
-	private int numOfMessageSent;
-	private double meantime;
-	private static Object [][] outPut=new Object[TOTALRUNMAX][5];
-	private static Random rand=new Random(); 
+	public int numOfMessageSent;
+	public double meantime;
+	public static Object [][] outPut=new Object[TOTALRUNMAX][5];
+	public static Random rand=new Random(); 
 
 
+	public LSPerformance(String url, String urls){
+		
+	}
+	
 	public LSPerformance(){
 		
 		this.client = new LSClient(url,urls);
@@ -92,10 +98,13 @@ public class LSPerformance {
 		
 		this.Benchmark = icfg.getBenchmark();
 		this.API = icfg.getAPI();
+		if(API.contains(",")){
 		APIS=API.trim().split(","); 
 		for(int i=0;i<APIS.length;i++){
 			System.out.println(APIS[i]);
 		}
+		}
+		else APIS[0]=API;
 		this.run =icfg.getRuns();
 		System.out.println("-----------------"+this.run);
 		temp=run.trim().split(",");
@@ -172,6 +181,7 @@ public class LSPerformance {
 	}
 
 
+	
 	public double calMeanTime(int [] runs,String api,HashMap<String,Object> map){
 		ArrayList<Double> time= new ArrayList();
 		//		API = getService;
@@ -251,8 +261,27 @@ public class LSPerformance {
 	public double getServiceTest(int [] runs, String api,String benchmark ){
 		if(benchmark.equals("sequencial"))
 		meantime= calMeanTime(runs,api,null);
-		else if(benchmark.equals("paralell")){
+		
+		else if(benchmark.equals("parallel")){
 			
+			GetService getService = new GetService(url,urls, recorduri, Outputunit, api, client,null);
+			serialNo++;
+			Thread t = new Thread(getService);
+			
+			
+			ExecutorService pool = Executors.newFixedThreadPool(10);
+//
+//			pool = Executors.newFixedThreadPool(10);
+//			t.start();
+			Date timeBegin = new Date();
+			pool.submit(getService);
+			Date timeEnd = new Date();
+			meantime=timeEnd.getTime()-timeBegin.getTime();
+			outPut[serialNo][0]=serialNo;
+			outPut[serialNo][1]=api;
+			outPut[serialNo][2]=10;
+			outPut[serialNo][3]=meantime;
+			outPut[serialNo][4]=Outputunit;
 		}
 		else{
 			
@@ -264,7 +293,7 @@ public class LSPerformance {
 	public double getServiceKeyTest(int [] runs, String api,String benchmark){
 		if(benchmark.equals("sequencial"))
 			meantime= calMeanTime(runs,api, null);
-			else if(benchmark.equals("paralell")){
+			else if(benchmark.equals("paralell")){//
 				
 			}
 			else{
@@ -389,3 +418,68 @@ public class LSPerformance {
 	}
 
 }
+
+class GetService implements Runnable{
+	String url;
+	String urls;
+	int [] runs;
+	String api;
+	HashMap<String,Object> map;
+	double ttl;
+	public static Random rand=new Random();
+	String recorduri;
+	LSClient client;
+	String Outputunit;
+	
+	
+	public GetService(){
+		super();
+	}
+	
+	public GetService(String url, String urls,String recorduri, 
+			String Outputunit,String api,LSClient client, HashMap<String,Object> map){
+		
+		this.url=url;
+		this.urls=urls;
+		this.api=api;
+		this.map=map;
+		this.recorduri=recorduri;
+		this.client=client;
+		this.Outputunit=Outputunit;
+	
+	}
+	public void run(){
+		this.measureTTL(api,null);
+	}
+
+	public double measureTTL(String api,HashMap<String,Object> map){
+	
+
+		Date timeBegin = new Date();
+
+		int randnum1=rand.nextInt(10);
+		String recuri1=recorduri+"/?nocache"+randnum1;
+		System.out.println("recuril"+recuri1);
+		client.getService(recuri1);
+		Date timeEnd = new Date();
+		
+		ttl = timeEnd.getTime() - timeBegin.getTime();
+
+		if(Outputunit.equals("s"))
+			ttl = ttl/1000;
+		else if(Outputunit.equals("m"))
+			ttl = ttl/1000/60;
+		else if(Outputunit.equals("h"))
+			ttl = ttl/1000/60/60;
+		else 
+			System.out.println("Invalid outPutUnit.");
+
+		System.out.println("ttl= "+ttl);
+		
+		return ttl;
+	}
+
+}
+
+
+
