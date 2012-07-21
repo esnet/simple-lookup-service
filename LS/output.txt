@@ -1,2 +1,2 @@
 SerialNO  API                 MesNo   MeanTime                 unit    
-1         getService          10      1.0                      s       
+1         getService          10      235.0                    s       

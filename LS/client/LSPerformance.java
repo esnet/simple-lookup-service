@@ -259,14 +259,15 @@ public class LSPerformance {
 	}
 
 	public double getServiceTest(int [] runs, String api,String benchmark ){
+	ArrayList<Thread> thrList= new ArrayList();
 		if(benchmark.equals("sequencial"))
 		meantime= calMeanTime(runs,api,null);
-		
+	
 		else if(benchmark.equals("parallel")){
 			
-			GetService getService = new GetService(url,urls, recorduri, Outputunit, api, client,null);
+			GetService gs = new GetService(url,urls, recorduri, Outputunit, api, client,null);
 			serialNo++;
-			Thread t = new Thread(getService);
+//			Thread t = new Thread(getService);
 			
 			
 			ExecutorService pool = Executors.newFixedThreadPool(10);
@@ -274,7 +275,24 @@ public class LSPerformance {
 //			pool = Executors.newFixedThreadPool(10);
 //			t.start();
 			Date timeBegin = new Date();
-			pool.submit(getService);
+			
+			
+			for(int i = 0; i< 10; i++){
+			       thrList.add(new Thread (gs));
+			       thrList.get(i).start();
+			}
+
+			for(int i = 0; i< 10; i++){
+			       try {
+					thrList.get(i).join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+//			for(int i=0;i<10;i++)
+//			pool.submit(gs);
 			Date timeEnd = new Date();
 			meantime=timeEnd.getTime()-timeBegin.getTime();
 			outPut[serialNo][0]=serialNo;
