@@ -93,16 +93,20 @@ public class LSPerformance {
 		this.recorduri = icfg.getRecorduri();
 		this.deleteuri = icfg.getDeleteuri();
 		this.key = icfg.getKey();
-		
+
 		this.Benchmark = icfg.getBenchmark();
 		this.API = icfg.getAPI();
 		if(API.contains(",")){
-		APIS=API.trim().split(","); 
+			APIS=API.trim().split(","); 
+			for(int i=0;i<APIS.length;i++){
+				System.out.println(APIS[i]);
+			}
+		}
+		else APIS[0]=API;
 		for(int i=0;i<APIS.length;i++){
 			System.out.println(APIS[i]);
 		}
-		}
-		else APIS[0]=API;
+		System.out.println("!!!!!!!"+APIS[0]);
 		this.run =icfg.getRuns();
 //		System.out.println("-----------------"+this.run);
 		temp=run.trim().split(",");
@@ -156,27 +160,29 @@ public class LSPerformance {
 		querymap.put("record-service-domain-operator",this.recordservicedomainoperatorquery);
 		querymap.put("record-operator",this.recordoperatorquery);
 		
-
+		
 		for(String api: APIS){
-			if(api.equals("getService")){
+			if(api!=null){
+				if(api.equals("getService")){
 //				System.out.println("+++++++"+Benchmark);
-				System.out.println("++++"+Runs.length);
-				this.getServiceTest(Runs,api, Benchmark);
+					System.out.println("++++"+Runs.length);
+					this.getServiceTest(Runs,api, Benchmark);
+				}
+				else if(api.equals("getServiceKey")){
+					this.getServiceKeyTest(Runs,api, Benchmark);
+				}
+				else if(api.equals("deleteService"))
+					this.deleteServiceTest(Runs,api, Benchmark);
+				else if(api.equals("renewService"))
+					this.renewServiceTest(Runs,api, Benchmark);
+				else if(api.equals("queryService"))
+					this.queryServiceTest(Runs, api,Benchmark);
+				else if(api.equals("registerService")){
+					this.registerServiceTest(Runs,api, Benchmark);				
+				}
+				else
+					System.out.println("Invalid API");
 			}
-			else if(api.equals("getServiceKey")){
-				this.getServiceKeyTest(Runs,api, Benchmark);
-			}
-			else if(api.equals("deleteService"))
-				this.deleteServiceTest(Runs,api, Benchmark);
-			else if(api.equals("renewService"))
-				this.renewServiceTest(Runs,api, Benchmark);
-			else if(api.equals("queryService"))
-				this.queryServiceTest(Runs, api,Benchmark);
-			else if(api.equals("registerService")){
-				this.registerServiceTest(Runs,api, Benchmark);				
-			}
-			else
-				System.out.println("Invalid API");
 		}
 	}
 
@@ -184,7 +190,7 @@ public class LSPerformance {
 	
 	public double calMeanTime(int [] runs,String api,HashMap<String,Object> map){
 		ArrayList<Double> time= new ArrayList();
-		//		API = getService;
+//		API = getService;
 		double temptime = 0;
 		double sumtime=0;
 
@@ -280,8 +286,6 @@ public class LSPerformance {
 				}
 			}
 
-//		for(int i=0;i<10;i++)
-//		pool.submit(gs);
 			Date timeEnd = new Date();
 			System.out.println("runs[i]"+runs[i]);
 			meantime=(timeEnd.getTime()-timeBegin.getTime())/runs[i];
