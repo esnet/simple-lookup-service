@@ -1,2 +1,7 @@
 SerialNO  API                 MesNo   MeanTime                 unit    
-1         getService          10      235.0                    s       
+1         renewService        10      0.063                    s       
+2         renewService        20      0.107                    s       
+3         queryService        10      0.0090                   s       
+4         queryService        20      0.023                    s       
+5         registerService     10      0.011                    s       
+6         registerService     20      0.018                    s       

@@ -25,6 +25,7 @@ import utils.InputConfigReader;
 
 
 public class LSPerformance {
+	public GetService gs;
 	public String urls = "http://localhost:8080/lookup/services";
 	public String  url= "http://localhost:8080/lookup/service/";
 	public String  recorduri= "e0879a5b-54dd-469c-8f7d-6e50ed896449";
@@ -76,9 +77,6 @@ public class LSPerformance {
 	public static Random rand=new Random(); 
 
 
-	public LSPerformance(String url, String urls){
-		
-	}
 	
 	public LSPerformance(){
 		
@@ -106,10 +104,11 @@ public class LSPerformance {
 		}
 		else APIS[0]=API;
 		this.run =icfg.getRuns();
-		System.out.println("-----------------"+this.run);
+//		System.out.println("-----------------"+this.run);
 		temp=run.trim().split(",");
 		for(int i=0;i<temp.length;i++){ 
 	        Runs[i]=Integer.parseInt(temp[i]); 
+	        System.out.println("-----------------"+Runs[i]);
 	    } 
 		
 		
@@ -160,7 +159,8 @@ public class LSPerformance {
 
 		for(String api: APIS){
 			if(api.equals("getService")){
-				System.out.println("+++++++"+Benchmark);
+//				System.out.println("+++++++"+Benchmark);
+				System.out.println("++++"+Runs.length);
 				this.getServiceTest(Runs,api, Benchmark);
 			}
 			else if(api.equals("getServiceKey")){
@@ -258,61 +258,76 @@ public class LSPerformance {
 		return meantime;
 	}
 
-	public double getServiceTest(int [] runs, String api,String benchmark ){
-	ArrayList<Thread> thrList= new ArrayList();
-		if(benchmark.equals("sequencial"))
-		meantime= calMeanTime(runs,api,null);
-	
-		else if(benchmark.equals("parallel")){
-			
-			GetService gs = new GetService(url,urls, recorduri, Outputunit, api, client,null);
+	public double calMeanForParallel(int [] runs,ArrayList<Thread> thrList,String api,Thread t){
+		Date timeBegin = new Date();
+		System.out.println("++++"+runs.length);
+		for(int i = 0;i<runs.length;i++){
+			if(runs[i]!=0){
+			thrList.clear();
 			serialNo++;
-//			Thread t = new Thread(getService);
-			
-			
-			ExecutorService pool = Executors.newFixedThreadPool(10);
-//
-//			pool = Executors.newFixedThreadPool(10);
-//			t.start();
-			Date timeBegin = new Date();
-			
-			
-			for(int i = 0; i< 10; i++){
-			       thrList.add(new Thread (gs));
-			       thrList.get(i).start();
+			for(int j = 0; j< runs[i]; j++){
+				Thread t1 = new Thread(t);
+				thrList.add(new Thread (t1));
+				thrList.get(j).start();
 			}
 
-			for(int i = 0; i< 10; i++){
-			       try {
-					thrList.get(i).join();
+			for(int j = 0; j< runs[i]; j++){
+				try {
+					thrList.get(j).join();
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 
-//			for(int i=0;i<10;i++)
-//			pool.submit(gs);
+//		for(int i=0;i<10;i++)
+//		pool.submit(gs);
 			Date timeEnd = new Date();
-			meantime=timeEnd.getTime()-timeBegin.getTime();
+			System.out.println("runs[i]"+runs[i]);
+			meantime=(timeEnd.getTime()-timeBegin.getTime())/runs[i];
+			if(Outputunit.equals("s"))
+				meantime = meantime/1000;
+			else if(Outputunit.equals("m"))
+				meantime = meantime/1000/60;
+			else if(Outputunit.equals("h"))
+				meantime = meantime/1000/60/60;
+			else 
+				System.out.println("Invalid outPutUnit.");
+
 			outPut[serialNo][0]=serialNo;
 			outPut[serialNo][1]=api;
-			outPut[serialNo][2]=10;
+			outPut[serialNo][2]=runs[i];
 			outPut[serialNo][3]=meantime;
 			outPut[serialNo][4]=Outputunit;
+			}
+		}
+		return meantime;
+	}
+	public double getServiceTest(int [] runs, String api,String benchmark ){
+		ArrayList<Thread> thrList= new ArrayList();
+		if(benchmark.equals("sequencial"))
+			meantime= calMeanTime(runs,api,null);
+
+		else if(benchmark.equals("parallel")){
+			GetService gs = new GetService(url,urls, recorduri, Outputunit, api, client,null);
+			Thread t = new Thread(gs);
+			meantime=calMeanForParallel(runs,thrList,api,t);
 		}
 		else{
-			
+
 		}
 		return meantime;
 	}
 
 
 	public double getServiceKeyTest(int [] runs, String api,String benchmark){
+		ArrayList<Thread> thrList= new ArrayList();
 		if(benchmark.equals("sequencial"))
 			meantime= calMeanTime(runs,api, null);
-			else if(benchmark.equals("paralell")){//
-				
+			else if(benchmark.equals("parallel")){
+				GetServiceKey gsk = new GetServiceKey(url,urls, recorduri, Outputunit, api, client,null,key);
+				Thread t = new Thread(gsk);
+				meantime=calMeanForParallel(runs,thrList,api,t);
 			}
 			else{
 				
@@ -323,10 +338,13 @@ public class LSPerformance {
 
 
 	public double deleteServiceTest(int [] runs,String api, String benchmark){
+		ArrayList<Thread> thrList= new ArrayList();
 		if(benchmark.equals("sequencial"))
 			meantime= calMeanTime(runs,api,null);
 			else if(benchmark.equals("paralell")){
-				
+				DeleteService ds = new DeleteService(url,urls, recorduri, Outputunit, api, client);
+				Thread t = new Thread(gs);
+				meantime=calMeanForParallel(runs,thrList,api,t);
 			}
 			else{
 				
@@ -336,10 +354,13 @@ public class LSPerformance {
 
 
 	public double renewServiceTest(int [] runs,String api, String benchmark){
+		ArrayList<Thread> thrList= new ArrayList();
 		if(benchmark.equals("sequencial"))
 			meantime= calMeanTime(runs,api,renewmap);
-			else if(benchmark.equals("paralell")){
-				
+			else if(benchmark.equals("parallel")){
+				RenewService rs = new RenewService(url,urls, recorduri, Outputunit, api, client, renewmap);
+				Thread t = new Thread(rs);
+				meantime=calMeanForParallel(runs,thrList,api,t);
 			}
 			else{
 				
@@ -349,10 +370,13 @@ public class LSPerformance {
 
 
 	public double queryServiceTest(int [] runs, String api,String benchmark){
+		ArrayList<Thread> thrList= new ArrayList();
 		if(benchmark.equals("sequencial"))
 			meantime= calMeanTime(runs,api,querymap);
-			else if(benchmark.equals("paralell")){
-				
+			else if(benchmark.equals("parallel")){
+				QueryService qs = new QueryService(url,urls, recorduri, Outputunit, api, client, querymap);
+				Thread t = new Thread(qs);
+				meantime=calMeanForParallel(runs,thrList,api,t);
 			}
 			else{
 				
@@ -361,10 +385,13 @@ public class LSPerformance {
 	}
 
 	public double registerServiceTest(int [] runs,String api, String benchmark){
+		ArrayList<Thread> thrList= new ArrayList();
 		if(benchmark.equals("sequencial"))
 			meantime= calMeanTime(runs,api,regmap);
-			else if(benchmark.equals("paralell")){
-				
+			else if(benchmark.equals("parallel")){
+				RegisterService res = new RegisterService(url,urls, recorduri, Outputunit, api, client, querymap);
+				Thread t = new Thread(res);
+				meantime=calMeanForParallel(runs,thrList,api,t);
 			}
 			else{
 				
@@ -437,67 +464,7 @@ public class LSPerformance {
 
 }
 
-class GetService implements Runnable{
-	String url;
-	String urls;
-	int [] runs;
-	String api;
-	HashMap<String,Object> map;
-	double ttl;
-	public static Random rand=new Random();
-	String recorduri;
-	LSClient client;
-	String Outputunit;
-	
-	
-	public GetService(){
-		super();
-	}
-	
-	public GetService(String url, String urls,String recorduri, 
-			String Outputunit,String api,LSClient client, HashMap<String,Object> map){
-		
-		this.url=url;
-		this.urls=urls;
-		this.api=api;
-		this.map=map;
-		this.recorduri=recorduri;
-		this.client=client;
-		this.Outputunit=Outputunit;
-	
-	}
-	public void run(){
-		this.measureTTL(api,null);
-	}
 
-	public double measureTTL(String api,HashMap<String,Object> map){
-	
-
-		Date timeBegin = new Date();
-
-		int randnum1=rand.nextInt(10);
-		String recuri1=recorduri+"/?nocache"+randnum1;
-		System.out.println("recuril"+recuri1);
-		client.getService(recuri1);
-		Date timeEnd = new Date();
-		
-		ttl = timeEnd.getTime() - timeBegin.getTime();
-
-		if(Outputunit.equals("s"))
-			ttl = ttl/1000;
-		else if(Outputunit.equals("m"))
-			ttl = ttl/1000/60;
-		else if(Outputunit.equals("h"))
-			ttl = ttl/1000/60/60;
-		else 
-			System.out.println("Invalid outPutUnit.");
-
-		System.out.println("ttl= "+ttl);
-		
-		return ttl;
-	}
-
-}
 
 
 

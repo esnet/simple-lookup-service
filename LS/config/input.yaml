@@ -18,7 +18,7 @@ input:
     record-service-domain-operator-query: 'any'
     record-operator-query: 'all'
     Benchmark: 'parallel'
-    API: 'getService,getServiceKey'
+    API: 'renewService,queryService,registerService'
     Outputunit: 's'
     runs: '10,20'
  
