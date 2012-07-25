@@ -342,9 +342,9 @@ public class LSPerformance {
 	
 	
 	public double calMeanForReallife(int certainruns, ArrayList<Thread> thrList,String api,Thread t){
-		Date timeBegin = new Date();
 		serialNo++;
-		if(certainruns!=0){
+		Date timeBegin = new Date();
+//		if(certainruns!=0){
 			for(int j = 0; j< certainruns; j++){
 				Thread t1 = new Thread(t);
 				thrList.add(new Thread (t1));
@@ -360,7 +360,11 @@ public class LSPerformance {
 			}
 			Date timeEnd = new Date();
 			System.out.println("certainruns"+certainruns);
+			if(certainruns!=0){
 			meantime=(timeEnd.getTime()-timeBegin.getTime())/certainruns;
+			}
+			else
+				meantime =0;
 			if(Outputunit.equals("s"))
 				meantime = meantime/1000;
 			else if(Outputunit.equals("m"))
@@ -376,7 +380,7 @@ public class LSPerformance {
 			outPut[serialNo][3]=certainruns;
 			outPut[serialNo][4]=meantime;
 			outPut[serialNo][5]=Outputunit;
-		}
+//		}
 		return meantime;
 	}
 
