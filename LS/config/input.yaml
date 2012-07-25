@@ -3,7 +3,7 @@ input:
     urls: 'http://localhost:8080/lookup/services'
     url: 'http://localhost:8080/lookup/service/'
     recorduri: 'e0879a5b-54dd-469c-8f7d-6e50ed896449'
-    deleteuri: '0c28d22d-8ff4-4efc-a7bd-dea21930357f'
+    deleteuri: 'b49259ea-eaae-4eec-ae43-95c938269e94'
     key: 'record-service-domain'
     record-ttl-renew: 'PT2H5M2S'
     record-type-reg: 'service'
@@ -17,10 +17,19 @@ input:
     record-service-domain-query: 'es.net,L*'
     record-service-domain-operator-query: 'any'
     record-operator-query: 'all'
-    Benchmark: 'parallel'
-    API: 'getService'
+    # the Benchmark can be one of the three values: 'sequencial', 'parallel' and 'reallife'
+    Benchmark: 'reallife'
+    API: 'getService,getServiceKey,queryService'
+    # the Outputunit can be one of the three values: 's', 'm' and 'h'
     Outputunit: 's'
-    runs: '10'
+    runs: '10,20'
+    #if the Benchmark is 'reallife', users should specify the number of runs of each API as follows:
+    getServiceRuns: '10'
+    getServiceKeyRuns: '20'
+    deleteServiceRuns: '1'
+    renewServiceRuns: '2'
+    queryServiceRuns: '3'
+    registerServiceRuns: '4'
  
 		
 		

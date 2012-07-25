@@ -11,34 +11,34 @@ public class InputConfigReader {
     private static InputConfigReader instance;
     private static final String DEFAULT_FILE = "input.yaml";
     private static final String DEFAULT_PATH = "config";
-
     Map<String,String> inputMap = new HashMap<String,String>();
-
-
-    private String urls = "http://localhost:8080/lookup/services";
-    private String  url= "http://localhost:8080/lookup/service/";
-    private String  recorduri= "e0879a5b-54dd-469c-8f7d-6e50ed896449";
-    private String deleteuri = "0c28d22d-8ff4-4efc-a7bd-dea21930357f";
-    private String  key = "record-service-domain";
-
-    private String recordttlrenew = "PT2H5M2S";
-    private String recordtypereg ="service";
-    private String recordservicelocatorreg= "http://localhost/accesspoint";
-    private String recordservicetypereg= "owamp";
-    private String recordservicedomainreg= "es.net";
-    private String recordprivatekeyreg= "privatekey1";
-    private String recordtypequery= "service";
-    private String recordservicelocatorquery= "tcp://nash-pt1.es.net:4823";
-    private String recordservicetypequery= "ping";
-    private String recordservicedomainquery= "es.net,L*";
-    private String recordservicedomainoperatorquery= "any";
-    private String recordoperatorquery = "all";
-    
-    private String Benchmark= "sequencial";
-	private String API = "getService,getSeviceKey";
-    private String Outputunit = "s";
+    private String urls;
+    private String  url;
+    private String  recorduri;
+    private String deleteuri;
+    private String  key;
+    private String recordttlrenew;
+    private String recordtypereg;
+    private String recordservicelocatorreg;
+    private String recordservicetypereg;
+    private String recordservicedomainreg;
+    private String recordprivatekeyreg;
+    private String recordtypequery;
+    private String recordservicelocatorquery;
+    private String recordservicetypequery;
+    private String recordservicedomainquery;
+    private String recordservicedomainoperatorquery;
+    private String recordoperatorquery;
+    private String Benchmark;
+	private String API;
+    private String Outputunit;
     private String runs;
-    
+    private int getServiceRuns;
+    private int getServiceKeyRuns;
+    private int deleteServiceRuns;
+    private int renewServiceRuns;
+    private int queryServiceRuns;
+    private int registerServiceRuns;
     
     
     /**
@@ -160,6 +160,31 @@ public class InputConfigReader {
 	}
 
 
+	public int getGetServiceRuns() {
+		return getServiceRuns;
+	}
+
+	public int getGetServiceKeyRuns() {
+		return getServiceKeyRuns;
+	}
+
+	public int getDeleteServiceRuns() {
+		return deleteServiceRuns;
+	}
+
+	public int getRenewServiceRuns() {
+		return renewServiceRuns;
+	}
+
+	public int getQueryServiceRuns() {
+		return queryServiceRuns;
+	}
+
+	public int getRegisterServiceRuns() {
+		return registerServiceRuns;
+	}
+
+	
 	private void setInfo(String path, String fname) {
         ConfigHelper cfg = ConfigHelper.getInstance();
         Map yamlMap = cfg.getConfiguration(path,fname);
@@ -178,7 +203,7 @@ public class InputConfigReader {
         this.Benchmark=(String)this.inputMap.get("Benchmark");
         this.Outputunit=(String)this.inputMap.get("Outputunit");
         this.runs=this.inputMap.get("runs");
-        
+        this.recordttlrenew = (String)this.inputMap.get("record-ttl-renew");
         this.recordservicedomainoperatorquery = (String)this.inputMap.get("record-service-domain-operator-query");
         System.out.println((String)this.inputMap.get("record-service-domain-operator-query"));
         this.recordservicedomainquery = (String)this.inputMap.get("record-service-domain-query");
@@ -193,7 +218,12 @@ public class InputConfigReader {
         this.recordtypereg = (String)this.inputMap.get("record-type-reg");
         this.recordprivatekeyreg = (String)this.inputMap.get("record-privatekey-reg");
         
-        this.recordttlrenew = (String)this.inputMap.get("record-ttl-renew");
+        this.getServiceRuns = Integer.parseInt((String)this.inputMap.get("getServiceRuns"));
+        this.getServiceKeyRuns = Integer.parseInt((String)this.inputMap.get("getServiceKeyRuns"));
+        this.deleteServiceRuns = Integer.parseInt((String)this.inputMap.get("deleteServiceRuns"));
+        this.renewServiceRuns = Integer.parseInt((String)this.inputMap.get("renewServiceRuns"));
+        this.queryServiceRuns = Integer.parseInt((String)this.inputMap.get("queryServiceRuns"));
+        this.registerServiceRuns = Integer.parseInt((String)this.inputMap.get("registerServiceRuns"));
         
      
     }

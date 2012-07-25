@@ -1,2 +1,6 @@
-SerialNO  API                 MesNo   MeanTime                 unit    
-1         getService          10      0.024                    s       
+SerialNO  API                 Benchmark      MesNo   MeanTime                 unit    
+1         getService          reallife       10      0.021                    s       
+2         getServiceKey       reallife       20      0.0060                   s       
+3         renewService        reallife       2       0.0060                   s       
+4         queryService        reallife       3       0.0090                   s       
+5         registerService     reallife       4       0.0060                   s       

@@ -6,24 +6,16 @@ import java.util.Random;
 
 public class DeleteService implements Runnable{
 
-	String url;
-	String urls;
-	int [] runs;
-	String api;
-
-	double ttl;
-	public static Random rand=new Random();
-	String recorduri;
-	LSClient client;
-	String Outputunit;
+	private double ttl;
+	private static Random rand=new Random();
+	private String recorduri;
+	private LSClient client;
+	private String Outputunit;
 
 
-	public DeleteService(String url, String urls,String recorduri, 
-			String Outputunit,String api,LSClient client){
+	public DeleteService(String recorduri, 
+			String Outputunit,LSClient client){
 
-		this.url=url;
-		this.urls=urls;
-		this.api=api;
 
 		this.recorduri=recorduri;
 		this.client=client;
@@ -31,10 +23,10 @@ public class DeleteService implements Runnable{
 
 	}
 	public void run(){
-		this.measureTTL(api);
+		this.measureTTL();
 	}
 
-	public double measureTTL(String api){
+	public double measureTTL(){
 
 
 		Date timeBegin = new Date();

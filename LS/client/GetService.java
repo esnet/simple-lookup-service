@@ -6,24 +6,20 @@ import java.util.Random;
 
 public class GetService implements Runnable{
 
-	String url;
-	String urls;
-	int [] runs;
-	String api;
-	HashMap<String,Object> map;
-	double ttl;
-	public static Random rand=new Random();
-	String recorduri;
-	LSClient client;
-	String Outputunit;
+
+	private int [] runs;
+	private HashMap<String,Object> map;
+	private double ttl;
+	private static Random rand=new Random();
+	private String recorduri;
+	private LSClient client;
+	private String Outputunit;
 
 
-	public GetService(String url, String urls,String recorduri, 
-			String Outputunit,String api,LSClient client, HashMap<String,Object> map){
+	public GetService(String recorduri, 
+			String Outputunit,LSClient client, HashMap<String,Object> map){
 
-		this.url=url;
-		this.urls=urls;
-		this.api=api;
+
 		this.map=map;
 		this.recorduri=recorduri;
 		this.client=client;
@@ -31,10 +27,10 @@ public class GetService implements Runnable{
 
 	}
 	public void run(){
-		this.measureTTL(api,null);
+		this.measureTTL(null);
 	}
 
-	public double measureTTL(String api,HashMap<String,Object> map){
+	public double measureTTL(HashMap<String,Object> map){
 
 
 		Date timeBegin = new Date();
