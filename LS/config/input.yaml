@@ -24,7 +24,7 @@ input:
     Outputunit: 's'
     runs: '10,20'
     #if the Benchmark is 'reallife', users should specify the number of runs of each API as follows:
-    getServiceRuns: '10'
+    getServiceRuns: '0'
     getServiceKeyRuns: '20'
     deleteServiceRuns: '1'
     renewServiceRuns: '2'
