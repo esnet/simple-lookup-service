@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 
 public class InputConfigReader {
-
     private static InputConfigReader instance;
     private static final String DEFAULT_FILE = "input.yaml";
     private static final String DEFAULT_PATH = "config";
@@ -224,7 +223,6 @@ public class InputConfigReader {
         this.renewServiceRuns = Integer.parseInt((String)this.inputMap.get("renewServiceRuns"));
         this.queryServiceRuns = Integer.parseInt((String)this.inputMap.get("queryServiceRuns"));
         this.registerServiceRuns = Integer.parseInt((String)this.inputMap.get("registerServiceRuns"));
-        
-     
+
     }
 }

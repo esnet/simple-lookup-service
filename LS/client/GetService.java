@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Random;
 
 public class GetService implements Runnable{
-
-
 	private int [] runs;
 	private HashMap<String,Object> map;
 	private double ttl;
@@ -16,28 +14,21 @@ public class GetService implements Runnable{
 	private String Outputunit;
 
 
-	public GetService(String recorduri, 
-			String Outputunit,LSClient client, HashMap<String,Object> map){
-
-
+	public GetService(String recorduri, String Outputunit,LSClient client, HashMap<String,Object> map){
 		this.map=map;
 		this.recorduri=recorduri;
 		this.client=client;
 		this.Outputunit=Outputunit;
-
 	}
+	
 	public void run(){
 		this.measureTTL(null);
 	}
 
 	public double measureTTL(HashMap<String,Object> map){
-
-
 		Date timeBegin = new Date();
-
 		int randnum1=rand.nextInt(10);
 		String recuri1=recorduri+"/?nocache"+randnum1;
-		System.out.println("recuril"+recuri1);
 		client.getService(recuri1);
 		Date timeEnd = new Date();
 

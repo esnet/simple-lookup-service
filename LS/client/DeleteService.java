@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Random;
 
 public class DeleteService implements Runnable{
-
 	private double ttl;
 	private static Random rand=new Random();
 	private String recorduri;
@@ -13,28 +12,21 @@ public class DeleteService implements Runnable{
 	private String Outputunit;
 
 
-	public DeleteService(String recorduri, 
-			String Outputunit,LSClient client){
-
-
+	public DeleteService(String recorduri, String Outputunit,LSClient client){
 		this.recorduri=recorduri;
 		this.client=client;
 		this.Outputunit=Outputunit;
-
 	}
+	
 	public void run(){
 		this.measureTTL();
 	}
 
 	public double measureTTL(){
-
-
 		Date timeBegin = new Date();
 		client.deleteService(recorduri);
 		Date timeEnd = new Date();
-
 		ttl = timeEnd.getTime() - timeBegin.getTime();
-
 		if(Outputunit.equals("s"))
 			ttl = ttl/1000;
 		else if(Outputunit.equals("m"))
@@ -43,7 +35,6 @@ public class DeleteService implements Runnable{
 			ttl = ttl/1000/60/60;
 		else 
 			System.out.println("Invalid outPutUnit.");
-
 		System.out.println("ttl= "+ttl);
 
 		return ttl;

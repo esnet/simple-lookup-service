@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Random;
 
 public class QueryService implements Runnable{
-
-	
 	private HashMap<String,Object> map;
 	private double ttl;
 	private static Random rand=new Random();
@@ -15,28 +13,21 @@ public class QueryService implements Runnable{
 	private String Outputunit;
 
 
-	public QueryService(String recorduri, 
-			String Outputunit,LSClient client, HashMap<String,Object> map){
-
-		
+	public QueryService(String recorduri, String Outputunit,LSClient client, HashMap<String,Object> map){
 		this.map=map;
 		this.recorduri=recorduri;
 		this.client=client;
 		this.Outputunit=Outputunit;
-
 	}
+	
 	public void run(){
 		this.measureTTL(map);
 	}
 
 	public double measureTTL(HashMap<String,Object> map){
-
-
 		Date timeBegin = new Date();
-
 		client.query(map);
 		Date timeEnd = new Date();
-
 		ttl = timeEnd.getTime() - timeBegin.getTime();
 
 		if(Outputunit.equals("s"))

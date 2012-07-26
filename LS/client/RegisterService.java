@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Random;
 
 public class RegisterService implements Runnable{
-
-
 	private HashMap<String,Object> map;
 	private double ttl;
 	private static Random rand=new Random();
@@ -15,31 +13,25 @@ public class RegisterService implements Runnable{
 	private String Outputunit;
 
 
-	public RegisterService(String recorduri, 
-			String Outputunit,LSClient client, HashMap<String,Object> map){
-
-		
+	public RegisterService(String recorduri, String Outputunit,LSClient client, HashMap<String,Object> map){
 		this.map=map;
 		this.recorduri=recorduri;
 		this.client=client;
 		this.Outputunit=Outputunit;
-
 	}
+	
 	public void run(){
 		this.measureTTL(map);
 	}
 
 	public double measureTTL(HashMap<String,Object> map){
-
-
 		Date timeBegin = new Date();
 		int rundnum =rand.nextInt(10000);
-		System.out.println("rundun="+rundnum);
 		String locator = (String)map.get("record-service-locator")+rundnum;
 		map.put("record-service-locator", locator);
 		client.register(map);
 		Date timeEnd = new Date();
-
+		
 		ttl = timeEnd.getTime() - timeBegin.getTime();
 
 		if(Outputunit.equals("s"))

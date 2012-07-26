@@ -80,7 +80,6 @@ public class LSPerformance {
 
 	
 	public LSPerformance(){
-			
 		InputConfigReader icfg = InputConfigReader.getInstance();
 		this.urls = icfg.getUrls();
 		
@@ -107,21 +106,17 @@ public class LSPerformance {
 		}
 		System.out.println("!!!!!!!"+APIS[0]);
 		this.run =icfg.getRuns();
-//		System.out.println("-----------------"+this.run);
 		temp=run.trim().split(",");
 		for(int i=0;i<temp.length;i++){ 
 	        Runs[i]=Integer.parseInt(temp[i]); 
 	        System.out.println("-----------------"+Runs[i]);
 	    } 
 		
-		
-//		System.out.println("-----------------"+this.Benchmark);
 		this.Outputunit =icfg.getOutputunit();
 
 		this.recordttlrenew = icfg.getRecordttlrenew();
 		this.recordtypereg = icfg.getRecordtypereg();
 		this.recordservicelocatorreg = icfg.getRecordservicelocatorreg();
-//		System.out.println("-----------------"+this.recordservicelocatorreg);
 		this.recordservicedomainreg = icfg.getRecordservicedomainreg();
 		this.recordprivatekeyreg = icfg.getRecordprivatekeyreg();
 		
@@ -251,7 +246,6 @@ public class LSPerformance {
 					System.out.println("rundun="+rundnum3);
 					String locator = (String)map.get("record-service-locator")+rundnum3;
 					map.put("record-service-locator", locator);
-
 					client.register(map);				
 				}
 				else
@@ -336,7 +330,6 @@ public class LSPerformance {
 			}
 		}
 		
-		
 		return meantime;
 	}
 	
@@ -416,7 +409,6 @@ public class LSPerformance {
 			meantime=calMeanForParallel(runs,thrList,api,t);
 		}
 		else if(benchmark.equals("reallife")){
-			System.out.println("key~~~:"+this.key);
 			GetServiceKey gsk = new GetServiceKey(recorduri, Outputunit, client,null,key);
 			Thread t = new Thread(gsk);
 			meantime=calMeanForReallife(getServiceKeyRuns,thrList,"getServiceKey",t);
