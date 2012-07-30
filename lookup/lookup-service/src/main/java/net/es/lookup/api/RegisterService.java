@@ -22,27 +22,31 @@ import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 
+import org.apache.log4j.Logger;
+
 /**
  *
  */
 public class RegisterService {
-
+	private static Logger LOG = Logger.getLogger(RegisterService.class);
     private String params;
 
     public String registerService(String message) {
-    	
+    	LOG.info("intializing registerService...");
         // this.params = params;
         // Return some cliched textual content
         JSONRegisterResponse response;
         JSONRegisterRequest request = new JSONRegisterRequest(message);
         if (request.getStatus() == JSONRegisterRequest.INCORRECT_FORMAT) {
             System.out.println("INCORRECT FORMAT");
+            LOG.error("INCORRECR FORMAT OF JSON DATA");
             // TODO: return correct error code
             throw new BadRequestException("Error in JSON data");
            
         }
         // Verify that request is valid and authorized
         System.out.println(this.isValid(request));
+        LOG.debug("valid?"+this.isValid(request));
         if (this.isValid(request) && this.isAuthed(request)) {
             // Generate a new URI for this service and add it to the service key/value pairs
             String uri = this.newURI (); 
@@ -79,6 +83,7 @@ public class RegisterService {
                         Map.Entry<String,Object> pairs = (Map.Entry)it.next();
                         if(!isIgnoreKey(pairs.getKey())){
                         	System.out.println(pairs.getKey() + " = " + pairs.getValue());
+                        	LOG.debug("key-value pair:"+ pairs.getKey() + "=" + pairs.getValue());
                         	operators.add(pairs.getKey(), ReservedKeywords.RECORD_OPERATOR_ALL);
                         	query.add(pairs.getKey(),pairs.getValue());
                         	
@@ -91,25 +96,32 @@ public class RegisterService {
 
                 	response = new JSONRegisterResponse (res.getMap());
                 	System.out.println(JSONMessage.toString(response));
+                	LOG.debug("response:"+ JSONMessage.toString(response));
                 	return JSONMessage.toString(response);
                 }catch(DataFormatException e){
+                	LOG.fatal("Data formating exception");
                 	throw new InternalErrorException("Data formatting exception");
                 }catch(DuplicateEntryException e){
+                	LOG.error("FobiddenRequestException:"+e.getMessage());
                 	throw new ForbiddenRequestException(e.getMessage());
                 }catch(DatabaseException e){
+                	LOG.fatal("DatabaseException:" +e.getMessage());
                 	throw new InternalErrorException(e.getMessage());
                 }
             }else{
                 // Build response
                // response = new JSONRegisterResponse (request.getMap());
+            	LOG.fatal("Failed to secure lease for the registration record");
                throw new InternalErrorException("Failed to secure lease for the registration record");
             }
 
 
         }else{
         	if(!this.isValid(request)){
+        		LOG.error("Invalid request:");
         		throw new BadRequestException("Invalid request");
         	}else if(!this.isAuthed(request)){
+        		LOG.error("Not authorized to perform the request");
         		throw new UnauthorizedException("Not authorized to perform the request");
         	}
         }
