@@ -26,7 +26,7 @@ import org.apache.http.HttpEntity;
 
 
 //
-public class RegistrationTest {
+public class RegTest {
 
 
 		@Test

@@ -2,6 +2,7 @@ package net.es.lookup.service;
 
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.PackagesResourceConfig;
+import com.sun.jersey.api.core.ClassNamesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
 import org.glassfish.grizzly.http.server.HttpServer;
 
@@ -9,6 +10,8 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 
+import java.util.Set;
+import java.util.Iterator;
 
 import net.es.lookup.resources.*;
 
@@ -71,8 +74,21 @@ public class LookupService {
 
     protected HttpServer startServer() throws IOException {
         System.out.println("Creating Resource...");
-        ResourceConfig rc = new PackagesResourceConfig("net.es.lookup.resources","net.es.lookup.service");
+        String[] services = {
+                AccessServiceResource.class.getName(),
+                KeyResource.class.getName(),
+                ServicesResource.class.getName(),
+                SubscribeResource.class.getName(),
+        };
+        ResourceConfig rc = new ClassNamesResourceConfig(services);
+
+        //ResourceConfig rc = new PackagesResourceConfig("net.es.lookup.resources");
         System.out.println();
+        Set set = rc.getRootResourceClasses();
+        Iterator iter = set.iterator();
+        while (iter.hasNext()) {
+          System.out.println(iter.next());
+        }
         System.out.println(("Starting grizzly..."));
         String hosturl = "http://"+this.host+"/";
         return GrizzlyServerFactory.createHttpServer(UriBuilder.fromUri(hosturl).port(this.port).build(),

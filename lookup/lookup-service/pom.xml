@@ -5,6 +5,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <groupId>net.es.lookup</groupId>
     <artifactId>lookup-service</artifactId>
     <name>Lookup Service</name>
 
@@ -115,7 +116,7 @@
              <plugin>
                 <groupId>org.dstovall</groupId>
                 <artifactId>onejar-maven-plugin</artifactId>
-                <version>1.4.4</version>
+                <version>1.4.1</version>
                 <executions>
                     <execution>
                         <configuration>
@@ -135,8 +136,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <inherited>true</inherited>
                     <configuration>
-                        <source>1.6</source>
-                        <target>1.6</target>
+                        <source>1.5</source>
+                        <target>1.5</target>
                     </configuration>
                 </plugin>
                 <plugin>
