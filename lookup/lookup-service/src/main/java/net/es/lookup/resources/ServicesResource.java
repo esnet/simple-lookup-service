@@ -23,7 +23,8 @@ import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeywords;
 
 /**
- *
+ * This class and other similar resource classes need to be explicitly loaded in the 
+ * net.es.lookup.service.LookupService class
  */
 @Path("/lookup/services")
 public class ServicesResource {

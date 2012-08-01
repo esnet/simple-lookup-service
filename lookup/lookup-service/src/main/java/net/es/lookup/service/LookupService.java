@@ -18,7 +18,9 @@ import net.es.lookup.resources.*;
 
 
 /**
- *
+ * This class contains the method to start the lookup service
+ * NOTE: All the resource classes (ie., classes that contain @Path annotation) need to be explicitly loaded in
+ * startServer method
  */
 public class LookupService {
 

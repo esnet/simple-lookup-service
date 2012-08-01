@@ -6,7 +6,9 @@ import net.sf.json.util.JSONBuilder;
 import net.sf.json.util.JSONStringer;
 import net.sf.json.JSONException;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,7 +56,22 @@ public class JSONMessage {
 	            tmp = tmp.object();
 	
 	            for (Map.Entry<String,Object> entry : entries) {
-	                tmp = tmp.key(entry.getKey()).value(entry.getValue());
+	                //tmp = tmp.key(entry.getKey()).value(entry.getValue());
+	            	
+	            	
+	            	if(entry.getValue() instanceof String){
+	            		tmp = tmp.key(entry.getKey()).value(entry.getValue());
+	            	}else{
+	            		List<String> tmpvalues = (List)entry.getValue();
+	            		Iterator<String> it = tmpvalues.iterator();
+	            		tmp = tmp.key(entry.getKey());
+	            		tmp = tmp.array();
+	            		while (it.hasNext()){
+	            			tmp = tmp.value(it.next());
+	            			
+	            		}
+	            		tmp.endArray();
+	            	}
 	            }
 	            tmp = tmp.endObject();
 	        }

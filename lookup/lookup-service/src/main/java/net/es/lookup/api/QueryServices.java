@@ -69,7 +69,8 @@ public class QueryServices {
         	try{
         		List<Service> res = ServiceDAOMongoDb.getInstance().query(request, queryParameters, operators, maxResult, skip);
             	// Build response
-                response = JSONMessage.toString(res);
+               response = JSONMessage.toString(res);
+        		//response = res;
                 System.out.println(response);
                 return response;
         	}catch(DatabaseException e){

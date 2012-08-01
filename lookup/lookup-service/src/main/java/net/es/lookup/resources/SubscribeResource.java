@@ -11,7 +11,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
 /**
- *
+ * This class and other similar resource classes need to be explicitly loaded in the 
+ * net.es.lookup.service.LookupService class
  */
 @Path("/lookup/subscribe/{queryId}")
 public class SubscribeResource {

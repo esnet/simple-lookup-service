@@ -39,7 +39,7 @@ public class RegisterService {
         JSONRegisterRequest request = new JSONRegisterRequest(message);
         if (request.getStatus() == JSONRegisterRequest.INCORRECT_FORMAT) {
             System.out.println("INCORRECT FORMAT");
-            LOG.error("INCORRECR FORMAT OF JSON DATA");
+            LOG.error("INCORRECT FORMAT OF JSON DATA");
             // TODO: return correct error code
             throw new BadRequestException("Error in JSON data");
            
