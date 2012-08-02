@@ -30,7 +30,21 @@ public class JSONMessage {
         	JSONBuilder tmp = stringer.object();
 
         	for (Map.Entry<String,Object> entry : entries) {
-        		tmp = tmp.key(entry.getKey()).value(entry.getValue());
+        		//tmp = tmp.key(entry.getKey()).value(entry.getValue());
+        		
+        		if(entry.getValue() instanceof String){
+            		tmp = tmp.key(entry.getKey()).value(entry.getValue());
+            	}else{
+            		List<String> tmpvalues = (List)entry.getValue();
+            		Iterator<String> it = tmpvalues.iterator();
+            		tmp = tmp.key(entry.getKey());
+            		tmp = tmp.array();
+            		while (it.hasNext()){
+            			tmp = tmp.value(it.next());
+            			
+            		}
+            		tmp.endArray();
+            	}
         	}
 
         	tmp.endObject();
