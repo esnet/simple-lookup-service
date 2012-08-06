@@ -31,11 +31,19 @@ public class DatabaseConfigReader {
     public static DatabaseConfigReader getInstance() {
         if (DatabaseConfigReader.instance == null) {
             DatabaseConfigReader.instance = new DatabaseConfigReader();
-            DatabaseConfigReader.instance.setInfo(DEFAULT_PATH,DEFAULT_FILE);
+            String configPath = DEFAULT_PATH+"/"+DEFAULT_FILE;
+            DatabaseConfigReader.instance.setInfo(configPath);
         }
         return DatabaseConfigReader.instance;
     }
 
+    public static DatabaseConfigReader getInstance(String configPath) {
+        if (DatabaseConfigReader.instance == null) {
+            DatabaseConfigReader.instance = new DatabaseConfigReader();
+            DatabaseConfigReader.instance.setInfo(configPath);
+        }
+        return DatabaseConfigReader.instance;
+    }
     public String getDburl() {
         return this.dburl;
     }
@@ -52,11 +60,11 @@ public class DatabaseConfigReader {
         return this.collname;
     }
     
-    private void setInfo(String path, String fname) {
+    private void setInfo(String configPath) {
         ConfigHelper cfg = ConfigHelper.getInstance();
-        Map yamlMap = cfg.getConfiguration(path,fname);
+        Map yamlMap = cfg.getConfiguration(configPath);
         assert yamlMap != null:  "Could not load configuration file from " +
-            "file: ${basedir}/"+path + fname;
+            "file: {$basedir}/"+configPath;
         this.databaseMap = (HashMap)yamlMap.get("database");
         this.dburl = (String) this.databaseMap.get("dburl");
         System.out.println((String)this.databaseMap.get("dbport"));

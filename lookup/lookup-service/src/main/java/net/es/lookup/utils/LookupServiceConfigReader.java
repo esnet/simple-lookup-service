@@ -30,7 +30,16 @@ public class LookupServiceConfigReader {
     public static LookupServiceConfigReader getInstance() {
         if (LookupServiceConfigReader.instance == null) {
             LookupServiceConfigReader.instance = new LookupServiceConfigReader();
-            LookupServiceConfigReader.instance.setInfo(DEFAULT_PATH,DEFAULT_FILE);
+            String configPath = DEFAULT_PATH+"/"+DEFAULT_FILE;
+            LookupServiceConfigReader.instance.setInfo(configPath);
+        }
+        return LookupServiceConfigReader.instance;
+    }
+    
+    public static LookupServiceConfigReader getInstance(String configPath) {
+        if (LookupServiceConfigReader.instance == null) {
+            LookupServiceConfigReader.instance = new LookupServiceConfigReader();
+            LookupServiceConfigReader.instance.setInfo(configPath);
         }
         return LookupServiceConfigReader.instance;
     }
@@ -47,11 +56,11 @@ public class LookupServiceConfigReader {
         return this.maxleasetime;
     }
     
-    private void setInfo(String path, String fname) {
+    private void setInfo(String configPath) {
         ConfigHelper cfg = ConfigHelper.getInstance();
-        Map yamlMap = cfg.getConfiguration(path,fname);
+        Map yamlMap = cfg.getConfiguration(configPath);
         assert yamlMap != null:  "Could not load configuration file from " +
-            "file: ${basedir}/"+path + fname;
+            "file: ${basedir}/"+configPath;
         this.lookupServiceMap = (HashMap)yamlMap.get("lookupservice");
         this.host = (String) this.lookupServiceMap.get("host");
         System.out.println((String)this.lookupServiceMap.get("host"));
