@@ -21,6 +21,7 @@ public class Invoker {
     private static ServiceDAOMongoDb dao = null;
     private static String host = "localhost";
     private static LookupServiceConfigReader lcfg;
+    private static String cfg="";
 
     /**
      * Main program to start the Lookup Service
@@ -32,8 +33,12 @@ public class Invoker {
 
         parseArgs( args );
         
-       
-        lcfg = LookupServiceConfigReader.getInstance();
+        if(cfg == null || cfg.isEmpty()){
+        	lcfg = LookupServiceConfigReader.getInstance();
+        }else{
+        	lcfg = LookupServiceConfigReader.getInstance(cfg);
+        }
+        
         port = lcfg.getPort();
         host = lcfg.getHost();
         
@@ -61,6 +66,7 @@ public class Invoker {
         parser.acceptsAll( asList( "h", "?" ), "show help then exit" );
         OptionSpec<String> PORT = parser.accepts("p", "server port").withRequiredArg().ofType(String.class);
         OptionSpec<String> HOST = parser.accepts("h", "host").withRequiredArg().ofType(String.class);
+        OptionSpec<String> CONFIG = parser.accepts("c", "config").withRequiredArg().ofType(String.class);
         OptionSet options = parser.parse( args );
 
         // check for help
@@ -73,6 +79,10 @@ public class Invoker {
         }
         if (options.has(HOST) ){
             host = options.valueOf(HOST);
+        }
+        
+        if (options.has(CONFIG) ){
+            cfg = options.valueOf(CONFIG);
         }
         
         

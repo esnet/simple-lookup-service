@@ -24,7 +24,7 @@ import net.es.lookup.resources.*;
  */
 public class LookupService {
 
-    public static String SERVICE_URI_PREFIX="service";
+    public static String SERVICE_URI_PREFIX="lookup/service";
 
     private int port = 8080;
     private String host = "localhost";

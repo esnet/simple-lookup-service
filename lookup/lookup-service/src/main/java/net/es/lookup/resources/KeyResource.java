@@ -28,7 +28,7 @@ public class KeyResource {
 
     @Produces("application/json")
     public String getHandler (@PathParam("service") String serviceid, String service,@PathParam("key")String key) {
-    	String serviceuri = "service/"+serviceid;
+    	String serviceuri = "lookup/service/"+serviceid;
         return this.accessService.getKeyService(serviceuri,service,key);
     }
 

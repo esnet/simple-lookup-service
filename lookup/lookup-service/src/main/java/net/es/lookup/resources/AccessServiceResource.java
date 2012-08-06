@@ -29,7 +29,7 @@ public class AccessServiceResource {
 
     @Produces("application/json")
     public String getHandler (@PathParam("service") String serviceid, String service) {
-    	String serviceuri = "service/"+serviceid;
+    	String serviceuri = "lookup/service/"+serviceid;
         return this.accessService.getService(serviceuri,service);
     }
 
@@ -42,7 +42,7 @@ public class AccessServiceResource {
     @Produces("application/json")
     public String deleteHandler (@PathParam("service") String serviceid, String service) {
 //    	return this.deleteService.delete(serviceid);
-    	String serviceuri = "service/"+serviceid;
+    	String serviceuri = "lookup/service/"+serviceid;
     	return this.accessService.deleteService(serviceuri, service);
     }
     
@@ -54,7 +54,7 @@ public class AccessServiceResource {
 
     @Produces("application/json")
     public String renewHandler (@PathParam("service") String serviceid, String message) {
-    	String serviceuri = "service/"+serviceid;
+    	String serviceuri = "lookup/service/"+serviceid;
         return this.accessService.renewService(serviceuri,message);
     }
 }

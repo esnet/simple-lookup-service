@@ -130,7 +130,7 @@ def formatData(parsedData, mapFile):
 
 print "Select a configfile to input:"
 #print "config files:"
-files = os.listdir('../input')
+files = os.listdir('../lookup-service/input')
 for items in files:
     if items.endswith(".conf"):
         print items
@@ -138,17 +138,17 @@ for items in files:
 configfile = raw_input()  
 print "" 
 print "Select a mapfile to input:"
-files = os.listdir('../input')
+files = os.listdir('../lookup-service/input')
 for items in files:
     if items.endswith(".txt"):
         print items
 mapfile = raw_input()
 
 with open(configfile, "w") as myfile:
-    myfile = os.path.join(os.path.dirname(__file__),"..","input",configfile)
+    myfile = os.path.join(os.path.dirname(__file__),"..","lookup-service/input",configfile)
 
 with open(mapfile, "w") as mapFile:
-    mapFile = os.path.join(os.path.dirname(__file__),"..","input", mapfile)
+    mapFile = os.path.join(os.path.dirname(__file__),"..","lookup-service/input", mapfile)
 
 
 mydata=parseData(myfile)
