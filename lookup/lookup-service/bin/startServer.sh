@@ -15,7 +15,7 @@ if [ -z "$pidfile" ]; then
 fi
 
 if [ -z "$jarfile" ]; then
-    jarfile=./target/${shortname}-0.0.1-SNAPSHOT.one-jar.jar
+    jarfile=./target/${shortname}-${vers}.one-jar.jar
     echo "Starting ${shortname} with version:$vers"
 fi
 

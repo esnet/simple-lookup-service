@@ -2,11 +2,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.es.lookup</groupId>
     <artifactId>LOOKUP</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1</version>
     <packaging>pom</packaging>
     <name>Lookup Service</name>
     <properties>
-       <lookup.version>0.0.1-SNAPSHOT</lookup.version>
+       <lookup.version>0.1</lookup.version>
        <java.version>1.5</java.version>
     </properties>
 
