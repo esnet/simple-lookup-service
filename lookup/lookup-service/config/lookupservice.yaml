@@ -1,5 +1,0 @@
----
-lookupservice:
-    host: 'localhost'
-    port: '8080'
-    maxleasetime: '7200'

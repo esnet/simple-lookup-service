@@ -9,8 +9,8 @@ import java.util.HashMap;
 public class DatabaseConfigReader {
 
     private static DatabaseConfigReader instance;
-    private static final String DEFAULT_FILE = "database.yaml";
-    private static final String DEFAULT_PATH = "config";
+    private static final String DEFAULT_FILE = "lookupservice.yaml";
+    private static final String DEFAULT_PATH = "etc";
 
     Map<String,String> databaseMap = new HashMap<String,String>();
     private String dburl = "127.0.0.1";

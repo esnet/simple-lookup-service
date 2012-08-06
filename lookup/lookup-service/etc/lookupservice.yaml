@@ -1,0 +1,13 @@
+---
+#Lookup Service settings
+lookupservice:
+    host: 'localhost'
+    port: '8080'
+    maxleasetime: '7200'
+
+#Database settings  
+database:
+    dburl: '127.0.0.1'
+    dbport: '27017'
+    dbname: 'LookupService'
+    collname: 'services'

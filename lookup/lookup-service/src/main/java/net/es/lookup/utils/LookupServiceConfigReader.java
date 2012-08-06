@@ -10,7 +10,7 @@ public class LookupServiceConfigReader {
 
     private static LookupServiceConfigReader instance;
     private static final String DEFAULT_FILE = "lookupservice.yaml";
-    private static final String DEFAULT_PATH = "config";
+    private static final String DEFAULT_PATH = "etc";
 
     Map<String,Object> lookupServiceMap = new HashMap<String,Object>();
     private String host = "127.0.0.1";

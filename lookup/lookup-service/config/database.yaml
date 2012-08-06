@@ -1,6 +1,0 @@
----
-database:
-    dburl: '127.0.0.1'
-    dbport: '27017'
-    dbname: 'LookupService'
-    collname: 'services'
