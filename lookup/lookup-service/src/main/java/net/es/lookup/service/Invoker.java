@@ -89,7 +89,7 @@ public class Invoker {
         }
         
         if(options.has("l")){
-            logConfig = (String) opts.valueOf("l");
+            logConfig = (String) options.valueOf("l");
         }
         
         
