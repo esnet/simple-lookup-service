@@ -12,14 +12,19 @@ import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.ReservedKeywords;
+import org.apache.log4j.Logger;
+
+
+
+
 
 public class QueryServices {
-
+	private static Logger LOG = Logger.getLogger(QueryServices.class);
     private String params;
 
     //constructs query and operator messages and calls the DB function
     public String query(Message request, int maxResult, int skip) {
-	
+    LOG.info("Intializing queryService...");
     String response;
     
     Map<String, Object> requestMap = request.getMap();
@@ -30,10 +35,9 @@ public class QueryServices {
     
     int size = requestMap.size();
 	System.out.println("Total number of parameters passed in request="+size);
-	  
+	LOG.debug("Total number of parameters passed in request="+size); 
 	System.out.println("request:"+requestMap.toString());
-    	if(request.getOperator() != null){
-    		System.out.println("ddddd"+request.getOperator());
+    	if(request.getOperator() != null){ 		
     		List mainOp = request.getOperator();
         	operators.add(ReservedKeywords.RECORD_OPERATOR, mainOp);
     	}else{
@@ -55,7 +59,7 @@ public class QueryServices {
     			String opKey = key+"-"+ReservedKeywords.RECORD_OPERATOR_SUFFIX;
     			if(requestMap.containsKey(opKey)){
     				operators.add(key,requestMap.get(opKey));
-//    				System.out.println("operators::"+operators.getMap());////
+
     			}else{
     				//add default
     				operators.add(key, ReservedKeywords.RECORD_OPERATOR_DEFAULT);
@@ -72,10 +76,14 @@ public class QueryServices {
                response = JSONMessage.toString(res);
         		//response = res;
                 System.out.println(response);
+                LOG.debug("Response:"+response);
                 return response;
         	}catch(DatabaseException e){
+        		LOG.fatal("Error retrieving results:" +e.getMessage());
         		throw new InternalErrorException("Error retrieving results");
         	}catch(DataFormatException e){
+				LOG.error("Data formatting exception");
+
         		throw new InternalErrorException("Error formatting data");
         	}  
     }

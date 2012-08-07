@@ -23,6 +23,7 @@ import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 
+import org.apache.log4j.Logger;
 
 
 /**
@@ -30,10 +31,12 @@ import net.es.lookup.common.exception.internal.DataFormatException;
  */
 
 public class AccessService {
-
+	private static Logger LOG = Logger.getLogger(AccessService.class);
 	public String getService(String serviceid, String service) {
 		// Return some cliched textual content
-		System.out.println("Processing getService");
+	
+//		System.out.println("Processing getService");
+		LOG.info("Processing getService...");
 		JSONSubGetResponse response;
 		Service serviceRecord= new Service();
 		Message errorResponse = new Message();
@@ -42,11 +45,13 @@ public class AccessService {
 		JSONSubGetRequest request = new JSONSubGetRequest(service);
 		if (request.getStatus() == JSONSubGetRequest.INCORRECT_FORMAT) {
 			System.out.println("INCORRECT FORMAT");
+			LOG.error("requestStatus:"+request.getStatus()+" Service request format is Incorrect");
 			// TODO: return correct error code
 			throw new BadRequestException("Service request format is Incorrect\n");
 		}
 
 		// Verify that request is valid and authorized
+		LOG.debug("Is the request valid?"+this.isValid(request));
 		if (this.isValid(request) && this.isAuthed(serviceid, request)) {
 
 			try{
@@ -54,6 +59,7 @@ public class AccessService {
 
 				if(serviceRecord!= null){
 					System.out.println("servicerecord not null");
+					LOG.debug("servicerecord not null");
 					Map<String, Object> serviceMap = serviceRecord.getMap();	
 
 					Message newRequest = new Message(serviceMap);
@@ -63,24 +69,30 @@ public class AccessService {
 						try{
 							return JSONMessage.toString(response);
 						}catch(DataFormatException e){
+							LOG.error("Data formating exception.");
 							throw new InternalErrorException("Data formatting exception");
 						}
 					}
 				}else{
+					LOG.error("Service Not Found in DB.");
 					throw new NotFoundException("Service Not Found in DB\n");
 				}
 			}catch(DatabaseException e){
+				LOG.fatal("DatabaseException: The database is out of service." +e.getMessage());
 				throw new InternalErrorException("Database error\n");
 			}
 		}else{
 			if(!this.isValid(request)){
+				LOG.error("Service Request is invalid");
 				throw new BadRequestException("Service Request is invalid\n");
 			}else if(!this.isAuthed(serviceid, request)){
+				LOG.error("The private-key is not authorized to access this service");
 				throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
 			}
 			try{
 				return JSONMessage.toString(errorResponse);    
 			}catch(DataFormatException e){
+				LOG.error("Data formating exception.");
 				throw new InternalErrorException("Data formatting exception");
 			}
 		}
@@ -94,7 +106,8 @@ public class AccessService {
 
 	public String getKeyService(String serviceid, String service, String key) {
 		// Return some cliched textual content
-		System.out.println("Processing getService");
+		System.out.println("Processing getServiceKey");
+		LOG.info("Processing getServiceKey...");
 		JSONSubGetResponse response;
 		Service serviceRecord= new Service();
 		Message errorResponse = new Message();
@@ -103,11 +116,13 @@ public class AccessService {
 		JSONSubGetRequest request = new JSONSubGetRequest(service);
 		if (request.getStatus() == JSONSubGetRequest.INCORRECT_FORMAT) {
 			System.out.println("INCORRECT FORMAT");
+			LOG.error("requestStatus:"+request.getStatus()+" Service request format is Incorrect");
 			// TODO: return correct error code
 			throw new BadRequestException("Service request format is Incorrect\n");
 		}
 
 		// Verify that request is valid and authorized
+		LOG.debug("Is the request valid?"+this.isValid(request));
 		if (this.isValid(request) && this.isAuthed(serviceid, request)) {
 
 			try{
@@ -124,27 +139,34 @@ public class AccessService {
 						try{
 							return JSONMessage.toString(response);
 						}catch(DataFormatException e){
+							LOG.error("Data formating exception.");
 							throw new InternalErrorException("Data formatting exception");
 						}
 					}else if(serviceRecord.getKey(key)==null){
+						LOG.error("The key does not exist.");
 						throw new NotFoundException("The key does not exist\n");
 					}
 						
 				}else{
+					LOG.error("Service Not Found in DB.");
 					throw new NotFoundException("Service Not Found in DB\n");
 				}
 			}catch(DatabaseException e){
+				LOG.fatal("DatabaseException: The database is out of service." +e.getMessage());
 				throw new InternalErrorException("Database error\n");
 			}
 		}else{
 			if(!this.isValid(request)){
+				LOG.error("Service Request is invalid");
 				throw new BadRequestException("Service Request is invalid\n");
 			}else if(!this.isAuthed(serviceid, request)){
+				LOG.error("The private-key is not authorized to access this service");
 				throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
 			}
 			try{
 				return JSONMessage.toString(errorResponse);    
 			}catch(DataFormatException e){
+				LOG.error("Data formatting exception");
 				throw new InternalErrorException("Data formatting exception");
 			}
 		}
@@ -159,6 +181,7 @@ public class AccessService {
 
 	public String renewService(String serviceid, String service){
 		System.out.println("Processing renewService");
+		LOG.info("Processing renewService...");
 		JSONRenewResponse response;
 
 		Message errorResponse = new Message();
@@ -167,11 +190,13 @@ public class AccessService {
 		//renew can be empty for now. next version will require the privatekey
 		if (!service.isEmpty() && request.getStatus() == JSONRenewRequest.INCORRECT_FORMAT) {
 			System.out.println("INCORRECT FORMAT");
+			LOG.error("requestStatus:"+request.getStatus()+" Service request format is Incorrect");
 			// TODO: return correct error code
 			throw new BadRequestException("Service request format is Incorrect\n");
 		}
 
 		// Verify that request is valid and authorized
+		LOG.debug("Is the request valid?"+this.isValid(request));
 		if (this.isValid(request) && this.isAuthed(serviceid, request)) {
 
 			try{
@@ -202,6 +227,7 @@ public class AccessService {
 							try{
 								return JSONMessage.toString(response);
 							}catch(DataFormatException e){
+								LOG.error("Data formatting exception");
 								throw new InternalErrorException("Data formatting exception");
 							}
 						}else{
@@ -209,20 +235,25 @@ public class AccessService {
 						}
 					}	
 				}else{
+					LOG.error("Service Not Found in DB.");
 					throw new NotFoundException("Service Not Found in DB\n");
 				}
 			}catch(DatabaseException e){
+				LOG.fatal("DatabaseException: The database is out of service." +e.getMessage());
 				throw new InternalErrorException("Database error\n");
 			}
 		}else{
 			if(!this.isValid(request)){
+				LOG.error("Service Request is invalid");
 				throw new BadRequestException("Request is invalid\n");
 			}else if(!this.isAuthed(serviceid, request)){
+				LOG.error("The private-key is not authorized to access this service");
 				throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
 			}
 			try{
 				return JSONMessage.toString(errorResponse);    
 			}catch(DataFormatException e){
+				LOG.error("Data formatting exception");
 				throw new InternalErrorException("Data formatting exception");
 			}
 		}
@@ -233,17 +264,20 @@ public class AccessService {
 
 	public String deleteService(String serviceid, String service){
 		System.out.println("Processing deleteService");
+		LOG.info("Processing deleteService...");
 		JSONDeleteResponse response;
 
 		Message errorResponse = new Message();
 		JSONDeleteRequest request = new JSONDeleteRequest(service);
 		if (request.getStatus() == JSONDeleteRequest.INCORRECT_FORMAT) {
 			System.out.println("INCORRECT FORMAT");
+			LOG.error("requestStatus:"+request.getStatus()+" Service request format is Incorrect");
 			// TODO: return correct error code
 			throw new BadRequestException("Service request format is Incorrect\n");
 		}
 
 		// Verify that request is valid and authorized
+		LOG.debug("Is the request valid?"+this.isValid(request));
 		if (this.isValid(request) && this.isAuthed(serviceid, request)) {
 			try{
 				Service serviceRecord = ServiceDAOMongoDb.getInstance().getServiceByURI(serviceid);
@@ -264,27 +298,33 @@ public class AccessService {
 						try{
 							return JSONMessage.toString(response);
 						}catch(DataFormatException e){
+							LOG.error("Data formatting exception");
 							throw new InternalErrorException("Data formatting exception");
 						}
 					}
 					
 				}else{
+					LOG.error("Service Not Found in DB.");
 					throw new NotFoundException("Service Not Found in DB\n");
 				}
 			}
 			catch(DatabaseException e){
+				LOG.fatal("DatabaseException: The database is out of service." +e.getMessage());
 				throw new InternalErrorException("Database error\n");
 			}
 		}
 		else{
 			if(!this.isValid(request)){
+				LOG.error("Service Request is invalid");
 				throw new BadRequestException("Service Request is invalid\n");
 			}else if(!this.isAuthed(serviceid, request)){
+				LOG.error("The private-key is not authorized to access this service");
 				throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
 			}
 			try{
 				return JSONMessage.toString(errorResponse);   
 			}catch(DataFormatException e){
+				LOG.error("Data formatting exception");
 				throw new InternalErrorException("Data formatting exception");
 			}
 		}
