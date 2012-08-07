@@ -14,7 +14,7 @@ Summary:        Lookup Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://code.google.com/p/esnet-perfsonar
-Source0:        lookup-service-%{version}-%{relnum}.tar.gz
+Source0:        lookup-service.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  java-1.6.0-openjdk
 BuildRequires:  java-1.6.0-openjdk-devel
@@ -24,16 +24,16 @@ Requires:       java-1.6.0-openjdk
 Requires:       chkconfig
 
 %description
-MaDDash is a framework for scheduling service checks and displaying results in a grid. 
-This package provides a server that schedules the checks and publishes the results
+Lookup Service is used to find registered services. 
+This package provides a server that allows clients to register and query services 
 via REST interface.
 
 %pre
-/usr/sbin/groupadd lookup 2> /dev/null || :
-/usr/sbin/useradd -g lookup -r -s /sbin/nologin -c "Lookup Service User" -d /tmp lookup 2> /dev/null || :
+/usr/sbin/groupadd lookup-service 2> /dev/null || :
+/usr/sbin/useradd -g lookup-service -r -s /sbin/nologin -c "Lookup Service User" -d /tmp lookup-service 2> /dev/null || :
 
 %prep
-%setup -q -n lookup-service-%{version}-%{relnum}
+%setup -q -n lookup-service
 
 %clean
 rm -rf %{buildroot}
