@@ -8,7 +8,7 @@
 %define relnum 3 
 
 Name:           %{package_name}
-Version:        1.0
+Version:        0.1
 Release:        %{relnum}
 Summary:        Lookup Service
 License:        distributable, see LICENSE
@@ -85,9 +85,9 @@ if [ "$1" = "2" ]; then
   unlink %{install_base}/target/%{package_name}.jar
 fi
 ln -s %{install_base}/target/%{package_name}-%{version}.one-jar.jar %{install_base}/target/%{package_name}.one-jar.jar
-chown lookup:lookup %{install_base}/target/%{package_name}.one-jar.jar
+chown lookup:lookup %{install_base}/target/%{package_name}-%{version}.one-jar.jar
 ln -s %{install_base}/target/%{package_name}-%{version}.jar %{install_base}/target/%{package_name}.jar
-chown lookup:lookup %{install_base}/target/%{package_name}.jar
+chown lookup:lookup %{install_base}/target/%{package_name}-%{version}.jar
 
 #Configure service to start when machine boots
 /sbin/chkconfig --add %{package_name}
