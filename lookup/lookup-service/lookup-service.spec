@@ -85,9 +85,9 @@ if [ "$1" = "2" ]; then
   unlink %{install_base}/target/%{package_name}.jar
 fi
 ln -s %{install_base}/target/%{package_name}-%{version}.one-jar.jar %{install_base}/target/%{package_name}.one-jar.jar
-chown lookup-service:lookup-service %{install_base}/target/%{package_name}.one-jar.jar
+chown lookup:lookup %{install_base}/target/%{package_name}.one-jar.jar
 ln -s %{install_base}/target/%{package_name}-%{version}.jar %{install_base}/target/%{package_name}.jar
-chown lookup-service:lookup-service %{install_base}/target/%{package_name}.jar
+chown lookup:lookup %{install_base}/target/%{package_name}.jar
 
 #Configure service to start when machine boots
 /sbin/chkconfig --add %{package_name}
