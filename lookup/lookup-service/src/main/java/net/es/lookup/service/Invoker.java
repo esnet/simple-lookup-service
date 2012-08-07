@@ -22,6 +22,7 @@ public class Invoker {
     private static String host = "localhost";
     private static LookupServiceConfigReader lcfg;
     private static String cfg="";
+    private static String logConfig ="./etc/log4j.properties";
 
     /**
      * Main program to start the Lookup Service
@@ -42,6 +43,7 @@ public class Invoker {
         port = lcfg.getPort();
         host = lcfg.getHost();
         
+        System.setProperty("log4j.configuration", "file:" + logConfig);
 
         System.out.println("starting ServiceDAOMongoDb");
         Invoker.dao = new ServiceDAOMongoDb();
@@ -67,6 +69,7 @@ public class Invoker {
         OptionSpec<String> PORT = parser.accepts("p", "server port").withRequiredArg().ofType(String.class);
         OptionSpec<String> HOST = parser.accepts("h", "host").withRequiredArg().ofType(String.class);
         OptionSpec<String> CONFIG = parser.accepts("c", "config").withRequiredArg().ofType(String.class);
+        OptionSpec<String> LOGCONFIG = parser.accepts("l", "logConfig").withRequiredArg().ofType(String.class);
         OptionSet options = parser.parse( args );
 
         // check for help
@@ -84,6 +87,11 @@ public class Invoker {
         if (options.has(CONFIG) ){
             cfg = options.valueOf(CONFIG);
         }
+        
+        if(options.has("l")){
+            logConfig = (String) opts.valueOf("l");
+        }
+        
         
         
    }
