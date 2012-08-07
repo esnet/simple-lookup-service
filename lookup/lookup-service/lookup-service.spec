@@ -29,8 +29,8 @@ This package provides a server that allows clients to register and query service
 via REST interface.
 
 %pre
-/usr/sbin/groupadd lookup-service 2> /dev/null || :
-/usr/sbin/useradd -g lookup-service -r -s /sbin/nologin -c "Lookup Service User" -d /tmp lookup-service 2> /dev/null || :
+/usr/sbin/groupadd lookup 2> /dev/null || :
+/usr/sbin/useradd -g lookup -r -s /sbin/nologin -c "Lookup Service User" -d /tmp lookup 2> /dev/null || :
 
 %prep
 %setup -q -n lookup-service
@@ -63,20 +63,20 @@ install -m 755 %{package_name}/scripts/%{package_name} %{buildroot}/etc/init.d/%
 cp %{package_name}/etc/lookupservice.yaml %{buildroot}/%{config_base}/lookup-service.yaml
 
 #Update log locations
-sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, -e s,%{package_name}.netlogger.log,%{log_dir}/%{package_name}.netlogger.log, < %{package_name}/etc/log4j.properties > %{buildroot}/%{config_base}/log4j.properties
+sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{package_name}/etc/log4j.properties > %{buildroot}/%{config_base}/log4j.properties
 
 %post
 #Create directory for PID files
 mkdir -p %{run_dir}
-chown lookup-service:lookup-service %{run_dir}
+chown lookup:lookup %{run_dir}
 
 #Create directory for logs
 mkdir -p %{log_dir}
-chown lookup-service:lookup-service %{log_dir}
+chown lookup:lookup %{log_dir}
 
 #Create database directory
 mkdir -p %{data_dir}
-chown lookup-service:lookup-service %{data_dir}
+chown lookup:lookup %{data_dir}
 
 #Create symbolic links to latest version of jar files
 ##if update then delete old links
@@ -93,7 +93,7 @@ chown lookup-service:lookup-service %{install_base}/target/%{package_name}.jar
 /sbin/chkconfig --add %{package_name}
 
 %files
-%defattr(-,lookup-service,lookup-service,-)
+%defattr(-,lookup,lookup,-)
 %config(noreplace) %{config_base}/*
 %{install_base}/target/*
 %{install_base}/bin/*
