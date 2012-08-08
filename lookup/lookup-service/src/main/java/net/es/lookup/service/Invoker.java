@@ -46,7 +46,7 @@ public class Invoker {
         System.setProperty("log4j.configuration", "file:" + logConfig);
 
         System.out.println("starting ServiceDAOMongoDb");
-        Invoker.dao = new ServiceDAOMongoDb();
+        Invoker.dao = new ServiceDAOMongoDb(cfg);
 
         System.out.println("starting Lookup Service");
         
@@ -88,8 +88,8 @@ public class Invoker {
             cfg = options.valueOf(CONFIG);
         }
         
-        if(options.has("l")){
-            logConfig = (String) options.valueOf("l");
+        if(options.has(LOGCONFIG)){
+            logConfig = (String) options.valueOf(LOGCONFIG);
         }
         
         

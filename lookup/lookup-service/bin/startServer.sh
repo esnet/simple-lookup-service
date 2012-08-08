@@ -20,4 +20,5 @@ if [ -z "$jarfile" ]; then
 fi
 
 java -Djava.net.preferIPv4Stack=true -jar $jarfile $* &
+echo "Starting ${shortname} with $*"
 echo $! > $pidfile
