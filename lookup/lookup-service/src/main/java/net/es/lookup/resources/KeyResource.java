@@ -1,7 +1,6 @@
 package net.es.lookup.resources;
 
 
-import net.es.lookup.api.DeleteService;
 import net.es.lookup.api.AccessService;
 
 import javax.ws.rs.GET;

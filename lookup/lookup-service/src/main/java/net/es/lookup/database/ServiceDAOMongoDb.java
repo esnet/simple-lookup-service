@@ -91,12 +91,12 @@ public class ServiceDAOMongoDb {
         ServiceDAOMongoDb.instance = this;
         try{
         	mongo = new Mongo(dburl,dbport);
-        	System.out.println(mongo.getAddress().toString());
+        	//System.out.println(mongo.getAddress().toString());
 		
         	db = mongo.getDB(dbname);
-        	System.out.println(db.getName());
+        	//System.out.println(db.getName());
         	coll = db.getCollection(collname);
-        	System.out.println(coll.getName());
+        	//System.out.println(coll.getName());
         }catch(UnknownHostException e){
         	throw new DatabaseException(e.getMessage());
         }catch(Exception e){
@@ -119,7 +119,7 @@ public class ServiceDAOMongoDb {
 		//check for duplicates
 		try{
 			List<Service> dupEntries = this.query(message,queryRequest,operators);
-			System.out.println("Duplicate Entries: "+dupEntries.size());
+			//System.out.println("Duplicate Entries: "+dupEntries.size());
 			if(dupEntries.size()>0){
 				throw new DuplicateEntryException("Record already exists");		
 			}
@@ -193,19 +193,19 @@ public class ServiceDAOMongoDb {
         	BasicDBObject query = new BasicDBObject();
         	query.put(ReservedKeywords.RECORD_URI, serviceid);
         	
-        	System.out.println(query);
+        	//System.out.println(query);
         	
         	BasicDBObject updateObject = new BasicDBObject();
         	updateObject.putAll(updateRequest.getMap());
         	
-        	System.out.println(updateObject);
+        	//System.out.println(updateObject);
         	
         	
         	
         	try{
         		WriteResult wrt = coll.update(query, updateObject);
         		CommandResult cmdres = wrt.getLastError();
-        		System.out.println(cmdres.ok());
+        		//System.out.println(cmdres.ok());
         	
         		if(cmdres.ok()){
         			response = (Message) getServiceByURI(serviceid);
@@ -285,12 +285,12 @@ public class ServiceDAOMongoDb {
             	//deal with metacharacter
             	 if(val.endsWith("*")){
             		 val = val.substring(0, val.length()-1);
-            		 System.out.println(val);
+            		 //System.out.println(val);
             		 Pattern newVal = Pattern.compile("^"+val);
             		 tmpHash.put(newKey, newVal);
             	 }else if(val.startsWith("*")){
             		 val = val.substring(1, val.length());
-            		 System.out.println(val);
+            		 //System.out.println(val);
             		 Pattern newVal = Pattern.compile(val+"$");
             		 tmpHash.put(newKey, newVal);
             	 }else{
@@ -304,12 +304,12 @@ public class ServiceDAOMongoDb {
                 		 String val = (String)values.get(i);
                 		 if(val.endsWith("*")){
                     		 val = val.substring(0, val.length()-1);
-                    		 System.out.println(val);
+                    		 //System.out.println(val);
                     		 Pattern newVal = Pattern.compile("^"+val);
                     		 newValues.add(newVal);
                     	 }else if(val.startsWith("*")){
                     		 val = val.substring(1, val.length());
-                    		 System.out.println(val);
+                    		 //System.out.println(val);
                     		 Pattern newVal = Pattern.compile(val+"$");
                     		 newValues.add(newVal);
                     	 }else{
@@ -334,12 +334,12 @@ public class ServiceDAOMongoDb {
                 	 String val = (String)values.get(0);
                 	 if(val.endsWith("*")){
                 		 val = val.substring(0, val.length()-1);
-                		 System.out.println(val);
+                		 //System.out.println(val);
                 		 Pattern newVal = Pattern.compile("^"+val);
                 		 tmpHash.put(newKey, newVal);
                 	 }else if(val.startsWith("*")){
                 		 val = val.substring(1, val.length());
-                		 System.out.println(val);
+                		 //System.out.println(val);
                 		 Pattern newVal = Pattern.compile(val+"$");
                 		 newValues.add(newVal);
                 	 }else{
@@ -382,7 +382,7 @@ public class ServiceDAOMongoDb {
 			query.put(mongoOp, keyValueList);
 		}
 		
-		System.out.println(query);
+		//System.out.println(query);
 		return query;
 	}
 	

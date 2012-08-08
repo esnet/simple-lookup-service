@@ -1,7 +1,6 @@
 package net.es.lookup.resources;
 
 
-import net.es.lookup.api.DeleteService;
 import net.es.lookup.api.AccessService;
 
 import javax.ws.rs.GET;
@@ -18,7 +17,6 @@ import javax.ws.rs.PathParam;
 @Path("/lookup/service/{service}")
 public class AccessServiceResource {
 
-    private DeleteService deleteService = new DeleteService();
     private AccessService accessService = new AccessService();
 
 
@@ -41,7 +39,6 @@ public class AccessServiceResource {
 
     @Produces("application/json")
     public String deleteHandler (@PathParam("service") String serviceid, String service) {
-//    	return this.deleteService.delete(serviceid);
     	String serviceuri = "lookup/service/"+serviceid;
     	return this.accessService.deleteService(serviceuri, service);
     }

@@ -24,7 +24,8 @@ public class QueryServices {
 
     //constructs query and operator messages and calls the DB function
     public String query(Message request, int maxResult, int skip) {
-    LOG.info("Intializing queryService...");
+    LOG.info("Processing queryService...");
+    LOG.info("Received message: "+request.getMap());
     String response;
     
     Map<String, Object> requestMap = request.getMap();
@@ -34,9 +35,10 @@ public class QueryServices {
     Message operators = new Message();
     
     int size = requestMap.size();
-	System.out.println("Total number of parameters passed in request="+size);
+	
 	LOG.debug("Total number of parameters passed in request="+size); 
-	System.out.println("request:"+requestMap.toString());
+	
+	LOG.info("request:"+requestMap.toString());
     	if(request.getOperator() != null){ 		
     		List mainOp = request.getOperator();
         	operators.add(ReservedKeywords.RECORD_OPERATOR, mainOp);
@@ -45,13 +47,13 @@ public class QueryServices {
     		mainOp.add(ReservedKeywords.RECORD_OPERATOR_DEFAULT);
     		operators.add(ReservedKeywords.RECORD_OPERATOR, mainOp);
     	}
-    	System.out.println("operator"+operators.getMap());
+    	
     	for (Map.Entry<String, Object> entry : requestMap.entrySet()) {
     		
     		String key = entry.getKey();
     		Object value = entry.getValue();
     		
-    		System.out.println("key= "+key);
+    		LOG.debug("key= "+key);
 	
     		//generate the operator map
     		if (!key.contains(ReservedKeywords.RECORD_OPERATOR_SUFFIX)){
@@ -65,7 +67,7 @@ public class QueryServices {
     				operators.add(key, ReservedKeywords.RECORD_OPERATOR_DEFAULT);
     				
     			}
-    			System.out.println("operators::"+operators.getMap());////
+    			LOG.debug("operators::"+operators.getMap());////
     		}
     	}   
 
@@ -73,17 +75,18 @@ public class QueryServices {
         	try{
         		List<Service> res = ServiceDAOMongoDb.getInstance().query(request, queryParameters, operators, maxResult, skip);
             	// Build response
-               response = JSONMessage.toString(res);
+                response = JSONMessage.toString(res);
         		//response = res;
-                System.out.println(response);
+                LOG.info("Query status: SUCCESS;");
                 LOG.debug("Response:"+response);
                 return response;
         	}catch(DatabaseException e){
         		LOG.fatal("Error retrieving results:" +e.getMessage());
+        		LOG.info("Query status: FAILED; exiting");
         		throw new InternalErrorException("Error retrieving results");
         	}catch(DataFormatException e){
 				LOG.error("Data formatting exception");
-
+				LOG.info("Query status: FAILED; exiting");
         		throw new InternalErrorException("Error formatting data");
         	}  
     }

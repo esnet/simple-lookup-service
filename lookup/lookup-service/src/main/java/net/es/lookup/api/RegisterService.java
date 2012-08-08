@@ -32,20 +32,19 @@ public class RegisterService {
     private String params;
 
     public String registerService(String message) {
-    	LOG.info("intializing registerService...");
-        // this.params = params;
-        // Return some cliched textual content
+    	LOG.info(" Processing registerService.");
+    	LOG.info(" Received message: "+message);
         JSONRegisterResponse response;
         JSONRegisterRequest request = new JSONRegisterRequest(message);
         if (request.getStatus() == JSONRegisterRequest.INCORRECT_FORMAT) {
-            System.out.println("INCORRECT FORMAT");
-            LOG.error("INCORRECT FORMAT OF JSON DATA");
+            LOG.info("Register status: FAILED; exiting");
+            LOG.error(" INCORRECT FORMAT OF JSON DATA");
             // TODO: return correct error code
             throw new BadRequestException("Error in JSON data");
            
         }
         // Verify that request is valid and authorized
-        System.out.println(this.isValid(request));
+        
         LOG.debug("valid?"+this.isValid(request));
         if (this.isValid(request) && this.isAuthed(request)) {
             // Generate a new URI for this service and add it to the service key/value pairs
@@ -82,7 +81,6 @@ public class RegisterService {
                     while (it.hasNext()) {
                         Map.Entry<String,Object> pairs = (Map.Entry)it.next();
                         if(!isIgnoreKey(pairs.getKey())){
-                        	System.out.println(pairs.getKey() + " = " + pairs.getValue());
                         	LOG.debug("key-value pair:"+ pairs.getKey() + "=" + pairs.getValue());
                         	operators.add(pairs.getKey(), ReservedKeywords.RECORD_OPERATOR_ALL);
                         	query.add(pairs.getKey(),pairs.getValue());
@@ -95,23 +93,27 @@ public class RegisterService {
             	    Message res = ServiceDAOMongoDb.getInstance().queryAndPublishService(request,query,operators);
 
                 	response = new JSONRegisterResponse (res.getMap());
-                	System.out.println(JSONMessage.toString(response));
+                	LOG.info("Register status: SUCCESS; exiting");
                 	LOG.debug("response:"+ JSONMessage.toString(response));
                 	return JSONMessage.toString(response);
                 }catch(DataFormatException e){
                 	LOG.fatal("Data formating exception");
+                	LOG.info("Register status: FAILED; exiting");
                 	throw new InternalErrorException("Data formatting exception");
                 }catch(DuplicateEntryException e){
                 	LOG.error("FobiddenRequestException:"+e.getMessage());
+                	LOG.info("Register status: FAILED; exiting");
                 	throw new ForbiddenRequestException(e.getMessage());
                 }catch(DatabaseException e){
                 	LOG.fatal("DatabaseException:" +e.getMessage());
+                	LOG.info("Register status: FAILED; exiting");
                 	throw new InternalErrorException(e.getMessage());
                 }
             }else{
                 // Build response
                // response = new JSONRegisterResponse (request.getMap());
             	LOG.fatal("Failed to secure lease for the registration record");
+            	LOG.info("Register status: FAILED; exiting");
                throw new InternalErrorException("Failed to secure lease for the registration record");
             }
 
@@ -119,9 +121,11 @@ public class RegisterService {
         }else{
         	if(!this.isValid(request)){
         		LOG.error("Invalid request:");
+        		LOG.info("Register status: FAILED; exiting");
         		throw new BadRequestException("Invalid request");
         	}else if(!this.isAuthed(request)){
         		LOG.error("Not authorized to perform the request");
+        		LOG.info("Register status: FAILED; exiting");
         		throw new UnauthorizedException("Not authorized to perform the request");
         	}
         }

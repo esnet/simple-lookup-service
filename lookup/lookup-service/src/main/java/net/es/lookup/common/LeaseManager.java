@@ -54,7 +54,7 @@ public class LeaseManager {
         }
         
         Instant expires = now.plus(ttl);
-        System.out.println(expires.toString());
+        //System.out.println(expires.toString());
         // Add expires key/value in the message
         message.add(ReservedKeywords.RECORD_EXPIRES, this.fmt.print(expires));
         return true;

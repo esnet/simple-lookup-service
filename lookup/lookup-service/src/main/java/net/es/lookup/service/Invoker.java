@@ -35,7 +35,10 @@ public class Invoker {
         parseArgs( args );
         
         if(cfg != null && !cfg.isEmpty()){
+        	System.out.println("Starting Lookup Service using config File: "+ cfg);
         	 LookupServiceConfigReader.init(cfg);
+        }else{
+        	System.out.println("Starting Lookup Service using default options");
         }
         lcfg = LookupServiceConfigReader.getInstance();
         port = lcfg.getPort();
@@ -45,6 +48,7 @@ public class Invoker {
 
         System.out.println("starting ServiceDAOMongoDb");
         if(cfg != null && !cfg.isEmpty()){
+        	
         	Invoker.dao = new ServiceDAOMongoDb(cfg);
         }else{
         	Invoker.dao = new ServiceDAOMongoDb();
@@ -91,9 +95,7 @@ public class Invoker {
         
         if(options.has(LOGCONFIG)){
             logConfig = (String) options.valueOf(LOGCONFIG);
-        }
-        
-        
+        }     
         
    }
 

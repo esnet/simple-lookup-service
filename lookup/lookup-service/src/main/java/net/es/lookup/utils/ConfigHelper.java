@@ -27,8 +27,6 @@ public class ConfigHelper {
     @SuppressWarnings({ "static-access", "unchecked" })
     public Map getConfiguration(String configPath) {
         Map configuration = null;
-        //String absfilename = path+"/"+fname;
-        //System.out.println(absfilename);
         InputStream yamlFile = this.getClass().getClassLoader().getSystemResourceAsStream(configPath);
         try {
             configuration = (Map) Yaml.load(yamlFile);

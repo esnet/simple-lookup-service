@@ -39,7 +39,7 @@ public class JSONRegisterRequest extends RegisterRequest {
     	if(obj != null){
     	       JSONObject jsonObj = (JSONObject) obj;
     	        Set keyValues = jsonObj.entrySet();
-    	        System.out.println(obj.toString());
+    	        //System.out.println(obj.toString());
     	        for (Object o : ((JSONObject) obj).keySet()) {
     	            this.add(o.toString(), ((JSONObject) obj).get(o));
     	        }
