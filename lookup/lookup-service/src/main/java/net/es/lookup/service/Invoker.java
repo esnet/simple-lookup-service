@@ -44,8 +44,11 @@ public class Invoker {
         System.setProperty("log4j.configuration", "file:" + logConfig);
 
         System.out.println("starting ServiceDAOMongoDb");
-        Invoker.dao = new ServiceDAOMongoDb(cfg);
-
+        if(cfg != null && !cfg.isEmpty()){
+        	Invoker.dao = new ServiceDAOMongoDb(cfg);
+        }else{
+        	Invoker.dao = new ServiceDAOMongoDb();
+        }
         System.out.println("starting Lookup Service");
         
         // Create the REST service
