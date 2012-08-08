@@ -34,12 +34,10 @@ public class Invoker {
 
         parseArgs( args );
         
-        if(cfg == null || cfg.isEmpty()){
-        	lcfg = LookupServiceConfigReader.getInstance();
-        }else{
-        	lcfg = LookupServiceConfigReader.getInstance(cfg);
+        if(cfg != null && !cfg.isEmpty()){
+        	 LookupServiceConfigReader.init(cfg);
         }
-        
+        lcfg = LookupServiceConfigReader.getInstance();
         port = lcfg.getPort();
         host = lcfg.getHost();
         

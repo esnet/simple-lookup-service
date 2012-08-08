@@ -11,6 +11,7 @@ public class LookupServiceConfigReader {
     private static LookupServiceConfigReader instance;
     private static final String DEFAULT_FILE = "lookupservice.yaml";
     private static final String DEFAULT_PATH = "etc";
+    private static String configFile = DEFAULT_PATH+"/"+DEFAULT_FILE;
 
     Map<String,Object> lookupServiceMap = new HashMap<String,Object>();
     private String host = "127.0.0.1";
@@ -23,6 +24,14 @@ public class LookupServiceConfigReader {
     private LookupServiceConfigReader() {
         
     }
+    
+    /*
+     * set the config file
+     * */
+    
+    public static void init(String cFile){
+    	configFile = cFile;
+    }
 
     /**
      * @return the initialized LookupServiceConfigReader singleton instance
@@ -30,19 +39,11 @@ public class LookupServiceConfigReader {
     public static LookupServiceConfigReader getInstance() {
         if (LookupServiceConfigReader.instance == null) {
             LookupServiceConfigReader.instance = new LookupServiceConfigReader();
-            String configPath = DEFAULT_PATH+"/"+DEFAULT_FILE;
-            LookupServiceConfigReader.instance.setInfo(configPath);
+            LookupServiceConfigReader.instance.setInfo(configFile);
         }
         return LookupServiceConfigReader.instance;
     }
-    
-    public static LookupServiceConfigReader getInstance(String configPath) {
-        if (LookupServiceConfigReader.instance == null) {
-            LookupServiceConfigReader.instance = new LookupServiceConfigReader();
-            LookupServiceConfigReader.instance.setInfo(configPath);
-        }
-        return LookupServiceConfigReader.instance;
-    }
+
 
     public String getHost() {
         return this.host;

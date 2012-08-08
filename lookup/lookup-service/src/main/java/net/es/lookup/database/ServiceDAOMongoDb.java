@@ -43,7 +43,6 @@ public class ServiceDAOMongoDb {
 	// retrieves default - mongodb running on localhost and default port - 27017 and dbname- "lookupservice", collection name - "services" 
 	//creates a new one if it cannot find one 
 	public ServiceDAOMongoDb() throws DatabaseException{
-		
 		DatabaseConfigReader dcfg = DatabaseConfigReader.getInstance();
 		this.dburl = dcfg.getDburl();
 		this.dbport = dcfg.getDbport();
@@ -53,7 +52,7 @@ public class ServiceDAOMongoDb {
 	}
 	
 	public ServiceDAOMongoDb(String configFile) throws DatabaseException{
-		
+		DatabaseConfigReader.init(configFile);
 		DatabaseConfigReader dcfg = DatabaseConfigReader.getInstance(configFile);
 		this.dburl = dcfg.getDburl();
 		this.dbport = dcfg.getDbport();

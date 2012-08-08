@@ -11,6 +11,7 @@ public class DatabaseConfigReader {
     private static DatabaseConfigReader instance;
     private static final String DEFAULT_FILE = "lookupservice.yaml";
     private static final String DEFAULT_PATH = "etc";
+    private static String configFile = DEFAULT_PATH+"/"+DEFAULT_FILE;
 
     Map<String,String> databaseMap = new HashMap<String,String>();
     private String dburl = "127.0.0.1";
@@ -24,6 +25,13 @@ public class DatabaseConfigReader {
     private DatabaseConfigReader() {
         
     }
+    
+    /**
+     * set config file
+     * */
+    public static void init(String cFile){
+    	configFile = cFile;
+    }
 
     /**
      * @return the initialized DatabaseConfigReader singleton instance
@@ -31,19 +39,11 @@ public class DatabaseConfigReader {
     public static DatabaseConfigReader getInstance() {
         if (DatabaseConfigReader.instance == null) {
             DatabaseConfigReader.instance = new DatabaseConfigReader();
-            String configPath = DEFAULT_PATH+"/"+DEFAULT_FILE;
-            DatabaseConfigReader.instance.setInfo(configPath);
+            DatabaseConfigReader.instance.setInfo(configFile);
         }
         return DatabaseConfigReader.instance;
     }
-
-    public static DatabaseConfigReader getInstance(String configPath) {
-        if (DatabaseConfigReader.instance == null) {
-            DatabaseConfigReader.instance = new DatabaseConfigReader();
-            DatabaseConfigReader.instance.setInfo(configPath);
-        }
-        return DatabaseConfigReader.instance;
-    }
+    
     public String getDburl() {
         return this.dburl;
     }
