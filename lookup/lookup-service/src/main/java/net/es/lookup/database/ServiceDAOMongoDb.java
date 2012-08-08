@@ -53,7 +53,7 @@ public class ServiceDAOMongoDb {
 	
 	public ServiceDAOMongoDb(String configFile) throws DatabaseException{
 		DatabaseConfigReader.init(configFile);
-		DatabaseConfigReader dcfg = DatabaseConfigReader.getInstance(configFile);
+		DatabaseConfigReader dcfg = DatabaseConfigReader.getInstance();
 		this.dburl = dcfg.getDburl();
 		this.dbport = dcfg.getDbport();
 		this.dbname = dcfg.getDbname();
