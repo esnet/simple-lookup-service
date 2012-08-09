@@ -1,7 +1,7 @@
 %define package_name lookup-service 
 %define mvn_project_list %{package_name}
-%define install_base /opt/lookup-service/%{package_name}
-%define config_base /etc/lookup-service/%{package_name}
+%define install_base /opt/%{package_name}
+%define config_base /etc/%{package_name}
 %define log_dir /var/log/lookup-service
 %define run_dir /var/run/lookup-service
 %define data_dir /var/lib/lookup-service/
@@ -22,7 +22,7 @@ BuildRequires:  sed
 BuildArch:      noarch
 Requires:       java-1.6.0-openjdk
 Requires:       chkconfig
-
+Requires:	mongo-10gen
 %description
 Lookup Service is used to find registered services. 
 This package provides a server that allows clients to register and query services 
@@ -85,9 +85,9 @@ if [ "$1" = "2" ]; then
   unlink %{install_base}/target/%{package_name}.jar
 fi
 ln -s %{install_base}/target/%{package_name}-%{version}.one-jar.jar %{install_base}/target/%{package_name}.one-jar.jar
-chown lookup:lookup %{install_base}/target/%{package_name}-%{version}.one-jar.jar
+chown lookup:lookup %{install_base}/target/%{package_name}.one-jar.jar
 ln -s %{install_base}/target/%{package_name}-%{version}.jar %{install_base}/target/%{package_name}.jar
-chown lookup:lookup %{install_base}/target/%{package_name}-%{version}.jar
+chown lookup:lookup %{install_base}/target/%{package_name}.jar
 
 #Configure service to start when machine boots
 /sbin/chkconfig --add %{package_name}
