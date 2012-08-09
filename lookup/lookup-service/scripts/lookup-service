@@ -1,10 +1,10 @@
 #!/bin/bash
 #
 # Init file for Lookup Service 
-
+# chkconfig: 2345 65 20
 # description: Lookup Service server
 #
-
+#
 # Source function library.
 . /etc/rc.d/init.d/functions
 
