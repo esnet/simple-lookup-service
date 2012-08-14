@@ -50,7 +50,7 @@ public class RegisterService {
             // Generate a new URI for this service and add it to the service key/value pairs
             String uri = this.newURI (); 
             request.add (ReservedKeywords.RECORD_URI, uri);
-            // Request a lease
+           // Request a lease
             boolean gotLease = LeaseManager.getInstance().requestLease(request);
             if (gotLease) {
             	List<String> recordType = request.getRecordType();
@@ -114,7 +114,7 @@ public class RegisterService {
                // response = new JSONRegisterResponse (request.getMap());
             	LOG.fatal("Failed to secure lease for the registration record");
             	LOG.info("Register status: FAILED; exiting");
-               throw new InternalErrorException("Failed to secure lease for the registration record");
+               throw new ForbiddenRequestException("Failed to secure lease for the registration record");
             }
 
 

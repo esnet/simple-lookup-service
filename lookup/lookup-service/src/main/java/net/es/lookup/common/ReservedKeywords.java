@@ -11,6 +11,7 @@ public class ReservedKeywords{
 	public static final String RECORD_SKIP = "record-skip";
 	public static final String RECORD_MAXRESULTS = "record-maxresults";
 	public static final String RECORD_PRIVATEKEY = "record-privatekey";
+	public static final String RECORD_FLAGGED = "record-flagged";
 	
 	//operator keys
 	public static final String RECORD_OPERATOR_SUFFIX = "operator";

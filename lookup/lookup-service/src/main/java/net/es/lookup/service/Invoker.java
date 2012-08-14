@@ -5,6 +5,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.es.lookup.database.ServiceDAOMongoDb;
+import net.es.lookup.database.MongoDBMaintenance;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.Service;
 import net.es.lookup.utils.LookupServiceConfigReader;
@@ -59,6 +60,12 @@ public class Invoker {
         Invoker.lookupService = new LookupService(Invoker.host,Invoker.port);
         // Start the service
         Invoker.lookupService.startService();
+        
+        //Start DB maintenance thread
+        MongoDBMaintenance maintenanceObj = new MongoDBMaintenance(Invoker.dao);
+        Thread dbpruneThread = new Thread(maintenanceObj);
+        dbpruneThread.setPriority(Thread.MIN_PRIORITY);
+        dbpruneThread.start();
                 
         // Block forever
         Object blockMe = new Object();

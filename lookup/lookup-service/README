@@ -1,28 +1,42 @@
 SIMPLE LOOKUP SERVICE
 
 INTRODUCTION
-Simple Lookup Service is used to register records. A record is a list of key-value pairs that is used to describe any network
+Simple Lookup Service registers records. A record is a list of key-value pairs that is used to describe any network
 element (Eg: services, hosts, tests, etc). These records can be retrieved by searching for one or more of the registered key-value pairs.
-The REGISTRATION API is used to register records. The QUERY API and SERVICE API is used to retrieve/modify records.
+The REGISTRATION API is for registering records. The QUERY API and/or SERVICE API can be used to retrieve/modify records.
 
+The Simple Lookup Service is written in Java.
+
+An rpm is available for CentOS 5.6. For other flavors of Linux, you will have to install the source and build a jar file and deploy it.
 
 DEPENDENCIES:
 This software requires the following:
-	1. maven
-	2. svn
-	3. MongoDB
+	1. MongoDB
+	2 java-1.6.0-openjdk
 	
-MongoDB installation
+In addition,
+
+If you are using the rpm to install, then you will need
+	1 chkconfig
+	
+If you are installing from source, then you will need
+	1. maven
+	
+MongoDB installation:
 Download Mongo DB and install it. It’s official site: http://www.mongodb.org/downloads
 
-To run the database, open a new terminal and go into the mongodb folder and into "bin", then
-type the command: ./mongod --dbpath=<datapath> --bind_ip=127.0.0.1
+If you are using CentOS, RedHat or Fedora, use yum to install MongoDB.
+The instructions can be found here: http://docs.mongodb.org/manual/tutorial/install-mongodb-on-redhat-centos-or-fedora-linux/
+
+Configuring and Running MongoDB:
+For CentOS, RedHat or Fedora, use the instructions found here: http://docs.mongodb.org/manual/tutorial/install-mongodb-on-redhat-centos-or-fedora-linux/
+
+For other flavors, find the instructions for your distribution here: http://docs.mongodb.org/manual/installation/#installation-guides
+
+If you are modifying the port and url, then make a note of it. You will need it when you configure the Lookup Service.
 
 INSTALLATION
-svn checkout the source code from http://esnet-perfsonar.googlecode.com/svn/trunk/
 
-cd <project-dir>/lookup-service
-sh run.sh
 
 
 TEST PROGRAMS

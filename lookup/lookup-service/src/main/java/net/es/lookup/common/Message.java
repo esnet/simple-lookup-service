@@ -54,6 +54,10 @@ public class  Message {
         return (String) this.getMap().get(ReservedKeywords.RECORD_TTL);
         
     }
+    public String getExpires() {
+        return (String) this.getMap().get(ReservedKeywords.RECORD_EXPIRES);
+        
+    }
 
     public List<String> getServiceType() {
         return  (List<String>) this.getMap().get(ReservedKeywords.RECORD_SERVICE_TYPE);

@@ -219,10 +219,12 @@ public class AccessService {
 						serviceMap.put(ReservedKeywords.RECORD_TTL, "");
 					}
 
-					if(serviceMap.containsKey(ReservedKeywords.RECORD_EXPIRES)){
-						serviceMap.remove(ReservedKeywords.RECORD_EXPIRES);
-					}
-
+					//if(serviceMap.containsKey(ReservedKeywords.RECORD_EXPIRES)){
+						//serviceMap.remove(ReservedKeywords.RECORD_EXPIRES);
+					//}
+					
+					
+					
 					Message newRequest = new Message(serviceMap);
 
 					boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
@@ -239,9 +241,11 @@ public class AccessService {
 								LOG.info("RenewService status: FAILED; exiting");
 								throw new InternalErrorException("Data formatting exception");
 							}
-						}else{
-
 						}
+					}else{
+						LOG.fatal("Failed to secure lease for the renew record");
+		            	LOG.info("Renew status: FAILED; exiting");
+		            	throw new ForbiddenRequestException("Failed to secure lease for the renewal record");
 					}	
 				}else{
 					LOG.error("Service Not Found in DB.");
@@ -295,37 +299,25 @@ public class AccessService {
 		LOG.debug("Is the request valid?"+this.isValid(request));
 		if (this.isValid(request) && this.isAuthed(serviceid, request)) {
 			try{
-				Service serviceRecord = ServiceDAOMongoDb.getInstance().getServiceByURI(serviceid);
-
-				if(serviceRecord!= null){
-					LOG.debug("servicerecord not null");
-					Map<String, Object> serviceMap = serviceRecord.getMap();
-
-
-					if(serviceMap.containsKey(ReservedKeywords.RECORD_EXPIRES)){
-						serviceMap.remove(ReservedKeywords.RECORD_EXPIRES);
-					}
-					Message newRequest = new Message(serviceMap);
-
-					Message res = ServiceDAOMongoDb.getInstance().deleteService(newRequest);
-					if(res.getError() == 200){
-						response = new JSONDeleteResponse (res.getMap());
-						try{
-							return JSONMessage.toString(response);
-						}catch(DataFormatException e){
-							LOG.error("Data formatting exception");
-							LOG.info("DeleteService status: FAILED; exiting");
-							throw new InternalErrorException("Data formatting exception");
-						}
-					}
-					
-				}else{
-					LOG.error("Service Not Found in DB.");
+				Message serviceRecord = ServiceDAOMongoDb.getInstance().deleteService(serviceid);
+				
+				if(serviceRecord == null){
+					LOG.error("Service Not found");
 					LOG.info("DeleteService status: FAILED; exiting");
-					throw new NotFoundException("Service Not Found in DB\n");
+					throw new NotFoundException("Service not found in DB\n");
+				}else{
+					try{
+						LOG.info("Service Deleted");
+						LOG.info("DeleteService status: SUCCESS; exiting");
+						return JSONMessage.toString(serviceRecord);
+					}catch (DataFormatException e){
+						LOG.error("Data formatting exception");
+						LOG.info("DeleteService status: FAILED; exiting");
+						throw new InternalErrorException("Database error\n");
+					}
 				}
-			}
-			catch(DatabaseException e){
+
+			}catch(DatabaseException e){
 				LOG.fatal("DatabaseException: The database is out of service." +e.getMessage());
 				LOG.info("DeleteService status: FAILED; exiting");
 				throw new InternalErrorException("Database error\n");
@@ -340,14 +332,6 @@ public class AccessService {
 				LOG.error("The private-key is not authorized to access this service");
 				LOG.info("DeleteService status: FAILED; exiting");
 				throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
-			}
-			try{
-				LOG.info("DeleteService status: SUCCESS");
-				return JSONMessage.toString(errorResponse);   
-			}catch(DataFormatException e){
-				LOG.error("Data formatting exception");
-				LOG.info("DeleteService status: FAILED; exiting");
-				throw new InternalErrorException("Data formatting exception");
 			}
 		}
 		return "\n";

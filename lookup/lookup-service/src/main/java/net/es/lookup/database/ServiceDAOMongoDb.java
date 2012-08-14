@@ -148,17 +148,16 @@ public class ServiceDAOMongoDb {
 	}
 	
 	
-	public Message deleteService(Message message) throws DatabaseException{
+	public Message deleteService(String serviceid) throws DatabaseException{
 		
 		int errorcode;
 		String errormsg;
 		
 		Message response = new Message();
 		BasicDBObject query = new BasicDBObject();
-		String uri = message.getURI();
 		//TODO: add check to see if only one elem is returned
-		query.put(ReservedKeywords.RECORD_URI, uri);
-		response = getServiceByURI(uri);
+		query.put(ReservedKeywords.RECORD_URI, serviceid);
+		response = getServiceByURI(serviceid);
 		try{
 			WriteResult wrt = coll.remove(query);
 		
@@ -265,7 +264,11 @@ public class ServiceDAOMongoDb {
 		return result;
 	}
 	
-	
+	public List<Service> queryAll() throws DatabaseException{
+		Message msg = new Message();
+		List <Service> result = query(msg,msg,msg);
+		return result;
+	}
 	
 	//Builds the query from the given map
 	private BasicDBObject buildQuery(Message queryRequest, Message operators){
@@ -397,7 +400,7 @@ public class ServiceDAOMongoDb {
 		try{
 			DBCursor cur = coll.find(query);
 		
-			System.out.println("Came inside getServiceByURI");
+			//System.out.println("Came inside getServiceByURI");
 			
 			if (cur.size() == 1){
 				DBObject tmp = cur.next();

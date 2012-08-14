@@ -8,7 +8,13 @@ import net.es.lookup.common.ReservedKeywords;
 import org.joda.time.Duration;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
+import org.joda.time.DateTimeComparator;
+import org.joda.time.DateTime;
+
 import net.es.lookup.utils.LookupServiceConfigReader;
+
+
+import net.es.lookup.database.MongoDBMaintenance;
 
 
 public class LeaseManager {
@@ -36,6 +42,20 @@ public class LeaseManager {
         // Retrieve requested TTL
         String requestedTTL = message.getTTL();
         long ttl = 0;
+        
+        //check if expires field is beyond pruning threshold. If yes, do not give lease. Record needs to be deleted.
+        String expires = message.getExpires();
+        if(expires != null && expires != ""){
+        	Instant pTime = now.minus(MongoDBMaintenance.getPruneThreshold());
+			DateTime pruneTime = pTime.toDateTime();
+			
+			DateTimeFormatter fmt =  ISODateTimeFormat.dateTime();
+			DateTime dt = fmt.parseDateTime(expires);
+			DateTimeComparator dtc =  DateTimeComparator.getInstance();
+			if(dtc.compare(dt,pruneTime)<0){
+				return false;
+			}
+        }
         if(requestedTTL != null && requestedTTL != ""){
         	PeriodFormatter fmt = ISOPeriodFormat.standard();
         	
@@ -53,10 +73,10 @@ public class LeaseManager {
         	ttl = LeaseManager.MAX_LEASE;
         }
         
-        Instant expires = now.plus(ttl);
+        Instant newExpires = now.plus(ttl);
         //System.out.println(expires.toString());
         // Add expires key/value in the message
-        message.add(ReservedKeywords.RECORD_EXPIRES, this.fmt.print(expires));
+        message.add(ReservedKeywords.RECORD_EXPIRES, this.fmt.print(newExpires));
         return true;
  
     }
