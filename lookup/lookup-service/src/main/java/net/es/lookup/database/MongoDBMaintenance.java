@@ -1,6 +1,7 @@
 package net.es.lookup.database;
 
 import net.es.lookup.common.Service;
+import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import org.joda.time.format.ISODateTimeFormat;
@@ -9,17 +10,15 @@ import org.joda.time.DateTimeComparator;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class MongoDBMaintenance implements Runnable{
 	private ServiceDAOMongoDb db;
 	private static long prune_threshold = 60*1000; //in milliseconds
 	private static long maintenanceInterval = 60*60*1000;//in milliseconds
-	private static boolean archive = false; //default is false
-	private static String archiveDBHost = "";
-	private static String archiveDBPort = "";
-	private static String archiveDBName = "";
-	private static String archiveDBCollectionName = "";
+	private boolean archive = false; //default is false
+	private ArchiveDAOMongoDb archivedb=null;
 	
 	
 	
@@ -27,12 +26,13 @@ public class MongoDBMaintenance implements Runnable{
 		return prune_threshold;
 	}
 	
-	public MongoDBMaintenance(ServiceDAOMongoDb db){
-		this.db = db;
-	}
-	
-	public MongoDBMaintenance(String configFile){
-		this.db = db;
+	public MongoDBMaintenance(boolean archive){
+		this.db = ServiceDAOMongoDb.getInstance();
+		this.archive = archive;
+		
+		if(archive){
+			this.archivedb = ArchiveDAOMongoDb.getInstance();
+		}
 	}
 	
 	public void run() {
@@ -52,10 +52,9 @@ public class MongoDBMaintenance implements Runnable{
 				System.out.println("Caught exception!");
 				continue;
 			}
+			
+			List<Message> messages = new ArrayList<Message>();
 			if(result.size()>0){
-				if(archive){
-					
-				}else{
 					for (int i=0; i<result.size(); i++){
 						Map m = result.get(i).getMap();
 						DateTimeFormatter fmt =  ISODateTimeFormat.dateTime();
@@ -64,15 +63,22 @@ public class MongoDBMaintenance implements Runnable{
 						if(dtc.compare(dt,pruneTime)<0){
 							String uri = (String)m.get(ReservedKeywords.RECORD_URI);
 							try{
-							 db.deleteService(uri);
+							 messages.add(db.deleteService(uri));
 							}catch(Exception e){
 								System.out.println("Error pruning DB!!");
 								continue;
 							}
 						}
-					}					
-				}
-
+					}
+					
+					if(archive){
+						try{
+							archivedb.insert(messages);
+							}catch(DatabaseException e){
+								System.out.println("Error inserting in Archive DB!!");
+								continue;
+							}					
+					}
 		     }
 			
 	        try{

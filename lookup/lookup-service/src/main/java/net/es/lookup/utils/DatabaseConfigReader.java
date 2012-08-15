@@ -18,6 +18,13 @@ public class DatabaseConfigReader {
     private int dbport = 27017;
     private String dbname = "LookupService";
     private String collname = "services";
+    
+    private boolean archive=false;
+    Map<String,String> archiveDatabaseMap = new HashMap<String,String>();
+    private String archiveDBUrl = "";
+    private int archiveDBPort = 0;
+    private String archiveDBName = "";
+    private String archiveDBCollName = "";
 
     /**
      * Constructor - private because this is a Singleton
@@ -44,20 +51,40 @@ public class DatabaseConfigReader {
         return DatabaseConfigReader.instance;
     }
     
-    public String getDburl() {
+    public String getDbUrl() {
         return this.dburl;
     }
 
-    public int getDbport() {
+    public int getDbPort() {
         return this.dbport;
     }
 
-    public String getDbname() {
+    public String getDbName() {
         return this.dbname;
     }
     
-    public String getCollname() {
+    public String getCollName() {
         return this.collname;
+    }
+    
+    public boolean getArchive() {
+        return this.archive;
+    }
+    
+    public String getArchiveDbUrl() {
+        return this.archiveDBUrl;
+    }
+
+    public int getArchiveDbPort() {
+        return this.archiveDBPort;
+    }
+
+    public String getArchiveDbName() {
+        return this.archiveDBName;
+    }
+    
+    public String getArchiveDbCollName() {
+        return this.archiveDBCollName;
     }
     
     private void setInfo(String configPath) {
@@ -66,11 +93,22 @@ public class DatabaseConfigReader {
         assert yamlMap != null:  "Could not load configuration file from " +
             "file: {$basedir}/"+configPath;
         this.databaseMap = (HashMap)yamlMap.get("database");
-        this.dburl = (String) this.databaseMap.get("dburl");
-        System.out.println((String)this.databaseMap.get("dbport"));
-        this.dbport = Integer.parseInt((String)this.databaseMap.get("dbport"));
-        this.dbname = (String) this.databaseMap.get("dbname");
-        this.collname = (String) this.databaseMap.get("collname");
+        this.dburl = (String) this.databaseMap.get("DBUrl");
+        System.out.println((String)this.databaseMap.get("DBPort"));
+        this.dbport = Integer.parseInt((String)this.databaseMap.get("DBPort"));
+        this.dbname = (String) this.databaseMap.get("DBName");
+        this.collname = (String) this.databaseMap.get("DBCollName");
+        
+        this.archive = (Boolean)yamlMap.get("archive");
+        
+        if(this.archive){
+        	this.databaseMap = (HashMap)yamlMap.get("archiveDatabase");
+        	this.archiveDBUrl = (String) this.databaseMap.get("archiveDBUrl");
+            System.out.println((String)this.databaseMap.get("archiveDBPort"));
+            this.archiveDBPort = Integer.parseInt((String)this.databaseMap.get("archiveDBPort"));
+            this.archiveDBName = (String) this.databaseMap.get("archiveDBName");
+            this.archiveDBCollName = (String) this.databaseMap.get("archiveDBCollName");
+        }
      
     }
 }

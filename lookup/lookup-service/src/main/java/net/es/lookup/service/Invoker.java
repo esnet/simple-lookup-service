@@ -5,10 +5,12 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.es.lookup.database.ServiceDAOMongoDb;
+import net.es.lookup.database.ArchiveDAOMongoDb;
 import net.es.lookup.database.MongoDBMaintenance;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.Service;
 import net.es.lookup.utils.LookupServiceConfigReader;
+import net.es.lookup.utils.DatabaseConfigReader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +24,11 @@ public class Invoker {
     private static ServiceDAOMongoDb dao = null;
     private static String host = "localhost";
     private static LookupServiceConfigReader lcfg;
+    private static DatabaseConfigReader dcfg;
     private static String cfg="";
     private static String logConfig ="./etc/log4j.properties";
-
+    private boolean archive = false;
+    private static ArchiveDAOMongoDb archivedao = null;
     /**
      * Main program to start the Lookup Service
      * @param args [-h, ?] for help
@@ -36,24 +40,32 @@ public class Invoker {
         parseArgs( args );
         
         if(cfg != null && !cfg.isEmpty()){
-        	System.out.println("Starting Lookup Service using config File: "+ cfg);
+        	 System.out.println("Starting Lookup Service using config File: "+ cfg);
         	 LookupServiceConfigReader.init(cfg);
+        	 DatabaseConfigReader.init(cfg);
         }else{
         	System.out.println("Starting Lookup Service using default options");
         }
         lcfg = LookupServiceConfigReader.getInstance();
+        dcfg = DatabaseConfigReader.getInstance();
         port = lcfg.getPort();
         host = lcfg.getHost();
         
         System.setProperty("log4j.configuration", "file:" + logConfig);
 
         System.out.println("starting ServiceDAOMongoDb");
-        if(cfg != null && !cfg.isEmpty()){
+
+        Invoker.dao = new ServiceDAOMongoDb();
+    
+        
+        boolean archive = dcfg.getArchive();
+        
+        if(archive){
+        	System.out.println("starting ArchiveDAOMongoDb");
+        	Invoker.archivedao = new ArchiveDAOMongoDb();
         	
-        	Invoker.dao = new ServiceDAOMongoDb(cfg);
-        }else{
-        	Invoker.dao = new ServiceDAOMongoDb();
         }
+        
         System.out.println("starting Lookup Service");
         
         // Create the REST service
@@ -62,7 +74,8 @@ public class Invoker {
         Invoker.lookupService.startService();
         
         //Start DB maintenance thread
-        MongoDBMaintenance maintenanceObj = new MongoDBMaintenance(Invoker.dao);
+        
+        MongoDBMaintenance maintenanceObj = new MongoDBMaintenance(archive);
         Thread dbpruneThread = new Thread(maintenanceObj);
         dbpruneThread.setPriority(Thread.MIN_PRIORITY);
         dbpruneThread.start();

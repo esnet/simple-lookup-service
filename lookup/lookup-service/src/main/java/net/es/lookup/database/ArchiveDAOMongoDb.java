@@ -17,65 +17,42 @@ import net.es.lookup.common.Message;
 import net.es.lookup.resources.ServicesResource;
 import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.common.exception.internal.DuplicateEntryException;
 
 import net.es.lookup.utils.DatabaseConfigReader;
 
-public class ServiceDAOMongoDb {
+public class ArchiveDAOMongoDb {
 	private String dburl="127.0.0.1";
 	private int dbport=27017;
-	private String dbname="LookupService";
-	private String collname="services";
+	private String dbname="LookupServiceArchive";
+	private String collname="archive";
 
 	private Mongo mongo;
 	private DB db;
 	private DBCollection coll;
-    private static ServiceDAOMongoDb instance = null;
+    private static ArchiveDAOMongoDb instance = null;
     
 	private static Map<String, String> operatorMapping = new HashMap();
 	private static Map<String, String> listOperatorMapping = new HashMap();
-	
 
-    public static ServiceDAOMongoDb getInstance() {
-        return ServiceDAOMongoDb.instance;
+    public static ArchiveDAOMongoDb getInstance() {
+        return ArchiveDAOMongoDb.instance;
     }
 
-	// retrieves default - mongodb running on localhost and default port - 27017 and dbname- "lookupservice", collection name - "services" 
-	//creates a new one if it cannot find one 
-	public ServiceDAOMongoDb() throws DatabaseException{
+	public ArchiveDAOMongoDb() throws DatabaseException{
 		DatabaseConfigReader dcfg = DatabaseConfigReader.getInstance();
-		this.dburl = dcfg.getDbUrl();
-		this.dbport = dcfg.getDbPort();
-		this.dbname = dcfg.getDbName();
-		this.collname = dcfg.getCollName();
+		this.dburl = dcfg.getArchiveDbUrl();
+		this.dbport = dcfg.getArchiveDbPort();
+		this.dbname = dcfg.getArchiveDbName();
+		this.collname = dcfg.getArchiveDbCollName();
 		init();
 	}
 
-	//uses default url and port - mongodb running on localhost and default port - 27017
-	//creates a new one if it cannot find one
-	public ServiceDAOMongoDb(String dbname, String collname) throws DatabaseException{
-		this.dbname = dbname;
-		this.collname = collname;
-		init();
-	}
-	
-	//retrieves the db and collection(table); creates a new one if it cannot find one
-	public ServiceDAOMongoDb (String dburl, int dbport, String dbname, String collname) throws DatabaseException{
-		this.dburl = dburl;
-		this.dbport = dbport;
-		this.dbname = dbname;
-		this.collname = collname;
-		init();
-	}
-	
-
-	
 	private void init() throws DatabaseException {
-        if (ServiceDAOMongoDb.instance != null) {
+        if (ArchiveDAOMongoDb.instance != null) {
             // An instance has been already created.
-            throw new DatabaseException("Attempt to create a second instance of ServiceDAOMongoDb");
+            throw new DatabaseException("Attempt to create a second instance of ArchiveDAOMongoDb");
         }
-        ServiceDAOMongoDb.instance = this;
+        ArchiveDAOMongoDb.instance = this;
         try{
         	mongo = new Mongo(dburl,dbport);
         	//System.out.println(mongo.getAddress().toString());
@@ -98,21 +75,10 @@ public class ServiceDAOMongoDb {
 	}
 	
 	//should use json specific register request and response.
-	public Message queryAndPublishService(Message message, Message queryRequest, Message operators) throws DatabaseException, DuplicateEntryException{
+	public void insert(Message message) throws DatabaseException{
 		int errorcode;
 		String errormsg;
 		Message response;
-		
-		//check for duplicates
-		try{
-			List<Service> dupEntries = this.query(message,queryRequest,operators);
-			//System.out.println("Duplicate Entries: "+dupEntries.size());
-			if(dupEntries.size()>0){
-				throw new DuplicateEntryException("Record already exists");		
-			}
-		}catch(DatabaseException e){
-			throw new DatabaseException("Error inserting record");
-		}
 		
 		Map<String, Object> services = message.getMap();
 		BasicDBObject doc = new BasicDBObject();
@@ -121,99 +87,34 @@ public class ServiceDAOMongoDb {
 		WriteResult wrt = coll.insert(doc);
 		
 		CommandResult cmdres = wrt.getLastError();
-		if(cmdres.ok()){
-			errorcode = 200;
-			errormsg = "SUCCESS";
-		}else{
+		if(!cmdres.ok()){
+			throw new DatabaseException("Error inserting record");
+		}
+
+	}
+	
+	public void insert(List<Message> messages) throws DatabaseException{
+		int errorcode;
+		String errormsg;
+		Message response;
+		
+		List<DBObject> dbobj = new ArrayList<DBObject>();
+		for (int i=0;i<messages.size();i++){
+			Map<String, Object> service = messages.get(i).getMap();
+			BasicDBObject doc = new BasicDBObject();
+			doc.putAll(service);
+			dbobj.add(doc);
+		}
+		
+		WriteResult wrt = coll.insert(dbobj);
+		
+		CommandResult cmdres = wrt.getLastError();
+		if(!cmdres.ok()){
 			throw new DatabaseException("Error inserting record");
 		}
 		
-		response = new Message(services);
-		response.setError(errorcode);
-		response.setErrorMessage(errormsg);
-		return response;
 	}
 	
-	
-	public Message deleteService(String serviceid) throws DatabaseException{
-		
-		int errorcode;
-		String errormsg;
-		
-		Message response = new Message();
-		BasicDBObject query = new BasicDBObject();
-		//TODO: add check to see if only one elem is returned
-		query.put(ReservedKeywords.RECORD_URI, serviceid);
-		response = getServiceByURI(serviceid);
-		try{
-			WriteResult wrt = coll.remove(query);
-		
-			CommandResult cmdres = wrt.getLastError();
-		
-			if(cmdres.ok()){
-				errorcode = 200;
-				errormsg = "SUCCESS";
-			}else{
-				throw new DatabaseException(cmdres.getErrorMessage());
-			}
-		}catch(MongoException e){
-			throw new DatabaseException(e.getMessage());
-		}
-		
-		
-		response.setError(errorcode);
-		response.setErrorMessage(errormsg);
-		return response;
-		
-	}
-	
-	public Message updateService(String serviceid, Message updateRequest) throws DatabaseException{
-		
-		int errorcode;
-		String errormsg;
-        
-		Message response = new Message();
-        
-        if(serviceid != null && !serviceid.isEmpty()){
-        	
-        	BasicDBObject query = new BasicDBObject();
-        	query.put(ReservedKeywords.RECORD_URI, serviceid);
-        	
-        	//System.out.println(query);
-        	
-        	BasicDBObject updateObject = new BasicDBObject();
-        	updateObject.putAll(updateRequest.getMap());
-        	
-        	//System.out.println(updateObject);
-        	
-        	
-        	
-        	try{
-        		WriteResult wrt = coll.update(query, updateObject);
-        		CommandResult cmdres = wrt.getLastError();
-        		//System.out.println(cmdres.ok());
-        	
-        		if(cmdres.ok()){
-        			response = (Message) getServiceByURI(serviceid);
-        			errorcode=200;
-        			errormsg="SUCCESS";
-        		}else{
-        			throw new DatabaseException(cmdres.getErrorMessage());
-        		}
-        	}catch(MongoException e){
-        		throw new DatabaseException(e.getMessage());
-        	}
-    		
-        }else{
-        	throw new DatabaseException("Record URI not specified!!!");
-        }
-		
-        
-        response.setError(errorcode);
-        response.setErrorMessage(errormsg);
-		return response;
-	}
-
     public List<Service> query(Message message, Message queryRequest, Message operators) throws DatabaseException{
         return this.query (message, queryRequest, operators, 0, 0);
     }
@@ -375,30 +276,6 @@ public class ServiceDAOMongoDb {
 		//System.out.println(query);
 		return query;
 	}
-	
-	public Service getServiceByURI(String URI) throws DatabaseException{
-		int errorcode;
-		String errormsg;
-		
-		BasicDBObject query = new BasicDBObject();
-		query.put(ReservedKeywords.RECORD_URI, URI);
-		Service result=null;
-		
-		try{
-			DBCursor cur = coll.find(query);
-		
-			//System.out.println("Came inside getServiceByURI");
-			
-			if (cur.size() == 1){
-				DBObject tmp = cur.next();
-				Map<String,Object> tmpMap= tmp.toMap();
-				tmpMap.remove("_id");
-				result = new Service(tmpMap);
-			}
-		}catch(MongoException e){
-			throw new DatabaseException(e.getMessage());
-		}
-			return result;
-	}
+
 	
 }

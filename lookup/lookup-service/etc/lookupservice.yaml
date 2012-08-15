@@ -7,7 +7,15 @@ lookupservice:
 
 #Database settings  
 database:
-    dburl: '127.0.0.1'
-    dbport: '27017'
-    dbname: 'LookupService'
-    collname: 'services'
+    DBUrl: '127.0.0.1'
+    DBPort: '27017'
+    DBName: 'LookupService'
+    DBCollName: 'services'
+    
+archive: true
+
+archiveDatabase:
+    archiveDBUrl: '127.0.0.1'
+    archiveDBPort: '27017'
+    archiveDBName: 'archiveLookupService'
+    archiveDBCollName: 'services'
