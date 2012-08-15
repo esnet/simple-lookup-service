@@ -28,6 +28,7 @@ public class Invoker {
     private static String cfg="";
     private static String logConfig ="./etc/log4j.properties";
     private boolean archive = false;
+    private boolean exportArchive = false;
     private static ArchiveDAOMongoDb archivedao = null;
     /**
      * Main program to start the Lookup Service
@@ -59,6 +60,7 @@ public class Invoker {
     
         
         boolean archive = dcfg.getArchive();
+        boolean exportArchive = lcfg.getExportArchive();
         
         if(archive){
         	System.out.println("starting ArchiveDAOMongoDb");
@@ -69,7 +71,7 @@ public class Invoker {
         System.out.println("starting Lookup Service");
         
         // Create the REST service
-        Invoker.lookupService = new LookupService(Invoker.host,Invoker.port);
+        Invoker.lookupService = new LookupService(Invoker.host,Invoker.port,exportArchive);
         // Start the service
         Invoker.lookupService.startService();
         

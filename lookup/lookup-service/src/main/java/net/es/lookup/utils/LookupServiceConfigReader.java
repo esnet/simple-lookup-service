@@ -17,6 +17,7 @@ public class LookupServiceConfigReader {
     private String host = "127.0.0.1";
     private int port = 8085;
     private long maxleasetime = 7200;
+    private boolean exportArchive = false;
 
     /**
      * Constructor - private because this is a Singleton
@@ -57,6 +58,10 @@ public class LookupServiceConfigReader {
         return this.maxleasetime;
     }
     
+    public boolean getExportArchive(){
+    	return this.exportArchive;
+    }
+    
     private void setInfo(String configPath) {
         ConfigHelper cfg = ConfigHelper.getInstance();
         Map yamlMap = cfg.getConfiguration(configPath);
@@ -67,6 +72,7 @@ public class LookupServiceConfigReader {
         System.out.println((String)this.lookupServiceMap.get("host"));
         this.port = Integer.parseInt((String)this.lookupServiceMap.get("port"));
         this.maxleasetime = Long.parseLong((String)this.lookupServiceMap.get("maxleasetime"));
+        this.exportArchive = (Boolean)yamlMap.get("exportArchive");
      
     }
 }

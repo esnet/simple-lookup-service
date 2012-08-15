@@ -30,6 +30,7 @@ public class LookupService {
     private String host = "localhost";
     private HttpServer httpServer = null;
     private static LookupService instance = null;
+    private boolean exportArchive = false;
 
     //static {
       //  LookupService.instance = new LookupService();
@@ -64,6 +65,13 @@ public class LookupService {
         this.port = port;
         init();
     }
+    
+    public LookupService (String host, int port, boolean exportArchive) {
+    	this.host = host;
+        this.port = port;
+        this.exportArchive = exportArchive;
+        init();
+    }
 
     public void startService() {
         System.out.println("Starting HTTP server");
@@ -76,13 +84,9 @@ public class LookupService {
 
     protected HttpServer startServer() throws IOException {
         System.out.println("Creating Resource...");
-        String[] services = {
-                AccessServiceResource.class.getName(),
-                KeyResource.class.getName(),
-                ServicesResource.class.getName(),
-                SubscribeResource.class.getName(),
-        };
-        ResourceConfig rc = new ClassNamesResourceConfig(services);
+        
+        String[] serviceResources = getResourceNames();
+        ResourceConfig rc = new ClassNamesResourceConfig(serviceResources);
 
         //ResourceConfig rc = new PackagesResourceConfig("net.es.lookup.resources");
         System.out.println();
@@ -95,6 +99,28 @@ public class LookupService {
         String hosturl = "http://"+this.host+"/";
         return GrizzlyServerFactory.createHttpServer(UriBuilder.fromUri(hosturl).port(this.port).build(),
                                                      rc);
+    }
+    
+    private String[] getResourceNames(){
+    //define resources here
+    	if(exportArchive){
+    		 String[] services = {
+    	                AccessServiceResource.class.getName(),
+    	                KeyResource.class.getName(),
+    	                ServicesResource.class.getName(),
+    	                SubscribeResource.class.getName(),
+    	                ArchiveResource.class.getName(),
+    	        };
+    		 return services;
+    	}else{
+    		 String[] services = {
+    	                AccessServiceResource.class.getName(),
+    	                KeyResource.class.getName(),
+    	                ServicesResource.class.getName(),
+    	                SubscribeResource.class.getName(),
+    	        };
+    		 return services;
+    	}
     }
 
 }
