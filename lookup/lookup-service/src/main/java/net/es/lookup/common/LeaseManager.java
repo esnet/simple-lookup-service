@@ -12,7 +12,6 @@ import org.joda.time.DateTimeComparator;
 import org.joda.time.DateTime;
 
 import net.es.lookup.utils.LookupServiceConfigReader;
-import net.es.lookup.utils.DatabaseConfigReader;
 
 
 
@@ -22,7 +21,6 @@ public class LeaseManager {
     private static LeaseManager instance = null;
     private DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
     private LookupServiceConfigReader lcfg;
-    private DatabaseConfigReader dcfg;
 
     static {
         LeaseManager.instance = new LeaseManager();
@@ -34,7 +32,6 @@ public class LeaseManager {
 
     private LeaseManager () {
     	 lcfg = LookupServiceConfigReader.getInstance();
-    	 dcfg = DatabaseConfigReader.getInstance();
     	 MAX_LEASE = lcfg.getMaxleasetime();
     }
 
@@ -47,7 +44,7 @@ public class LeaseManager {
         //check if expires field is beyond pruning threshold. If yes, do not give lease. Record needs to be deleted.
         String expires = message.getExpires();
         if(expires != null && expires != ""){
-        	Instant pTime = now.minus(dcfg.getPruneThreshold());
+        	Instant pTime = now.minus(lcfg.getPruneThreshold());
 			DateTime pruneTime = pTime.toDateTime();
 			
 			DateTimeFormatter fmt =  ISODateTimeFormat.dateTime();

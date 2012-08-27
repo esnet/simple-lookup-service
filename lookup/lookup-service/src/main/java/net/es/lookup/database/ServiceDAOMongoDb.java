@@ -19,7 +19,7 @@ import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 
-import net.es.lookup.utils.DatabaseConfigReader;
+import net.es.lookup.utils.LookupServiceConfigReader;
 
 public class ServiceDAOMongoDb {
 	private String dburl="127.0.0.1";
@@ -43,7 +43,7 @@ public class ServiceDAOMongoDb {
 	// retrieves default - mongodb running on localhost and default port - 27017 and dbname- "lookupservice", collection name - "services" 
 	//creates a new one if it cannot find one 
 	public ServiceDAOMongoDb() throws DatabaseException{
-		DatabaseConfigReader dcfg = DatabaseConfigReader.getInstance();
+		LookupServiceConfigReader dcfg = LookupServiceConfigReader.getInstance();
 		this.dburl = dcfg.getDbUrl();
 		this.dbport = dcfg.getDbPort();
 		this.dbname = dcfg.getDbName();

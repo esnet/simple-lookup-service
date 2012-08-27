@@ -9,7 +9,6 @@ import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.Service;
 import net.es.lookup.utils.LookupServiceConfigReader;
-import net.es.lookup.utils.DatabaseConfigReader;
 
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -32,7 +31,6 @@ public class Invoker {
     private static ServiceDAOMongoDb dao = null;
     private static String host = "localhost";
     private static LookupServiceConfigReader lcfg;
-    private static DatabaseConfigReader dcfg;
     private static String cfg="";
     private static String logConfig ="./etc/log4j.properties";
     private static int dbpruneInterval;
@@ -49,15 +47,13 @@ public class Invoker {
         if(cfg != null && !cfg.isEmpty()){
         	 System.out.println("Starting Lookup Service using config File: "+ cfg);
         	 LookupServiceConfigReader.init(cfg);
-        	 DatabaseConfigReader.init(cfg);
         }else{
         	System.out.println("Starting Lookup Service using default options");
         }
         lcfg = LookupServiceConfigReader.getInstance();
-        dcfg = DatabaseConfigReader.getInstance();
         port = lcfg.getPort();
         host = lcfg.getHost();
-        dbpruneInterval = dcfg.getPruneInterval();
+        dbpruneInterval = lcfg.getPruneInterval();
         
         System.setProperty("log4j.configuration", "file:" + logConfig);
 

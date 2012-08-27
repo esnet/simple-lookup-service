@@ -17,7 +17,18 @@ public class LookupServiceConfigReader {
     private String host = "127.0.0.1";
     private int port = 8085;
     private long maxleasetime = 7200;
-    private boolean exportArchive = false;
+    
+    private static final int MINIMUM_INTERVAL = 1800;
+    private static final int MINIMUM_THRESHOLD = 0;
+    
+
+    Map<String,String> databaseMap = new HashMap<String,String>();
+    private String dburl = "127.0.0.1";
+    private int dbport = 27017;
+    private String dbname = "LookupService";
+    private String collname = "services";
+    private int pruneInterval = MINIMUM_INTERVAL;
+    private int pruneThreshold = 0;
 
     /**
      * Constructor - private because this is a Singleton
@@ -57,9 +68,28 @@ public class LookupServiceConfigReader {
     public long getMaxleasetime() {
         return this.maxleasetime;
     }
+    public String getDbUrl() {
+        return this.dburl;
+    }
+
+    public int getDbPort() {
+        return this.dbport;
+    }
+
+    public String getDbName() {
+        return this.dbname;
+    }
     
-    public boolean getExportArchive(){
-    	return this.exportArchive;
+    public String getCollName() {
+        return this.collname;
+    }
+    
+    public int getPruneInterval() {
+        return this.pruneInterval;
+    }
+    
+    public int getPruneThreshold() {
+        return this.pruneThreshold;
     }
     
     private void setInfo(String configPath) {
@@ -72,6 +102,15 @@ public class LookupServiceConfigReader {
         System.out.println((String)this.lookupServiceMap.get("host"));
         this.port = Integer.parseInt((String)this.lookupServiceMap.get("port"));
         this.maxleasetime = Long.parseLong((String)this.lookupServiceMap.get("maxleasetime"));
+        
+        this.databaseMap = (HashMap)yamlMap.get("database");
+        this.dburl = (String) this.databaseMap.get("DBUrl");
+        System.out.println((String)this.databaseMap.get("DBPort"));
+        this.dbport = Integer.parseInt((String)this.databaseMap.get("DBPort"));
+        this.dbname = (String) this.databaseMap.get("DBName");
+        this.collname = (String) this.databaseMap.get("DBCollName");
+        this.pruneThreshold = Integer.parseInt((String)this.databaseMap.get("pruneThreshold"));
+        this.pruneInterval = Integer.parseInt((String)this.databaseMap.get("pruneInterval"));
      
     }
 }
