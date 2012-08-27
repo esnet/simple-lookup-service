@@ -11,13 +11,5 @@ database:
     DBPort: '27017'
     DBName: 'LookupService'
     DBCollName: 'services'
-    
-archive: true
-
-exportArchive: true
-
-archiveDatabase:
-    archiveDBUrl: '127.0.0.1'
-    archiveDBPort: '27017'
-    archiveDBName: 'archiveLookupService'
-    archiveDBCollName: 'services'
+    pruneInterval: '60' 
+    pruneThreshold: '5'

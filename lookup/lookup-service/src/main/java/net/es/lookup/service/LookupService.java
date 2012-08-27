@@ -30,7 +30,6 @@ public class LookupService {
     private String host = "localhost";
     private HttpServer httpServer = null;
     private static LookupService instance = null;
-    private boolean exportArchive = false;
 
     //static {
       //  LookupService.instance = new LookupService();
@@ -65,13 +64,6 @@ public class LookupService {
         this.port = port;
         init();
     }
-    
-    public LookupService (String host, int port, boolean exportArchive) {
-    	this.host = host;
-        this.port = port;
-        this.exportArchive = exportArchive;
-        init();
-    }
 
     public void startService() {
         System.out.println("Starting HTTP server");
@@ -103,16 +95,7 @@ public class LookupService {
     
     private String[] getResourceNames(){
     //define resources here
-    	if(exportArchive){
-    		 String[] services = {
-    	                AccessServiceResource.class.getName(),
-    	                KeyResource.class.getName(),
-    	                ServicesResource.class.getName(),
-    	                SubscribeResource.class.getName(),
-    	                ArchiveResource.class.getName(),
-    	        };
-    		 return services;
-    	}else{
+
     		 String[] services = {
     	                AccessServiceResource.class.getName(),
     	                KeyResource.class.getName(),
@@ -120,7 +103,6 @@ public class LookupService {
     	                SubscribeResource.class.getName(),
     	        };
     		 return services;
-    	}
     }
 
 }

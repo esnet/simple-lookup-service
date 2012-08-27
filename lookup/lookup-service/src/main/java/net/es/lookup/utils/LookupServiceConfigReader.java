@@ -72,7 +72,6 @@ public class LookupServiceConfigReader {
         System.out.println((String)this.lookupServiceMap.get("host"));
         this.port = Integer.parseInt((String)this.lookupServiceMap.get("port"));
         this.maxleasetime = Long.parseLong((String)this.lookupServiceMap.get("maxleasetime"));
-        this.exportArchive = (Boolean)yamlMap.get("exportArchive");
      
     }
 }

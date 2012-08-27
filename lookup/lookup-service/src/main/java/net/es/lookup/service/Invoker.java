@@ -5,12 +5,20 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.es.lookup.database.ServiceDAOMongoDb;
-import net.es.lookup.database.ArchiveDAOMongoDb;
-import net.es.lookup.database.MongoDBMaintenance;
+import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.Service;
 import net.es.lookup.utils.LookupServiceConfigReader;
 import net.es.lookup.utils.DatabaseConfigReader;
+
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.impl.StdSchedulerFactory;
+import static org.quartz.JobBuilder.*;
+import static org.quartz.TriggerBuilder.*;
+import static org.quartz.SimpleScheduleBuilder.*;
+import org.quartz.JobDetail;
+import org.quartz.Trigger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +35,7 @@ public class Invoker {
     private static DatabaseConfigReader dcfg;
     private static String cfg="";
     private static String logConfig ="./etc/log4j.properties";
-    private boolean archive = false;
-    private boolean exportArchive = false;
-    private static ArchiveDAOMongoDb archivedao = null;
+    private static int dbpruneInterval;
     /**
      * Main program to start the Lookup Service
      * @param args [-h, ?] for help
@@ -51,37 +57,52 @@ public class Invoker {
         dcfg = DatabaseConfigReader.getInstance();
         port = lcfg.getPort();
         host = lcfg.getHost();
+        dbpruneInterval = dcfg.getPruneInterval();
         
         System.setProperty("log4j.configuration", "file:" + logConfig);
 
         System.out.println("starting ServiceDAOMongoDb");
 
         Invoker.dao = new ServiceDAOMongoDb();
-    
-        
-        boolean archive = dcfg.getArchive();
-        boolean exportArchive = lcfg.getExportArchive();
-        
-        if(archive){
-        	System.out.println("starting ArchiveDAOMongoDb");
-        	Invoker.archivedao = new ArchiveDAOMongoDb();
-        	
-        }
         
         System.out.println("starting Lookup Service");
         
         // Create the REST service
-        Invoker.lookupService = new LookupService(Invoker.host,Invoker.port,exportArchive);
+        Invoker.lookupService = new LookupService(Invoker.host,Invoker.port);
         // Start the service
         Invoker.lookupService.startService();
         
-        //Start DB maintenance thread
+
+        //DB Pruning
+        try {
+            // Grab the Scheduler instance from the Factory 
+            Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+
+            // and start it off
+            scheduler.start();
+
+            // define the job and tie it to our HelloJob class
+            JobDetail job = newJob(MongoDBMaintenanceJob.class)
+                .withIdentity("myJob", "group1") // name "myJob", group "group1"
+                .build();
+                  
+            // Trigger the job to run now, and then every 40 seconds
+            Trigger trigger = newTrigger()
+                .withIdentity("myTrigger", "group1")
+                .startNow()
+                .withSchedule(simpleSchedule()
+                    .withIntervalInSeconds(dbpruneInterval)
+                    .repeatForever())            
+                .build();
+                  
+            // Tell quartz to schedule the job using our trigger
+            scheduler.scheduleJob(job, trigger);
+            scheduler.shutdown();
+
+        } catch (SchedulerException se) {
+            se.printStackTrace();
+        }
         
-        MongoDBMaintenance maintenanceObj = new MongoDBMaintenance(archive);
-        Thread dbpruneThread = new Thread(maintenanceObj);
-        dbpruneThread.setPriority(Thread.MIN_PRIORITY);
-        dbpruneThread.start();
-                
         // Block forever
         Object blockMe = new Object();
         synchronized (blockMe) {

@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.Service;
 import net.es.lookup.database.ServiceDAOMongoDb;
-import net.es.lookup.database.ArchiveDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DataFormatException;
@@ -50,34 +49,6 @@ public class QueryServices {
 				LOG.info("Query status: FAILED; exiting");
 				throw new InternalErrorException("Error formatting data");
 			}  
-    }
-    
-    public String queryArchive(Message request) {
-	    LOG.info("Processing queryArchiveService...");
-	    LOG.info("Received message: "+request.getMap());
-	    String response;
-	    
-	    Message queryParameters = getQueryParameters(request);
-	    Message operators = getOperators(request,queryParameters);
-	
-		// Query DB
-		try{
-			List<Service> res = ArchiveDAOMongoDb.getInstance().query(request, queryParameters, operators);
-	    	// Build response
-	        response = JSONMessage.toString(res);
-			//response = res;
-	        LOG.info("Query status: SUCCESS;");
-	        LOG.debug("Response:"+response);
-	        return response;
-		}catch(DatabaseException e){
-			LOG.fatal("Error retrieving results:" +e.getMessage());
-			LOG.info("Query status: FAILED; exiting");
-			throw new InternalErrorException("Error retrieving results; Check if archive feature is supported");
-		}catch(DataFormatException e){
-			LOG.error("Data formatting exception");
-			LOG.info("Query status: FAILED; exiting");
-			throw new InternalErrorException("Error formatting data");
-		}  
 }
    
     

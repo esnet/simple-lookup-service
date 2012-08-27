@@ -12,19 +12,16 @@ public class DatabaseConfigReader {
     private static final String DEFAULT_FILE = "lookupservice.yaml";
     private static final String DEFAULT_PATH = "etc";
     private static String configFile = DEFAULT_PATH+"/"+DEFAULT_FILE;
+    private static final int MINIMUM_INTERVAL = 1800;
+    private static final int MINIMUM_THRESHOLD = 0;
 
     Map<String,String> databaseMap = new HashMap<String,String>();
     private String dburl = "127.0.0.1";
     private int dbport = 27017;
     private String dbname = "LookupService";
     private String collname = "services";
-    
-    private boolean archive=false;
-    Map<String,String> archiveDatabaseMap = new HashMap<String,String>();
-    private String archiveDBUrl = "";
-    private int archiveDBPort = 0;
-    private String archiveDBName = "";
-    private String archiveDBCollName = "";
+    private int pruneInterval = MINIMUM_INTERVAL;
+    private int pruneThreshold = 0;
 
     /**
      * Constructor - private because this is a Singleton
@@ -67,26 +64,14 @@ public class DatabaseConfigReader {
         return this.collname;
     }
     
-    public boolean getArchive() {
-        return this.archive;
+    public int getPruneInterval() {
+        return this.pruneInterval;
     }
     
-    public String getArchiveDbUrl() {
-        return this.archiveDBUrl;
+    public int getPruneThreshold() {
+        return this.pruneThreshold;
     }
-
-    public int getArchiveDbPort() {
-        return this.archiveDBPort;
-    }
-
-    public String getArchiveDbName() {
-        return this.archiveDBName;
-    }
-    
-    public String getArchiveDbCollName() {
-        return this.archiveDBCollName;
-    }
-    
+   
     private void setInfo(String configPath) {
         ConfigHelper cfg = ConfigHelper.getInstance();
         Map yamlMap = cfg.getConfiguration(configPath);
@@ -98,17 +83,8 @@ public class DatabaseConfigReader {
         this.dbport = Integer.parseInt((String)this.databaseMap.get("DBPort"));
         this.dbname = (String) this.databaseMap.get("DBName");
         this.collname = (String) this.databaseMap.get("DBCollName");
-        
-        this.archive = (Boolean)yamlMap.get("archive");
-        
-        if(this.archive){
-        	this.databaseMap = (HashMap)yamlMap.get("archiveDatabase");
-        	this.archiveDBUrl = (String) this.databaseMap.get("archiveDBUrl");
-            System.out.println((String)this.databaseMap.get("archiveDBPort"));
-            this.archiveDBPort = Integer.parseInt((String)this.databaseMap.get("archiveDBPort"));
-            this.archiveDBName = (String) this.databaseMap.get("archiveDBName");
-            this.archiveDBCollName = (String) this.databaseMap.get("archiveDBCollName");
-        }
+        this.pruneThreshold = Integer.parseInt((String)this.databaseMap.get("pruneThreshold"));
+        this.pruneInterval = Integer.parseInt((String)this.databaseMap.get("pruneInterval"));
      
     }
 }

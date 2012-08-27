@@ -1,6 +1,7 @@
 package net.es.lookup.database;
 
 import net.es.lookup.common.Service;
+
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.internal.DatabaseException;
@@ -13,48 +14,38 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class MongoDBMaintenance implements Runnable{
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+
+import org.apache.log4j.Logger;
+
+
+public class MongoDBMaintenanceJob implements Job{
+	private static Logger LOG = Logger.getLogger(MongoDBMaintenanceJob.class);
 	private ServiceDAOMongoDb db;
 	private static long prune_threshold = 60*1000; //in milliseconds
 	private static long maintenanceInterval = 60*60*1000;//in milliseconds
-	private boolean archive = false; //default is false
-	private ArchiveDAOMongoDb archivedb=null;
 	
-	
-	
-	public static long getPruneThreshold(){
-		return prune_threshold;
-	}
-	
-	public MongoDBMaintenance(boolean archive){
+	public MongoDBMaintenanceJob(){
 		this.db = ServiceDAOMongoDb.getInstance();
-		this.archive = archive;
-		
-		if(archive){
-			this.archivedb = ArchiveDAOMongoDb.getInstance();
-		}
 	}
 	
-	public void run() {
-		while(true){
-			List<Service> result;
-			System.out.println("Hello from a thread!");
+	public void execute(JobExecutionContext context) throws JobExecutionException {
+			List<Service> result = null;
+			LOG.info("Running MongoDBPrune...");
 			Instant now = new Instant();
 			Instant pTime = now.minus(prune_threshold);
-			System.out.println(pTime.toString());
 			DateTime pruneTime = pTime.toDateTime();
 			
 			try{
-				System.out.println("About to execute db query");
 				result = db.queryAll();
-				System.out.println("Executed db query");
 			}catch(DatabaseException e){
-				System.out.println("Caught exception!");
-				continue;
+				LOG.error("DBException! Could not query database");
 			}
 			
 			List<Message> messages = new ArrayList<Message>();
-			if(result.size()>0){
+			if(result != null && result.size()>0){
 					for (int i=0; i<result.size(); i++){
 						Map m = result.get(i).getMap();
 						DateTimeFormatter fmt =  ISODateTimeFormat.dateTime();
@@ -65,28 +56,12 @@ public class MongoDBMaintenance implements Runnable{
 							try{
 							 messages.add(db.deleteService(uri));
 							}catch(Exception e){
-								System.out.println("Error pruning DB!!");
-								continue;
+								LOG.error("Error pruning DB!!");
 							}
 						}
 					}
-					
-					if(archive){
-						try{
-							archivedb.insert(messages);
-							}catch(DatabaseException e){
-								System.out.println("Error inserting in Archive DB!!");
-								continue;
-							}					
-					}
 		     }
-			
-	        try{
-	        	Thread.sleep(maintenanceInterval);
-	        }catch(InterruptedException e){
-	        	continue;
-	        }
-		}   
-        
-    }
+		   
+	}
+    
 }

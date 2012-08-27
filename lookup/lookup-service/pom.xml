@@ -17,6 +17,8 @@
         </pluginRepository>
     </pluginRepositories>
     
+    
+     <!-- jersey -->
     <dependencies>
 	<dependency>
     		<groupId>com.sun.jersey</groupId>
@@ -29,26 +31,36 @@
     		<version>1.12</version>
 	</dependency>
 
+
+	 <!-- json -->
     <dependency>
                <groupId>net.sf.json-lib</groupId>
                <artifactId>json-lib</artifactId>
                <version>2.4</version>
                <classifier>jdk15</classifier>
     </dependency>
-           
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongo-java-driver</artifactId>
-            <version>2.7.3</version>
-        </dependency>
+    
+     <!-- mongodb -->   
+     <dependency>
+         <groupId>org.mongodb</groupId>
+         <artifactId>mongo-java-driver</artifactId>
+         <version>2.7.3</version>
+     </dependency>
 
+	 <!-- iso time -->
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
             <version>2.1</version>
         </dependency>
-
-        <!-- configuration -->
+        
+	<!--quartz scheduler -->
+	<dependency>
+	    <groupId>org.quartz-scheduler</groupId>
+	    <artifactId>quartz</artifactId>
+	    <version>2.1.6</version>
+	</dependency>
+        <!-- yaml configuration -->
         <dependency>
             <groupId>org.jyaml</groupId>
             <artifactId>jyaml</artifactId>
