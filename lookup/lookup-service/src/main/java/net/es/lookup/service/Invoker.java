@@ -10,6 +10,9 @@ import net.es.lookup.common.Message;
 import net.es.lookup.common.Service;
 import net.es.lookup.utils.LookupServiceConfigReader;
 
+
+import net.es.lookup.common.exception.internal.DatabaseException;
+
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.StdSchedulerFactory;
@@ -44,22 +47,30 @@ public class Invoker {
 
         parseArgs( args );
         
+        //set log config
+        System.setProperty("log4j.configuration", "file:" + logConfig);
+        
         if(cfg != null && !cfg.isEmpty()){
-        	 System.out.println("Starting Lookup Service using config File: "+ cfg);
+        	 System.out.println("Using config File: "+ cfg);
         	 LookupServiceConfigReader.init(cfg);
         }else{
-        	System.out.println("Starting Lookup Service using default options");
+        	System.out.println("Using default config file");
         }
         lcfg = LookupServiceConfigReader.getInstance();
         port = lcfg.getPort();
         host = lcfg.getHost();
         dbpruneInterval = lcfg.getPruneInterval();
         
-        System.setProperty("log4j.configuration", "file:" + logConfig);
+        
 
         System.out.println("starting ServiceDAOMongoDb");
-
-        Invoker.dao = new ServiceDAOMongoDb();
+        try{
+        	 Invoker.dao = new ServiceDAOMongoDb();
+        }catch(DatabaseException e){
+        	System.out.println("Error connecting to database; Please check if MongoDB is running");
+        	System.exit(1);
+        }
+       
         
         System.out.println("starting Lookup Service");
         

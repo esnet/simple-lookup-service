@@ -8,10 +8,13 @@ import java.util.Map;
 
 import org.ho.yaml.Yaml;
 
+import org.apache.log4j.Logger;
+
 
 public class ConfigHelper {
 
     private static ConfigHelper instance;
+    private static Logger LOG = Logger.getLogger(ConfigHelper.class);
 
     public static ConfigHelper getInstance() {
         if (instance == null) {
@@ -25,16 +28,17 @@ public class ConfigHelper {
     }
 
     @SuppressWarnings({ "static-access", "unchecked" })
-    public Map getConfiguration(String configPath) {
+    public Map getConfiguration(String configFile) {
         Map configuration = null;
-        InputStream yamlFile = this.getClass().getClassLoader().getSystemResourceAsStream(configPath);
+        InputStream yamlFile = this.getClass().getClassLoader().getSystemResourceAsStream(configFile);
         try {
             configuration = (Map) Yaml.load(yamlFile);
         } catch (NullPointerException ex) {
             try {
-                yamlFile = new FileInputStream(new File(configPath));
+                yamlFile = new FileInputStream(new File(configFile));
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
+            	LOG.error(configFile+" not found\n. Config file required to start Lookup Service");
                 System.exit(1);
             }
             configuration = (Map) Yaml.load(yamlFile);

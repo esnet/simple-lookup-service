@@ -2,14 +2,16 @@
 #Lookup Service settings
 lookupservice:
     host: 'localhost'
-    port: '8080'
-    maxleasetime: '7200'
+    port: 8080
+    maxleasetime: 7200
 
 #Database settings  
 database:
     DBUrl: '127.0.0.1'
-    DBPort: '27017'
+    DBPort: 27017
     DBName: 'LookupService'
     DBCollName: 'services'
-    pruneInterval: '60' 
-    pruneThreshold: '5'
+    username: 'lookup'
+    password: 'abc123'
+    pruneInterval: 60 
+    pruneThreshold: 5

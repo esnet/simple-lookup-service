@@ -71,30 +71,36 @@ public class ServiceDAOMongoDb {
 
 	
 	private void init() throws DatabaseException {
-        if (ServiceDAOMongoDb.instance != null) {
-            // An instance has been already created.
-            throw new DatabaseException("Attempt to create a second instance of ServiceDAOMongoDb");
-        }
-        ServiceDAOMongoDb.instance = this;
-        try{
-        	mongo = new Mongo(dburl,dbport);
-        	//System.out.println(mongo.getAddress().toString());
-		
-        	db = mongo.getDB(dbname);
-        	//System.out.println(db.getName());
-        	coll = db.getCollection(collname);
-        	//System.out.println(coll.getName());
-        }catch(UnknownHostException e){
-        	throw new DatabaseException(e.getMessage());
-        }catch(Exception e){
-        	throw new DatabaseException(e.getMessage());
-        }
-		
-        operatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ALL, "$and");
-        operatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ANY, "$or");
-		
-        listOperatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ANY, "$in");
-        listOperatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ALL, "$all");
+		if (ServiceDAOMongoDb.instance != null) {
+			// An instance has been already created.
+			throw new DatabaseException("Attempt to create a second instance of ServiceDAOMongoDb");
+		}
+		ServiceDAOMongoDb.instance = this;
+		try{
+			mongo = new Mongo(dburl,dbport);
+			//System.out.println(mongo.getAddress().toString());
+
+			db = mongo.getDB(dbname);
+
+			//System.out.println(db.getName());
+			coll = db.getCollection(collname);
+			//System.out.println(coll.getName());
+
+			//test query to check if mongodb is running
+			coll.getCount(); 
+
+
+		}catch(UnknownHostException e){
+			throw new DatabaseException(e.getMessage());
+		}catch(Exception e){
+			throw new DatabaseException(e.getMessage());
+		}
+
+		operatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ALL, "$and");
+		operatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ANY, "$or");
+
+		listOperatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ANY, "$in");
+		listOperatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ALL, "$all");
 	}
 	
 	//should use json specific register request and response.

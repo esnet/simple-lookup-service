@@ -2,6 +2,8 @@ package net.es.lookup.utils;
 
 import java.util.Map;
 import java.util.HashMap;
+
+import org.apache.log4j.Logger;
 /**
  * Singleton to store database configuration.
  * @author Sowmya Balasubramanian
@@ -16,19 +18,21 @@ public class LookupServiceConfigReader {
     Map<String,Object> lookupServiceMap = new HashMap<String,Object>();
     private String host = "127.0.0.1";
     private int port = 8085;
-    private long maxleasetime = 7200;
+    private int maxleasetime = 7200;
     
     private static final int MINIMUM_INTERVAL = 1800;
     private static final int MINIMUM_THRESHOLD = 0;
     
 
-    Map<String,String> databaseMap = new HashMap<String,String>();
+    Map<String,Object> databaseMap = new HashMap<String,Object>();
     private String dburl = "127.0.0.1";
     private int dbport = 27017;
     private String dbname = "LookupService";
     private String collname = "services";
     private int pruneInterval = MINIMUM_INTERVAL;
     private int pruneThreshold = 0;
+    
+    private static Logger LOG = Logger.getLogger(ConfigHelper.class);
 
     /**
      * Constructor - private because this is a Singleton
@@ -97,20 +101,25 @@ public class LookupServiceConfigReader {
         Map yamlMap = cfg.getConfiguration(configPath);
         assert yamlMap != null:  "Could not load configuration file from " +
             "file: ${basedir}/"+configPath;
-        this.lookupServiceMap = (HashMap)yamlMap.get("lookupservice");
-        this.host = (String) this.lookupServiceMap.get("host");
-        System.out.println((String)this.lookupServiceMap.get("host"));
-        this.port = Integer.parseInt((String)this.lookupServiceMap.get("port"));
-        this.maxleasetime = Long.parseLong((String)this.lookupServiceMap.get("maxleasetime"));
         
-        this.databaseMap = (HashMap)yamlMap.get("database");
-        this.dburl = (String) this.databaseMap.get("DBUrl");
-        System.out.println((String)this.databaseMap.get("DBPort"));
-        this.dbport = Integer.parseInt((String)this.databaseMap.get("DBPort"));
-        this.dbname = (String) this.databaseMap.get("DBName");
-        this.collname = (String) this.databaseMap.get("DBCollName");
-        this.pruneThreshold = Integer.parseInt((String)this.databaseMap.get("pruneThreshold"));
-        this.pruneInterval = Integer.parseInt((String)this.databaseMap.get("pruneInterval"));
+        try{
+        	this.lookupServiceMap = (HashMap)yamlMap.get("lookupservice");
+            this.host = (String) this.lookupServiceMap.get("host");
+            this.port = (Integer)this.lookupServiceMap.get("port");
+            this.maxleasetime = (Integer)this.lookupServiceMap.get("maxleasetime");
+            
+            this.databaseMap = (HashMap)yamlMap.get("database");
+            this.dburl = (String) this.databaseMap.get("DBUrl");
+            this.dbport = (Integer)this.databaseMap.get("DBPort");
+            this.dbname = (String) this.databaseMap.get("DBName");
+            this.collname = (String) this.databaseMap.get("DBCollName");
+            this.pruneThreshold = (Integer)this.databaseMap.get("pruneThreshold");
+            this.pruneInterval = (Integer)this.databaseMap.get("pruneInterval");
+        }catch(Exception e){
+        	LOG.error("Error parsing config file; Please check config parameters");
+        	System.exit(1);
+        }
+        
      
     }
 }
