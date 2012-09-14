@@ -195,6 +195,7 @@ public class ServiceDAOMongoDb {
         	
         	
         	try{
+  
         		WriteResult wrt = coll.update(query, updateObject);
         		CommandResult cmdres = wrt.getLastError();
         		//System.out.println(cmdres.ok());

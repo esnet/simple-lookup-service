@@ -14,18 +14,21 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.JobDataMap;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
 
 import org.apache.log4j.Logger;
 
-
+@DisallowConcurrentExecution
 public class MongoDBMaintenanceJob implements Job{
 	private static Logger LOG = Logger.getLogger(MongoDBMaintenanceJob.class);
 	private ServiceDAOMongoDb db;
-	private static long prune_threshold = 60*1000; //in milliseconds
-	private static long maintenanceInterval = 60*60*1000;//in milliseconds
+	
+	public static String PRUNE_THRESHOLD = "prune_threshold"; //parameter will be set during run time
 	
 	public MongoDBMaintenanceJob(){
 		this.db = ServiceDAOMongoDb.getInstance();
@@ -34,6 +37,8 @@ public class MongoDBMaintenanceJob implements Job{
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 			List<Service> result = null;
 			LOG.info("Running MongoDBPrune...");
+			JobDataMap data = context.getJobDetail().getJobDataMap();
+			long prune_threshold = data.getLong(PRUNE_THRESHOLD);
 			Instant now = new Instant();
 			Instant pTime = now.minus(prune_threshold);
 			DateTime pruneTime = pTime.toDateTime();

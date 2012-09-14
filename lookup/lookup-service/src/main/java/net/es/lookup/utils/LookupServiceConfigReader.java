@@ -15,16 +15,20 @@ public class LookupServiceConfigReader {
     private static final String DEFAULT_PATH = "etc";
     private static String configFile = DEFAULT_PATH+"/"+DEFAULT_FILE;
 
-    Map<String,Object> lookupServiceMap = new HashMap<String,Object>();
+    private Map<String,Object> lookupServiceMap = new HashMap<String,Object>();
     private String host = "127.0.0.1";
     private int port = 8085;
-    private int maxleasetime = 7200;
+    private Map<String,Object> leaseTimeMap = new HashMap<String,Object>();
+    private int maxlease;
+    private int minlease;
+    private int defaultlease;
+    
     
     private static final int MINIMUM_INTERVAL = 1800;
     private static final int MINIMUM_THRESHOLD = 0;
     
 
-    Map<String,Object> databaseMap = new HashMap<String,Object>();
+    private Map<String,Object> databaseMap = new HashMap<String,Object>();
     private String dburl = "127.0.0.1";
     private int dbport = 27017;
     private String dbname = "LookupService";
@@ -69,9 +73,18 @@ public class LookupServiceConfigReader {
         return this.port;
     }
 
-    public long getMaxleasetime() {
-        return this.maxleasetime;
+    public long getMaxLease() {
+        return this.maxlease;
     }
+    
+    public long getDefaultLease() {
+        return this.defaultlease;
+    }
+    
+    public long getMinLease() {
+        return this.minlease;
+    }
+    
     public String getDbUrl() {
         return this.dburl;
     }
@@ -102,21 +115,28 @@ public class LookupServiceConfigReader {
         assert yamlMap != null:  "Could not load configuration file from " +
             "file: ${basedir}/"+configPath;
         
+        
         try{
-        	this.lookupServiceMap = (HashMap)yamlMap.get("lookupservice");
-            this.host = (String) this.lookupServiceMap.get("host");
-            this.port = (Integer)this.lookupServiceMap.get("port");
-            this.maxleasetime = (Integer)this.lookupServiceMap.get("maxleasetime");
+        	lookupServiceMap = (HashMap)yamlMap.get("lookupservice");
+            host = (String) lookupServiceMap.get("host");
+            port = (Integer)lookupServiceMap.get("port");
             
-            this.databaseMap = (HashMap)yamlMap.get("database");
-            this.dburl = (String) this.databaseMap.get("DBUrl");
-            this.dbport = (Integer)this.databaseMap.get("DBPort");
-            this.dbname = (String) this.databaseMap.get("DBName");
-            this.collname = (String) this.databaseMap.get("DBCollName");
-            this.pruneThreshold = (Integer)this.databaseMap.get("pruneThreshold");
-            this.pruneInterval = (Integer)this.databaseMap.get("pruneInterval");
+            leaseTimeMap = (HashMap)lookupServiceMap.get("lease");
+            LOG.info(leaseTimeMap.toString());
+            maxlease = (Integer)leaseTimeMap.get("max");
+            LOG.info("came here");
+            minlease = (Integer)leaseTimeMap.get("min");
+            defaultlease = (Integer)leaseTimeMap.get("default");
+            
+            databaseMap = (HashMap)yamlMap.get("database");
+            dburl = (String) databaseMap.get("DBUrl");
+            dbport = (Integer)databaseMap.get("DBPort");
+            dbname = (String) databaseMap.get("DBName");
+            collname = (String) databaseMap.get("DBCollName");
+            pruneThreshold = (Integer)databaseMap.get("pruneThreshold");
+            pruneInterval = (Integer)databaseMap.get("pruneInterval");
         }catch(Exception e){
-        	LOG.error("Error parsing config file; Please check config parameters");
+        	LOG.error("Error parsing config file; Please check config parameters"+e.toString());
         	System.exit(1);
         }
         

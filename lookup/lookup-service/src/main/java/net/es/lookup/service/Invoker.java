@@ -36,7 +36,7 @@ public class Invoker {
     private static LookupServiceConfigReader lcfg;
     private static String cfg="";
     private static String logConfig ="./etc/log4j.properties";
-    private static int dbpruneInterval;
+    //private static int dbpruneInterval;
     /**
      * Main program to start the Lookup Service
      * @param args [-h, ?] for help
@@ -59,7 +59,8 @@ public class Invoker {
         lcfg = LookupServiceConfigReader.getInstance();
         port = lcfg.getPort();
         host = lcfg.getHost();
-        dbpruneInterval = lcfg.getPruneInterval();
+        int dbpruneInterval = lcfg.getPruneInterval();
+        long prunethreshold = lcfg.getPruneThreshold();
         
         
 
@@ -88,14 +89,15 @@ public class Invoker {
             // and start it off
             scheduler.start();
 
-            // define the job and tie it to our HelloJob class
+            // define the job and tie it to our Job class
             JobDetail job = newJob(MongoDBMaintenanceJob.class)
-                .withIdentity("myJob", "group1") // name "myJob", group "group1"
+                .withIdentity("mongoJob", "DBMaintenance") // name "myJob", group "group1"
                 .build();
+            job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
                   
             // Trigger the job to run now, and then every 40 seconds
             Trigger trigger = newTrigger()
-                .withIdentity("myTrigger", "group1")
+                .withIdentity("DBTrigger", "DBMaintenance")
                 .startNow()
                 .withSchedule(simpleSchedule()
                     .withIntervalInSeconds(dbpruneInterval)
@@ -104,7 +106,7 @@ public class Invoker {
                   
             // Tell quartz to schedule the job using our trigger
             scheduler.scheduleJob(job, trigger);
-            scheduler.shutdown();
+            
 
         } catch (SchedulerException se) {
             se.printStackTrace();

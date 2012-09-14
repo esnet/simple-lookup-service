@@ -3,7 +3,10 @@
 lookupservice:
     host: 'localhost'
     port: 8080
-    maxleasetime: 7200
+    lease:
+        max: 2592000
+        default: 7200
+        min: 1800
 
 #Database settings  
 database:
@@ -13,5 +16,5 @@ database:
     DBCollName: 'services'
     username: 'lookup'
     password: 'abc123'
-    pruneInterval: 60 
-    pruneThreshold: 5
+    pruneInterval: 3600 
+    pruneThreshold: 300
