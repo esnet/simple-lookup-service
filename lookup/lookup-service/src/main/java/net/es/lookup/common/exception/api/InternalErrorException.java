@@ -6,7 +6,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
 
 public class InternalErrorException extends WebApplicationException {
+
     public InternalErrorException(String message) {
+
         super(Response.status(Status.INTERNAL_SERVER_ERROR).entity(message).type(MediaType.TEXT_PLAIN).build());
+
     }
+
 }

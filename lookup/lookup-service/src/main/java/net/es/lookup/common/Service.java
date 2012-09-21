@@ -16,11 +16,15 @@ public class Service extends Message {
      */
 
     public Service() {
+
         super();
+
     }
 
     public Service (Map<String,Object> map) {
+
         super (map);
+
     }
 
 }

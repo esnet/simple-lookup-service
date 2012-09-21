@@ -14,23 +14,19 @@ import javax.ws.rs.PathParam;
  * This class and other similar resource classes need to be explicitly loaded in the 
  * net.es.lookup.service.LookupService class
  */
+
 @Path("/lookup/service/{service}/{key}")
 public class KeyResource {
 
     private AccessService accessService = new AccessService();
 
-
-    // The Java method will process HTTP GET requests
     @GET
-    // The Java method will produce content identified by the MIME Media
-    // type "text/plain"
-
     @Produces("application/json")
-    public String getHandler (@PathParam("service") String serviceid, String service,@PathParam("key")String key) {
+    public String getHandler (@PathParam("service") String serviceid, @PathParam("key")String key){
+
     	String serviceuri = "lookup/service/"+serviceid;
-        return this.accessService.getKeyService(serviceuri,service,key);
+        return this.accessService.getKeyService(serviceuri, key);
+
     }
 
-
-    
 }

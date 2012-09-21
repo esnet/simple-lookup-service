@@ -20,11 +20,7 @@ public class SubscribeResource {
     private Subscribe subscribe = new Subscribe();
 
 
-    // The Java method will process HTTP GET requests
     @POST
-    // The Java method will produce content identified by the MIME Media
-    // type "text/plain"
-
     @Consumes("application/json")
     @Produces("application/json")
     public String postHandler (String message) {
@@ -33,11 +29,7 @@ public class SubscribeResource {
     }
 
 
-    // The Java method will process HTTP GET requests
     @GET
-    // The Java method will produce content identified by the MIME Media
-    // type "text/plain"
-
     @Produces("application/json")
     public String getHandler (@PathParam("queryId") String queryId) {
 
@@ -49,16 +41,10 @@ public class SubscribeResource {
     }
 
 
-    // The Java method will process HTTP GET requests
     @DELETE
-    // The Java method will produce content identified by the MIME Media
-    // type "text/plain"
-
     @Produces("application/json")
     public String deleteHandler (String message, @PathParam("service") String serviceid) {
         return "Not yet implemented\n";
     }
-
-
 
 }

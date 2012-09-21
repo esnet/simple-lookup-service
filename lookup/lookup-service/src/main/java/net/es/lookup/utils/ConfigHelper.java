@@ -17,33 +17,54 @@ public class ConfigHelper {
     private static Logger LOG = Logger.getLogger(ConfigHelper.class);
 
     public static ConfigHelper getInstance() {
+
         if (instance == null) {
+
             instance = new ConfigHelper();
+
         }
+
         return instance;
+
     }
 
     private ConfigHelper() {
 
     }
 
+
     @SuppressWarnings({ "static-access", "unchecked" })
     public Map getConfiguration(String configFile) {
+
         Map configuration = null;
         InputStream yamlFile = this.getClass().getClassLoader().getSystemResourceAsStream(configFile);
+
         try {
+
             configuration = (Map) Yaml.load(yamlFile);
+
         } catch (NullPointerException ex) {
+
             try {
+
                 yamlFile = new FileInputStream(new File(configFile));
+
             } catch (FileNotFoundException e) {
+
                 //e.printStackTrace();
-            	LOG.error(configFile+" not found\n. Config file required to start Lookup Service");
+                LOG.error(configFile+" not found\n. Config file required to start Lookup Service");
                 System.exit(1);
+
             }
+
             configuration = (Map) Yaml.load(yamlFile);
+
         }
+
         return configuration;
+
     }
+
+
 }
 

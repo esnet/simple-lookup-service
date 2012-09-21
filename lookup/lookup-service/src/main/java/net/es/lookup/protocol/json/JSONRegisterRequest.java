@@ -22,34 +22,45 @@ public class JSONRegisterRequest extends RegisterRequest {
     static public final int INCORRECT_FORMAT = 2;
 
     public JSONRegisterRequest (String message) {
+
         this.parseJSON(message);
+
     }
 
     private void parseJSON (String message) {
     	
     	JSONTokener tokener = new JSONTokener(message);
     	Object obj;
+
     	try{
+
     	       obj = tokener.nextValue();
+
     	}catch(JSONException e){
+
     		this.status = JSONRegisterRequest.INCORRECT_FORMAT;
     		return;
+
     	}
      
     	if(obj != null){
+
     	       JSONObject jsonObj = (JSONObject) obj;
     	        Set keyValues = jsonObj.entrySet();
-    	        //System.out.println(obj.toString());
+
     	        for (Object o : ((JSONObject) obj).keySet()) {
+
     	            this.add(o.toString(), ((JSONObject) obj).get(o));
+
     	        }
+
     	}else{
+
     		this.status = JSONRegisterRequest.INCORRECT_FORMAT;
+
     	}
  
-
-        
-
- 
     }
+
+
 }
