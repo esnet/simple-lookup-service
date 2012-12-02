@@ -19,7 +19,7 @@ import java.util.List;
  */
 
 @Path("/lookup/records")
-public class ServicesResource {
+public class RecordResource {
 
     private QueryServices queryServices = new QueryServices();
     private RegisterService registerService = new RegisterService();
