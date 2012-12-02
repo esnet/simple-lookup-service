@@ -3,47 +3,42 @@ package net.es.lookup.resources;
 
 import net.es.lookup.api.AccessService;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.Produces;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 
 /**
- * This class and other similar resource classes need to be explicitly loaded in the 
+ * This class and other similar resource classes need to be explicitly loaded in the
  * net.es.lookup.service.LookupService class
  */
 
-@Path("/lookup/service/{service}")
+@Path("/lookup/{record}/{recordid}")
 public class AccessServiceResource {
 
     private AccessService accessService = new AccessService();
 
     @GET
     @Produces("application/json")
-    public String getHandler (@PathParam("service") String serviceid) {
+    public String getHandler(@PathParam("record") String record, @PathParam("recordid") String recordid) {
 
-    	String serviceuri = "lookup/service/"+serviceid;
+        String serviceuri = "lookup/"+ record + recordid;
         return this.accessService.getService(serviceuri);
 
     }
 
     @DELETE
     @Produces("application/json")
-    public String deleteHandler (@PathParam("service") String serviceid, String service) {
+    public String deleteHandler(@PathParam("record") String record, @PathParam("recordid") String recordid, String service) {
 
-    	String serviceuri = "lookup/service/"+serviceid;
-    	return this.accessService.deleteService(serviceuri, service);
+        String serviceuri = "lookup/"+ record + recordid;
+        return this.accessService.deleteService(serviceuri, service);
 
     }
 
     @POST
     @Produces("application/json")
-    public String renewHandler (@PathParam("service") String serviceid, String message) {
+    public String renewHandler(@PathParam("record") String record, @PathParam("recordid") String recordid, String message) {
 
-    	String serviceuri = "lookup/service/"+serviceid;
-        return this.accessService.renewService(serviceuri,message);
+        String serviceuri = "lookup/"+ record + recordid;
+        return this.accessService.renewService(serviceuri, message);
 
     }
 

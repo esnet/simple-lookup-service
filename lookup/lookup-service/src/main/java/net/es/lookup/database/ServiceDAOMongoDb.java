@@ -1,41 +1,33 @@
 package net.es.lookup.database;
 
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
-
 import com.mongodb.*;
-import java.net.UnknownHostException;
-import java.util.regex.Pattern;
-
-import net.es.lookup.common.Service;
 import net.es.lookup.common.Message;
-import net.es.lookup.resources.ServicesResource;
 import net.es.lookup.common.ReservedKeywords;
+import net.es.lookup.common.Service;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
-
 import net.es.lookup.utils.LookupServiceConfigReader;
+
+import java.net.UnknownHostException;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class ServiceDAOMongoDb {
 
-	private String dburl="127.0.0.1";
-	private int dbport=27017;
-	private String dbname="LookupService";
-	private String collname="services";
+    private String dburl = "127.0.0.1";
+    private int dbport = 27017;
+    private String dbname = "LookupService";
+    private String collname = "services";
 
-	private Mongo mongo;
-	private DB db;
-	private DBCollection coll;
+    private Mongo mongo;
+    private DB db;
+    private DBCollection coll;
     private static ServiceDAOMongoDb instance = null;
-    
-	private static Map<String, String> operatorMapping = new HashMap();
-	private static Map<String, String> listOperatorMapping = new HashMap();
-	
+
+    private static Map<String, String> operatorMapping = new HashMap();
+    private static Map<String, String> listOperatorMapping = new HashMap();
+
     {
         operatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ALL, "$and");
         operatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ANY, "$or");
@@ -51,468 +43,468 @@ public class ServiceDAOMongoDb {
 
     }
 
-	// retrieves default - mongodb running on localhost and default port - 27017 and dbname- "lookupservice", collection name - "services" 
-	//creates a new one if it cannot find one 
-	public ServiceDAOMongoDb() throws DatabaseException{
+    // retrieves default - mongodb running on localhost and default port - 27017 and dbname- "lookupservice", collection name - "services"
+    //creates a new one if it cannot find one
+    public ServiceDAOMongoDb() throws DatabaseException {
 
-		LookupServiceConfigReader dcfg = LookupServiceConfigReader.getInstance();
-		this.dburl = dcfg.getDbUrl();
-		this.dbport = dcfg.getDbPort();
-		this.dbname = dcfg.getDbName();
-		this.collname = dcfg.getCollName();
-		init();
+        LookupServiceConfigReader dcfg = LookupServiceConfigReader.getInstance();
+        this.dburl = dcfg.getDbUrl();
+        this.dbport = dcfg.getDbPort();
+        this.dbname = dcfg.getDbName();
+        this.collname = dcfg.getCollName();
+        init();
 
-	}
-
-
-	//uses default url and port - mongodb running on localhost and default port - 27017
-	//creates a new one if it cannot find one
-	public ServiceDAOMongoDb(String dbname, String collname) throws DatabaseException{
-
-		this.dbname = dbname;
-		this.collname = collname;
-		init();
-
-	}
+    }
 
 
-	//retrieves the db and collection(table); creates a new one if it cannot find one
-	public ServiceDAOMongoDb (String dburl, int dbport, String dbname, String collname) throws DatabaseException{
+    //uses default url and port - mongodb running on localhost and default port - 27017
+    //creates a new one if it cannot find one
+    public ServiceDAOMongoDb(String dbname, String collname) throws DatabaseException {
 
-		this.dburl = dburl;
-		this.dbport = dbport;
-		this.dbname = dbname;
-		this.collname = collname;
-		init();
+        this.dbname = dbname;
+        this.collname = collname;
+        init();
 
-	}
-
-
-	private void init() throws DatabaseException {
-
-		if (ServiceDAOMongoDb.instance != null) {
-
-			// An instance has been already created.
-			throw new DatabaseException("Attempt to create a second instance of ServiceDAOMongoDb");
-
-		}
-
-		ServiceDAOMongoDb.instance = this;
-
-		try{
-
-			mongo = new Mongo(dburl,dbport);
-			db = mongo.getDB(dbname);
-			coll = db.getCollection(collname);
-			coll.getCount(); 
-
-		}catch(UnknownHostException e){
-
-			throw new DatabaseException(e.getMessage());
-
-		}catch(Exception e){
-
-			throw new DatabaseException(e.getMessage());
-
-		}
+    }
 
 
-	}
+    //retrieves the db and collection(table); creates a new one if it cannot find one
+    public ServiceDAOMongoDb(String dburl, int dbport, String dbname, String collname) throws DatabaseException {
+
+        this.dburl = dburl;
+        this.dbport = dbport;
+        this.dbname = dbname;
+        this.collname = collname;
+        init();
+
+    }
 
 
-	//should use json specific register request and response.
-	public Message queryAndPublishService(Message message, Message queryRequest, Message operators) throws DatabaseException, DuplicateEntryException{
+    private void init() throws DatabaseException {
 
-		int errorcode;
-		String errormsg;
-		Message response;
-		
-		//check for duplicates
-		try{
+        if (ServiceDAOMongoDb.instance != null) {
 
-			List<Service> dupEntries = this.query(message,queryRequest,operators);
-			//System.out.println("Duplicate Entries: "+dupEntries.size());
-			if(dupEntries.size()>0){
+            // An instance has been already created.
+            throw new DatabaseException("Attempt to create a second instance of ServiceDAOMongoDb");
 
-				throw new DuplicateEntryException("Record already exists");
+        }
 
-			}
+        ServiceDAOMongoDb.instance = this;
 
-		}catch(DatabaseException e){
+        try {
 
-			throw new DatabaseException("Error inserting record");
+            mongo = new Mongo(dburl, dbport);
+            db = mongo.getDB(dbname);
+            coll = db.getCollection(collname);
+            coll.getCount();
 
-		}
-		
-		Map<String, Object> services = message.getMap();
-		BasicDBObject doc = new BasicDBObject();
-		doc.putAll(services);
-		WriteResult wrt = coll.insert(doc);
-		CommandResult cmdres = wrt.getLastError();
+        } catch (UnknownHostException e) {
 
-		if(cmdres.ok()){
+            throw new DatabaseException(e.getMessage());
 
-			errorcode = 200;
-			errormsg = "SUCCESS";
+        } catch (Exception e) {
 
-		}else{
+            throw new DatabaseException(e.getMessage());
 
-			throw new DatabaseException("Error inserting record");
-
-		}
-		
-		response = new Message(services);
-		response.setError(errorcode);
-		response.setErrorMessage(errormsg);
-		return response;
-
-	}
-	
-	
-	public Message deleteService(String serviceid) throws DatabaseException{
-		
-		int errorcode;
-		String errormsg;
-		
-		Message response = new Message();
-		BasicDBObject query = new BasicDBObject();
-		//TODO: add check to see if only one elem is returned
-		query.put(ReservedKeywords.RECORD_URI, serviceid);
-		response = getServiceByURI(serviceid);
-
-		try{
-
-			WriteResult wrt = coll.remove(query);
-		
-			CommandResult cmdres = wrt.getLastError();
-		
-			if(cmdres.ok()){
-
-				errorcode = 200;
-				errormsg = "SUCCESS";
-
-			}else{
-
-				throw new DatabaseException(cmdres.getErrorMessage());
-
-			}
-
-		}catch(MongoException e){
-
-			throw new DatabaseException(e.getMessage());
-
-		}
-		
-		
-		response.setError(errorcode);
-		response.setErrorMessage(errormsg);
-		return response;
-		
-	}
+        }
 
 
-	public Message updateService(String serviceid, Message updateRequest) throws DatabaseException{
-		
-		int errorcode;
-		String errormsg;
-        
-		Message response = new Message();
-        
-        if(serviceid != null && !serviceid.isEmpty()){
-        	
-        	BasicDBObject query = new BasicDBObject();
-        	query.put(ReservedKeywords.RECORD_URI, serviceid);
+    }
 
-        	BasicDBObject updateObject = new BasicDBObject();
-        	updateObject.putAll(updateRequest.getMap());
-        	
-        	try{
-  
-        		WriteResult wrt = coll.update(query, updateObject);
-        		CommandResult cmdres = wrt.getLastError();
-        	
-        		if(cmdres.ok()){
 
-        			response = (Message) getServiceByURI(serviceid);
-        			errorcode=200;
-        			errormsg="SUCCESS";
+    //should use json specific register request and response.
+    public Message queryAndPublishService(Message message, Message queryRequest, Message operators) throws DatabaseException, DuplicateEntryException {
 
-        		}else{
+        int errorcode;
+        String errormsg;
+        Message response;
 
-        			throw new DatabaseException(cmdres.getErrorMessage());
+        //check for duplicates
+        try {
 
-        		}
+            List<Service> dupEntries = this.query(message, queryRequest, operators);
+            //System.out.println("Duplicate Entries: "+dupEntries.size());
+            if (dupEntries.size() > 0) {
 
-        	}catch(MongoException e){
+                throw new DuplicateEntryException("Record already exists");
 
-        		throw new DatabaseException(e.getMessage());
+            }
 
-        	}
-    		
-        }else{
+        } catch (DatabaseException e) {
 
-        	throw new DatabaseException("Record URI not specified!!!");
+            throw new DatabaseException("Error inserting record");
+
+        }
+
+        Map<String, Object> services = message.getMap();
+        BasicDBObject doc = new BasicDBObject();
+        doc.putAll(services);
+        WriteResult wrt = coll.insert(doc);
+        CommandResult cmdres = wrt.getLastError();
+
+        if (cmdres.ok()) {
+
+            errorcode = 200;
+            errormsg = "SUCCESS";
+
+        } else {
+
+            throw new DatabaseException("Error inserting record");
+
+        }
+
+        response = new Message(services);
+        response.setError(errorcode);
+        response.setErrorMessage(errormsg);
+        return response;
+
+    }
+
+
+    public Message deleteService(String serviceid) throws DatabaseException {
+
+        int errorcode;
+        String errormsg;
+
+        Message response = new Message();
+        BasicDBObject query = new BasicDBObject();
+        //TODO: add check to see if only one elem is returned
+        query.put(ReservedKeywords.RECORD_URI, serviceid);
+        response = getServiceByURI(serviceid);
+
+        try {
+
+            WriteResult wrt = coll.remove(query);
+
+            CommandResult cmdres = wrt.getLastError();
+
+            if (cmdres.ok()) {
+
+                errorcode = 200;
+                errormsg = "SUCCESS";
+
+            } else {
+
+                throw new DatabaseException(cmdres.getErrorMessage());
+
+            }
+
+        } catch (MongoException e) {
+
+            throw new DatabaseException(e.getMessage());
+
+        }
+
+
+        response.setError(errorcode);
+        response.setErrorMessage(errormsg);
+        return response;
+
+    }
+
+
+    public Message updateService(String serviceid, Message updateRequest) throws DatabaseException {
+
+        int errorcode;
+        String errormsg;
+
+        Message response = new Message();
+
+        if (serviceid != null && !serviceid.isEmpty()) {
+
+            BasicDBObject query = new BasicDBObject();
+            query.put(ReservedKeywords.RECORD_URI, serviceid);
+
+            BasicDBObject updateObject = new BasicDBObject();
+            updateObject.putAll(updateRequest.getMap());
+
+            try {
+
+                WriteResult wrt = coll.update(query, updateObject);
+                CommandResult cmdres = wrt.getLastError();
+
+                if (cmdres.ok()) {
+
+                    response = (Message) getServiceByURI(serviceid);
+                    errorcode = 200;
+                    errormsg = "SUCCESS";
+
+                } else {
+
+                    throw new DatabaseException(cmdres.getErrorMessage());
+
+                }
+
+            } catch (MongoException e) {
+
+                throw new DatabaseException(e.getMessage());
+
+            }
+
+        } else {
+
+            throw new DatabaseException("Record URI not specified!!!");
 
         }
 
         response.setError(errorcode);
         response.setErrorMessage(errormsg);
-		return response;
-
-	}
-
-    public List<Service> query(Message message, Message queryRequest, Message operators) throws DatabaseException{
-
-        return this.query (message, queryRequest, operators, 0, 0);
+        return response;
 
     }
-	
-	public List<Service> query(Message message, Message queryRequest, Message operators, int maxResults, int skip) throws DatabaseException{
-		
-		BasicDBObject query = buildQuery(queryRequest, operators);
-		
-		ArrayList <Service> result = new ArrayList<Service>();
-		
-		try{
 
-			DBCursor cur = coll.find(query);	
-			
-			while (cur.hasNext()){
+    public List<Service> query(Message message, Message queryRequest, Message operators) throws DatabaseException {
 
-				Service tmpserv = new Service();
-				DBObject tmp = cur.next();
-				Set<String> keys = tmp.keySet();
+        return this.query(message, queryRequest, operators, 0, 0);
 
-				if (!keys.isEmpty()){
+    }
 
-					Iterator<String> it = keys.iterator();
+    public List<Service> query(Message message, Message queryRequest, Message operators, int maxResults, int skip) throws DatabaseException {
 
-					while(it.hasNext()){
+        BasicDBObject query = buildQuery(queryRequest, operators);
 
-						String tmpKey = it.next();
-						//remove key added by mongodb
+        ArrayList<Service> result = new ArrayList<Service>();
 
-						if(!tmpKey.equals("_id")){
+        try {
 
-							tmpserv.add (tmpKey,tmp.get(tmpKey));
+            DBCursor cur = coll.find(query);
 
-						}
-						  
-					}
+            while (cur.hasNext()) {
 
-				}
+                Service tmpserv = new Service();
+                DBObject tmp = cur.next();
+                Set<String> keys = tmp.keySet();
 
-				result.add(tmpserv);
+                if (!keys.isEmpty()) {
 
-			}
+                    Iterator<String> it = keys.iterator();
 
-		}catch(MongoException e){
+                    while (it.hasNext()) {
 
-			throw new DatabaseException("Error retrieving results");
+                        String tmpKey = it.next();
+                        //remove key added by mongodb
 
-		}
+                        if (!tmpKey.equals("_id")) {
 
-		return result;
+                            tmpserv.add(tmpKey, tmp.get(tmpKey));
 
-	}
+                        }
 
-	
-	public List<Service> queryAll() throws DatabaseException{
+                    }
 
-		Message msg = new Message();
-		List <Service> result = query(msg,msg,msg);
-		return result;
+                }
 
-	}
+                result.add(tmpserv);
+
+            }
+
+        } catch (MongoException e) {
+
+            throw new DatabaseException("Error retrieving results");
+
+        }
+
+        return result;
+
+    }
 
 
-	//Builds the query from the given map
-	private BasicDBObject buildQuery(Message queryRequest, Message operators){
+    public List<Service> queryAll() throws DatabaseException {
 
-		Map<String, Object> serv =  queryRequest.getMap();
-		
-		Map<String, String> ops = operators.getMap();
-	
-		List <HashMap<String,Object>> keyValueList = new ArrayList<HashMap<String,Object>>();
-		
-        for (Map.Entry<String,Object> entry : serv.entrySet()) {
+        Message msg = new Message();
+        List<Service> result = query(msg, msg, msg);
+        return result;
+
+    }
+
+
+    //Builds the query from the given map
+    private BasicDBObject buildQuery(Message queryRequest, Message operators) {
+
+        Map<String, Object> serv = queryRequest.getMap();
+
+        Map<String, String> ops = operators.getMap();
+
+        List<HashMap<String, Object>> keyValueList = new ArrayList<HashMap<String, Object>>();
+
+        for (Map.Entry<String, Object> entry : serv.entrySet()) {
 
             String newKey = entry.getKey();
             HashMap<String, Object> tmpHash = new HashMap<String, Object>();
             Object obj = serv.get(newKey);
 
             if (obj instanceof String) {
-                 
-            	String val = (String) obj;
-            	//deal with metacharacter
-            	 if(val.endsWith("*")){
 
-            		 val = val.substring(0, val.length()-1);
-            		 //System.out.println(val);
-            		 Pattern newVal = Pattern.compile("^"+val);
-            		 tmpHash.put(newKey, newVal);
+                String val = (String) obj;
+                //deal with metacharacter
+                if (val.endsWith("*")) {
 
-            	 }else if(val.startsWith("*")){
+                    val = val.substring(0, val.length() - 1);
+                    //System.out.println(val);
+                    Pattern newVal = Pattern.compile("^" + val);
+                    tmpHash.put(newKey, newVal);
 
-            		 val = val.substring(1, val.length());
-            		 //System.out.println(val);
-            		 Pattern newVal = Pattern.compile(val+"$");
-            		 tmpHash.put(newKey, newVal);
+                } else if (val.startsWith("*")) {
 
-            	 }else{
+                    val = val.substring(1, val.length());
+                    //System.out.println(val);
+                    Pattern newVal = Pattern.compile(val + "$");
+                    tmpHash.put(newKey, newVal);
 
-            		 tmpHash.put(newKey, (String) obj);
+                } else {
 
-            	 }
+                    tmpHash.put(newKey, (String) obj);
+
+                }
 
             } else if (obj instanceof List) {
 
-                 List <Object> values = (List<Object>) obj;
-                 ArrayList newValues = new ArrayList();
+                List<Object> values = (List<Object>) obj;
+                ArrayList newValues = new ArrayList();
 
-                 if(values.size()>1){
+                if (values.size() > 1) {
 
-                	 for(int i=0; i<values.size();i++){
+                    for (int i = 0; i < values.size(); i++) {
 
-                		 String val = (String)values.get(i);
+                        String val = (String) values.get(i);
 
-                		 if(val.endsWith("*")){
+                        if (val.endsWith("*")) {
 
-                    		 val = val.substring(0, val.length()-1);
-                    		 //System.out.println(val);
-                    		 Pattern newVal = Pattern.compile("^"+val);
-                    		 newValues.add(newVal);
+                            val = val.substring(0, val.length() - 1);
+                            //System.out.println(val);
+                            Pattern newVal = Pattern.compile("^" + val);
+                            newValues.add(newVal);
 
-                    	 }else if(val.startsWith("*")){
+                        } else if (val.startsWith("*")) {
 
-                    		 val = val.substring(1, val.length());
-                    		 //System.out.println(val);
-                    		 Pattern newVal = Pattern.compile(val+"$");
-                    		 newValues.add(newVal);
+                            val = val.substring(1, val.length());
+                            //System.out.println(val);
+                            Pattern newVal = Pattern.compile(val + "$");
+                            newValues.add(newVal);
 
-                    	 }else{
+                        } else {
 
-                    		 newValues.add(val);
+                            newValues.add(val);
 
-                    	 }
-                		 
-                	 }
+                        }
 
-                	 HashMap<String, Object> listvalues = new HashMap<String, Object>();
+                    }
 
-                	 if(ops.containsKey(newKey) && listOperatorMapping.containsKey(ops.get(newKey))){
-                		 
-                		 //get the operator
-                		 String curop = listOperatorMapping.get(ops.get(newKey));
-                		 listvalues.put(curop, newValues);
-                		 tmpHash.put(newKey, listvalues);
+                    HashMap<String, Object> listvalues = new HashMap<String, Object>();
 
-                	 }else{
+                    if (ops.containsKey(newKey) && listOperatorMapping.containsKey(ops.get(newKey))) {
 
-                		 tmpHash.put(newKey, newValues);
+                        //get the operator
+                        String curop = listOperatorMapping.get(ops.get(newKey));
+                        listvalues.put(curop, newValues);
+                        tmpHash.put(newKey, listvalues);
 
-                	 }  
+                    } else {
 
-                 }else if(values.size()==1){
+                        tmpHash.put(newKey, newValues);
 
-                	 String val = (String)values.get(0);
-                	 if(val.endsWith("*")){
+                    }
 
-                		 val = val.substring(0, val.length()-1);
-                		 Pattern newVal = Pattern.compile("^"+val);
-                		 tmpHash.put(newKey, newVal);
+                } else if (values.size() == 1) {
 
-                	 }else if(val.startsWith("*")){
+                    String val = (String) values.get(0);
+                    if (val.endsWith("*")) {
 
-                		 val = val.substring(1, val.length());
-                		 //System.out.println(val);
-                		 Pattern newVal = Pattern.compile(val+"$");
-                		 newValues.add(newVal);
+                        val = val.substring(0, val.length() - 1);
+                        Pattern newVal = Pattern.compile("^" + val);
+                        tmpHash.put(newKey, newVal);
 
-                	 }else{
+                    } else if (val.startsWith("*")) {
 
-                		 tmpHash.put(newKey, values.get(0));
+                        val = val.substring(1, val.length());
+                        //System.out.println(val);
+                        Pattern newVal = Pattern.compile(val + "$");
+                        newValues.add(newVal);
 
-                	 }
-                        
-                 }
-                    
-             }
-            
-            if(!tmpHash.isEmpty()){
+                    } else {
 
-            	keyValueList.add(tmpHash);
+                        tmpHash.put(newKey, values.get(0));
+
+                    }
+
+                }
 
             }
-           
+
+            if (!tmpHash.isEmpty()) {
+
+                keyValueList.add(tmpHash);
+
+            }
+
         }
-		
-		BasicDBObject query = new BasicDBObject();
-		ArrayList queryOp = (ArrayList)operators.getOperator();
-		String op=null;
 
-		if( queryOp != null && !queryOp.isEmpty()){
+        BasicDBObject query = new BasicDBObject();
+        ArrayList queryOp = (ArrayList) operators.getOperator();
+        String op = null;
 
-			op = (String)queryOp.get(0);        //uses only the first value from the list
+        if (queryOp != null && !queryOp.isEmpty()) {
 
-		}else{
+            op = (String) queryOp.get(0);        //uses only the first value from the list
 
-			op = ReservedKeywords.RECORD_OPERATOR_DEFAULT;
+        } else {
 
-		}
-		
-		String mongoOp="";
-		
-		if(operatorMapping.containsKey(op)){
+            op = ReservedKeywords.RECORD_OPERATOR_DEFAULT;
 
-			mongoOp = operatorMapping.get(op);
+        }
 
-		}
-		
-		if(!keyValueList.isEmpty()){
+        String mongoOp = "";
 
-			query.put(mongoOp, keyValueList);
+        if (operatorMapping.containsKey(op)) {
 
-		}
+            mongoOp = operatorMapping.get(op);
 
-		return query;
+        }
 
-	}
+        if (!keyValueList.isEmpty()) {
+
+            query.put(mongoOp, keyValueList);
+
+        }
+
+        return query;
+
+    }
 
 
-	public Service getServiceByURI(String URI) throws DatabaseException{
+    public Service getServiceByURI(String URI) throws DatabaseException {
 
-		int errorcode;
-		String errormsg;
-		
-		BasicDBObject query = new BasicDBObject();
-		query.put(ReservedKeywords.RECORD_URI, URI);
-		Service result=null;
-		
-		try{
+        int errorcode;
+        String errormsg;
 
-			DBCursor cur = coll.find(query);
-		
-			//System.out.println("Came inside getServiceByURI");
-			
-			if (cur.size() == 1){
+        BasicDBObject query = new BasicDBObject();
+        query.put(ReservedKeywords.RECORD_URI, URI);
+        Service result = null;
 
-				DBObject tmp = cur.next();
-				Map<String,Object> tmpMap= tmp.toMap();
-				tmpMap.remove("_id");
-				result = new Service(tmpMap);
+        try {
 
-			}
+            DBCursor cur = coll.find(query);
 
-		}catch(MongoException e){
+            //System.out.println("Came inside getServiceByURI");
 
-			throw new DatabaseException(e.getMessage());
+            if (cur.size() == 1) {
 
-		}
+                DBObject tmp = cur.next();
+                Map<String, Object> tmpMap = tmp.toMap();
+                tmpMap.remove("_id");
+                result = new Service(tmpMap);
 
-			return result;
+            }
 
-	}
+        } catch (MongoException e) {
 
-	
+            throw new DatabaseException(e.getMessage());
+
+        }
+
+        return result;
+
+    }
+
+
 }

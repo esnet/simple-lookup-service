@@ -1,14 +1,13 @@
 package net.es.lookup.utils;
 
+import org.apache.log4j.Logger;
+import org.ho.yaml.Yaml;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Map;
-
-import org.ho.yaml.Yaml;
-
-import org.apache.log4j.Logger;
 
 
 public class ConfigHelper {
@@ -33,7 +32,7 @@ public class ConfigHelper {
     }
 
 
-    @SuppressWarnings({ "static-access", "unchecked" })
+    @SuppressWarnings({"static-access", "unchecked"})
     public Map getConfiguration(String configFile) {
 
         Map configuration = null;
@@ -52,7 +51,7 @@ public class ConfigHelper {
             } catch (FileNotFoundException e) {
 
                 //e.printStackTrace();
-                LOG.error(configFile+" not found\n. Config file required to start Lookup Service");
+                LOG.error(configFile + " not found\n. Config file required to start Lookup Service");
                 System.exit(1);
 
             }

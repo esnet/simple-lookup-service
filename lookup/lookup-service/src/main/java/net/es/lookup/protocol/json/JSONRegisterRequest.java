@@ -1,65 +1,56 @@
 package net.es.lookup.protocol.json;
 
-import java.util.Set;
-
-import org.joda.time.Duration;
-import org.joda.time.format.ISOPeriodFormat;
-import org.joda.time.format.PeriodFormatter;
-
-import net.es.lookup.common.Message;
 import net.es.lookup.common.RegisterRequest;
-import net.sf.json.util.JSONTokener;
-import net.sf.json.JSONObject;
 import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
+import net.sf.json.util.JSONTokener;
 
-import net.es.lookup.common.ReservedKeywords;
-
-import net.es.lookup.common.exception.internal.DataFormatException;
+import java.util.Set;
 
 public class JSONRegisterRequest extends RegisterRequest {
 
     static public final int VALID = 1;
     static public final int INCORRECT_FORMAT = 2;
 
-    public JSONRegisterRequest (String message) {
+    public JSONRegisterRequest(String message) {
 
         this.parseJSON(message);
 
     }
 
-    private void parseJSON (String message) {
-    	
-    	JSONTokener tokener = new JSONTokener(message);
-    	Object obj;
+    private void parseJSON(String message) {
 
-    	try{
+        JSONTokener tokener = new JSONTokener(message);
+        Object obj;
 
-    	       obj = tokener.nextValue();
+        try {
 
-    	}catch(JSONException e){
+            obj = tokener.nextValue();
 
-    		this.status = JSONRegisterRequest.INCORRECT_FORMAT;
-    		return;
+        } catch (JSONException e) {
 
-    	}
-     
-    	if(obj != null){
+            this.status = JSONRegisterRequest.INCORRECT_FORMAT;
+            return;
 
-    	       JSONObject jsonObj = (JSONObject) obj;
-    	        Set keyValues = jsonObj.entrySet();
+        }
 
-    	        for (Object o : ((JSONObject) obj).keySet()) {
+        if (obj != null) {
 
-    	            this.add(o.toString(), ((JSONObject) obj).get(o));
+            JSONObject jsonObj = (JSONObject) obj;
+            Set keyValues = jsonObj.entrySet();
 
-    	        }
+            for (Object o : ((JSONObject) obj).keySet()) {
 
-    	}else{
+                this.add(o.toString(), ((JSONObject) obj).get(o));
 
-    		this.status = JSONRegisterRequest.INCORRECT_FORMAT;
+            }
 
-    	}
- 
+        } else {
+
+            this.status = JSONRegisterRequest.INCORRECT_FORMAT;
+
+        }
+
     }
 
 

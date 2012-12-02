@@ -1,20 +1,21 @@
 package net.es.lookup.service;
 
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
-import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ClassNamesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
+import net.es.lookup.resources.AccessServiceResource;
+import net.es.lookup.resources.KeyResource;
+import net.es.lookup.resources.ServicesResource;
 import org.glassfish.grizzly.http.server.HttpServer;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
-import java.net.URI;
-
-import java.util.Set;
 import java.util.Iterator;
+import java.util.Set;
 
-import net.es.lookup.resources.*;
-
+//import com.sun.grizzly.websockets.WebSocket;
+//import com.sun.grizzly.websockets.WebSocketAddOn;
+//import com.sun.grizzly.websockets.WebSocketApplication;
 
 
 /**
@@ -24,14 +25,14 @@ import net.es.lookup.resources.*;
  */
 public class LookupService {
 
-    public static String SERVICE_URI_PREFIX="lookup/service";
+    public static String SERVICE_URI_PREFIX = "lookup";
     private int port = 8080;
     private String host = "localhost";
     private HttpServer httpServer = null;
     private static LookupService instance = null;
 
     //static {
-      //  LookupService.instance = new LookupService();
+    //  LookupService.instance = new LookupService();
     //}
 
 
@@ -56,17 +57,17 @@ public class LookupService {
     }
 
 
-    public LookupService () {
+    public LookupService() {
 
         // Default port is 8080 and default host is localhost
-    	this.host = "localhost";
+        this.host = "localhost";
         this.port = 8080;
         init();
 
     }
 
 
-    public LookupService (int port) {
+    public LookupService(int port) {
 
         this.port = port;
         init();
@@ -74,9 +75,9 @@ public class LookupService {
     }
 
 
-    public LookupService (String host, int port) {
+    public LookupService(String host, int port) {
 
-    	this.host = host;
+        this.host = host;
         this.port = port;
         init();
 
@@ -102,7 +103,7 @@ public class LookupService {
     protected HttpServer startServer() throws IOException {
 
         System.out.println("Creating Resource...");
-        
+
         String[] serviceResources = getResourceNames();
         ResourceConfig rc = new ClassNamesResourceConfig(serviceResources);
         System.out.println();
@@ -111,28 +112,34 @@ public class LookupService {
 
         while (iter.hasNext()) {
 
-          System.out.println(iter.next());
+            System.out.println(iter.next());
 
         }
 
         System.out.println(("Starting grizzly..."));
-        String hosturl = "http://"+this.host+"/";
-        return GrizzlyServerFactory.createHttpServer(UriBuilder.fromUri(hosturl).port(this.port).build(),
-                                                     rc);
+        String hosturl = "http://" + this.host + "/";
+        //return GrizzlyServerFactory.createHttpServer(UriBuilder.fromUri(hosturl).port(this.port).build(),rc);
+
+        HttpServer server = GrizzlyServerFactory.createHttpServer(UriBuilder.fromUri(hosturl).port(this.port).build(),
+                rc);
+
+
+        return server;
 
     }
 
-    
-    private String[] getResourceNames(){
+
+    private String[] getResourceNames() {
+
         //define resources here
         String[] services = {
-            AccessServiceResource.class.getName(),
-            KeyResource.class.getName(),
-            ServicesResource.class.getName(),
-            SubscribeResource.class.getName(),
-    	};
+                AccessServiceResource.class.getName(),
+                KeyResource.class.getName(),
+                ServicesResource.class.getName(),
+                //SubscribeResource.class.getName(),
+        };
 
-    	return services;
+        return services;
 
     }
 

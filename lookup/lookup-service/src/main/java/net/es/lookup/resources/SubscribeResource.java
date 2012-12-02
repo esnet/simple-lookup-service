@@ -1,50 +1,39 @@
 package net.es.lookup.resources;
 
-import net.es.lookup.api.Subscribe;
 
-import javax.ws.rs.POST;
-import javax.ws.rs.GET;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import org.atmosphere.annotation.Broadcast;
+import org.atmosphere.annotation.Suspend;
+import org.atmosphere.cpr.Broadcaster;
+import org.atmosphere.cpr.BroadcasterFactory;
+import org.atmosphere.jersey.Broadcastable;
+
+import javax.ws.rs.*;
+
 
 /**
- * This class and other similar resource classes need to be explicitly loaded in the 
+ * This class and other similar resource classes need to be explicitly loaded in the
  * net.es.lookup.service.LookupService class
  */
-@Path("/lookup/subscribe/{queryId}")
+@Path("/lookup/subscribe/{topic}")
+@Produces("text/plain")
+
 public class SubscribeResource {
 
-    private Subscribe subscribe = new Subscribe();
+    @GET
+    @Suspend
+    public Broadcastable receive(@HeaderParam("X-Remote-User") Broadcaster user) {
 
+        return new Broadcastable(user);
+    }
 
     @POST
-    @Consumes("application/json")
-    @Produces("application/json")
-    public String postHandler (String message) {
+    @Broadcast
+    public Broadcastable send(@FormParam("to") String to,
+                              @FormParam("msg") String msg) {
 
-        return this.subscribe.subscribe(message);
-    }
-
-
-    @GET
-    @Produces("application/json")
-    public String getHandler (@PathParam("queryId") String queryId) {
-
-        if (queryId == null) {
-            return "Not yet implemented\n";
-        } else {
-            return "Not yet implemented\n";
-        }
-    }
-
-
-    @DELETE
-    @Produces("application/json")
-    public String deleteHandler (String message, @PathParam("service") String serviceid) {
-        return "Not yet implemented\n";
+        Broadcaster user =
+                BroadcasterFactory.getDefault().lookup(Broadcaster.class, to);
+        return user == null ? null : new Broadcastable(msg, user);
     }
 
 }

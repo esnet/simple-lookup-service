@@ -1,33 +1,24 @@
 package net.es.lookup.resources;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
-
-
-
-import javax.ws.rs.POST;
-import javax.ws.rs.GET;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriInfo;
-
 import net.es.lookup.api.QueryServices;
 import net.es.lookup.api.RegisterService;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeywords;
 
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriInfo;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
- * This class and other similar resource classes need to be explicitly loaded in the 
+ * This class and other similar resource classes need to be explicitly loaded in the
  * net.es.lookup.service.LookupService class
  */
 
-@Path("/lookup/services")
+@Path("/lookup/records")
 public class ServicesResource {
 
     private QueryServices queryServices = new QueryServices();
@@ -37,7 +28,7 @@ public class ServicesResource {
     @POST
     @Consumes("application/json")
     @Produces("application/json")
-    public String postHandler (String message) {
+    public String postHandler(String message) {
 
         return this.registerService.registerService(message);
 
@@ -46,7 +37,7 @@ public class ServicesResource {
 
     @GET
     @Produces("application/json")
-    public String getHandler (@Context UriInfo ui) {
+    public String getHandler(@Context UriInfo ui) {
 
         MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
         Message message = new Message();
@@ -59,7 +50,7 @@ public class ServicesResource {
 
                 List<String> ops = new ArrayList();
                 ops.add(queryParams.getFirst(key));
-                message.add (key, ops);
+                message.add(key, ops);
 
             } else if (key.equals(ReservedKeywords.RECORD_SKIP)) {
 
@@ -73,13 +64,13 @@ public class ServicesResource {
 
                 // Not skip, operator or max-results. Must be key/values pair for the query
                 String strArr[] = queryParams.getFirst(key).split(",");
-                if (strArr.length>1){
+                if (strArr.length > 1) {
 
-                    message.add (key, Arrays.asList(strArr));
+                    message.add(key, Arrays.asList(strArr));
 
-                }else{
+                } else {
 
-                    message.add (key, queryParams.getFirst(key));
+                    message.add(key, queryParams.getFirst(key));
 
                 }
 

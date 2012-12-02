@@ -2,66 +2,64 @@ package net.es.lookup.protocol.json;
 
 import net.es.lookup.common.Message;
 import net.es.lookup.common.Service;
+import net.es.lookup.common.exception.internal.DataFormatException;
+import net.sf.json.JSONException;
 import net.sf.json.util.JSONBuilder;
 import net.sf.json.util.JSONStringer;
-import net.sf.json.JSONException;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-
-import net.es.lookup.common.exception.internal.DataFormatException;
 
 
 public class JSONMessage {
 
     public static final String LIST_OBJECT = "results";
 
-    public static String toString (Message message ) throws DataFormatException {
+    public static String toString(Message message) throws DataFormatException {
 
         JSONStringer stringer = new JSONStringer();
 
         Map<String, Object> map = message.getMap();
-        Set<Map.Entry<String, Object>> entries=  map.entrySet();
-        
-        try{
+        Set<Map.Entry<String, Object>> entries = map.entrySet();
 
-        	JSONBuilder tmp = stringer.object();
+        try {
 
-        	for (Map.Entry<String,Object> entry : entries) {
+            JSONBuilder tmp = stringer.object();
 
-        		//tmp = tmp.key(entry.getKey()).value(entry.getValue());
-        		
-        		if(entry.getValue() instanceof String){
+            for (Map.Entry<String, Object> entry : entries) {
 
-            		tmp = tmp.key(entry.getKey()).value(entry.getValue());
+                //tmp = tmp.key(entry.getKey()).value(entry.getValue());
 
-            	}else{
+                if (entry.getValue() instanceof String) {
 
-            		List<String> tmpvalues = (List)entry.getValue();
-            		Iterator<String> it = tmpvalues.iterator();
-            		tmp = tmp.key(entry.getKey());
-            		tmp = tmp.array();
+                    tmp = tmp.key(entry.getKey()).value(entry.getValue());
 
-            		while (it.hasNext()){
+                } else {
 
-            			tmp = tmp.value(it.next());
+                    List<String> tmpvalues = (List) entry.getValue();
+                    Iterator<String> it = tmpvalues.iterator();
+                    tmp = tmp.key(entry.getKey());
+                    tmp = tmp.array();
 
-            		}
+                    while (it.hasNext()) {
 
-            		tmp.endArray();
+                        tmp = tmp.value(it.next());
 
-            	}
+                    }
 
-        	}
+                    tmp.endArray();
 
-        	tmp.endObject();
+                }
 
-        }catch(JSONException e){
+            }
 
-        	throw new DataFormatException("Error in data format");
+            tmp.endObject();
+
+        } catch (JSONException e) {
+
+            throw new DataFormatException("Error in data format");
 
         }
 
@@ -70,55 +68,55 @@ public class JSONMessage {
     }
 
 
-    public static String toString (List<Service> services ) throws DataFormatException {
+    public static String toString(List<Service> services) throws DataFormatException {
 
         JSONStringer stringer = new JSONStringer();
         JSONBuilder tmp = stringer;
 
-        try{
+        try {
 
-	        tmp = tmp.object().key(JSONMessage.LIST_OBJECT).array();
-	
-	        for (Message service : services) {
+            tmp = tmp.object().key(JSONMessage.LIST_OBJECT).array();
 
-	            Map<String, Object> map = service.getMap();
-	            Set<Map.Entry<String, Object>> entries=  map.entrySet();
-	            tmp = tmp.object();
-	
-	            for (Map.Entry<String,Object> entry : entries) {
+            for (Message service : services) {
 
-	            	if(entry.getValue() instanceof String){
+                Map<String, Object> map = service.getMap();
+                Set<Map.Entry<String, Object>> entries = map.entrySet();
+                tmp = tmp.object();
 
-	            		tmp = tmp.key(entry.getKey()).value(entry.getValue());
+                for (Map.Entry<String, Object> entry : entries) {
 
-	            	}else{
+                    if (entry.getValue() instanceof String) {
 
-	            		List<String> tmpvalues = (List)entry.getValue();
-	            		Iterator<String> it = tmpvalues.iterator();
-	            		tmp = tmp.key(entry.getKey());
-	            		tmp = tmp.array();
+                        tmp = tmp.key(entry.getKey()).value(entry.getValue());
 
-	            		while (it.hasNext()){
+                    } else {
 
-	            			tmp = tmp.value(it.next());
+                        List<String> tmpvalues = (List) entry.getValue();
+                        Iterator<String> it = tmpvalues.iterator();
+                        tmp = tmp.key(entry.getKey());
+                        tmp = tmp.array();
 
-	            		}
+                        while (it.hasNext()) {
 
-	            		tmp.endArray();
+                            tmp = tmp.value(it.next());
 
-	            	}
+                        }
 
-	            }
+                        tmp.endArray();
 
-	            tmp = tmp.endObject();
+                    }
 
-	        }
+                }
 
-	        tmp = tmp.endArray().endObject();
+                tmp = tmp.endObject();
 
-        }catch(JSONException e){
+            }
 
-        	throw new DataFormatException("Error in data format");
+            tmp = tmp.endArray().endObject();
+
+        } catch (JSONException e) {
+
+            throw new DataFormatException("Error in data format");
 
         }
 

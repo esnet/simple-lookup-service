@@ -1,51 +1,39 @@
 package net.es.lookup.protocol.json;
 
 import net.es.lookup.common.DeleteRequest;
-import net.es.lookup.common.Service;
-import java.util.Map;
-import java.util.Set;
-
-import net.sf.json.JSONArray;
-import net.sf.json.util.JSONTokener;
 import net.sf.json.JSONObject;
+import net.sf.json.util.JSONTokener;
 
-import org.joda.time.Duration;
-import org.joda.time.format.ISOPeriodFormat;
-import org.joda.time.format.PeriodFormatter;
-import net.sf.json.JSONException;
+public class JSONDeleteRequest extends DeleteRequest {
 
-import net.es.lookup.common.ReservedKeywords;
+    static public final int VALID = 1;
+    static public final int INCORRECT_FORMAT = 2;
 
-public class JSONDeleteRequest extends DeleteRequest{
+    public JSONDeleteRequest(String message) {
 
-	static public final int VALID = 1;
-	static public final int INCORRECT_FORMAT =  2;
+        this.parseJSON(message);
 
-	public JSONDeleteRequest (String message) {
+    }
 
-		this.parseJSON(message);
+    private void parseJSON(String message) {
 
-	}
+        if (!message.isEmpty()) {
 
-	private void parseJSON (String message) {
+            JSONTokener tokener = new JSONTokener(message);
+            Object obj = tokener.nextValue();
+            JSONObject jsonObj = (JSONObject) obj;
 
-		if(!message.isEmpty()){
+            for (Object o : ((JSONObject) obj).keySet()) {
 
-			JSONTokener tokener = new JSONTokener(message);
-			Object obj = tokener.nextValue();
-			JSONObject jsonObj = (JSONObject) obj;
+                this.add(o.toString(), ((JSONObject) obj).get(o));
 
-			for (Object o : ((JSONObject) obj).keySet()) {
+            }
 
-				this.add(o.toString(), ((JSONObject) obj).get(o));
+        }
 
-			}
+        this.status = JSONDeleteRequest.VALID;
 
-		}
-
-		this.status = JSONDeleteRequest.VALID;
-
-	}
+    }
 
 
 }

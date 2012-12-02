@@ -1,20 +1,14 @@
 package net.es.lookup.api;
 
-
-import java.util.List;
-
-import net.es.lookup.common.Service;
-import net.es.lookup.database.ServiceDAOMongoDb;
-import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONSubRequest;
 
-public class Subscribe {
+public class QuerySubscribe {
 
     private String params;
 
     public String subscribe(String message) {
 
-      /*  String response;
+        /*  String response;
         try {
             JSONSubRequest request = new JSONSubRequest(message);
             if (request.getStatus() == JSONSubRequest.INCORRECT_FORMAT) {
@@ -36,8 +30,8 @@ public class Subscribe {
         }
         return "\n";
         */
-    	
-    	return "Not yet implemented";
+
+        return "Not yet implemented";
 
     }
 

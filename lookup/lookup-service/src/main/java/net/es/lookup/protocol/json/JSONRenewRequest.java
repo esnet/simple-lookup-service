@@ -1,34 +1,26 @@
 package net.es.lookup.protocol.json;
 
-import java.util.Map;
-import java.util.Set;
-import net.sf.json.util.JSONTokener;
-import net.sf.json.JSONObject;
-
-import net.es.lookup.common.Message;
 import net.es.lookup.common.RenewRequest;
-
-import org.joda.time.Duration;
-import org.joda.time.format.ISOPeriodFormat;
-import org.joda.time.format.PeriodFormatter;
 import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
+import net.sf.json.util.JSONTokener;
 
-import net.es.lookup.common.ReservedKeywords;
+import java.util.Set;
 
 public class JSONRenewRequest extends RenewRequest {
 
     static public final int VALID = 1;
-    static public final int INCORRECT_FORMAT =  2;
+    static public final int INCORRECT_FORMAT = 2;
 
-    public JSONRenewRequest (String message) {
+    public JSONRenewRequest(String message) {
 
-            this.parseJSON(message);
+        this.parseJSON(message);
 
     }
 
-    private void parseJSON (String message) {
+    private void parseJSON(String message) {
 
-        try{
+        try {
 
             JSONTokener tokener = new JSONTokener(message);
 
@@ -45,7 +37,7 @@ public class JSONRenewRequest extends RenewRequest {
 
             this.status = JSONRenewRequest.VALID;
 
-        }catch(JSONException e){
+        } catch (JSONException e) {
 
             this.status = JSONRenewRequest.INCORRECT_FORMAT;
 
