@@ -4,14 +4,14 @@ import java.util.Map;
 
 public abstract class DeleteResponse extends Message {
 
-	public DeleteResponse() {
+    public DeleteResponse() {
 
         super();
 
     }
 
 
-	public DeleteResponse(Map<String,Object> map) {
+    public DeleteResponse(Map<String, Object> map) {
 
         super(map);
 

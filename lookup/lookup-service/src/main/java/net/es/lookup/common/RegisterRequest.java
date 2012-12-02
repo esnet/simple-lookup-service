@@ -4,13 +4,13 @@ import java.util.Map;
 
 public abstract class RegisterRequest extends Message {
 
-	public RegisterRequest() {
+    public RegisterRequest() {
 
         super();
 
     }
 
-	public RegisterRequest(Map<String,Object> map) {
+    public RegisterRequest(Map<String, Object> map) {
 
         super(map);
 

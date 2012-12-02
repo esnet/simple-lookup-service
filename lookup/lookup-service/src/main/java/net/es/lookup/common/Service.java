@@ -21,9 +21,9 @@ public class Service extends Message {
 
     }
 
-    public Service (Map<String,Object> map) {
+    public Service(Map<String, Object> map) {
 
-        super (map);
+        super(map);
 
     }
 

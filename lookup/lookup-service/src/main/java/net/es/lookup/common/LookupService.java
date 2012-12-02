@@ -1,15 +1,13 @@
 /**
-* This interface defines the API between the REST API handling and the actual Lookup Service.
+ * This interface defines the API between the REST API handling and the actual Lookup Service.
  *
-**/
+ **/
 
 package net.es.lookup.common;
 
-import java.util.List;
-
 public class LookupService {
 
-    public RegisterResponse publishService (RegisterRequest registerRequest) {
+    public RegisterResponse publishService(RegisterRequest registerRequest) {
 
         return null;
 
@@ -20,20 +18,20 @@ public class LookupService {
         return null;
 
     }
-    
+
     public RenewResponse renewService(RenewRequest renewRequest) {
 
         return null;
 
     }
-    
-    public Service getServiceByURI (String URI) {
+
+    public Service getServiceByURI(String URI) {
 
         return null;
 
     }
 
-    public QueryResponse query (QueryRequest queryRequest) {
+    public QueryResponse query(QueryRequest queryRequest) {
 
         return null;
 

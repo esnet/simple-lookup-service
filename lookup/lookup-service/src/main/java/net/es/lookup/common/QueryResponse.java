@@ -1,17 +1,16 @@
 package net.es.lookup.common;
 
-import java.util.*;
-import net.es.lookup.common.*;
+import java.util.Map;
 
-public abstract class  QueryResponse extends Message{
+public abstract class QueryResponse extends Message {
 
-	public QueryResponse() {
+    public QueryResponse() {
 
         super();
 
     }
 
-	public QueryResponse(Map<String,Object> map) {
+    public QueryResponse(Map<String, Object> map) {
 
         super(map);
 

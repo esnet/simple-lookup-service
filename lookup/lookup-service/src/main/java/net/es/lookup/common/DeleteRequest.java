@@ -4,17 +4,16 @@ import java.util.Map;
 
 public abstract class DeleteRequest extends Message {
 
-	public DeleteRequest() {
+    public DeleteRequest() {
 
         super();
 
     }
 
-	public DeleteRequest(Map<String,Object> map) {
+    public DeleteRequest(Map<String, Object> map) {
 
         super(map);
 
     }
-
 
 }

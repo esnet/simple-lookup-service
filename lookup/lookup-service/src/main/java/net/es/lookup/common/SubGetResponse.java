@@ -4,13 +4,13 @@ import java.util.Map;
 
 public abstract class SubGetResponse extends Message {
 
-	public SubGetResponse() {
+    public SubGetResponse() {
 
         super();
 
     }
 
-	public SubGetResponse(Map<String,Object> map) {
+    public SubGetResponse(Map<String, Object> map) {
 
         super(map);
 

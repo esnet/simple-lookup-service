@@ -10,7 +10,7 @@ public abstract class QueryRequest extends Message {
 
     }
 
-	public QueryRequest(Map<String,Object> map) {
+    public QueryRequest(Map<String, Object> map) {
 
         super(map);
 

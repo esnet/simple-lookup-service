@@ -4,13 +4,13 @@ import java.util.Map;
 
 public abstract class SubRequest extends Message {
 
-	public SubRequest() {
+    public SubRequest() {
 
         super();
 
     }
 
-	public SubRequest(Map<String,Object> map) {
+    public SubRequest(Map<String, Object> map) {
 
         super(map);
 
