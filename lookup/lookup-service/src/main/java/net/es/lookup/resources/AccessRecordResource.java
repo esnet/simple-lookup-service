@@ -11,7 +11,7 @@ import javax.ws.rs.*;
  */
 
 @Path("/lookup/{record}/{recordid}")
-public class AccessServiceResource {
+public class AccessRecordResource {
 
     private AccessService accessService = new AccessService();
 
