@@ -3,9 +3,9 @@ package net.es.lookup.service;
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.ClassNamesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
-import net.es.lookup.resources.AccessServiceResource;
+import net.es.lookup.resources.AccessRecordResource;
 import net.es.lookup.resources.KeyResource;
-import net.es.lookup.resources.ServicesResource;
+import net.es.lookup.resources.RecordResource;
 import org.glassfish.grizzly.http.server.HttpServer;
 
 import javax.ws.rs.core.UriBuilder;
@@ -133,9 +133,9 @@ public class LookupService {
 
         //define resources here
         String[] services = {
-                AccessServiceResource.class.getName(),
+                AccessRecordResource.class.getName(),
                 KeyResource.class.getName(),
-                ServicesResource.class.getName(),
+                RecordResource.class.getName(),
                 //SubscribeResource.class.getName(),
         };
 
