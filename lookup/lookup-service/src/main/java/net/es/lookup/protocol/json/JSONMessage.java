@@ -75,7 +75,8 @@ public class JSONMessage {
 
         try {
 
-            tmp = tmp.object().key(JSONMessage.LIST_OBJECT).array();
+            //tmp = tmp.object().key(JSONMessage.LIST_OBJECT).array();
+            tmp = tmp.array();
 
             for (Message service : services) {
 
@@ -112,7 +113,8 @@ public class JSONMessage {
 
             }
 
-            tmp = tmp.endArray().endObject();
+            //tmp = tmp.endArray().endObject();
+            tmp = tmp.endArray();
 
         } catch (JSONException e) {
 

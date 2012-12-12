@@ -19,7 +19,7 @@ public class AccessRecordResource {
     @Produces("application/json")
     public String getHandler(@PathParam("record") String record, @PathParam("recordid") String recordid) {
 
-        String serviceuri = "lookup/"+ record + recordid;
+        String serviceuri = "lookup/"+ record +"/"+ recordid;
         return this.accessService.getService(serviceuri);
 
     }
