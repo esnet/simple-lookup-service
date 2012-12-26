@@ -22,7 +22,7 @@ public class KeyResource {
     @Produces("application/json")
     public String getHandler(@PathParam("record") String record, @PathParam("recordid") String recordid, @PathParam("key") String key) {
 
-        String serviceuri = "lookup/"+ record + recordid;
+        String serviceuri = "lookup/"+ record+"/" + recordid;
         return this.accessService.getKeyService(serviceuri, key);
 
     }
