@@ -28,7 +28,7 @@ public class AccessRecordResource {
     @Produces("application/json")
     public String deleteHandler(@PathParam("record") String record, @PathParam("recordid") String recordid, String service) {
 
-        String serviceuri = "lookup/"+ record + recordid;
+        String serviceuri = "lookup/"+ record +"/"+ recordid;
         return this.accessService.deleteService(serviceuri, service);
 
     }
@@ -37,7 +37,7 @@ public class AccessRecordResource {
     @Produces("application/json")
     public String renewHandler(@PathParam("record") String record, @PathParam("recordid") String recordid, String message) {
 
-        String serviceuri = "lookup/"+ record + recordid;
+        String serviceuri = "lookup/"+ record +"/"+ recordid;
         return this.accessService.renewService(serviceuri, message);
 
     }
