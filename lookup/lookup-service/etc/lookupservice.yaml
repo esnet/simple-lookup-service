@@ -2,7 +2,7 @@
 #Lookup Service settings
 lookupservice:
     host: 'localhost'
-    port: 9125
+    port: 8090
     lease:
         max: 2592000
         default: 7200
