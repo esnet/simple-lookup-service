@@ -10,7 +10,12 @@ import org.joda.time.DateTimeComparator;
 import org.joda.time.Instant;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.quartz.*;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.JobDataMap;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +32,7 @@ public class MongoDBMaintenanceJob implements Job {
     public MongoDBMaintenanceJob() {
 
         this.db = ServiceDAOMongoDb.getInstance();
+        LOG.info("Initializing MongoDBPrune...");
 
     }
 
