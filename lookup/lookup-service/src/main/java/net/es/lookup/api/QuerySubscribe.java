@@ -1,18 +1,21 @@
 package net.es.lookup.api;
 
 import net.es.lookup.common.Message;
+import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.QueryException;
 import net.es.lookup.common.exception.internal.QueueException;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONSubRequest;
+import net.es.lookup.protocol.json.JSONSubResponse;
 import net.es.lookup.pubsub.amq.AMQueueManager;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -35,17 +38,18 @@ public class QuerySubscribe {
         }
         // Verify that request is valid and authorized
         if (this.isValid(request) && this.isAuthed(request)) {
-            //List<Service> res = ServiceDAOMongoDb.getInstance().query(request);
-
             // Build response
-            Message res = new Message();
-            res.add("url", "http://localhost:61616");
+
+            JSONSubResponse res = new JSONSubResponse();
+            List<String> locator = new ArrayList<String>();
+            locator.add("tcp://localhost:61616");
+            res.add(ReservedKeywords.RECORD_SUBSCRIBE_LOCATOR, locator);
 
             AMQueueManager amqmanager = AMQueueManager.getInstance();
             try {
                 List<String> qlist = amqmanager.getQueues(request);
 
-                res.add("qid", qlist);
+                res.add(ReservedKeywords.RECORD_SUBSCRIBE_QUEUE, qlist);
                 response = JSONMessage.toString(res);
             } catch (QueryException e) {
                 throw new InternalErrorException(e.getMessage());

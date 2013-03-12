@@ -1,6 +1,7 @@
 package net.es.lookup.protocol.json;
 
 
+import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.SubRequest;
 import net.sf.json.JSONObject;
 import net.sf.json.util.JSONTokener;
@@ -12,7 +13,27 @@ public class JSONSubRequest extends SubRequest {
 
     public JSONSubRequest(String message) {
 
-        this.parseJSON(message);
+        super();
+
+        //if message is not empty, then parse
+        if (message != null && !message.isEmpty()) {
+
+            try {
+
+                this.parseJSON(message);
+                this.status = JSONSubRequest.VALID;
+
+            } catch (Exception e) {
+
+                this.status = JSONSubRequest.INCORRECT_FORMAT;
+
+            }
+        } else {
+
+            this.setDefault();
+            this.status = JSONSubRequest.VALID;
+
+        }
 
     }
 
@@ -27,11 +48,8 @@ public class JSONSubRequest extends SubRequest {
             this.add(o.toString(), ((JSONObject) obj).get(o));
 
         }
-
-        this.status = JSONSubRequest.VALID;
-
     }
 
-
 }
+
 
