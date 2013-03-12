@@ -23,10 +23,23 @@ public class AMQueueManager implements QueueManager {
     private HashMap<String, AMQueue> queuemap = new HashMap<String, AMQueue >();                          /* keeps track of queueid to queue mapping */
     private HashMap<String, List<String>> querymap = new HashMap<String, List<String>>();                 /* keeps track of query to queueid mapping  */
 
+    private static AMQueueManager instance = null;
     private static Logger LOG = Logger.getLogger(AMQueueManager.class);
 
     public AMQueueManager() {
+        setInstance(this);
+    }
 
+    public static synchronized void setInstance(AMQueueManager amQueueManager){
+        if(instance != null){
+            throw new RuntimeException("net.es.lookup.pubsub.amq.AMQueueManager: Attempt to create second instance");
+        }else{
+            instance = amQueueManager;
+        }
+    }
+
+    public static AMQueueManager getInstance(){
+        return instance;
     }
 
     /**

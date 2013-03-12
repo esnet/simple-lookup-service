@@ -6,6 +6,9 @@ import joptsimple.OptionSpec;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.database.ServiceDAOMongoDb;
+import net.es.lookup.pubsub.QueueManager;
+import net.es.lookup.pubsub.QueuePumpJob;
+import net.es.lookup.pubsub.amq.AMQueueManager;
 import net.es.lookup.utils.LookupServiceConfigReader;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -28,6 +31,7 @@ public class Invoker {
     private static LookupServiceConfigReader lcfg;
     private static String cfg = "";
     private static String logConfig = "./etc/log4j.properties";
+    private static AMQueueManager amQueueManager = null;
     //private static int dbpruneInterval;
 
     /**
@@ -78,6 +82,9 @@ public class Invoker {
         // Start the service
         Invoker.lookupService.startService();
 
+        //starting queuemanager
+        Invoker.amQueueManager = new AMQueueManager();
+
         //DB Pruning
         try {
 
@@ -103,6 +110,24 @@ public class Invoker {
 
             // Tell quartz to schedule the job using our trigger
             scheduler.scheduleJob(job, trigger);
+
+            // define the job and tie it to Queue Pump
+            JobDetail job1 = newJob(QueuePumpJob.class)
+                    .withIdentity("queuepump", "GenerateQData")
+                    .build();
+            //job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
+            // Trigger the job to run now, and then every n seconds for m times
+            Trigger trigger1 = newTrigger()
+                    .withIdentity("queuepumpTrigger", "GenerateQData")
+                    .startNow()
+                    .withSchedule(simpleSchedule()
+                            .withIntervalInSeconds(10)
+                            .withRepeatCount(3000))
+                    .build();
+
+            // Tell quartz to schedule the job using our trigger
+            scheduler.scheduleJob(job1, trigger1);
+
 
         } catch (SchedulerException se) {
 

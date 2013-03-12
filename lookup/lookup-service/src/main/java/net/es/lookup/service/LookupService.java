@@ -1,12 +1,15 @@
 package net.es.lookup.service;
 
+import com.sun.corba.se.pept.broker.Broker;
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.ClassNamesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
 import net.es.lookup.resources.AccessRecordResource;
 import net.es.lookup.resources.KeyResource;
 import net.es.lookup.resources.RecordResource;
+import net.es.lookup.resources.SubscribeResource;
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.apache.activemq.broker.BrokerService;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
@@ -30,6 +33,7 @@ public class LookupService {
     private String host = "localhost";
     private HttpServer httpServer = null;
     private static LookupService instance = null;
+    BrokerService broker = null;
 
     //static {
     //  LookupService.instance = new LookupService();
@@ -90,11 +94,15 @@ public class LookupService {
         try {
 
             this.httpServer = this.startServer();
+            this.broker = this.startBroker();
+
 
         } catch (IOException e) {
 
             System.out.println("Failed to start HTTP server: " + e);
 
+        } catch (Exception e){
+            System.out.println("Failed to start broker: " + e);
         }
 
     }
@@ -129,6 +137,17 @@ public class LookupService {
     }
 
 
+    protected BrokerService startBroker() throws Exception{
+        System.out.println("Creating ActiveMQ Broker");
+        BrokerService br = new BrokerService();
+
+        // TODO configure the broker
+        br.addConnector("tcp://localhost:61616");
+
+        br.start();
+        return br;
+    }
+
     private String[] getResourceNames() {
 
         //define resources here
@@ -136,7 +155,8 @@ public class LookupService {
                 AccessRecordResource.class.getName(),
                 KeyResource.class.getName(),
                 RecordResource.class.getName(),
-                //SubscribeResource.class.getName(),
+                SubscribeResource.class.getName(),
+
         };
 
         return services;

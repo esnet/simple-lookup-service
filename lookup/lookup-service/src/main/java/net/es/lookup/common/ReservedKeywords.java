@@ -29,4 +29,8 @@ public class ReservedKeywords {
     //record-values
     public static final String RECORD_VALUE_PS = "service";
     public static final String RECORD_VALUE_DEFAULT = RECORD_VALUE_PS;
+
+    public static final String SERVER_STATUS_UNKNOWN = "unknown";
+    public static final String SERVER_STATUS_ALIVE = "alive";
+    public static final String SERVER_STATUS_UNREACHABLE = "unreachable";
 }

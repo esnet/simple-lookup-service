@@ -105,6 +105,17 @@
             <version>3.0.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-all</artifactId>
+            <version>5.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-optional</artifactId>
+            <version>5.5.1</version>
+        </dependency>
+
     </dependencies>
 
 
