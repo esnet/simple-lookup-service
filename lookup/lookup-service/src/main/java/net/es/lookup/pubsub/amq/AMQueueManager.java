@@ -20,8 +20,9 @@ import org.apache.log4j.Logger;
  */
 public class AMQueueManager implements QueueManager {
 
-    private HashMap<String, AMQueue> queuemap = new HashMap<String, AMQueue >();                          /* keeps track of queueid to queue mapping */
-    private HashMap<String, List<String>> querymap = new HashMap<String, List<String>>();                 /* keeps track of query to queueid mapping  */
+    private HashMap<String, AMQueue> queuemap = new HashMap<String, AMQueue >();            /* keeps track of queueid to queue mapping */
+    private HashMap<String, List<String>> querymap = new HashMap<String, List<String>>();   /* keeps track of query to queueid mapping  */
+    private HashMap<String, List<Message>> normalizedquerymap = new HashMap<String, List<Message>>();   /* keeps track of normalized query to original query mapping  */
 
     private static AMQueueManager instance = null;
     private static Logger LOG = Logger.getLogger(AMQueueManager.class);
@@ -74,6 +75,11 @@ public class AMQueueManager implements QueueManager {
                  //add to querymap
                  res.add(qid);
                  querymap.put(normalizedQuery, res);
+
+                 //add to normalized query
+                 List<Message> queryList = new ArrayList<Message>();
+                 queryList.add(query);
+                 normalizedquerymap.put(normalizedQuery,queryList);
              }
 
         }
@@ -82,8 +88,22 @@ public class AMQueueManager implements QueueManager {
 
     }
 
+    /**
+     * This method is the implementation of the hasQueues method declared by QueueManager interface.
+     * This method simply returns true if queue exists for a query and false if not .
+     * */
+    public boolean hasQueues(Message query) throws QueryException, QueueException {
 
-   /**
+        String normalizedquery = QueryNormalizer.normalize(query);
+        if(querymap.containsKey(normalizedquery)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+
+    /**
     * This method is the implementation of the push method declared by QueueManager interface.
     * This method simply checks if queue exists and pushes the message to the queue. If queue does
     * not exist, it throws a QueueException.
@@ -99,4 +119,16 @@ public class AMQueueManager implements QueueManager {
         }
 
     }
+
+        public List<Message> getAllQueries(){
+
+        List<Message> queryList = new ArrayList<Message>();
+
+        for(String q: querymap.keySet()){
+            queryList.addAll(normalizedquerymap.get(q));
+        }
+
+        return queryList;
+    }
+
 }

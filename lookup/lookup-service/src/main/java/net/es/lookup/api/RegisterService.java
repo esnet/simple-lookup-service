@@ -7,13 +7,12 @@ import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.UnauthorizedException;
-import net.es.lookup.common.exception.internal.DataFormatException;
-import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.common.exception.internal.DuplicateEntryException;
+import net.es.lookup.common.exception.internal.*;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
+import net.es.lookup.pubsub.amq.AMQueuePump;
 import net.es.lookup.service.LookupService;
 import org.apache.log4j.Logger;
 
@@ -28,7 +27,6 @@ public class RegisterService {
     private String params;
 
     public String registerService(String message) {
-
         LOG.info(" Processing registerService.");
         LOG.info(" Received message: " + message);
         JSONRegisterResponse response;
@@ -59,6 +57,9 @@ public class RegisterService {
 
                 String uri = this.newURI(rType);
                 request.add(ReservedKeywords.RECORD_URI, uri);
+
+                //Add the state
+                request.add(ReservedKeywords.RECORD_STATE, ReservedKeywords.RECORD_VALUE_STATE_REGISTER);
 
                 // Build the matching query request that must fail for the service to be published
                 Message query = new Message();
@@ -105,9 +106,22 @@ public class RegisterService {
 
                     Message res = ServiceDAOMongoDb.getInstance().queryAndPublishService(request, query, operators);
                     response = new JSONRegisterResponse(res.getMap());
+                    String responseString = JSONMessage.toString(response);
+
+                    List<Message> resList = new ArrayList<Message>();
+                    resList.add(res);
+                    try {
+                        AMQueuePump.getInstance().fillQueues(resList);
+                    } catch (QueueException e) {
+                        LOG.error("Error sending Register Record  to Queue");
+                        LOG.info("Register: Caught Queue Exception");
+                    } catch (QueryException e) {
+                        LOG.error("Error sending Register Record  to Queue");
+                        LOG.info("Register: Caught Query Exception");
+                    }
                     LOG.info("Register status: SUCCESS; exiting");
-                    LOG.debug("response:" + JSONMessage.toString(response));
-                    return JSONMessage.toString(response);
+                    LOG.debug("response:" + responseString);
+                    return responseString;
 
                 } catch (DataFormatException e) {
 

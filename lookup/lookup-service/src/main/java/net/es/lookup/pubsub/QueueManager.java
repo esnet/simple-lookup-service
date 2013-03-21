@@ -21,10 +21,17 @@ public interface QueueManager {
      * are assigned for a particular query. It creates one if none is found.
      *
      * @param query The lookup service query for which a queue is required
-     * @return Returns a listof queue identifiers (string)
+     * @return Returns a list of queue identifiers (string)
      */
     public List<String> getQueues(Message query) throws QueryException, QueueException;
 
+    /**
+     * This method returns true if one or more queues exists for a particular query
+     *
+     * @param query The lookup service query for which a queue is required
+     * @return Returns true if one or more queue is found for the query
+     */
+    public boolean hasQueues(Message query) throws QueryException, QueueException;
 
     /**
      * This method pushes data to queue
@@ -35,5 +42,11 @@ public interface QueueManager {
      * @return void
      */
     public void push(String qid, Message message) throws QueueException;
+
+    /**
+     * This method returns all the queries that the QueueManager is handling
+     * @return List<String> A list of all the queries
+     */
+    public List<Message> getAllQueries();
 
 }

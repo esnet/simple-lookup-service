@@ -2,6 +2,7 @@ package net.es.lookup.api;
 
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeywords;
+import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.QueryException;
@@ -60,9 +61,9 @@ public class QuerySubscribe {
             }
 
             return response;
+        }else{
+            throw new BadRequestException("Subscribe supports only empty queries");
         }
-
-        return "\n";
 
 
 
@@ -79,11 +80,17 @@ public class QuerySubscribe {
 
     }
 
-
+    /**
+     * Checks if the message is valid
+     * */
     private boolean isValid(JSONSubRequest request) {
 
-        // All mandatory key/value must be present
+        // Should be an empty query
         boolean res = true;
+        if(request.getMap().size()>1){
+            res = false;
+        }
+
         return res;
 
     }

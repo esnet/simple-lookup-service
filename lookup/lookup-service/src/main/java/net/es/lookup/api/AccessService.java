@@ -11,10 +11,15 @@ import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
+import net.es.lookup.common.exception.internal.QueryException;
+import net.es.lookup.common.exception.internal.QueueException;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.*;
+import net.es.lookup.pubsub.amq.AMQueuePump;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 
@@ -197,7 +202,21 @@ public class AccessService {
                     if (gotLease) {
 
                         LOG.debug("gotLease for " + serviceid);
+                        //update state
+                        newRequest.add(ReservedKeywords.RECORD_STATE, ReservedKeywords.RECORD_VALUE_STATE_RENEW);
                         Message res = ServiceDAOMongoDb.getInstance().updateService(serviceid, newRequest);
+
+                        List<Message> sList = new ArrayList();
+                        sList.add(res);
+                        try {
+                            AMQueuePump.getInstance().fillQueues(sList);
+                        } catch (QueueException e) {
+                            LOG.error("Error sending Renew Record  to Queue");
+                            LOG.info("Renew: Caught Queue Exception");
+                        } catch (QueryException e) {
+                            LOG.error("Error sending Renew Record  to Queue");
+                            LOG.info("Renew: Caught Query Exception");
+                        }
 
                         if (res.getError() == 200) {
 
@@ -303,6 +322,21 @@ public class AccessService {
             try {
 
                 Message serviceRecord = ServiceDAOMongoDb.getInstance().deleteService(serviceid);
+
+                //update state
+                serviceRecord.add(ReservedKeywords.RECORD_STATE, ReservedKeywords.RECORD_VALUE_STATE_DELETE);
+
+                List<Message> sList = new ArrayList();
+                sList.add(serviceRecord);
+                try {
+                    AMQueuePump.getInstance().fillQueues(sList);
+                } catch (QueueException e) {
+                    LOG.error("Error sending Delete Record  to Queue");
+                    LOG.info("Delete: Caught Queue Exception");
+                } catch (QueryException e) {
+                    LOG.error("Error sending Delete Record  to Queue");
+                    LOG.info("Delete: Caught Query Exception");
+                }
 
                 if (serviceRecord == null) {
 

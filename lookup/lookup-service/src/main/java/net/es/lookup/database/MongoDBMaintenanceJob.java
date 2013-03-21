@@ -4,6 +4,9 @@ import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.Service;
 import net.es.lookup.common.exception.internal.DatabaseException;
+import net.es.lookup.common.exception.internal.QueryException;
+import net.es.lookup.common.exception.internal.QueueException;
+import net.es.lookup.pubsub.amq.AMQueuePump;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;
@@ -73,8 +76,9 @@ public class MongoDBMaintenanceJob implements Job {
                     String uri = (String) m.get(ReservedKeywords.RECORD_URI);
 
                     try {
-
-                        messages.add(db.deleteService(uri));
+                        Message tmp = db.deleteService(uri);
+                        tmp.add(ReservedKeywords.RECORD_STATE,ReservedKeywords.RECORD_VALUE_STATE_EXPIRE);
+                        messages.add(tmp);
 
                     } catch (Exception e) {
 
@@ -86,6 +90,16 @@ public class MongoDBMaintenanceJob implements Job {
 
             }
 
+        }
+
+        try {
+            AMQueuePump.getInstance().fillQueues(messages);
+        } catch (QueueException e) {
+            LOG.error("Error sending Expired Record  to Queue");
+            LOG.info("Expired Prune: Caught Queue Exception");
+        } catch (QueryException e) {
+            LOG.error("Error sending Expired Record  to Queue");
+            LOG.info("Expired Prune: Caught Query Exception");
         }
 
     }

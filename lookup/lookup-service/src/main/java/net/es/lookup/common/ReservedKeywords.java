@@ -11,7 +11,8 @@ public class ReservedKeywords {
     public static final String RECORD_EXPIRES = "expires";
     public static final String RECORD_SKIP = "skip";
     public static final String RECORD_MAXRESULTS = "maxresults";
-    public static final String RECORD_PRIVATEKEY = "record-privatekey";
+    public static final String RECORD_PRIVATEKEY = "privatekey";
+    public static final String RECORD_STATE = "state";
 
 
 
@@ -19,6 +20,10 @@ public class ReservedKeywords {
     public static final String RECORD_VALUE_PS = "service";
     public static final String RECORD_VALUE_SUBSCRIBE = "subscribe";
     public static final String RECORD_VALUE_DEFAULT = RECORD_VALUE_PS;
+    public static final String RECORD_VALUE_STATE_REGISTER = "registered";
+    public static final String RECORD_VALUE_STATE_RENEW = "renewed";
+    public static final String RECORD_VALUE_STATE_DELETE = "deleted";
+    public static final String RECORD_VALUE_STATE_EXPIRE = "expired";
 
     //operator keys
     public static final String RECORD_OPERATOR_SUFFIX = "operator";

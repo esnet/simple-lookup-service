@@ -5,8 +5,8 @@ lookupservice:
     port: 8090
     lease:
         max: 2592000
-        default: 7200
-        min: 1800
+        default: 1800
+        min: 7200
 
 #Database settings  
 database:
@@ -16,5 +16,5 @@ database:
     DBCollName: 'services'
     username: 'lookup'
     password: 'abc123'
-    pruneInterval: 3600 
+    pruneInterval: 3600
     pruneThreshold: 300
