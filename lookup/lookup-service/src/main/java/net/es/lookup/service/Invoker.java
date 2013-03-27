@@ -9,6 +9,7 @@ import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.pubsub.amq.AMQueueManager;
 import net.es.lookup.pubsub.amq.AMQueuePump;
 import net.es.lookup.utils.LookupServiceConfigReader;
+import net.es.lookup.utils.QueueServiceConfigReader;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -32,6 +33,11 @@ public class Invoker {
     private static String logConfig = "./etc/log4j.properties";
     private static AMQueueManager amQueueManager = null;
     private static AMQueuePump amQueuePump = null;
+    private static String queueConfig = "";
+    private static String queuehost = "";
+    private static int queueport;
+    private static boolean queueservice = false;
+    private static String queueprotocol;
     //private static int dbpruneInterval;
 
     /**
@@ -58,9 +64,32 @@ public class Invoker {
 
         }
 
+        if (queueConfig != null && !queueConfig.isEmpty()) {
+
+            System.out.println("Using queue config File: " + queueConfig);
+            QueueServiceConfigReader.init(queueConfig);
+
+        } else {
+
+            System.out.println("Using default config file");
+
+        }
+
         lcfg = LookupServiceConfigReader.getInstance();
         port = lcfg.getPort();
         host = lcfg.getHost();
+
+        QueueServiceConfigReader qcfg = QueueServiceConfigReader.getInstance();
+        queuehost = qcfg.getHost();
+        queueport = qcfg.getPort();
+        queueprotocol = qcfg.getProtocol();
+
+        if(qcfg.getServiceState().equals("on")){
+            queueservice = true;
+        }else{
+            queueservice = false;
+        }
+
         int dbpruneInterval = lcfg.getPruneInterval();
         long prunethreshold = lcfg.getPruneThreshold();
         System.out.println("starting ServiceDAOMongoDb");
@@ -79,19 +108,25 @@ public class Invoker {
         System.out.println("starting Lookup Service");
         // Create the REST service
         Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
+        Invoker.lookupService.setQueueServiceRequired(queueservice);
+        Invoker.lookupService.setQueuehost(queuehost);
+        Invoker.lookupService.setQueueport(queueport);
+        Invoker.lookupService.setQueueprotocol(queueprotocol);
+
+
+
         // Start the service
         Invoker.lookupService.startService();
 
-        //starting queues
+
+        //starting queueservice
         Invoker.amQueueManager = new AMQueueManager();
         Invoker.amQueuePump = new AMQueuePump();
 
         //DB Pruning
         try {
 
-            // Grab the Scheduler instance from the Factory 
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
-            // and start it off
             scheduler.start();
 
             // define the job and tie it to  mongoJob class
@@ -101,15 +136,13 @@ public class Invoker {
             job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
 
             // Trigger the job to run now, and then every dbpruneInterval seconds
-            Trigger trigger = newTrigger()
-                    .withIdentity("DBTrigger", "DBMaintenance")
+            Trigger trigger = newTrigger().withIdentity("DBTrigger", "DBMaintenance")
                     .startNow()
                     .withSchedule(simpleSchedule()
                             .withIntervalInSeconds(dbpruneInterval)
                             .repeatForever())
                     .build();
 
-            // Tell quartz to schedule the job using our trigger
             scheduler.scheduleJob(job, trigger);
 
         } catch (SchedulerException se) {
@@ -137,6 +170,7 @@ public class Invoker {
         OptionSpec<String> HOST = parser.accepts("h", "host").withRequiredArg().ofType(String.class);
         OptionSpec<String> CONFIG = parser.accepts("c", "config").withRequiredArg().ofType(String.class);
         OptionSpec<String> LOGCONFIG = parser.accepts("l", "logConfig").withRequiredArg().ofType(String.class);
+        OptionSpec<String> QUEUECONFIG = parser.accepts("q", "queueConfig").withRequiredArg().ofType(String.class);
         OptionSet options = parser.parse(args);
 
         // check for help
@@ -168,6 +202,12 @@ public class Invoker {
         if (options.has(LOGCONFIG)) {
 
             logConfig = (String) options.valueOf(LOGCONFIG);
+
+        }
+
+        if (options.has(QUEUECONFIG)) {
+
+            queueConfig = (String) options.valueOf(LOGCONFIG);
 
         }
 

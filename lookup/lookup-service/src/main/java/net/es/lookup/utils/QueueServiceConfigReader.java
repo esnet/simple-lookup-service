@@ -21,6 +21,11 @@ public class QueueServiceConfigReader {
     private String host = "127.0.0.1";
     private int port = 16617;
     private String protocol = "tcp";
+    private String serviceState;
+
+
+    private boolean serviceUp;
+    private String url;
 
     private Map<String, Object> messageMap = new HashMap<String, Object>();
     private boolean persistent = false;
@@ -84,6 +89,32 @@ public class QueueServiceConfigReader {
         return persistent;
     }
 
+    public String getServiceState() {
+
+        return serviceState;
+    }
+
+    public boolean isServiceUp() {
+
+        return serviceUp;
+    }
+
+
+    public void setServiceState(String serviceState) {
+
+        this.serviceState = serviceState;
+    }
+
+    public String getUrl() {
+
+        return url;
+    }
+
+    public void setUrl(String url) {
+
+        this.url = url;
+    }
+
     private void setInfo(String configFile) {
 
         ConfigHelper cfg = ConfigHelper.getInstance();
@@ -96,6 +127,14 @@ public class QueueServiceConfigReader {
             queueServiceMap = (HashMap) yamlMap.get("queue");
             host = (String) queueServiceMap.get("host");
             port = (Integer) queueServiceMap.get("port");
+            serviceState = (String) queueServiceMap.get("service");
+            url = protocol+"://"+host+":"+port;
+
+            if(serviceState.equals("on")){
+                serviceUp=true;
+            }else{
+                serviceUp=false;
+            }
 
             messageMap = (HashMap) yamlMap.get("message");
             persistent = (Boolean) messageMap.get("persistent");

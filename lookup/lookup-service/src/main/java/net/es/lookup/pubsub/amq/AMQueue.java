@@ -3,6 +3,7 @@ package net.es.lookup.pubsub.amq;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.QueueException;
+import net.es.lookup.common.exception.internal.ServiceNotSupported;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.pubsub.Queue;
 import net.es.lookup.utils.QueueServiceConfigReader;
@@ -34,7 +35,7 @@ public class AMQueue extends Queue {
      */
     public AMQueue() throws QueueException {
 
-        //TODO: Make ActiveMQ options configurable
+        //TODO: Make ActiveMQ user, password options configurable
         String user = ActiveMQConnection.DEFAULT_USER;
         String password = ActiveMQConnection.DEFAULT_PASSWORD;
         QueueServiceConfigReader configReader = QueueServiceConfigReader.getInstance();

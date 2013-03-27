@@ -4,13 +4,16 @@ import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
+import net.es.lookup.common.exception.api.NotSupportedException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.QueryException;
 import net.es.lookup.common.exception.internal.QueueException;
+import net.es.lookup.common.exception.internal.ServiceNotSupported;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONSubRequest;
 import net.es.lookup.protocol.json.JSONSubResponse;
 import net.es.lookup.pubsub.amq.AMQueueManager;
+import net.es.lookup.utils.QueueServiceConfigReader;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
@@ -36,6 +39,9 @@ public class QuerySubscribe {
             System.out.println("INCORRECT FORMAT");
             // TODO: return correct error code
             return "402\n";
+        }
+        if(!QueueServiceConfigReader.getInstance().isServiceUp()){
+            throw new NotSupportedException("Queue Service Not Supported");
         }
         // Verify that request is valid and authorized
         if (this.isValid(request) && this.isAuthed(request)) {

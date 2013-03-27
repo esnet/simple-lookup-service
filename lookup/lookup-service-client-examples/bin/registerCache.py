@@ -7,7 +7,7 @@ import json
 import codecs
 
 #serviceFiles = ["bwctl","owamp","ndt","npad","ping","pinger","psb.bwctl","psb.owamp","snmpma","traceroute","traceroute_ma","phoebus","gridftp","hls"]
-attributes = ["access-point", "description", "service-type","service-location","domain","timestamp"]
+attributes = ["service-locator", "service-name", "service-type","location-city","location-region","location-country","group-communities","timestamp"]
 #retrieve cache file
 u = urllib2.urlopen(' http://ps1.es.net:8096/cache.tgz')
 myfile=os.path.join(os.path.dirname(__file__),"..","input",'lscache.tgz')
@@ -39,28 +39,18 @@ for infile in listing:
         #print line
         s= line.split("|")
         index = line.find("hLS")
-        if index > 0:
-            index2 = line.find("Korea")
-            if(index2>0):
-                count = count+1
-                print line
         #print s
         #keywordValues=[]
         keywordValues=""
         if(len(s)==6):
             keywords = s[4].split(",")
-            k=keywords[0].split(":")
-            if (len(k)==2):
-                keywordValues = k[1]
-            else:
-                keywordValues=k[0]
             #commenting out till LS can support lists
-            #for keyword in keywords:
-             #   k = keyword.split(":")
-              #  if(len(k)==2):
-               #     keywordValues.append(k[1])
-               # else:
-                #    keywordValues.append(k[0]))
+            for keyword in keywords:
+                k = keyword.split(":")
+                if(len(k)==2):
+                    keywordValues.append(k[1])
+                else:
+                    keywordValues.append(k[0]))
         else:
             break;
         if (len(s) == len(attributes)):
@@ -79,9 +69,8 @@ for infile in listing:
 #delete directory
 rmtree(dir)
 
-#print len(fdata)
-#print filesprocessed
-print count
+print len(fdata)
+print filesprocessed
 
 #for d in fdata:
     #print d
@@ -93,7 +82,7 @@ print count
     #print params
     #headers = {"Content-type": "application/json", "Accept": "application/json"}
     #conn = httplib.HTTPConnection("ps4.es.net:8085")
-    #conn.request("POST", "lookup/services", params, headers)
+    #conn.request("POST", "lookup/records", params, headers)
     #response = conn.getresponse()
     #print response.status, response.reason
 

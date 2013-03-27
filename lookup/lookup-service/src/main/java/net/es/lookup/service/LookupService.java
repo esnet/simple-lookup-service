@@ -1,6 +1,5 @@
 package net.es.lookup.service;
 
-import com.sun.corba.se.pept.broker.Broker;
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.ClassNamesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
@@ -16,11 +15,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 
-//import com.sun.grizzly.websockets.WebSocket;
-//import com.sun.grizzly.websockets.WebSocketAddOn;
-//import com.sun.grizzly.websockets.WebSocketApplication;
-
-
 /**
  * This class contains the method to start the lookup service
  * NOTE: All the resource classes (ie., classes that contain @Path annotation) need to be explicitly loaded in
@@ -34,6 +28,70 @@ public class LookupService {
     private HttpServer httpServer = null;
     private static LookupService instance = null;
     BrokerService broker = null;
+    private String queuehost;
+    private int queueport;
+    private String queueprotocol;
+    private boolean queueServiceRequired;
+
+    public int getPort() {
+
+        return port;
+    }
+
+    public void setPort(int port) {
+
+        this.port = port;
+    }
+
+    public String getHost() {
+
+        return host;
+    }
+
+    public void setHost(String host) {
+
+        this.host = host;
+    }
+
+    public String getQueuehost() {
+
+        return queuehost;
+    }
+
+    public void setQueuehost(String queuehost) {
+
+        this.queuehost = queuehost;
+    }
+
+    public int getQueueport() {
+
+        return queueport;
+    }
+
+    public void setQueueport(int queueport) {
+
+        this.queueport = queueport;
+    }
+
+    public String getQueueprotocol() {
+
+        return queueprotocol;
+    }
+
+    public void setQueueprotocol(String queueprotocol) {
+
+        this.queueprotocol = queueprotocol;
+    }
+
+    public boolean isQueueServiceRequired() {
+
+        return queueServiceRequired;
+    }
+
+    public void setQueueServiceRequired(boolean queueServiceRequired) {
+
+        this.queueServiceRequired = queueServiceRequired;
+    }
 
     //static {
     //  LookupService.instance = new LookupService();
@@ -94,7 +152,10 @@ public class LookupService {
         try {
 
             this.httpServer = this.startServer();
-            this.broker = this.startBroker();
+            if(queueServiceRequired){
+                this.broker = this.startBroker();
+            }
+
 
 
         } catch (IOException e) {
@@ -141,8 +202,8 @@ public class LookupService {
         System.out.println("Creating ActiveMQ Broker");
         BrokerService br = new BrokerService();
 
-        // TODO configure the broker
-        br.addConnector("tcp://localhost:61616");
+        String url = queueprotocol+"://"+queuehost+":"+queueport;
+        br.addConnector(url);
 
         br.start();
         return br;

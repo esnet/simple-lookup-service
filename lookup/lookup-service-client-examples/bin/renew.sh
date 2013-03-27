@@ -1,3 +1,3 @@
 #!/bin/sh
 
-curl -v -H "Content-Type: application/json" -X POST  http://localhost:8080/lookup/service/1af845cf-a25b-444c-b32f-fea3d6b19a30
+curl -v -H "Content-Type: application/json" -X POST  http://localhost:8090/lookup/vp5/ae6897b0-2f21-4a40-ac96-5f6a64d0a6a7

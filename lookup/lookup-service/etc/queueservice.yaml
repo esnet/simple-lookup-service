@@ -1,5 +1,6 @@
 #Queue
 queue:
+    service: 'off'
     host: 'localhost'
     port: 61616
     protocol: 'tcp'
