@@ -1,0 +1,10 @@
+#Queue
+queue:
+    host: 'localhost'
+    port: 61616
+    protocol: 'tcp'
+
+#Messages
+message:
+    persistent: true
+    ttl: 120

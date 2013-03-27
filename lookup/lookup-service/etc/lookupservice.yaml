@@ -18,3 +18,4 @@ database:
     password: 'abc123'
     pruneInterval: 3600
     pruneThreshold: 300
+
