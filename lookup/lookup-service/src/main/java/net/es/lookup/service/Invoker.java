@@ -34,10 +34,7 @@ public class Invoker {
     private static AMQueueManager amQueueManager = null;
     private static AMQueuePump amQueuePump = null;
     private static String queueConfig = "";
-    private static String queuehost = "";
-    private static int queueport;
     private static boolean queueservice = false;
-    private static String queueprotocol;
     //private static int dbpruneInterval;
 
     /**
@@ -80,9 +77,6 @@ public class Invoker {
         host = lcfg.getHost();
 
         QueueServiceConfigReader qcfg = QueueServiceConfigReader.getInstance();
-        queuehost = qcfg.getHost();
-        queueport = qcfg.getPort();
-        queueprotocol = qcfg.getProtocol();
 
         if(qcfg.getServiceState().equals("on")){
             queueservice = true;
@@ -109,9 +103,7 @@ public class Invoker {
         // Create the REST service
         Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
         Invoker.lookupService.setQueueServiceRequired(queueservice);
-        Invoker.lookupService.setQueuehost(queuehost);
-        Invoker.lookupService.setQueueport(queueport);
-        Invoker.lookupService.setQueueprotocol(queueprotocol);
+        Invoker.lookupService.setQueueurl(qcfg.getUrl());
 
 
 

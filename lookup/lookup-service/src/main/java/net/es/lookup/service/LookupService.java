@@ -28,9 +28,7 @@ public class LookupService {
     private HttpServer httpServer = null;
     private static LookupService instance = null;
     BrokerService broker = null;
-    private String queuehost;
-    private int queueport;
-    private String queueprotocol;
+    private String queueurl;
     private boolean queueServiceRequired;
 
     public int getPort() {
@@ -53,36 +51,6 @@ public class LookupService {
         this.host = host;
     }
 
-    public String getQueuehost() {
-
-        return queuehost;
-    }
-
-    public void setQueuehost(String queuehost) {
-
-        this.queuehost = queuehost;
-    }
-
-    public int getQueueport() {
-
-        return queueport;
-    }
-
-    public void setQueueport(int queueport) {
-
-        this.queueport = queueport;
-    }
-
-    public String getQueueprotocol() {
-
-        return queueprotocol;
-    }
-
-    public void setQueueprotocol(String queueprotocol) {
-
-        this.queueprotocol = queueprotocol;
-    }
-
     public boolean isQueueServiceRequired() {
 
         return queueServiceRequired;
@@ -91,6 +59,16 @@ public class LookupService {
     public void setQueueServiceRequired(boolean queueServiceRequired) {
 
         this.queueServiceRequired = queueServiceRequired;
+    }
+
+    public String getQueueurl() {
+
+        return queueurl;
+    }
+
+    public void setQueueurl(String queueurl) {
+
+        this.queueurl = queueurl;
     }
 
     //static {
@@ -202,7 +180,7 @@ public class LookupService {
         System.out.println("Creating ActiveMQ Broker");
         BrokerService br = new BrokerService();
 
-        String url = queueprotocol+"://"+queuehost+":"+queueport;
+        String url = queueurl;
         br.addConnector(url);
 
         br.start();
