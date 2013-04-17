@@ -6,6 +6,7 @@ import joptsimple.OptionSpec;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.database.ServiceDAOMongoDb;
+import net.es.lookup.pubsub.SubscribeClient;
 import net.es.lookup.pubsub.amq.AMQueueManager;
 import net.es.lookup.pubsub.amq.AMQueuePump;
 import net.es.lookup.utils.LookupServiceConfigReader;
@@ -142,6 +143,9 @@ public class Invoker {
             se.printStackTrace();
 
         }
+
+        SubscribeClient sc = new SubscribeClient();
+        sc.initiate();
 
         // Block forever
         Object blockMe = new Object();

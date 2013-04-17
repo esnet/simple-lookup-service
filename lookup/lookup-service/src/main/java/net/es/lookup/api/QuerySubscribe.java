@@ -1,6 +1,5 @@
 package net.es.lookup.api;
 
-import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
@@ -8,19 +7,12 @@ import net.es.lookup.common.exception.api.NotSupportedException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.QueryException;
 import net.es.lookup.common.exception.internal.QueueException;
-import net.es.lookup.common.exception.internal.ServiceNotSupported;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONSubRequest;
 import net.es.lookup.protocol.json.JSONSubResponse;
 import net.es.lookup.pubsub.amq.AMQueueManager;
 import net.es.lookup.utils.QueueServiceConfigReader;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.StreamingOutput;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 

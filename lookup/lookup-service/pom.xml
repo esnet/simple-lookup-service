@@ -104,7 +104,7 @@
             <artifactId>jopt-simple</artifactId>
             <version>3.0.1</version>
         </dependency>
-
+        <!-- activemq  -->
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-all</artifactId>
@@ -114,6 +114,12 @@
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-optional</artifactId>
             <version>5.5.1</version>
+        </dependency>
+        <!-- lookup-service client -->
+        <dependency>
+            <artifactId>lookup-service-client</artifactId>
+            <groupId>net.es.lookup</groupId>
+            <version>0.1</version>
         </dependency>
 
     </dependencies>

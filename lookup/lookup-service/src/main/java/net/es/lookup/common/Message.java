@@ -76,36 +76,9 @@ public class Message {
     }
 
 
-    public List<String> getServiceType() {
-
-        return (List<String>) this.getMap().get(ReservedKeywords.RECORD_SERVICE_TYPE);
-
-    }
-
     public List<String> getRecordType() {
 
         return (List<String>) this.getMap().get(ReservedKeywords.RECORD_TYPE);
-
-    }
-
-
-    public List<String> getAccessPoint() {
-
-        return (List<String>) this.getMap().get(ReservedKeywords.RECORD_SERVICE_LOCATOR);
-
-    }
-
-
-    public List<String> getServiceName() {
-
-        return (List<String>) this.getMap().get(ReservedKeywords.RECORD_SERVICE_NAME);
-
-    }
-
-
-    public List<String> getServiceDomain() {
-
-        return (List<String>) this.getMap().get(ReservedKeywords.RECORD_SERVICE_DOMAIN);
 
     }
 

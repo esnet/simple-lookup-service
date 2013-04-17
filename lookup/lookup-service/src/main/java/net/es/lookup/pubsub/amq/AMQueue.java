@@ -87,9 +87,9 @@ public class AMQueue extends Queue {
     public void push(Message message) throws QueueException {
 
         try {
-            String strmessage = JSONMessage.toString(message);
-            TextMessage msg = session.createTextMessage(strmessage);
-            producer.send(msg);
+            String strmsg = JSONMessage.toString(message);
+            TextMessage txtmsg = session.createTextMessage(strmsg);
+            producer.send(txtmsg);
         } catch (DataFormatException e) {
             throw new QueueException(e.getMessage());
         } catch (JMSException e) {

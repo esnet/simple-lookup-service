@@ -19,6 +19,6 @@ if [ -z "$jarfile" ]; then
     echo "Starting ${shortname} with version:$vers"
 fi
 
-java -Djava.net.preferIPv4Stack=true -jar $jarfile $* &
+java -Xmx256m -Djava.net.preferIPv4Stack=true -jar $jarfile $* &
 echo "Starting ${shortname} with $*"
 echo $! > $pidfile
