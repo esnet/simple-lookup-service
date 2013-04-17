@@ -72,12 +72,14 @@ public class Subscription {
            // }
 
             System.out.println("Debugging: Came here 2");
+            server.setPort(8080);
+
             String url = server.getConnectionUrl();
             String fullurl = url.concat(relativeUrl);
+
             System.out.println(fullurl);
             server.setConnectionUrl(fullurl);
             server.setConnectionType("POST");
-            server.setPort(8090);
             server.setData(queryString);
             server.send();
             System.out.println("Debugging: Came here 3");

@@ -7,6 +7,7 @@ package net.es.lookup.client;
  */
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.*;
 
 import net.es.lookup.common.ReservedKeywords;
@@ -16,6 +17,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -225,8 +227,19 @@ public class SimpleLS {
         } else if (connectionType.equalsIgnoreCase("POST")) {
             System.out.println("Came to execute Post");
             HttpPost httpPost = new HttpPost();
+            httpPost.setURI(URI.create(this.connectionUrl));
+            httpPost.setHeader("Accept", "application/json");
+            httpPost.setHeader("Content-type", "application/json");
+            StringEntity se= null;
+            try {
+                se = new StringEntity(data);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+            httpPost.setEntity(se);
             try {
                 httpResponse = httpclient.execute(httpPost);
+                System.out.println("Executed");
             } catch (IOException e) {
                 throw new LSClientException(e.getMessage());
             }
