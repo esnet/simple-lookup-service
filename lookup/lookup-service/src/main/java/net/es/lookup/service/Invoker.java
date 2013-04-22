@@ -3,6 +3,7 @@ package net.es.lookup.service;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.database.ServiceDAOMongoDb;
@@ -145,8 +146,11 @@ public class Invoker {
         }
 
         SubscribeClient sc = new SubscribeClient();
-        sc.initiate();
-
+        try{
+            sc.initiate();
+        }catch(LSClientException e){
+            System.out.println(e.getMessage());
+        }
         // Block forever
         Object blockMe = new Object();
         synchronized (blockMe) {

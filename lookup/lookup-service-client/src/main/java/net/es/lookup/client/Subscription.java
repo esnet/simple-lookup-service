@@ -60,13 +60,15 @@ public class Subscription {
 
         if (server != null && server.getStatus().equals(ReservedKeys.SERVER_STATUS_ALIVE)) {
             String queryString = "";
-            //  if(query != null){
-            //    try {
-            //queryString = JSONParser.toString(query);
-            //  } catch (ParserException e) {
-            //    throw new LSClientException(e.getMessage());
-            //}
-            // }
+            if (query != null) {
+                try {
+                    queryString = JSONParser.toString(query);
+                } catch (ParserException e) {
+                    throw new LSClientException(e.getMessage());
+                }
+            }
+
+
             server.setPort(8090);
 
             String url = server.getConnectionUrl();
@@ -75,22 +77,18 @@ public class Subscription {
             server.setConnectionType("POST");
             server.setData(queryString);
             server.send();
-
             if (server.getResponseCode() == 200) {
 
                 String response = server.getResponse();
-                SubscribeRecord record = (SubscribeRecord)JSONParser.toRecord(response);
+                SubscribeRecord record = (SubscribeRecord) JSONParser.toRecord(response);
                 return record;
-            } else {
-
-
+            }else {
                 throw new LSClientException("Error in response. Response code: " + server.getResponseCode() + ". Error Message: " + server.getErrorMessage());
             }
 
         } else {
             throw new LSClientException("Server Initialization Error");
         }
-
 
 
     }

@@ -25,12 +25,11 @@ public class QuerySubscribe {
 
 
         String response;
-
         JSONSubRequest request = new JSONSubRequest(message);
         if (request.getStatus() == JSONSubRequest.INCORRECT_FORMAT) {
             System.out.println("INCORRECT FORMAT");
             // TODO: return correct error code
-            return "402\n";
+            throw new BadRequestException("Error parsing request");
         }
         if(!QueueServiceConfigReader.getInstance().isServiceUp()){
             throw new NotSupportedException("Queue ServiceRecord Not Supported");
@@ -85,10 +84,11 @@ public class QuerySubscribe {
 
         // Should be an empty query
         boolean res = true;
-        if(request.getMap().size()>1){
+        if((request.getMap().size()>1)){
+            res = false;
+        }else if(request.getOperator() == null || request.getOperator().isEmpty()){
             res = false;
         }
-
         return res;
 
     }

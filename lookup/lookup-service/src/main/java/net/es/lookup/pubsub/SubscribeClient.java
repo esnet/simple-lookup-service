@@ -4,7 +4,10 @@ import net.es.lookup.client.SimpleLS;
 import net.es.lookup.client.Subscription;
 import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.ParserException;
+import net.es.lookup.queries.Query;
 import net.es.lookup.records.PubSub.SubscribeRecord;
+
+import java.util.ArrayList;
 
 /**
  * Author: sowmya
@@ -25,7 +28,11 @@ public class SubscribeClient {
     }
 
     public void initiate() throws LSClientException, ParserException {
-        System.out.println("Came here");
+        Query q = new Query();
+        ArrayList<String>  type = new ArrayList<String>();
+        type.add("service");
+        q.setRecordType(type);
+        s.setQuery(q);
         SubscribeRecord response = s.request();
         System.out.println("Executed subscribe request");
         if(response != null){

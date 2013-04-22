@@ -125,7 +125,6 @@ public class JSONParser {
 
     public static Record toRecord(String jsonString) throws ParserException {
 
-        System.out.println("executing JSONParser.toRecord");
 
         JSONObject jsonObject = JSONObject.fromObject(jsonString);
         String type  = (String) jsonObject.get(ReservedKeys.RECORD_TYPE);
@@ -153,7 +152,8 @@ public class JSONParser {
         while (it.hasNext()){
             JSONObject jobj = JSONObject.fromObject(it.next());
             try {
-                Record r = new Record(jobj);
+                Record r = RecordFactory.getRecord((String)jobj.get(ReservedKeys.RECORD_TYPE));
+                r.setMap(jobj);
                 result.add(r);
             } catch (RecordException e) {
                 throw new ParserException("Error parsing String. Cannot convert to Records");
