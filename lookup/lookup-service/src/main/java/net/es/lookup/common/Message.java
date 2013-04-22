@@ -57,42 +57,42 @@ public class Message {
 
     public String getURI() {
 
-        return (String) this.getMap().get(ReservedKeywords.RECORD_URI);
+        return (String) this.getMap().get(ReservedKeys.RECORD_URI);
 
     }
 
 
     public String getTTL() {
 
-        return (String) this.getMap().get(ReservedKeywords.RECORD_TTL);
+        return (String) this.getMap().get(ReservedKeys.RECORD_TTL);
 
     }
 
 
     public String getExpires() {
 
-        return (String) this.getMap().get(ReservedKeywords.RECORD_EXPIRES);
+        return (String) this.getMap().get(ReservedKeys.RECORD_EXPIRES);
 
     }
 
 
     public List<String> getRecordType() {
 
-        return (List<String>) this.getMap().get(ReservedKeywords.RECORD_TYPE);
+        return (List<String>) this.getMap().get(ReservedKeys.RECORD_TYPE);
 
     }
 
 
     public List<String> getClientUUID() {
 
-        return (List<String>) this.getMap().get(ReservedKeywords.RECORD_PRIVATEKEY);
+        return (List<String>) this.getMap().get(ReservedKeys.RECORD_PRIVATEKEY);
 
     }
 
 
     public List<String> getOperator() {
 
-        return (List<String>) this.getMap().get(ReservedKeywords.RECORD_OPERATOR);
+        return (List<String>) this.getMap().get(ReservedKeys.RECORD_OPERATOR);
 
     }
 
@@ -134,7 +134,7 @@ public class Message {
 
             Object o = this.keyValues.get(key);
 
-            if (key.equals(ReservedKeywords.RECORD_URI) || key.equals(ReservedKeywords.RECORD_TTL)) {
+            if (key.equals(ReservedKeys.RECORD_URI) || key.equals(ReservedKeys.RECORD_TTL)) {
 
                 if (o instanceof String) {
 

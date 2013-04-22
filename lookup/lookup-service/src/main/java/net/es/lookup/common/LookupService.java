@@ -1,5 +1,5 @@
 /**
- * This interface defines the API between the REST API handling and the actual Lookup Service.
+ * This interface defines the API between the REST API handling and the actual Lookup ServiceRecord.
  *
  **/
 

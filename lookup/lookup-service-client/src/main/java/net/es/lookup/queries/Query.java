@@ -1,6 +1,6 @@
 package net.es.lookup.queries;
 
-import net.es.lookup.common.ReservedKeywords;
+import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.exception.RecordException;
 
 import java.util.HashMap;
@@ -52,48 +52,48 @@ public class Query {
 
     public List<String> getURI() {
 
-        return (List<String>) this.getMap().get(ReservedKeywords.RECORD_URI);
+        return (List<String>) this.getMap().get(ReservedKeys.RECORD_URI);
 
     }
 
 
     public List<String> getTTL() {
 
-        return (List<String>) this.getMap().get(ReservedKeywords.RECORD_TTL);
+        return (List<String>) this.getMap().get(ReservedKeys.RECORD_TTL);
 
     }
 
 
     public List<String> getExpires() {
 
-        return (List<String>) this.getMap().get(ReservedKeywords.RECORD_EXPIRES);
+        return (List<String>) this.getMap().get(ReservedKeys.RECORD_EXPIRES);
 
     }
 
 
     public List<String> getRecordType() {
 
-        return (List<String>) this.getMap().get(ReservedKeywords.RECORD_TYPE);
+        return (List<String>) this.getMap().get(ReservedKeys.RECORD_TYPE);
 
     }
 
     public List<String> getRecordState() {
 
-        return (List<String>) this.keyValues.get(ReservedKeywords.RECORD_STATE);
+        return (List<String>) this.keyValues.get(ReservedKeys.RECORD_STATE);
 
     }
 
 
     public void setURI(List<String> uri) {
 
-        this.keyValues.put(ReservedKeywords.RECORD_URI, uri);
+        this.keyValues.put(ReservedKeys.RECORD_URI, uri);
 
     }
 
 
     public void setTTL(List<String> ttl) {
 
-        this.keyValues.put(ReservedKeywords.RECORD_TTL, ttl);
+        this.keyValues.put(ReservedKeys.RECORD_TTL, ttl);
 
     }
 
@@ -101,20 +101,20 @@ public class Query {
     public void setExpires(List<String> expires) {
 
 
-        this.keyValues.put(ReservedKeywords.RECORD_EXPIRES, expires);
+        this.keyValues.put(ReservedKeys.RECORD_EXPIRES, expires);
 
     }
 
 
     public void setRecordType(List<String> type) {
 
-        this.keyValues.put(ReservedKeywords.RECORD_TYPE, type);
+        this.keyValues.put(ReservedKeys.RECORD_TYPE, type);
 
     }
 
     public void setRecordState(List<String> state) {
 
-        this.keyValues.put(ReservedKeywords.RECORD_STATE, state);
+        this.keyValues.put(ReservedKeys.RECORD_STATE, state);
 
     }
 

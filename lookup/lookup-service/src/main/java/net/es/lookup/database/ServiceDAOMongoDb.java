@@ -3,7 +3,8 @@ package net.es.lookup.database;
 
 import com.mongodb.*;
 import net.es.lookup.common.Message;
-import net.es.lookup.common.ReservedKeywords;
+import net.es.lookup.common.ReservedKeys;
+import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.Service;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
@@ -29,11 +30,11 @@ public class ServiceDAOMongoDb {
     private static Map<String, String> listOperatorMapping = new HashMap();
 
     {
-        operatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ALL, "$and");
-        operatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ANY, "$or");
+        operatorMapping.put(ReservedValues.RECORD_OPERATOR_ALL, "$and");
+        operatorMapping.put(ReservedValues.RECORD_OPERATOR_ANY, "$or");
 
-        listOperatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ANY, "$in");
-        listOperatorMapping.put(ReservedKeywords.RECORD_OPERATOR_ALL, "$all");
+        listOperatorMapping.put(ReservedValues.RECORD_OPERATOR_ANY, "$in");
+        listOperatorMapping.put(ReservedValues.RECORD_OPERATOR_ALL, "$all");
 
     }
 
@@ -169,7 +170,7 @@ public class ServiceDAOMongoDb {
         Message response = new Message();
         BasicDBObject query = new BasicDBObject();
         //TODO: add check to see if only one elem is returned
-        query.put(ReservedKeywords.RECORD_URI, serviceid);
+        query.put(ReservedKeys.RECORD_URI, serviceid);
         response = getServiceByURI(serviceid);
 
         try {
@@ -213,7 +214,7 @@ public class ServiceDAOMongoDb {
         if (serviceid != null && !serviceid.isEmpty()) {
 
             BasicDBObject query = new BasicDBObject();
-            query.put(ReservedKeywords.RECORD_URI, serviceid);
+            query.put(ReservedKeys.RECORD_URI, serviceid);
 
             BasicDBObject updateObject = new BasicDBObject();
             updateObject.putAll(updateRequest.getMap());
@@ -449,7 +450,7 @@ public class ServiceDAOMongoDb {
 
         } else {
 
-            op = ReservedKeywords.RECORD_OPERATOR_DEFAULT;
+            op = ReservedValues.RECORD_OPERATOR_DEFAULT;
 
         }
 
@@ -478,7 +479,7 @@ public class ServiceDAOMongoDb {
         String errormsg;
 
         BasicDBObject query = new BasicDBObject();
-        query.put(ReservedKeywords.RECORD_URI, URI);
+        query.put(ReservedKeys.RECORD_URI, URI);
         Service result = null;
 
         try {

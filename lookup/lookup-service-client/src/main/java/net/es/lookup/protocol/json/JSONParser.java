@@ -1,9 +1,11 @@
 package net.es.lookup.protocol.json;
 
+import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.exception.ParserException;
 import net.es.lookup.common.exception.RecordException;
 import net.es.lookup.queries.Query;
 import net.es.lookup.records.Record;
+import net.es.lookup.records.RecordFactory;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
@@ -121,12 +123,31 @@ public class JSONParser {
     }
 
 
-    public static List<Record> toRecord(String jsonString) throws ParserException {
+    public static Record toRecord(String jsonString) throws ParserException {
+
+        System.out.println("executing JSONParser.toRecord");
+
+        JSONObject jsonObject = JSONObject.fromObject(jsonString);
+        String type  = (String) jsonObject.get(ReservedKeys.RECORD_TYPE);
+        Record result;
+        try {
+            result = RecordFactory.getRecord(type);
+            result.setMap(jsonObject);
+        } catch (RecordException e) {
+            throw new ParserException("Error creating Record from json string");
+        }
+        return result;
+
+
+    }
+
+    public static List<Record> toRecords(String jsonString) throws ParserException {
 
         List<Record> result = new ArrayList<Record>();
+        System.out.println("executing JSONParser.toRecord");
 
         JSONArray jsonArray = JSONArray.fromObject(jsonString);
-
+        System.out.println("created jsonArray"+ jsonArray);
         Iterator it = jsonArray.iterator();
 
         while (it.hasNext()){

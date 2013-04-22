@@ -18,7 +18,7 @@ public abstract class SubRequest extends Message {
     }
 
     public void setDefault(){
-        this.add(ReservedKeywords.RECORD_OPERATOR, ReservedKeywords.RECORD_OPERATOR_DEFAULT);
+        this.add(ReservedKeys.RECORD_OPERATOR, ReservedValues.RECORD_OPERATOR_DEFAULT);
     }
 
 }

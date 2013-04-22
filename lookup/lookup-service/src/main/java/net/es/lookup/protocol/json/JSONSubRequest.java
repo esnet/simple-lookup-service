@@ -1,7 +1,6 @@
 package net.es.lookup.protocol.json;
 
 
-import net.es.lookup.common.ReservedKeywords;
 import net.es.lookup.common.SubRequest;
 import net.sf.json.JSONObject;
 import net.sf.json.util.JSONTokener;

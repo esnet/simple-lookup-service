@@ -6,8 +6,8 @@
 // * Time: 2:11 PM
 // */
 //import net.es.lookup.common.Message;
-//import net.es.lookup.common.ReservedKeywords;
-//import net.es.lookup.common.Service;
+//import net.es.lookup.common.ReservedKeys;
+//import net.es.lookup.common.ServiceRecord;
 //import net.es.lookup.common.exception.internal.DatabaseException;
 //import net.es.lookup.database.ServiceDAOMongoDb;
 //import org.apache.log4j.Logger;
@@ -39,7 +39,7 @@
 //
 //    public void execute(JobExecutionContext context) throws JobExecutionException {
 //
-//        List<Service> result = null;
+//        List<ServiceRecord> result = null;
 //        LOG.info("Running MongoDBPrune...");
 //        JobDataMap data = context.getJobDetail().getJobDataMap();
 //        long prune_threshold = data.getLong(PRUNE_THRESHOLD);
@@ -65,12 +65,12 @@
 //
 //                Map m = result.get(i).getMap();
 //                DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-//                DateTime dt = fmt.parseDateTime((String) m.get(ReservedKeywords.RECORD_EXPIRES));
+//                DateTime dt = fmt.parseDateTime((String) m.get(ReservedKeys.RECORD_EXPIRES));
 //                DateTimeComparator dtc = DateTimeComparator.getInstance();
 //
 //                if (dtc.compare(dt, pruneTime) < 0) {
 //
-//                    String uri = (String) m.get(ReservedKeywords.RECORD_URI);
+//                    String uri = (String) m.get(ReservedKeys.RECORD_URI);
 //
 //                    try {
 //

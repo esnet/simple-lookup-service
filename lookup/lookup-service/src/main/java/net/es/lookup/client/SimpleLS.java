@@ -2,7 +2,7 @@
 //
 //import java.io.IOException;
 //import java.net.Socket;
-//import net.es.lookup.common.ReservedKeywords;
+//import net.es.lookup.common.ReservedKeys;
 //
 ///**
 // * User: sowmya
@@ -17,7 +17,7 @@
 //    private String connectionType = "GET"; //HTTP connection type
 //    private String data= "";
 //    private String url = "";
-//    private String status = ReservedKeywords.SERVER_STATUS_UNKNOWN;
+//    private String status = ReservedKeys.SERVER_STATUS_UNKNOWN;
 //    private double latency =  0.0;
 //
 //

@@ -1,6 +1,6 @@
 package net.es.lookup.api;
 
-import net.es.lookup.common.ReservedKeywords;
+import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotSupportedException;
@@ -33,7 +33,7 @@ public class QuerySubscribe {
             return "402\n";
         }
         if(!QueueServiceConfigReader.getInstance().isServiceUp()){
-            throw new NotSupportedException("Queue Service Not Supported");
+            throw new NotSupportedException("Queue ServiceRecord Not Supported");
         }
         // Verify that request is valid and authorized
         if (this.isValid(request) && this.isAuthed(request)) {
@@ -42,13 +42,13 @@ public class QuerySubscribe {
             JSONSubResponse res = new JSONSubResponse();
             List<String> locator = new ArrayList<String>();
             locator.add("tcp://localhost:61616");
-            res.add(ReservedKeywords.RECORD_SUBSCRIBE_LOCATOR, locator);
+            res.add(ReservedKeys.RECORD_SUBSCRIBE_LOCATOR, locator);
 
             AMQueueManager amqmanager = AMQueueManager.getInstance();
             try {
                 List<String> qlist = amqmanager.getQueues(request);
 
-                res.add(ReservedKeywords.RECORD_SUBSCRIBE_QUEUE, qlist);
+                res.add(ReservedKeys.RECORD_SUBSCRIBE_QUEUE, qlist);
                 response = JSONMessage.toString(res);
             } catch (QueryException e) {
                 throw new InternalErrorException(e.getMessage());

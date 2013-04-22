@@ -3,7 +3,7 @@ package net.es.lookup.resources;
 import net.es.lookup.api.QueryServices;
 import net.es.lookup.api.RegisterService;
 import net.es.lookup.common.Message;
-import net.es.lookup.common.ReservedKeywords;
+import net.es.lookup.common.ReservedKeys;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -46,17 +46,17 @@ public class RecordResource {
 
         for (String key : queryParams.keySet()) {
 
-            if (key.equals(ReservedKeywords.RECORD_OPERATOR)) {
+            if (key.equals(ReservedKeys.RECORD_OPERATOR)) {
 
                 List<String> ops = new ArrayList();
                 ops.add(queryParams.getFirst(key));
                 message.add(key, ops);
 
-            } else if (key.equals(ReservedKeywords.RECORD_SKIP)) {
+            } else if (key.equals(ReservedKeys.RECORD_SKIP)) {
 
                 skip = Integer.parseInt(queryParams.getFirst(key));
 
-            } else if (key.equals(ReservedKeywords.RECORD_MAXRESULTS)) {
+            } else if (key.equals(ReservedKeys.RECORD_MAXRESULTS)) {
 
                 maxResults = Integer.parseInt(queryParams.getFirst(key));
 

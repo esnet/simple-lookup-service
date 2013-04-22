@@ -2,7 +2,8 @@ package net.es.lookup.api;
 
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
-import net.es.lookup.common.ReservedKeywords;
+import net.es.lookup.common.ReservedKeys;
+import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
@@ -27,6 +28,7 @@ public class RegisterService {
     private String params;
 
     public String registerService(String message) {
+
         LOG.info(" Processing registerService.");
         LOG.info(" Received message: " + message);
         JSONRegisterResponse response;
@@ -56,10 +58,10 @@ public class RegisterService {
                 String rType = recordType.get(0);
 
                 String uri = this.newURI(rType);
-                request.add(ReservedKeywords.RECORD_URI, uri);
+                request.add(ReservedKeys.RECORD_URI, uri);
 
                 //Add the state
-                request.add(ReservedKeywords.RECORD_STATE, ReservedKeywords.RECORD_VALUE_STATE_REGISTER);
+                request.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_REGISTER);
 
                 // Build the matching query request that must fail for the service to be published
                 Message query = new Message();
@@ -68,39 +70,24 @@ public class RegisterService {
                 List<String> queryKeyList = new ArrayList();
 
 
-                if (rType.equals(ReservedKeywords.RECORD_VALUE_DEFAULT)) {
+                Map<String, Object> keyValues = request.getMap();
+                Iterator it = keyValues.entrySet().iterator();
 
-                    queryKeyList = getServiceRecordQueryKeys();
+                while (it.hasNext()) {
 
-                    for (int i = 0; i < queryKeyList.size(); i++) {
+                    Map.Entry<String, Object> pairs = (Map.Entry) it.next();
 
-                        list = (List) request.getKey(queryKeyList.get(i));
-                        query.add(queryKeyList.get(i), list);
-                        operators.add(queryKeyList.get(i), ReservedKeywords.RECORD_OPERATOR_ALL);
+                    if (!isIgnoreKey(pairs.getKey())) {
 
-                    }
+                        LOG.debug("key-value pair:" + pairs.getKey() + "=" + pairs.getValue());
+                        operators.add(pairs.getKey(), ReservedValues.RECORD_OPERATOR_ALL);
+                        query.add(pairs.getKey(), pairs.getValue());
 
-                } else {
-
-                    Map<String, Object> keyValues = request.getMap();
-                    Iterator it = keyValues.entrySet().iterator();
-
-                    while (it.hasNext()) {
-
-                        Map.Entry<String, Object> pairs = (Map.Entry) it.next();
-
-                        if (!isIgnoreKey(pairs.getKey())) {
-
-                            LOG.debug("key-value pair:" + pairs.getKey() + "=" + pairs.getValue());
-                            operators.add(pairs.getKey(), ReservedKeywords.RECORD_OPERATOR_ALL);
-                            query.add(pairs.getKey(), pairs.getValue());
-
-
-                        }
 
                     }
 
                 }
+
 
                 try {
 
@@ -210,10 +197,10 @@ public class RegisterService {
 
     private String newURI(String rType) {
 
-        if(rType != null && !rType.isEmpty()){
-            String uri = LookupService.SERVICE_URI_PREFIX + "/"+ rType + "/"+UUID.randomUUID().toString();
+        if (rType != null && !rType.isEmpty()) {
+            String uri = LookupService.SERVICE_URI_PREFIX + "/" + rType + "/" + UUID.randomUUID().toString();
             return uri;
-        }else{
+        } else {
             LOG.error("Error creating URI: Record Type not found!");
             throw new BadRequestException("Cannot create URI. Record Type not found.");
         }
@@ -224,11 +211,11 @@ public class RegisterService {
     private List<String> getServiceRecordQueryKeys() {
 
         List<String> qList = new ArrayList();
-        qList.add(ReservedKeywords.RECORD_TYPE);
-        qList.add(ReservedKeywords.RECORD_SERVICE_LOCATOR);
-        qList.add(ReservedKeywords.RECORD_PRIVATEKEY);
-        qList.add(ReservedKeywords.RECORD_SERVICE_TYPE);
-        qList.add(ReservedKeywords.RECORD_SERVICE_DOMAIN);
+        qList.add(ReservedKeys.RECORD_TYPE);
+        qList.add(ReservedKeys.RECORD_SERVICE_LOCATOR);
+        qList.add(ReservedKeys.RECORD_PRIVATEKEY);
+        qList.add(ReservedKeys.RECORD_SERVICE_TYPE);
+        qList.add(ReservedKeys.RECORD_SERVICE_DOMAIN);
         return qList;
 
     }
@@ -236,7 +223,7 @@ public class RegisterService {
 
     private boolean isIgnoreKey(String key) {
 
-        if (key.equals(ReservedKeywords.RECORD_TTL) || key.equals(ReservedKeywords.RECORD_EXPIRES) || key.equals(ReservedKeywords.RECORD_URI)) {
+        if (key.equals(ReservedKeys.RECORD_TTL) || key.equals(ReservedKeys.RECORD_EXPIRES) || key.equals(ReservedKeys.RECORD_URI)) {
             return true;
         } else {
             return false;

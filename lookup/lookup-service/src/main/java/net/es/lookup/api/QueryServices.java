@@ -1,7 +1,8 @@
 package net.es.lookup.api;
 
 import net.es.lookup.common.Message;
-import net.es.lookup.common.ReservedKeywords;
+import net.es.lookup.common.ReservedKeys;
+import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.Service;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.internal.DataFormatException;
@@ -75,7 +76,7 @@ public class QueryServices {
             LOG.debug("key= " + key);
 
             //generate the operator map
-            if (!key.contains(ReservedKeywords.RECORD_OPERATOR_SUFFIX)) {
+            if (!key.contains(ReservedKeys.RECORD_OPERATOR_SUFFIX)) {
                 queryParameters.add(key, value);
             }
 
@@ -95,13 +96,13 @@ public class QueryServices {
         if (request.getOperator() != null) {
 
             List mainOp = request.getOperator();
-            operators.add(ReservedKeywords.RECORD_OPERATOR, mainOp);
+            operators.add(ReservedKeys.RECORD_OPERATOR, mainOp);
 
         } else {
 
             List mainOp = new ArrayList();
-            mainOp.add(ReservedKeywords.RECORD_OPERATOR_DEFAULT);
-            operators.add(ReservedKeywords.RECORD_OPERATOR, mainOp);
+            mainOp.add(ReservedValues.RECORD_OPERATOR_DEFAULT);
+            operators.add(ReservedKeys.RECORD_OPERATOR, mainOp);
 
         }
 
@@ -111,7 +112,7 @@ public class QueryServices {
             Object value = entry.getValue();
 
             LOG.debug("key= " + key);
-            String opKey = key + "-" + ReservedKeywords.RECORD_OPERATOR_SUFFIX;
+            String opKey = key + "-" + ReservedKeys.RECORD_OPERATOR_SUFFIX;
 
             if (requestMap.containsKey(opKey)) {
 
@@ -120,7 +121,7 @@ public class QueryServices {
             } else {
 
                 //add default
-                operators.add(key, ReservedKeywords.RECORD_OPERATOR_DEFAULT);
+                operators.add(key, ReservedValues.RECORD_OPERATOR_DEFAULT);
 
             }
 

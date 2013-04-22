@@ -1,10 +1,7 @@
 package net.es.lookup.api;
 
 
-import net.es.lookup.common.LeaseManager;
-import net.es.lookup.common.Message;
-import net.es.lookup.common.ReservedKeywords;
-import net.es.lookup.common.Service;
+import net.es.lookup.common.*;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
@@ -70,9 +67,9 @@ public class AccessService {
 
             } else {
 
-                LOG.error("Service Not Found in DB.");
+                LOG.error("ServiceRecord Not Found in DB.");
                 LOG.info("GetService status: FAILED; exiting");
-                throw new NotFoundException("Service Not Found in DB\n");
+                throw new NotFoundException("ServiceRecord Not Found in DB\n");
 
             }
 
@@ -134,9 +131,9 @@ public class AccessService {
 
             } else {
 
-                LOG.error("Service Not Found in DB.");
+                LOG.error("ServiceRecord Not Found in DB.");
                 LOG.info("GetServiceKey status: FAILED; exiting");
-                throw new NotFoundException("Service Not Found in DB\n");
+                throw new NotFoundException("ServiceRecord Not Found in DB\n");
 
             }
 
@@ -166,9 +163,9 @@ public class AccessService {
         //renew can be empty for now. next version will require the privatekey
         if (!service.isEmpty() && request.getStatus() == JSONRenewRequest.INCORRECT_FORMAT) {
 
-            LOG.error("requestStatus:" + request.getStatus() + " Service request format is Incorrect");
+            LOG.error("requestStatus:" + request.getStatus() + " ServiceRecord request format is Incorrect");
             LOG.info("RenewService status: FAILED; exiting");
-            throw new BadRequestException("Service request format is Incorrect\n");
+            throw new BadRequestException("ServiceRecord request format is Incorrect\n");
 
         }
 
@@ -188,11 +185,11 @@ public class AccessService {
 
                     if (request.getTTL() != null && request.getTTL() != "") {
 
-                        serviceMap.put(ReservedKeywords.RECORD_TTL, request.getTTL());
+                        serviceMap.put(ReservedKeys.RECORD_TTL, request.getTTL());
 
                     } else {
 
-                        serviceMap.put(ReservedKeywords.RECORD_TTL, "");
+                        serviceMap.put(ReservedKeys.RECORD_TTL, "");
 
                     }
 
@@ -203,7 +200,7 @@ public class AccessService {
 
                         LOG.debug("gotLease for " + serviceid);
                         //update state
-                        newRequest.add(ReservedKeywords.RECORD_STATE, ReservedKeywords.RECORD_VALUE_STATE_RENEW);
+                        newRequest.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_RENEW);
                         Message res = ServiceDAOMongoDb.getInstance().updateService(serviceid, newRequest);
 
                         List<Message> sList = new ArrayList();
@@ -246,9 +243,9 @@ public class AccessService {
 
                 } else {
 
-                    LOG.error("Service Not Found in DB.");
+                    LOG.error("ServiceRecord Not Found in DB.");
                     LOG.info("RenewService status: FAILED; exiting");
-                    throw new NotFoundException("Service Not Found in DB\n");
+                    throw new NotFoundException("ServiceRecord Not Found in DB\n");
 
                 }
 
@@ -264,7 +261,7 @@ public class AccessService {
 
             if (!this.isValid(request)) {
 
-                LOG.error("Service Request is invalid");
+                LOG.error("ServiceRecord Request is invalid");
                 LOG.info("RenewService status: FAILED; exiting");
                 throw new BadRequestException("Request is invalid\n");
 
@@ -308,9 +305,9 @@ public class AccessService {
         if (request.getStatus() == JSONDeleteRequest.INCORRECT_FORMAT) {
 
             LOG.debug("INCORRECT FORMAT");
-            LOG.error("requestStatus:" + request.getStatus() + " Service request format is Incorrect");
+            LOG.error("requestStatus:" + request.getStatus() + " ServiceRecord request format is Incorrect");
             LOG.info("DeleteService status: FAILED; exiting");
-            throw new BadRequestException("Service request format is Incorrect\n");
+            throw new BadRequestException("ServiceRecord request format is Incorrect\n");
 
         }
 
@@ -324,7 +321,7 @@ public class AccessService {
                 Message serviceRecord = ServiceDAOMongoDb.getInstance().deleteService(serviceid);
 
                 //update state
-                serviceRecord.add(ReservedKeywords.RECORD_STATE, ReservedKeywords.RECORD_VALUE_STATE_DELETE);
+                serviceRecord.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_DELETE);
 
                 List<Message> sList = new ArrayList();
                 sList.add(serviceRecord);
@@ -340,15 +337,15 @@ public class AccessService {
 
                 if (serviceRecord == null) {
 
-                    LOG.error("Service Not found");
+                    LOG.error("ServiceRecord Not found");
                     LOG.info("DeleteService status: FAILED; exiting");
-                    throw new NotFoundException("Service not found in DB\n");
+                    throw new NotFoundException("ServiceRecord not found in DB\n");
 
                 } else {
 
                     try {
 
-                        LOG.info("Service Deleted");
+                        LOG.info("ServiceRecord Deleted");
                         LOG.info("DeleteService status: SUCCESS; exiting");
                         return JSONMessage.toString(serviceRecord);
 
@@ -374,9 +371,9 @@ public class AccessService {
 
             if (!this.isValid(request)) {
 
-                LOG.error("Service Request is invalid");
+                LOG.error("ServiceRecord Request is invalid");
                 LOG.info("DeleteService status: FAILED; exiting");
-                throw new BadRequestException("Service Request is invalid\n");
+                throw new BadRequestException("ServiceRecord Request is invalid\n");
 
             } else if (!this.isAuthed(serviceid, request)) {
 

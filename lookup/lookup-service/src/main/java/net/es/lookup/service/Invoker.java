@@ -39,7 +39,7 @@ public class Invoker {
     //private static int dbpruneInterval;
 
     /**
-     * Main program to start the Lookup Service
+     * Main program to start the Lookup ServiceRecord
      *
      * @param args [-h, ?] for help
      *             [-p server-port
@@ -100,7 +100,7 @@ public class Invoker {
 
         }
 
-        System.out.println("starting Lookup Service");
+        System.out.println("starting Lookup ServiceRecord");
         // Create the REST service
         Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
         Invoker.lookupService.setQueueServiceRequired(queueservice);

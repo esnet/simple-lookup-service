@@ -1,7 +1,8 @@
 package net.es.lookup.database;
 
 import net.es.lookup.common.Message;
-import net.es.lookup.common.ReservedKeywords;
+import net.es.lookup.common.ReservedKeys;
+import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.Service;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.QueryException;
@@ -68,16 +69,16 @@ public class MongoDBMaintenanceJob implements Job {
 
                 Map m = result.get(i).getMap();
                 DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-                DateTime dt = fmt.parseDateTime((String) m.get(ReservedKeywords.RECORD_EXPIRES));
+                DateTime dt = fmt.parseDateTime((String) m.get(ReservedKeys.RECORD_EXPIRES));
                 DateTimeComparator dtc = DateTimeComparator.getInstance();
 
                 if (dtc.compare(dt, pruneTime) < 0) {
 
-                    String uri = (String) m.get(ReservedKeywords.RECORD_URI);
+                    String uri = (String) m.get(ReservedKeys.RECORD_URI);
 
                     try {
                         Message tmp = db.deleteService(uri);
-                        tmp.add(ReservedKeywords.RECORD_STATE,ReservedKeywords.RECORD_VALUE_STATE_EXPIRE);
+                        tmp.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_EXPIRE);
                         messages.add(tmp);
 
                     } catch (Exception e) {

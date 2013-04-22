@@ -4,7 +4,7 @@ import net.es.lookup.client.SimpleLS;
 import net.es.lookup.client.Subscription;
 import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.ParserException;
-import net.es.lookup.records.SubscribeRecord;
+import net.es.lookup.records.PubSub.SubscribeRecord;
 
 /**
  * Author: sowmya
@@ -27,6 +27,7 @@ public class SubscribeClient {
     public void initiate() throws LSClientException, ParserException {
         System.out.println("Came here");
         SubscribeRecord response = s.request();
+        System.out.println("Executed subscribe request");
         if(response != null){
             System.out.println(response.getLocator());
         }else{

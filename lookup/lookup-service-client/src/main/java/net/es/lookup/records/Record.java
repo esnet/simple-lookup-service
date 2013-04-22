@@ -1,6 +1,6 @@
 package net.es.lookup.records;
 
-import net.es.lookup.common.ReservedKeywords;
+import net.es.lookup.common.ReservedKeys;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +26,8 @@ public class Record {
     public Record(String type) {
 
         this.keyValues = new HashMap<String, Object>();
-        this.keyValues.put(ReservedKeywords.RECORD_TYPE, type);
+        this.keyValues.put(ReservedKeys.RECORD_TYPE, type);
+
 
     }
 
@@ -45,6 +46,18 @@ public class Record {
 
     }
 
+    public void setMap(Map<String, Object> map) throws RecordException {
+
+        for(String s: map.keySet()){
+            this.keyValues.put(s,map.get(s));
+        }
+
+        if(!this.validate()){
+            throw new RecordException("Error creating record. Missing mandatory key: type");
+        }
+    }
+
+
     public final Object getValue(Object key) {
 
         return this.keyValues.get(key);
@@ -59,14 +72,14 @@ public class Record {
 
     public String getURI() {
 
-        return (String) this.getMap().get(ReservedKeywords.RECORD_URI);
+        return (String) this.getMap().get(ReservedKeys.RECORD_URI);
 
     }
 
 
     public Long getTTL() {
 
-        String ttl = (String) this.getMap().get(ReservedKeywords.RECORD_TTL);
+        String ttl = (String) this.getMap().get(ReservedKeys.RECORD_TTL);
         PeriodFormatter fmt = ISOPeriodFormat.standard();
         Duration duration = fmt.parsePeriod(ttl).toStandardDuration();
         Long ttlval = new Long(duration.getStandardSeconds());
@@ -78,7 +91,7 @@ public class Record {
     public DateTime getExpires() {
 
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-        DateTime dt = fmt.parseDateTime((String) this.getMap().get(ReservedKeywords.RECORD_EXPIRES));
+        DateTime dt = fmt.parseDateTime((String) this.getMap().get(ReservedKeys.RECORD_EXPIRES));
         return (DateTime) dt;
 
     }
@@ -86,20 +99,20 @@ public class Record {
 
     public String getRecordType() {
 
-        return (String) this.getMap().get(ReservedKeywords.RECORD_TYPE);
+        return (String) this.getMap().get(ReservedKeys.RECORD_TYPE);
 
     }
 
     public String getRecordState() {
 
-        return (String) this.keyValues.get(ReservedKeywords.RECORD_STATE);
+        return (String) this.keyValues.get(ReservedKeys.RECORD_STATE);
 
     }
 
 
     public synchronized void setURI(String uri) {
 
-        this.keyValues.put(ReservedKeywords.RECORD_URI, uri);
+        this.keyValues.put(ReservedKeys.RECORD_URI, uri);
 
     }
 
@@ -109,7 +122,7 @@ public class Record {
         Period p = new Period(ttl);
         PeriodFormatter fmt = ISOPeriodFormat.standard();
         String str = fmt.print(p);
-        this.keyValues.put(ReservedKeywords.RECORD_TTL, str);
+        this.keyValues.put(ReservedKeys.RECORD_TTL, str);
 
     }
 
@@ -118,20 +131,20 @@ public class Record {
 
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
         String str = fmt.print(expires);
-        this.keyValues.put(ReservedKeywords.RECORD_EXPIRES, str);
+        this.keyValues.put(ReservedKeys.RECORD_EXPIRES, str);
 
     }
 
 
     public synchronized void setRecordType(String type) {
 
-        this.keyValues.put(ReservedKeywords.RECORD_TYPE, type);
+        this.keyValues.put(ReservedKeys.RECORD_TYPE, type);
 
     }
 
     public synchronized void setRecordState(String state) {
 
-        this.keyValues.put(ReservedKeywords.RECORD_STATE, state);
+        this.keyValues.put(ReservedKeys.RECORD_STATE, state);
 
     }
 
@@ -141,7 +154,7 @@ public class Record {
 
         boolean returnVal = true;
 
-        if(!keyValues.containsKey(ReservedKeywords.RECORD_TYPE)){
+        if(!keyValues.containsKey(ReservedKeys.RECORD_TYPE)){
             returnVal = returnVal & false;
         }
 
@@ -149,7 +162,7 @@ public class Record {
 
             Object o = this.keyValues.get(key);
 
-            if (key.equals(ReservedKeywords.RECORD_URI) || key.equals(ReservedKeywords.RECORD_STATE) || key.equals(ReservedKeywords.RECORD_TYPE) || key.equals(ReservedKeywords.RECORD_TTL) || key.equals(ReservedKeywords.RECORD_EXPIRES)) {
+            if (key.equals(ReservedKeys.RECORD_URI) || key.equals(ReservedKeys.RECORD_STATE) || key.equals(ReservedKeys.RECORD_TYPE) || key.equals(ReservedKeys.RECORD_TTL) || key.equals(ReservedKeys.RECORD_EXPIRES)) {
 
                 if (o instanceof String) {
 

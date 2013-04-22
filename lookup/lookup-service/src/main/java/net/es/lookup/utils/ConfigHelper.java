@@ -51,7 +51,7 @@ public class ConfigHelper {
             } catch (FileNotFoundException e) {
 
                 //e.printStackTrace();
-                LOG.error(configFile + " not found\n. Config file required to start Lookup Service");
+                LOG.error(configFile + " not found\n. Config file required to start Lookup ServiceRecord");
                 System.exit(1);
 
             }

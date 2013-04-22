@@ -104,7 +104,7 @@ public class LeaseManager {
 
         Instant newExpires = now.plus(ttl * 1000); //this method requires milliseconds
         LOG.info("Lease granted. ttl value: " + ttl);
-        message.add(ReservedKeywords.RECORD_EXPIRES, this.fmt.print(newExpires));
+        message.add(ReservedKeys.RECORD_EXPIRES, this.fmt.print(newExpires));
         LOG.info("Lease granted. expires value: " + newExpires);
         return true;
 

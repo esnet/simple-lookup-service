@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
 
-import net.es.lookup.common.ReservedKeywords;
+import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.exception.LSClientException;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
@@ -29,7 +29,7 @@ public class SimpleLS {
     private String connectionUrl;
     private HttpURLConnection connection;
     private String connectionType; //limited to http methods - GET, POST, DELETE
-    private String status = ReservedKeywords.SERVER_STATUS_UNKNOWN;
+    private String status = ReservedKeys.SERVER_STATUS_UNKNOWN;
     private long latency = 0;
     private String data="";
     private int timeout = 5000;
@@ -198,10 +198,10 @@ public class SimpleLS {
                 long end = System.nanoTime();
                 long lat = end - start;
                 this.latency = lat;
-                this.status = ReservedKeywords.SERVER_STATUS_ALIVE;
+                this.status = ReservedKeys.SERVER_STATUS_ALIVE;
             } else {
                 this.latency = 0;
-                this.status = ReservedKeywords.SERVER_STATUS_UNREACHABLE;
+                this.status = ReservedKeys.SERVER_STATUS_UNREACHABLE;
             }
 
         } catch (IOException e) {
