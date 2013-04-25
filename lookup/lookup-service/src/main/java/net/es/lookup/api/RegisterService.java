@@ -63,7 +63,7 @@ public class RegisterService {
                 //Add the state
                 request.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_REGISTER);
 
-                // Build the matching query request that must fail for the service to be published
+                // Build the matching query requestUrl that must fail for the service to be published
                 Message query = new Message();
                 Message operators = new Message();
                 List<String> list;
@@ -142,15 +142,15 @@ public class RegisterService {
 
             if (!this.isValid(request)) {
 
-                LOG.error("Invalid request:");
+                LOG.error("Invalid requestUrl:");
                 LOG.info("Register status: FAILED; exiting");
-                throw new BadRequestException("Invalid request");
+                throw new BadRequestException("Invalid requestUrl");
 
             } else if (!this.isAuthed(request)) {
 
-                LOG.error("Not authorized to perform the request");
+                LOG.error("Not authorized to perform the requestUrl");
                 LOG.info("Register status: FAILED; exiting");
-                throw new UnauthorizedException("Not authorized to perform the request");
+                throw new UnauthorizedException("Not authorized to perform the requestUrl");
 
             }
 

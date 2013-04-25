@@ -146,11 +146,7 @@ public class Invoker {
         }
 
         SubscribeClient sc = new SubscribeClient();
-        try{
-            sc.initiate();
-        }catch(LSClientException e){
-            System.out.println(e.getMessage());
-        }
+
         // Block forever
         Object blockMe = new Object();
         synchronized (blockMe) {

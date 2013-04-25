@@ -13,7 +13,7 @@ public class JSONSubRequest extends SubRequest {
     public JSONSubRequest(String message) {
 
         super();
-
+        System.out.println(message);
         //if message is not empty, then parse
         if (message != null && !message.isEmpty()) {
 
@@ -21,14 +21,15 @@ public class JSONSubRequest extends SubRequest {
 
                 this.parseJSON(message);
                 this.status = JSONSubRequest.VALID;
-
+                if(this.getMap().isEmpty()){
+                    this.setDefault();
+                }
             } catch (Exception e) {
 
                 this.status = JSONSubRequest.INCORRECT_FORMAT;
 
             }
         } else {
-
             this.setDefault();
             this.status = JSONSubRequest.VALID;
 

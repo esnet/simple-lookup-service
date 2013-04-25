@@ -29,12 +29,12 @@ public class QuerySubscribe {
         if (request.getStatus() == JSONSubRequest.INCORRECT_FORMAT) {
             System.out.println("INCORRECT FORMAT");
             // TODO: return correct error code
-            throw new BadRequestException("Error parsing request");
+            throw new BadRequestException("Error parsing requestUrl");
         }
         if(!QueueServiceConfigReader.getInstance().isServiceUp()){
             throw new NotSupportedException("Queue ServiceRecord Not Supported");
         }
-        // Verify that request is valid and authorized
+        // Verify that requestUrl is valid and authorized
         if (this.isValid(request) && this.isAuthed(request)) {
             // Build response
 
@@ -84,11 +84,11 @@ public class QuerySubscribe {
 
         // Should be an empty query
         boolean res = true;
-        if((request.getMap().size()>1)){
-            res = false;
-        }else if(request.getOperator() == null || request.getOperator().isEmpty()){
+        if(request.getMap().size()<1  ) {
             res = false;
         }
+        System.out.println("Query size: "+ request.getMap().size());
+        System.out.println("Return value: "+ res);
         return res;
 
     }

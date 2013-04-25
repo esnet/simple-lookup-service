@@ -163,14 +163,14 @@ public class AccessService {
         //renew can be empty for now. next version will require the privatekey
         if (!service.isEmpty() && request.getStatus() == JSONRenewRequest.INCORRECT_FORMAT) {
 
-            LOG.error("requestStatus:" + request.getStatus() + " ServiceRecord request format is Incorrect");
+            LOG.error("requestStatus:" + request.getStatus() + " ServiceRecord requestUrl format is Incorrect");
             LOG.info("RenewService status: FAILED; exiting");
-            throw new BadRequestException("ServiceRecord request format is Incorrect\n");
+            throw new BadRequestException("ServiceRecord requestUrl format is Incorrect\n");
 
         }
 
-        // Verify that request is valid and authorized
-        LOG.debug("Is the request valid?" + this.isValid(request));
+        // Verify that requestUrl is valid and authorized
+        LOG.debug("Is the requestUrl valid?" + this.isValid(request));
 
         if (this.isValid(request) && this.isAuthed(serviceid, request)) {
 
@@ -305,14 +305,14 @@ public class AccessService {
         if (request.getStatus() == JSONDeleteRequest.INCORRECT_FORMAT) {
 
             LOG.debug("INCORRECT FORMAT");
-            LOG.error("requestStatus:" + request.getStatus() + " ServiceRecord request format is Incorrect");
+            LOG.error("requestStatus:" + request.getStatus() + " ServiceRecord requestUrl format is Incorrect");
             LOG.info("DeleteService status: FAILED; exiting");
-            throw new BadRequestException("ServiceRecord request format is Incorrect\n");
+            throw new BadRequestException("ServiceRecord requestUrl format is Incorrect\n");
 
         }
 
-        // Verify that request is valid and authorized
-        LOG.debug("Is the request valid?" + this.isValid(request));
+        // Verify that requestUrl is valid and authorized
+        LOG.debug("Is the requestUrl valid?" + this.isValid(request));
 
         if (this.isValid(request) && this.isAuthed(serviceid, request)) {
 

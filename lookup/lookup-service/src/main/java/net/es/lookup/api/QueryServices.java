@@ -64,8 +64,8 @@ public class QueryServices {
 
         Map<String, Object> requestMap = request.getMap();
         int size = requestMap.size();
-        LOG.debug("Total number of parameters passed in request=" + size);
-        LOG.info("request:" + request.getMap().toString());
+        LOG.debug("Total number of parameters passed in requestUrl=" + size);
+        LOG.info("requestUrl:" + request.getMap().toString());
         Message queryParameters = new Message();
 
         for (Map.Entry<String, Object> entry : requestMap.entrySet()) {
