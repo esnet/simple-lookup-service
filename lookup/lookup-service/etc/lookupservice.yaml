@@ -7,6 +7,10 @@ lookupservice:
         max: 2592000
         default: 1800
         min: 7200
+    mode: 'replication'
+    source:
+        host: 'localhost'
+        port: 8090
 
 #Database settings  
 database:

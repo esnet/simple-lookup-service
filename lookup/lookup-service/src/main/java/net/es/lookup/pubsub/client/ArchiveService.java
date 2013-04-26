@@ -1,21 +1,17 @@
-package net.es.lookup.pubsub;
+package net.es.lookup.pubsub.client;
 
 import net.es.lookup.client.SimpleLS;
 import net.es.lookup.client.Subscriber;
 import net.es.lookup.client.SubscriberListener;
 import net.es.lookup.common.Message;
-import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.LSClientException;
-import net.es.lookup.common.exception.ParserException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.queries.Query;
 import net.es.lookup.records.Record;
 
-import javax.jms.MessageListener;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -24,28 +20,42 @@ import java.util.Map;
  * Date: 4/16/13
  * Time: 6:31 PM
  */
-public class SubscribeClient implements SubscriberListener {
+public class ArchiveService implements SubscriberListener {
 
-    private String url = "";
-    private String queue;
+    private String sourceHost;
+    private int sourcePort;
     private SimpleLS server;
-    private Subscriber s;
+    private Subscriber subscriber;
     private ServiceDAOMongoDb db = ServiceDAOMongoDb.getInstance();
 
-    public SubscribeClient() throws LSClientException {
+    public ArchiveService(String sourceHost, int sourcePort) throws LSClientException {
+        System.out.println("Host:"+sourceHost+"; port:"+sourcePort);
+        this.sourceHost = sourceHost;
+        this.sourcePort = sourcePort;
         init();
     }
 
     private void init() throws LSClientException {
-        server = new SimpleLS();
+        server = new SimpleLS(sourceHost,sourcePort);
         server.connect();
+
+    }
+
+    public void start() throws LSClientException {
         Query q = new Query();
-        s = new Subscriber(server, q);
-        s.addListener(this);
-        s.startSubscription();
+        subscriber = new Subscriber(server, q);
+        subscriber.addListener(this);
+        subscriber.startSubscription();
+    }
+
+    public void stop() throws LSClientException {
+        System.out.println("Stop service");
+        subscriber.removeListener(this);
+        subscriber.stopSubscription();
     }
 
     public void onRecord(Record record) {
+
         if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_REGISTER)) {
             Message message = new Message(record.getMap());
             Map<String, Object> keyValues = record.getMap();
@@ -70,12 +80,30 @@ public class SubscribeClient implements SubscriberListener {
                 e.printStackTrace();
             }
 
-        }else if(record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_RENEW)){
-            String recorduri = record.getURI();
+        } else if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_RENEW)) {
+            String recordUri = record.getURI();
             Message message = new Message(record.getMap());
             System.out.println("Got a renew message. Inserting into db");
             try {
-                db.updateService(recorduri, message);
+                db.updateService(recordUri, message);
+            } catch (DatabaseException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+        } else if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_EXPIRE)) {
+            String recordUri = record.getURI();
+            Message message = new Message(record.getMap());
+            System.out.println("Got an expired message. Inserting into db");
+            try {
+                db.updateService(recordUri, message);
+            } catch (DatabaseException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+        } else if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_DELETE)) {
+            String recordUri = record.getURI();
+            Message message = new Message(record.getMap());
+            System.out.println("Got delete message. Inserting into db");
+            try {
+                db.updateService(recordUri, message);
             } catch (DatabaseException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }

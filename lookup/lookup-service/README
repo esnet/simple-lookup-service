@@ -23,7 +23,7 @@ If you are installing from source, then you will need
 	1. maven
 	
 MongoDB installation:
-Download Mongo DB and install it. ItÕs official site: http://www.mongodb.org/downloads
+Download Mongo DB and install it. Itï¿½s official site: http://www.mongodb.org/downloads
 
 If you are using CentOS, RedHat or Fedora, use yum to install MongoDB.
 The instructions can be found here: http://docs.mongodb.org/manual/tutorial/install-mongodb-on-redhat-centos-or-fedora-linux/
@@ -33,7 +33,7 @@ For CentOS, RedHat or Fedora, use the instructions found here: http://docs.mongo
 
 For other flavors, find the instructions for your distribution here: http://docs.mongodb.org/manual/installation/#installation-guides
 
-If you are modifying the port and url, then make a note of it. You will need it when you configure the Lookup Service.
+If you are modifying the port and sourceUrl, then make a note of it. You will need it when you configure the Lookup Service.
 
 INSTALLATION
 
@@ -44,12 +44,12 @@ Sample curl clients are available in the bin directory.
 
 SAMPLE REGISTRATION RECORD
 {
-record-type: ÒserviceÓ,
-record-service-site_name: ÒESnet-nerscÓ,
-record-service-site_location: ÒNERSC, Oakland, CA, USAÓ,
-record-service-domain:[ÒESnetÓ,ÓEcenterÓ],
-record-service-locator:[Ònersc-owamp.es.netÓ, Ònersc-owamp-v6.es.netÓ,
-record-service-type: ÓpingÓ,
+record-type: ï¿½serviceï¿½,
+record-service-site_name: ï¿½ESnet-nerscï¿½,
+record-service-site_location: ï¿½NERSC, Oakland, CA, USAï¿½,
+record-service-domain:[ï¿½ESnetï¿½,ï¿½Ecenterï¿½],
+record-service-locator:[ï¿½nersc-owamp.es.netï¿½, ï¿½nersc-owamp-v6.es.netï¿½,
+record-service-type: ï¿½pingï¿½,
 record-service-eventtype: "http://ggf.org/ns/nmwg/tools/ping/1.0",
 }
 

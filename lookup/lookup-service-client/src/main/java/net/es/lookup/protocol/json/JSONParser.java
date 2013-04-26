@@ -42,7 +42,7 @@ public class JSONParser {
 
                 } else {
 
-                    List<String> tmpvalues = (List) entry.getValue();
+                    List<String> tmpvalues = (List<String>) entry.getValue();
                     Iterator<String> it = tmpvalues.iterator();
                     tmp = tmp.key(entry.getKey());
                     tmp = tmp.array();
@@ -127,13 +127,22 @@ public class JSONParser {
 
 
         JSONObject jsonObject = JSONObject.fromObject(jsonString);
-        String type  = (String) jsonObject.get(ReservedKeys.RECORD_TYPE);
+        System.out.println("JSONObject: "+ jsonObject.toString());
+
+        String type;
+        if(jsonObject.get(ReservedKeys.RECORD_TYPE) instanceof List){
+            type  = (String) ((List) jsonObject.get(ReservedKeys.RECORD_TYPE)).get(0);
+        }else{
+            type = (String) jsonObject.get(ReservedKeys.RECORD_TYPE);
+        }
+
         Record result;
         try {
             result = RecordFactory.getRecord(type);
+            System.out.println(type);
             result.setMap(jsonObject);
         } catch (RecordException e) {
-            throw new ParserException("Error creating Record from json string");
+            throw new ParserException(e.getMessage());
         }
         return result;
 

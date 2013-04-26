@@ -8,7 +8,9 @@ package net.es.lookup.client;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.exception.LSClientException;
@@ -23,17 +25,46 @@ import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 
 public class SimpleLS {
+    private String protocol = "http";
+    private URI connectionUrl;
 
     private String host = "localhost";
-    private int port = 8090;
-    private String connectionUrl;
-    private HttpURLConnection connection;
+    private int port = 8090;private String relativeUrl;
+
     private String connectionType; //limited to http methods - GET, POST, DELETE
     private String status = ReservedKeys.SERVER_STATUS_UNKNOWN;
     private long latency = 0;
-    private String data="";
+    private String data;
     private int timeout = 5000;
     private String response;
+
+    private int responseCode;
+    private String errorMessage;
+
+    public SimpleLS(String host, int port) throws LSClientException {
+
+        this(host, port, "GET");
+
+    }
+
+    public SimpleLS(String host, int port, String connectionType) throws LSClientException {
+
+        this.host = host;
+        this.port = port;
+        try {
+            this.connectionUrl =  createAbsoluteUrl("");
+        } catch (URISyntaxException e) {
+            throw new LSClientException(e.getMessage());
+        }
+        if (isValidConnectionType(connectionType)) {
+            this.connectionType = connectionType;
+        } else {
+            throw new LSClientException("Invalid Connection Type");
+        }
+
+
+    }
+
 
     public int getTimeout() {
 
@@ -61,87 +92,42 @@ public class SimpleLS {
         return errorMessage;
     }
 
-    private int responseCode;
-    private String errorMessage;
 
-
-    public SimpleLS() {
-
-        this.connectionUrl = "http://" + host + ":" + port;
-        this.connectionType = "GET";
-    }
-
-    public SimpleLS(String host, int port, String connectionType) throws LSClientException {
-
-        this.host = host;
-        this.port = port;
-        this.connectionUrl = "http://" + host + ":" + port;
-        if (isValidConnectiontype(connectionType)) {
-            this.connectionType = connectionType;
-        } else {
-            throw new LSClientException("Invalid Connection Type");
-        }
-
-
-    }
-
-    private boolean isValidConnectiontype(String connectionType) {
-
-        if (connectionType.equalsIgnoreCase("GET") || connectionType.equalsIgnoreCase("POST") || connectionType.equalsIgnoreCase("DELETE")) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     public String getHost() {
 
         return host;
     }
 
-    public synchronized void setHost(String host) {
-
-        this.host = host;
-        this.connectionUrl = "http://" + host + ":" + port;
-    }
 
     public int getPort() {
 
         return port;
     }
 
-    public void setPort(int port) {
+    public String getRelativeUrl() {
 
-        this.port = port;
-        this.connectionUrl = "http://" + host + ":" + port;
+        return relativeUrl;
     }
 
-    public String getConnectionUrl() {
+    public synchronized void setRelativeUrl(String relativeUrl) throws LSClientException {
 
-        return connectionUrl;
-    }
-
-    public synchronized void setConnectionUrl(String connectionUrl) throws LSClientException {
-
+            this.relativeUrl = relativeUrl;
         try {
-            URL url = new URL(connectionUrl);
-            this.host = url.getHost();
-            this.port = url.getPort();
-            this.connectionUrl = connectionUrl;
-        } catch (MalformedURLException e) {
+            this.connectionUrl = createAbsoluteUrl(relativeUrl);
+        } catch (URISyntaxException e) {
             throw new LSClientException(e.getMessage());
         }
 
     }
 
-    public HttpURLConnection getConnection() {
-
-        return connection;
+    private URI createAbsoluteUrl( String relativeUrl) throws URISyntaxException {
+        return new URI(protocol+"://"+host+":"+port+"/"+relativeUrl) ;
     }
 
-    public void setConnection(HttpURLConnection connection) {
+    public String getConnectionUrl() {
 
-        this.connection = connection;
+        return connectionUrl.toString();
     }
 
     public String getConnectionType() {
@@ -149,9 +135,9 @@ public class SimpleLS {
         return connectionType;
     }
 
-    public void setConnectionType(String connectionType) throws LSClientException {
+    public synchronized void setConnectionType(String connectionType) throws LSClientException {
 
-        if (isValidConnectiontype(connectionType)) {
+        if (isValidConnectionType(connectionType)) {
             this.connectionType = connectionType;
         } else {
             throw new LSClientException("Invalid Connection type");
@@ -164,19 +150,9 @@ public class SimpleLS {
         return status;
     }
 
-    public void setStatus(String status) {
-
-        this.status = status;
-    }
-
     public long getLatency() {
 
         return latency;
-    }
-
-    public void setLatency(long latency) {
-
-        this.latency = latency;
     }
 
     public String getData() {
@@ -184,12 +160,12 @@ public class SimpleLS {
         return data;
     }
 
-    public void setData(String data) {
+    public synchronized void setData(String data) {
 
         this.data = data;
     }
 
-    public void connect() throws LSClientException {
+    public synchronized void connect() throws LSClientException {
 
         try {
             long start = System.nanoTime();
@@ -210,12 +186,13 @@ public class SimpleLS {
         return;
     }
 
-    public void send() throws LSClientException {
+    public synchronized void send() throws LSClientException {
 
         HttpClient httpclient = new DefaultHttpClient();
         HttpResponse httpResponse;
         if (connectionType.equalsIgnoreCase("GET")) {
             HttpGet httpGet = new HttpGet();
+            httpGet.setURI(connectionUrl);
             httpGet.setHeader("Accept", "application/json");
             httpGet.setHeader("Content-type", "application/json");
             try {
@@ -225,27 +202,26 @@ public class SimpleLS {
             }
 
         } else if (connectionType.equalsIgnoreCase("POST")) {
-            System.out.println("Came to execute Post");
             HttpPost httpPost = new HttpPost();
-            httpPost.setURI(URI.create(this.connectionUrl));
+            httpPost.setURI(connectionUrl);
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Content-type", "application/json");
             StringEntity se= null;
             try {
                 se = new StringEntity(data);
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                throw new LSClientException(e.getMessage());
             }
             httpPost.setEntity(se);
             try {
                 httpResponse = httpclient.execute(httpPost);
-                System.out.println("Executed");
             } catch (IOException e) {
                 throw new LSClientException(e.getMessage());
             }
 
         } else if (connectionType.equalsIgnoreCase("DELETE")) {
             HttpDelete httpDelete = new HttpDelete();
+            httpDelete.setURI(connectionUrl);
             try {
                 httpResponse = httpclient.execute(httpDelete);
             } catch (IOException e) {
@@ -256,7 +232,6 @@ public class SimpleLS {
             throw new LSClientException("Cannot establish connection. Invalid connection type");
         }
 
-        System.out.println("Got a response");
 
         this.responseCode = httpResponse.getStatusLine().getStatusCode();
         this.errorMessage = httpResponse.getStatusLine().getReasonPhrase();
@@ -268,6 +243,17 @@ public class SimpleLS {
         }
 
         return;
+    }
+
+
+
+    private boolean isValidConnectionType(String connectionType) {
+
+        if (connectionType.equalsIgnoreCase("GET") || connectionType.equalsIgnoreCase("POST") || connectionType.equalsIgnoreCase("DELETE")) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 

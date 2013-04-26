@@ -34,13 +34,13 @@ public class Record {
     public Record(Map<String, Object> map) throws RecordException {
 
         this.keyValues = map;
-        if(!this.validate()){
+        if (!this.validate()) {
             throw new RecordException("Error creating record. Missing mandatory key: type");
         }
     }
 
 
-    public final Map getMap() {
+    public final Map<String,Object> getMap() {
 
         return this.keyValues;
 
@@ -48,17 +48,17 @@ public class Record {
 
     public void setMap(Map<String, Object> map) throws RecordException {
 
-        for(String s: map.keySet()){
-            this.keyValues.put(s,map.get(s));
+        for (String s : map.keySet()) {
+            this.keyValues.put(s, map.get(s));
         }
 
-        if(!this.validate()){
+        if (!this.validate()) {
             throw new RecordException("Error creating record. Missing mandatory key: type");
         }
     }
 
 
-    public final Object getValue(Object key) {
+    public final Object getValue(String key) {
 
         return this.keyValues.get(key);
 
@@ -77,13 +77,12 @@ public class Record {
     }
 
 
-    public Long getTTL() {
+    public long getTTL() {
 
         String ttl = (String) this.getMap().get(ReservedKeys.RECORD_TTL);
         PeriodFormatter fmt = ISOPeriodFormat.standard();
         Duration duration = fmt.parsePeriod(ttl).toStandardDuration();
-        Long ttlval = new Long(duration.getStandardSeconds());
-        return ttlval;
+        return duration.getStandardSeconds();
 
     }
 
@@ -91,9 +90,7 @@ public class Record {
     public DateTime getExpires() {
 
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-        DateTime dt = fmt.parseDateTime((String) this.getMap().get(ReservedKeys.RECORD_EXPIRES));
-        return (DateTime) dt;
-
+        return fmt.parseDateTime((String) this.getMap().get(ReservedKeys.RECORD_EXPIRES));
     }
 
 
@@ -110,14 +107,14 @@ public class Record {
     }
 
 
-    public synchronized void setURI(String uri) {
+    public  void setURI(String uri) {
 
         this.keyValues.put(ReservedKeys.RECORD_URI, uri);
 
     }
 
 
-    public synchronized void setTTL(Long ttl) {
+    public void setTTL(Long ttl) {
 
         Period p = new Period(ttl);
         PeriodFormatter fmt = ISOPeriodFormat.standard();
@@ -127,7 +124,7 @@ public class Record {
     }
 
 
-    public synchronized void setExpires(DateTime expires) {
+    public void setExpires(DateTime expires) {
 
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
         String str = fmt.print(expires);
@@ -136,17 +133,23 @@ public class Record {
     }
 
 
-    public synchronized void setRecordType(String type) {
+    public void setRecordType(String type) {
 
         this.keyValues.put(ReservedKeys.RECORD_TYPE, type);
 
     }
 
-    public synchronized void setRecordState(String state) {
+    public void setRecordState(String state) {
 
         this.keyValues.put(ReservedKeys.RECORD_STATE, state);
 
     }
+
+    public Record duplicate() throws RecordException {
+        return new Record(this.getMap());
+    }
+
+
 
 
     //validates the type of value
@@ -154,58 +157,46 @@ public class Record {
 
         boolean returnVal = true;
 
-        if(!keyValues.containsKey(ReservedKeys.RECORD_TYPE)){
-            returnVal = returnVal & false;
+        if (!keyValues.containsKey(ReservedKeys.RECORD_TYPE)) {
+            return false;
         }
 
         for (String key : this.keyValues.keySet()) {
 
             Object o = this.keyValues.get(key);
 
-            if (key.equals(ReservedKeys.RECORD_URI) || key.equals(ReservedKeys.RECORD_STATE) || key.equals(ReservedKeys.RECORD_TYPE) || key.equals(ReservedKeys.RECORD_TTL) || key.equals(ReservedKeys.RECORD_EXPIRES)) {
+            if (o instanceof String) {
 
-                if (o instanceof String) {
+                returnVal = returnVal & true;
 
-                    returnVal = returnVal & true;
+            } else if (o instanceof List<?>) {
 
-                } else {
+                for (Object obj : (List) o) {
 
-                    returnVal = returnVal & false;
-                    return returnVal;
+                    if (obj instanceof String) {
 
-                }
+                        returnVal = returnVal & true;
 
-            } else {
+                    } else {
 
-                if (o instanceof List<?>) {
-
-                    for (Object obj : (List) o) {
-
-                        if (obj instanceof String) {
-
-                            returnVal = returnVal & true;
-
-                        } else {
-
-                            returnVal = returnVal & false;
-                            return returnVal;
-
-                        }
+                        returnVal = returnVal & false;
+                        return returnVal;
 
                     }
 
-                    returnVal = returnVal & true;
-
-                } else {
-
-                    returnVal = returnVal & false;
-                    return returnVal;
-
                 }
+
+                returnVal = returnVal & true;
+
+            } else {
+
+                returnVal = returnVal & false;
+                return returnVal;
 
             }
 
         }
+
 
         return returnVal;
 

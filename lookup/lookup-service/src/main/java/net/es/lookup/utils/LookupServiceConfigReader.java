@@ -15,6 +15,7 @@ public class LookupServiceConfigReader {
     private static LookupServiceConfigReader instance;
     private static final String DEFAULT_FILE = "lookupservice.yaml";
     private static final String DEFAULT_PATH = "etc";
+    private static final String DEFAULT_MODE = "master";
     private static String configFile = DEFAULT_PATH + "/" + DEFAULT_FILE;
 
     private Map<String, Object> lookupServiceMap = new HashMap<String, Object>();
@@ -24,6 +25,12 @@ public class LookupServiceConfigReader {
     private int maxlease;
     private int minlease;
     private int defaultlease;
+
+
+    private String mode = DEFAULT_MODE;
+
+    private String sourceHost;
+    private int sourcePort;
 
 
     private static final int MINIMUM_INTERVAL = 1800;
@@ -124,6 +131,22 @@ public class LookupServiceConfigReader {
         return this.pruneThreshold;
     }
 
+    public String getMode() {
+
+        return mode;
+    }
+
+    public int getSourcePort() {
+
+        return sourcePort;
+    }
+
+    public String getSourceHost() {
+
+        return sourceHost;
+    }
+
+
     private void setInfo(String configPath) {
 
         ConfigHelper cfg = ConfigHelper.getInstance();
@@ -136,11 +159,19 @@ public class LookupServiceConfigReader {
             lookupServiceMap = (HashMap) yamlMap.get("lookupservice");
             host = (String) lookupServiceMap.get("host");
             port = (Integer) lookupServiceMap.get("port");
+            mode = (String) lookupServiceMap.get("mode");
+
+            if (lookupServiceMap.containsKey("source")) {
+
+                Map sourceMap = (HashMap) lookupServiceMap.get("source");
+                sourceHost = (String) sourceMap.get("host");
+                sourcePort = (Integer) sourceMap.get("port");
+
+            }
+
 
             leaseTimeMap = (HashMap) lookupServiceMap.get("lease");
-            LOG.info(leaseTimeMap.toString());
             maxlease = (Integer) leaseTimeMap.get("max");
-            LOG.info("came here");
             minlease = (Integer) leaseTimeMap.get("min");
             defaultlease = (Integer) leaseTimeMap.get("default");
 

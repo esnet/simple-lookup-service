@@ -3,13 +3,14 @@ package net.es.lookup.service;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.database.ServiceDAOMongoDb;
-import net.es.lookup.pubsub.SubscribeClient;
+import net.es.lookup.pubsub.client.ArchiveService;
 import net.es.lookup.pubsub.amq.AMQueueManager;
 import net.es.lookup.pubsub.amq.AMQueuePump;
+import net.es.lookup.pubsub.client.ReplicationService;
+import net.es.lookup.utils.LookupServiceOptions;
 import net.es.lookup.utils.LookupServiceConfigReader;
 import net.es.lookup.utils.QueueServiceConfigReader;
 import org.quartz.JobDetail;
@@ -37,6 +38,10 @@ public class Invoker {
     private static AMQueuePump amQueuePump = null;
     private static String queueConfig = "";
     private static boolean queueservice = false;
+    private static String mode;
+
+    private static String sourceLookupServiceHost;
+    private static int sourceLookupServicePort;
     //private static int dbpruneInterval;
 
     /**
@@ -75,16 +80,16 @@ public class Invoker {
         }
 
         lcfg = LookupServiceConfigReader.getInstance();
+
+        mode = lcfg.getMode();
         port = lcfg.getPort();
         host = lcfg.getHost();
 
-        QueueServiceConfigReader qcfg = QueueServiceConfigReader.getInstance();
+        sourceLookupServiceHost = lcfg.getSourceHost();
+        System.out.println(sourceLookupServiceHost);
+        sourceLookupServicePort = lcfg.getSourcePort();
+        System.out.println(sourceLookupServicePort);
 
-        if(qcfg.getServiceState().equals("on")){
-            queueservice = true;
-        }else{
-            queueservice = false;
-        }
 
         int dbpruneInterval = lcfg.getPruneInterval();
         long prunethreshold = lcfg.getPruneThreshold();
@@ -104,53 +109,68 @@ public class Invoker {
         System.out.println("starting Lookup ServiceRecord");
         // Create the REST service
         Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
+
+
+        //Queue service
+        QueueServiceConfigReader qcfg = QueueServiceConfigReader.getInstance();
+
+        if(qcfg.getServiceState().equals(LookupServiceOptions.SERVICE_ON)){
+            queueservice = true;
+            //starting queueservice
+            Invoker.amQueueManager = new AMQueueManager();
+            Invoker.amQueuePump = new AMQueuePump();
+            Invoker.lookupService.setQueueurl(qcfg.getUrl());
+
+        }else{
+            queueservice = false;
+        }
+
         Invoker.lookupService.setQueueServiceRequired(queueservice);
-        Invoker.lookupService.setQueueurl(qcfg.getUrl());
-
-
 
         // Start the service
         Invoker.lookupService.startService();
 
+        if(mode.equalsIgnoreCase(LookupServiceOptions.MODE_REPLICATION)){
+            ReplicationService replicationService = new ReplicationService(sourceLookupServiceHost,sourceLookupServicePort);
+            replicationService.start();
 
-        //starting queueservice
-        Invoker.amQueueManager = new AMQueueManager();
-        Invoker.amQueuePump = new AMQueuePump();
+        }else if(mode.equalsIgnoreCase(LookupServiceOptions.MODE_ARCHIVE)){
+            ArchiveService archiveService = new ArchiveService(sourceLookupServiceHost,sourceLookupServicePort);
+            archiveService.start();
+        }else if(mode.equalsIgnoreCase(LookupServiceOptions.MODE_MASTER)){
+            //DB Pruning
+            try {
 
-        //DB Pruning
-        try {
+                Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+                scheduler.start();
 
-            Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
-            scheduler.start();
+                // define the job and tie it to  mongoJob class
+                JobDetail job = newJob(MongoDBMaintenanceJob.class)
+                        .withIdentity("mongoJob", "DBMaintenance")
+                        .build();
+                job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
 
-            // define the job and tie it to  mongoJob class
-            JobDetail job = newJob(MongoDBMaintenanceJob.class)
-                    .withIdentity("mongoJob", "DBMaintenance")
-                    .build();
-            job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
+                // Trigger the job to run now, and then every dbpruneInterval seconds
+                Trigger trigger = newTrigger().withIdentity("DBTrigger", "DBMaintenance")
+                        .startNow()
+                        .withSchedule(simpleSchedule()
+                                .withIntervalInSeconds(dbpruneInterval)
+                                .repeatForever())
+                        .build();
 
-            // Trigger the job to run now, and then every dbpruneInterval seconds
-            Trigger trigger = newTrigger().withIdentity("DBTrigger", "DBMaintenance")
-                    .startNow()
-                    .withSchedule(simpleSchedule()
-                            .withIntervalInSeconds(dbpruneInterval)
-                            .repeatForever())
-                    .build();
+                scheduler.scheduleJob(job, trigger);
 
-            scheduler.scheduleJob(job, trigger);
+            } catch (SchedulerException se) {
 
-        } catch (SchedulerException se) {
+                se.printStackTrace();
 
-            se.printStackTrace();
+            }
 
         }
-
-        SubscribeClient sc = new SubscribeClient();
 
         // Block forever
         Object blockMe = new Object();
         synchronized (blockMe) {
-
             blockMe.wait();
 
         }
@@ -197,13 +217,13 @@ public class Invoker {
 
         if (options.has(LOGCONFIG)) {
 
-            logConfig = (String) options.valueOf(LOGCONFIG);
+            logConfig =  options.valueOf(LOGCONFIG);
 
         }
 
         if (options.has(QUEUECONFIG)) {
 
-            queueConfig = (String) options.valueOf(LOGCONFIG);
+            queueConfig = options.valueOf(LOGCONFIG);
 
         }
 

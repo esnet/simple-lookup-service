@@ -20,9 +20,9 @@ import org.apache.log4j.Logger;
  */
 public class AMQueueManager implements QueueManager {
 
-    private HashMap<String, AMQueue> queuemap = new HashMap<String, AMQueue >();            /* keeps track of queueid to queue mapping */
-    private HashMap<String, List<String>> querymap = new HashMap<String, List<String>>();   /* keeps track of query to queueid mapping  */
-    private HashMap<String, List<Message>> normalizedquerymap = new HashMap<String, List<Message>>();   /* keeps track of normalized query to original query mapping  */
+    private HashMap<String, AMQueue> queueMap = new HashMap<String, AMQueue >();            /* keeps track of queueid to queue mapping */
+    private HashMap<String, List<String>> queryMap = new HashMap<String, List<String>>();   /* keeps track of query to queueid mapping  */
+    private HashMap<String, List<Message>> normalizedQueryMap = new HashMap<String, List<Message>>();   /* keeps track of normalized query to original query mapping  */
 
     private static AMQueueManager instance = null;
     private static Logger LOG = Logger.getLogger(AMQueueManager.class);
@@ -56,30 +56,30 @@ public class AMQueueManager implements QueueManager {
 
         if(!normalizedQuery.isEmpty()){
 
-             if(querymap.containsKey(normalizedQuery)){
+             if(queryMap.containsKey(normalizedQuery)){
 
-                 res = querymap.get(normalizedQuery);
+                 res = queryMap.get(normalizedQuery);
                  LOG.info("net.es.lookup.pubsub.amq.AMQueueManager: Queue exists. ");
 
              }else{
 
-                 System.out.println(querymap.toString());
+                 System.out.println(queryMap.toString());
                  AMQueue queue = new AMQueue();
                  String qid = queue.getQid();
                  LOG.info("net.es.lookup.pubsub.amq.AMQueueManager: Created queue with id "+qid);
 
 
-                 //add queue to queuemap
-                 queuemap.put(qid, queue);
+                 //add queue to queueMap
+                 queueMap.put(qid, queue);
 
-                 //add to querymap
+                 //add to queryMap
                  res.add(qid);
-                 querymap.put(normalizedQuery, res);
+                 queryMap.put(normalizedQuery, res);
 
                  //add to normalized query
                  List<Message> queryList = new ArrayList<Message>();
                  queryList.add(query);
-                 normalizedquerymap.put(normalizedQuery,queryList);
+                 normalizedQueryMap.put(normalizedQuery, queryList);
              }
 
         }
@@ -94,8 +94,8 @@ public class AMQueueManager implements QueueManager {
      * */
     public boolean hasQueues(Message query) throws QueryException, QueueException {
 
-        String normalizedquery = QueryNormalizer.normalize(query);
-        if(querymap.containsKey(normalizedquery)){
+        String normalizedQuery = QueryNormalizer.normalize(query);
+        if(queryMap.containsKey(normalizedQuery)){
             return true;
         }else{
             return false;
@@ -110,7 +110,7 @@ public class AMQueueManager implements QueueManager {
     * */
     public void push(String qid, Message message) throws QueueException {
 
-        AMQueue queue = queuemap.get(qid);
+        AMQueue queue = queueMap.get(qid);
 
         if (queue != null) {
             queue.push(message);
@@ -124,8 +124,8 @@ public class AMQueueManager implements QueueManager {
 
         List<Message> queryList = new ArrayList<Message>();
 
-        for(String q: querymap.keySet()){
-            queryList.addAll(normalizedquerymap.get(q));
+        for(String q: queryMap.keySet()){
+            queryList.addAll(normalizedQueryMap.get(q));
         }
 
         return queryList;
