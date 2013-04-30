@@ -26,11 +26,24 @@ public class ReservedKeys {
     //operator keys
     public static final String RECORD_OPERATOR_SUFFIX = "operator";
 
-    //service level keys
-    public static final String RECORD_SERVICE_LOCATOR = "service-locator";
-    public static final String RECORD_SERVICE_NAME = "service-name";
-    public static final String RECORD_SERVICE_DOMAIN = "service-domain";
-    public static final String RECORD_SERVICE_TYPE = "service-type";
+    //group keys
+    public static final String RECORD_GROUP_DOMAINS = "group-domains" ;
 
+    //location keys
+    public static final String RECORD_LOCATION_SITENAME = "location-sitename";
+    public static final String RECORD_LOCATION_CITY = "location-city";
+    public static final String RECORD_LOCATION_REGION = "location-region";
+    public static final String RECORD_LOCATION_COUNTRY = "location-country";
+    public static final String RECORD_LOCATION_ZIPCODE = "location-zipcode";
+    public static final String RECORD_LOCATION_LATITUDE = "location-latitude";
+    public static final String RECORD_LOCATION_LONGITUDE = "location-longitude";
+
+    //service keys
+    public static final String RECORD_SERVICE_NAME = "service-name";
+    public static final String RECORD_SERVICE_VERSION = "service-version";
+    public static final String RECORD_SERVICE_TYPE = "service-type";
+    public static final String RECORD_SERVICE_LOCATOR = "service-locator";
+    public static final String RECORD_SERVICE_ADMINISTRATORS = "service-administrators" ;
+    public static final String RECORD_SERVICE_HOST = "service-host";
 
 }

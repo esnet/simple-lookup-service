@@ -208,19 +208,6 @@ public class RegisterService {
     }
 
 
-    private List<String> getServiceRecordQueryKeys() {
-
-        List<String> qList = new ArrayList();
-        qList.add(ReservedKeys.RECORD_TYPE);
-        qList.add(ReservedKeys.RECORD_SERVICE_LOCATOR);
-        qList.add(ReservedKeys.RECORD_PRIVATEKEY);
-        qList.add(ReservedKeys.RECORD_SERVICE_TYPE);
-        qList.add(ReservedKeys.RECORD_SERVICE_DOMAIN);
-        return qList;
-
-    }
-
-
     private boolean isIgnoreKey(String key) {
 
         if (key.equals(ReservedKeys.RECORD_TTL) || key.equals(ReservedKeys.RECORD_EXPIRES) || key.equals(ReservedKeys.RECORD_URI)) {

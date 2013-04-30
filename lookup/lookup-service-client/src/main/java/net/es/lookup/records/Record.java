@@ -7,14 +7,16 @@ import java.util.List;
 import java.util.Map;
 
 import net.es.lookup.common.exception.RecordException;
-import org.joda.time.*;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 
 /**
- * User: sowmya
+ * Author: sowmya
  * Date: 9/25/12
  * Time: 2:05 PM
  */
@@ -46,15 +48,18 @@ public class Record {
 
     }
 
-    public void setMap(Map<String, Object> map) throws RecordException {
+    public final void setMap(Map<String, Object> map) throws RecordException {
 
-        for (String s : map.keySet()) {
-            this.keyValues.put(s, map.get(s));
+        if(map != null){
+            for (String s : map.keySet()) {
+                this.keyValues.put(s, map.get(s));
+            }
         }
 
         if (!this.validate()) {
             throw new RecordException("Error creating record. Missing mandatory key: type");
         }
+
     }
 
 
@@ -109,7 +114,7 @@ public class Record {
 
     public  void setURI(String uri) {
 
-        this.keyValues.put(ReservedKeys.RECORD_URI, uri);
+        this.add(ReservedKeys.RECORD_URI, uri);
 
     }
 
@@ -119,7 +124,7 @@ public class Record {
         Period p = new Period(ttl);
         PeriodFormatter fmt = ISOPeriodFormat.standard();
         String str = fmt.print(p);
-        this.keyValues.put(ReservedKeys.RECORD_TTL, str);
+        this.add(ReservedKeys.RECORD_TTL, str);
 
     }
 
@@ -128,20 +133,13 @@ public class Record {
 
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
         String str = fmt.print(expires);
-        this.keyValues.put(ReservedKeys.RECORD_EXPIRES, str);
-
-    }
-
-
-    public void setRecordType(String type) {
-
-        this.keyValues.put(ReservedKeys.RECORD_TYPE, type);
+        this.add(ReservedKeys.RECORD_EXPIRES, str);
 
     }
 
     public void setRecordState(String state) {
 
-        this.keyValues.put(ReservedKeys.RECORD_STATE, state);
+        this.add(ReservedKeys.RECORD_STATE, state);
 
     }
 
@@ -157,6 +155,9 @@ public class Record {
 
         boolean returnVal = true;
 
+        if(keyValues == null || keyValues.isEmpty()){
+            return false;
+        }
         if (!keyValues.containsKey(ReservedKeys.RECORD_TYPE)) {
             return false;
         }

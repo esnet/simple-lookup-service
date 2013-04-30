@@ -25,11 +25,13 @@ import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 
 public class SimpleLS {
+
     private String protocol = "http";
     private URI connectionUrl;
 
     private String host = "localhost";
-    private int port = 8090;private String relativeUrl;
+    private int port = 8090;
+    private String relativeUrl;
 
     private String connectionType; //limited to http methods - GET, POST, DELETE
     private String status = ReservedKeys.SERVER_STATUS_UNKNOWN;
@@ -49,10 +51,16 @@ public class SimpleLS {
 
     public SimpleLS(String host, int port, String connectionType) throws LSClientException {
 
-        this.host = host;
+        if (host != null && !host.isEmpty()) {
+            this.host = host;
+        } else {
+            throw new LSClientException("Please enter valid host name");
+        }
+
         this.port = port;
+
         try {
-            this.connectionUrl =  createAbsoluteUrl("");
+            this.connectionUrl = createAbsoluteUrl("");
         } catch (URISyntaxException e) {
             throw new LSClientException(e.getMessage());
         }
@@ -78,7 +86,6 @@ public class SimpleLS {
 
     public String getResponse() {
 
-
         return response;
     }
 
@@ -91,7 +98,6 @@ public class SimpleLS {
 
         return errorMessage;
     }
-
 
 
     public String getHost() {
@@ -112,17 +118,23 @@ public class SimpleLS {
 
     public synchronized void setRelativeUrl(String relativeUrl) throws LSClientException {
 
+        if (relativeUrl != null) {
             this.relativeUrl = relativeUrl;
-        try {
-            this.connectionUrl = createAbsoluteUrl(relativeUrl);
-        } catch (URISyntaxException e) {
-            throw new LSClientException(e.getMessage());
+            try {
+                this.connectionUrl = createAbsoluteUrl(relativeUrl);
+            } catch (URISyntaxException e) {
+                throw new LSClientException(e.getMessage());
+            }
+
+        } else {
+            throw new LSClientException("Empty parameter in setRelativeUrl");
         }
 
     }
 
-    private URI createAbsoluteUrl( String relativeUrl) throws URISyntaxException {
-        return new URI(protocol+"://"+host+":"+port+"/"+relativeUrl) ;
+    private URI createAbsoluteUrl(String relativeUrl) throws URISyntaxException {
+
+        return new URI(protocol + "://" + host + ":" + port + "/" + relativeUrl);
     }
 
     public String getConnectionUrl() {
@@ -206,7 +218,7 @@ public class SimpleLS {
             httpPost.setURI(connectionUrl);
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Content-type", "application/json");
-            StringEntity se= null;
+            StringEntity se;
             try {
                 se = new StringEntity(data);
             } catch (UnsupportedEncodingException e) {
@@ -244,7 +256,6 @@ public class SimpleLS {
 
         return;
     }
-
 
 
     private boolean isValidConnectionType(String connectionType) {
