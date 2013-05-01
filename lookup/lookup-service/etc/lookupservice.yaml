@@ -11,8 +11,8 @@ lookupservice:
     sources:
         - host: 'localhost'
           port: 8090
-        - host: 'ps4.es.net'
-          port: 9095
+        - host: 'sowmya-dev-vm.es.net'
+          port: 8090
 
 
 #Database settings  

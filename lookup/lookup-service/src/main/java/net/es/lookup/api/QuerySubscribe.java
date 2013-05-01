@@ -23,7 +23,7 @@ public class QuerySubscribe {
 
     public String subscribe(String message) {
 
-
+        QueueServiceConfigReader queueServiceConfigReader = QueueServiceConfigReader.getInstance();
         String response;
         JSONSubRequest request = new JSONSubRequest(message);
         if (request.getStatus() == JSONSubRequest.INCORRECT_FORMAT) {
@@ -31,7 +31,7 @@ public class QuerySubscribe {
             // TODO: return correct error code
             throw new BadRequestException("Error parsing requestUrl");
         }
-        if(!QueueServiceConfigReader.getInstance().isServiceUp()){
+        if(!queueServiceConfigReader.isServiceUp()){
             throw new NotSupportedException("Queue ServiceRecord Not Supported");
         }
         // Verify that requestUrl is valid and authorized
@@ -40,7 +40,7 @@ public class QuerySubscribe {
 
             JSONSubResponse res = new JSONSubResponse();
             List<String> locator = new ArrayList<String>();
-            locator.add("tcp://localhost:61616");
+            locator.add(queueServiceConfigReader.getUrl());
             res.add(ReservedKeys.RECORD_SUBSCRIBE_LOCATOR, locator);
 
             AMQueueManager amqmanager = AMQueueManager.getInstance();
