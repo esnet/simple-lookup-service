@@ -27,4 +27,5 @@ public class ReservedValues {
     public static final String RECORD_OPERATOR_ANY = "any";
     public static final String RECORD_OPERATOR_DEFAULT = RECORD_OPERATOR_ALL;
 
+    public static final String RECORD_VALUE_TYPE_ERROR = "error" ;
 }

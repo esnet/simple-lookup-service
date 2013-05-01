@@ -1,8 +1,11 @@
 package net.es.lookup.utils;
 
+import net.es.lookup.common.exception.internal.ConfigurationException;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,9 +32,8 @@ public class LookupServiceConfigReader {
 
     private String mode = DEFAULT_MODE;
 
-    private String sourceHost;
-    private int sourcePort;
-
+    private List<HashMap<String,Object>> sources;
+    private int sourceCount;
 
     private static final int MINIMUM_INTERVAL = 1800;
     private static final int MINIMUM_THRESHOLD = 0;
@@ -136,14 +138,31 @@ public class LookupServiceConfigReader {
         return mode;
     }
 
-    public int getSourcePort() {
+    public Map<String,Object> getSource(int index) {
 
-        return sourcePort;
+        return sources.get(index);
     }
 
-    public String getSourceHost() {
+    public int getSourceCount(){
+        return sourceCount;
+    }
 
-        return sourceHost;
+    public String getSourceHost(int index) throws ConfigurationException {
+
+        if(sources != null && !sources.isEmpty() && (index>=0 && index<sourceCount)){
+            return (String) sources.get(index).get("host");
+        }else{
+            throw new ConfigurationException("Error retrieving source host information");
+        }
+
+    }
+
+    public int getSourcePort(int index) throws ConfigurationException {
+        if(sources != null && !sources.isEmpty() && (index>=0 && index<sourceCount)){
+            return (Integer) sources.get(index).get("port");
+        }else{
+            throw new ConfigurationException("Error retrieving source port information");
+        }
     }
 
 
@@ -161,11 +180,10 @@ public class LookupServiceConfigReader {
             port = (Integer) lookupServiceMap.get("port");
             mode = (String) lookupServiceMap.get("mode");
 
-            if (lookupServiceMap.containsKey("source")) {
+            if (lookupServiceMap.containsKey("sources")) {
 
-                Map sourceMap = (HashMap) lookupServiceMap.get("source");
-                sourceHost = (String) sourceMap.get("host");
-                sourcePort = (Integer) sourceMap.get("port");
+                sources = (List<HashMap<String,Object>>) lookupServiceMap.get("sources");
+                sourceCount = sources.size();
 
             }
 
@@ -183,7 +201,7 @@ public class LookupServiceConfigReader {
             pruneThreshold = (Integer) databaseMap.get("pruneThreshold");
             pruneInterval = (Integer) databaseMap.get("pruneInterval");
         } catch (Exception e) {
-            LOG.error("Error parsing config file; Please check config parameters" + e.toString());
+            LOG.error("Error parsing config file. Please check config parameters " + e.toString());
             System.exit(1);
         }
 

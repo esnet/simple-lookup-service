@@ -8,9 +8,12 @@ lookupservice:
         default: 1800
         min: 7200
     mode: 'replication'
-    source:
-        host: 'localhost'
-        port: 8090
+    sources:
+        - host: 'localhost'
+          port: 8090
+        - host: 'ps4.es.net'
+          port: 9095
+
 
 #Database settings  
 database:

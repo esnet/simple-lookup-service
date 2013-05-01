@@ -40,10 +40,6 @@ public class Invoker {
     private static boolean queueservice = false;
     private static String mode;
 
-    private static String sourceLookupServiceHost;
-    private static int sourceLookupServicePort;
-    //private static int dbpruneInterval;
-
     /**
      * Main program to start the Lookup ServiceRecord
      *
@@ -84,11 +80,6 @@ public class Invoker {
         mode = lcfg.getMode();
         port = lcfg.getPort();
         host = lcfg.getHost();
-
-        sourceLookupServiceHost = lcfg.getSourceHost();
-        System.out.println(sourceLookupServiceHost);
-        sourceLookupServicePort = lcfg.getSourcePort();
-        System.out.println(sourceLookupServicePort);
 
 
         int dbpruneInterval = lcfg.getPruneInterval();
@@ -131,11 +122,11 @@ public class Invoker {
         Invoker.lookupService.startService();
 
         if(mode.equalsIgnoreCase(LookupServiceOptions.MODE_REPLICATION)){
-            ReplicationService replicationService = new ReplicationService(sourceLookupServiceHost,sourceLookupServicePort);
+            ReplicationService replicationService = new ReplicationService();
             replicationService.start();
 
         }else if(mode.equalsIgnoreCase(LookupServiceOptions.MODE_ARCHIVE)){
-            ArchiveService archiveService = new ArchiveService(sourceLookupServiceHost,sourceLookupServicePort);
+            ArchiveService archiveService = new ArchiveService();
             archiveService.start();
         }else if(mode.equalsIgnoreCase(LookupServiceOptions.MODE_MASTER)){
             //DB Pruning

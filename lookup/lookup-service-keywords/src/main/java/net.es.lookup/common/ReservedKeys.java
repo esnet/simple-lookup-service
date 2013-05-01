@@ -51,4 +51,7 @@ public class ReservedKeys {
     public static final String RECORD_INTERFACE_SUBNET = "interface-subnet" ;
     public static final String RECORD_INTERFACE_CAPACITY = "interface-capacity" ;
     public static final String RECORD_INTERFACE_MACADDRESS = "interface-mac";
+
+    public static final String ERROR_MESSAGE = "error-message";
+    public static final String ERROR_CODE = "error-code";
 }

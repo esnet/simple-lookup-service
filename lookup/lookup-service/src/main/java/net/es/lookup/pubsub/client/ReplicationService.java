@@ -6,13 +6,17 @@ import net.es.lookup.client.SubscriberListener;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.LSClientException;
+import net.es.lookup.common.exception.internal.ConfigurationException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.queries.Query;
 import net.es.lookup.records.Record;
+import net.es.lookup.utils.LookupServiceConfigReader;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,36 +25,57 @@ import java.util.Map;
  * Time: 6:01 PM
  */
 public class ReplicationService implements SubscriberListener {
-    private String sourceHost;
-    private int sourcePort;
-    private SimpleLS server;
-    private Subscriber subscriber;
+    private List<SimpleLS> servers;
+    private List<Subscriber> subscribers;
     private ServiceDAOMongoDb db = ServiceDAOMongoDb.getInstance();
 
-    public ReplicationService(String sourceHost, int sourcePort) throws LSClientException {
-        System.out.println("Host:"+sourceHost+"; port:"+sourcePort);
-        this.sourceHost = sourceHost;
-        this.sourcePort = sourcePort;
+    public ReplicationService() throws LSClientException {
+        servers = new LinkedList<SimpleLS>();
+        subscribers = new LinkedList<Subscriber>();
+        LookupServiceConfigReader lcfg = LookupServiceConfigReader.getInstance();
+        int count = lcfg.getSourceCount();
+
+        for(int i=0; i<count;i++){
+            try {
+                String host = lcfg.getSourceHost(i);
+                int port = lcfg.getSourcePort(i);
+                SimpleLS server = new SimpleLS(host,port);
+                servers.add(server);
+            } catch (ConfigurationException e) {
+                e.printStackTrace();
+            }
+
+        }
         init();
     }
 
     private void init() throws LSClientException {
-        server = new SimpleLS(sourceHost,sourcePort);
-        server.connect();
+        for (SimpleLS server: servers){
+            server.connect();
+        }
+
 
     }
 
     public void start() throws LSClientException {
         Query q = new Query();
-        subscriber = new Subscriber(server, q);
-        subscriber.addListener(this);
-        subscriber.startSubscription();
+        for (SimpleLS server: servers){
+            Subscriber subscriber = new Subscriber(server, q);
+            subscriber.addListener(this);
+            subscriber.startSubscription();
+            subscribers.add(subscriber);
+        }
+
+
     }
 
     public void stop() throws LSClientException {
         System.out.println("Stop service");
-        subscriber.removeListener(this);
-        subscriber.stopSubscription();
+        for (Subscriber subscriber: subscribers){
+            subscriber.removeListener(this);
+            subscriber.stopSubscription();
+        }
+
     }
 
     public void onRecord(Record record) {
