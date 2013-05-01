@@ -43,7 +43,7 @@ public class ServiceRecord extends Record {
 
     public void setServiceVersion(String serviceVersion) throws RecordException {
 
-        if(serviceVersion ==null || serviceVersion.isEmpty()){
+        if(serviceVersion !=null && !serviceVersion.isEmpty()){
             this.add(ReservedKeys.RECORD_SERVICE_VERSION, serviceVersion);
         }else{
             throw new RecordException(ReservedKeys.RECORD_SERVICE_VERSION+"is empty");
@@ -57,7 +57,7 @@ public class ServiceRecord extends Record {
 
     public void setServiceType(String serviceType) throws RecordException {
 
-        if(serviceType ==null || serviceType.isEmpty()){
+        if(serviceType !=null && !serviceType.isEmpty()){
             this.add(ReservedKeys.RECORD_SERVICE_TYPE, serviceType);
         }else{
             throw new RecordException(ReservedKeys.RECORD_SERVICE_TYPE+"is empty");
@@ -71,7 +71,7 @@ public class ServiceRecord extends Record {
 
     public void setServiceLocator(List<String> serviceLocator) throws RecordException {
 
-        if(serviceLocator ==null || serviceLocator.isEmpty()){
+        if(serviceLocator !=null && !serviceLocator.isEmpty()){
             this.add(ReservedKeys.RECORD_SERVICE_LOCATOR, serviceLocator);
         }else{
             throw new RecordException(ReservedKeys.RECORD_SERVICE_LOCATOR+"is empty");
@@ -85,7 +85,7 @@ public class ServiceRecord extends Record {
 
     public void setDomains(List<String> domains) throws RecordException {
 
-        if(domains ==null || domains.isEmpty()){
+        if(domains !=null && !domains.isEmpty()){
             this.add(ReservedKeys.RECORD_GROUP_DOMAINS, domains);
         }else{
             throw new RecordException(ReservedKeys.RECORD_GROUP_DOMAINS+"is empty");
@@ -99,7 +99,7 @@ public class ServiceRecord extends Record {
 
     public void setSiteName(String siteName) throws RecordException {
 
-        if(siteName ==null || siteName.isEmpty()){
+        if(siteName !=null && !siteName.isEmpty()){
             this.add(ReservedKeys.RECORD_LOCATION_SITENAME, siteName);
         }else{
             throw new RecordException(ReservedKeys.RECORD_LOCATION_SITENAME+"is empty");
@@ -113,7 +113,7 @@ public class ServiceRecord extends Record {
 
     public void setCity(String city) throws RecordException {
 
-        if(city ==null || city.isEmpty()){
+        if(city !=null && !city.isEmpty()){
             this.add(ReservedKeys.RECORD_LOCATION_CITY, city);
         }else{
             throw new RecordException(ReservedKeys.RECORD_LOCATION_CITY+"is empty");
@@ -127,7 +127,7 @@ public class ServiceRecord extends Record {
 
     public void setRegion(String region) throws RecordException {
 
-        if(region ==null || region.isEmpty()){
+        if(region !=null && !region.isEmpty()){
             this.add(ReservedKeys.RECORD_LOCATION_REGION, region);
         }else{
             throw new RecordException(ReservedKeys.RECORD_LOCATION_REGION+"is empty");
@@ -141,7 +141,7 @@ public class ServiceRecord extends Record {
 
     public void setCountry(String country) throws RecordException {
 
-        if(country == null || country.isEmpty()){
+        if(country != null && !country.isEmpty()){
             this.add(ReservedKeys.RECORD_LOCATION_COUNTRY, country);
         }else{
             throw new RecordException(ReservedKeys.RECORD_LOCATION_COUNTRY+"is empty");
@@ -155,7 +155,7 @@ public class ServiceRecord extends Record {
 
     public void setZipcode(String zipcode) throws RecordException {
 
-        if(zipcode == null || zipcode.isEmpty()){
+        if(zipcode != null && !zipcode.isEmpty()){
             this.add(ReservedKeys.RECORD_LOCATION_COUNTRY, zipcode);
         }else{
             throw new RecordException(ReservedKeys.RECORD_LOCATION_COUNTRY+"is empty");
@@ -169,7 +169,7 @@ public class ServiceRecord extends Record {
 
     public void setLatitude(double latitude) throws RecordException {
 
-        if(latitude<-90.00 || latitude > 90.00){
+        if(latitude >= -90.00 && latitude <= 90.00){
             this.add(ReservedKeys.RECORD_LOCATION_LATITUDE, latitude);
         }else{
             throw new RecordException(ReservedKeys.RECORD_LOCATION_LATITUDE+"is out of range (-90,90)");
@@ -183,7 +183,7 @@ public class ServiceRecord extends Record {
 
     public void setLongitude(double longitude) throws RecordException {
 
-        if(longitude<-180.00 || longitude > 180.00){
+        if(longitude >= -180.00 && longitude <= 180.00){
             this.add(ReservedKeys.RECORD_LOCATION_COUNTRY, longitude);
         }else{
             throw new RecordException(ReservedKeys.RECORD_LOCATION_LONGITUDE+"is out of range (-180,180)");
@@ -197,7 +197,7 @@ public class ServiceRecord extends Record {
 
     public void setAdministrators(List<String> administrators) throws RecordException {
 
-        if(administrators == null || administrators.isEmpty()){
+        if(administrators != null && !administrators.isEmpty()){
             this.add(ReservedKeys.RECORD_SERVICE_ADMINISTRATORS, administrators);
         }else{
             throw new RecordException(ReservedKeys.RECORD_SERVICE_ADMINISTRATORS+"is empty");
@@ -211,7 +211,7 @@ public class ServiceRecord extends Record {
 
     public void setHost(String host) throws RecordException {
 
-        if(host == null || host.isEmpty()){
+        if(host != null && !host.isEmpty()){
             this.add(ReservedKeys.RECORD_SERVICE_HOST, host);
         }else{
             throw new RecordException(ReservedKeys.RECORD_SERVICE_HOST+"is empty");
