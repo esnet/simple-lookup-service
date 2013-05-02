@@ -4,6 +4,7 @@ package net.es.lookup.records.Network;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.RecordException;
+import net.es.lookup.records.DataValidator;
 import net.es.lookup.records.Record;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class ServiceRecord extends Record {
         if(serviceName ==null || serviceName.isEmpty()){
             this.add(ReservedKeys.RECORD_SERVICE_NAME, serviceName);
         }else{
-            throw new RecordException(ReservedKeys.RECORD_SERVICE_NAME+"is empty");
+            throw new RecordException(ReservedKeys.RECORD_SERVICE_NAME+" is empty");
         }
 
     }
@@ -46,7 +47,7 @@ public class ServiceRecord extends Record {
         if(serviceVersion !=null && !serviceVersion.isEmpty()){
             this.add(ReservedKeys.RECORD_SERVICE_VERSION, serviceVersion);
         }else{
-            throw new RecordException(ReservedKeys.RECORD_SERVICE_VERSION+"is empty");
+            throw new RecordException(ReservedKeys.RECORD_SERVICE_VERSION+" is empty");
         }
     }
 
@@ -60,7 +61,7 @@ public class ServiceRecord extends Record {
         if(serviceType !=null && !serviceType.isEmpty()){
             this.add(ReservedKeys.RECORD_SERVICE_TYPE, serviceType);
         }else{
-            throw new RecordException(ReservedKeys.RECORD_SERVICE_TYPE+"is empty");
+            throw new RecordException(ReservedKeys.RECORD_SERVICE_TYPE+" is empty");
         }
     }
 
@@ -74,7 +75,7 @@ public class ServiceRecord extends Record {
         if(serviceLocator !=null && !serviceLocator.isEmpty()){
             this.add(ReservedKeys.RECORD_SERVICE_LOCATOR, serviceLocator);
         }else{
-            throw new RecordException(ReservedKeys.RECORD_SERVICE_LOCATOR+"is empty");
+            throw new RecordException(ReservedKeys.RECORD_SERVICE_LOCATOR+" is empty");
         }
     }
 
@@ -88,7 +89,7 @@ public class ServiceRecord extends Record {
         if(domains !=null && !domains.isEmpty()){
             this.add(ReservedKeys.RECORD_GROUP_DOMAINS, domains);
         }else{
-            throw new RecordException(ReservedKeys.RECORD_GROUP_DOMAINS+"is empty");
+            throw new RecordException(ReservedKeys.RECORD_GROUP_DOMAINS+" is empty");
         }
     }
 
@@ -102,7 +103,7 @@ public class ServiceRecord extends Record {
         if(siteName !=null && !siteName.isEmpty()){
             this.add(ReservedKeys.RECORD_LOCATION_SITENAME, siteName);
         }else{
-            throw new RecordException(ReservedKeys.RECORD_LOCATION_SITENAME+"is empty");
+            throw new RecordException(ReservedKeys.RECORD_LOCATION_SITENAME+" is empty");
         }
     }
 
@@ -116,7 +117,7 @@ public class ServiceRecord extends Record {
         if(city !=null && !city.isEmpty()){
             this.add(ReservedKeys.RECORD_LOCATION_CITY, city);
         }else{
-            throw new RecordException(ReservedKeys.RECORD_LOCATION_CITY+"is empty");
+            throw new RecordException(ReservedKeys.RECORD_LOCATION_CITY+" is empty");
         }
     }
 
@@ -130,7 +131,7 @@ public class ServiceRecord extends Record {
         if(region !=null && !region.isEmpty()){
             this.add(ReservedKeys.RECORD_LOCATION_REGION, region);
         }else{
-            throw new RecordException(ReservedKeys.RECORD_LOCATION_REGION+"is empty");
+            throw new RecordException(ReservedKeys.RECORD_LOCATION_REGION+" is empty");
         }
     }
 
@@ -141,10 +142,10 @@ public class ServiceRecord extends Record {
 
     public void setCountry(String country) throws RecordException {
 
-        if(country != null && !country.isEmpty()){
+        if(country != null && !country.isEmpty() && DataValidator.isValidCountry(country)){
             this.add(ReservedKeys.RECORD_LOCATION_COUNTRY, country);
         }else{
-            throw new RecordException(ReservedKeys.RECORD_LOCATION_COUNTRY+"is empty");
+            throw new RecordException(ReservedKeys.RECORD_LOCATION_COUNTRY+" is invalid");
         }
     }
 
@@ -156,9 +157,9 @@ public class ServiceRecord extends Record {
     public void setZipcode(String zipcode) throws RecordException {
 
         if(zipcode != null && !zipcode.isEmpty()){
-            this.add(ReservedKeys.RECORD_LOCATION_COUNTRY, zipcode);
+            this.add(ReservedKeys.RECORD_LOCATION_ZIPCODE, zipcode);
         }else{
-            throw new RecordException(ReservedKeys.RECORD_LOCATION_COUNTRY+"is empty");
+            throw new RecordException(ReservedKeys.RECORD_LOCATION_ZIPCODE+" is empty");
         }
     }
 
@@ -169,10 +170,10 @@ public class ServiceRecord extends Record {
 
     public void setLatitude(double latitude) throws RecordException {
 
-        if(latitude >= -90.00 && latitude <= 90.00){
+        if(DataValidator.isValidLatitude(latitude)){
             this.add(ReservedKeys.RECORD_LOCATION_LATITUDE, latitude);
         }else{
-            throw new RecordException(ReservedKeys.RECORD_LOCATION_LATITUDE+"is out of range (-90,90)");
+            throw new RecordException(ReservedKeys.RECORD_LOCATION_LATITUDE+" is out of range (-90,90)");
         }
     }
 
@@ -183,10 +184,10 @@ public class ServiceRecord extends Record {
 
     public void setLongitude(double longitude) throws RecordException {
 
-        if(longitude >= -180.00 && longitude <= 180.00){
-            this.add(ReservedKeys.RECORD_LOCATION_COUNTRY, longitude);
+        if(DataValidator.isValidLongitude(longitude)){
+            this.add(ReservedKeys.RECORD_LOCATION_LONGITUDE, longitude);
         }else{
-            throw new RecordException(ReservedKeys.RECORD_LOCATION_LONGITUDE+"is out of range (-180,180)");
+            throw new RecordException(ReservedKeys.RECORD_LOCATION_LONGITUDE+" is out of range (-180,180)");
         }
     }
 
@@ -200,7 +201,7 @@ public class ServiceRecord extends Record {
         if(administrators != null && !administrators.isEmpty()){
             this.add(ReservedKeys.RECORD_SERVICE_ADMINISTRATORS, administrators);
         }else{
-            throw new RecordException(ReservedKeys.RECORD_SERVICE_ADMINISTRATORS+"is empty");
+            throw new RecordException(ReservedKeys.RECORD_SERVICE_ADMINISTRATORS+" is empty");
         }
     }
 
@@ -214,7 +215,7 @@ public class ServiceRecord extends Record {
         if(host != null && !host.isEmpty()){
             this.add(ReservedKeys.RECORD_SERVICE_HOST, host);
         }else{
-            throw new RecordException(ReservedKeys.RECORD_SERVICE_HOST+"is empty");
+            throw new RecordException(ReservedKeys.RECORD_SERVICE_HOST+" is empty");
         }
     }
 

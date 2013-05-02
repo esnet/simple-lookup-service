@@ -14,6 +14,10 @@ public class ReservedKeys {
     public static final String RECORD_PRIVATEKEY = "privatekey";
     public static final String RECORD_STATE = "state";
 
+    //error keys
+    public static final String ERROR_MESSAGE = "error-message";
+    public static final String ERROR_CODE = "error-code";
+
     //subscribe keys
     public static final String RECORD_SUBSCRIBE_QUEUE = "subscribe-queue";
     public static final String RECORD_SUBSCRIBE_LOCATOR = "subscribe-locator";
@@ -52,6 +56,20 @@ public class ReservedKeys {
     public static final String RECORD_INTERFACE_CAPACITY = "interface-capacity" ;
     public static final String RECORD_INTERFACE_MACADDRESS = "interface-mac";
 
-    public static final String ERROR_MESSAGE = "error-message";
-    public static final String ERROR_CODE = "error-code";
+    //host keys
+    public static final String RECORD_HOST_NET_INTERFACES = "host-net-interfaces";
+    public static final String RECORD_HOST_NET_TCP_MAXBACKLOG = "host-net-tcp-maxbacklog";
+    public static final String RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_SEND = "host-net-tcp-autotunemaxbuffer-send";
+    public static final String RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_RECV = "host-net-tcp-autotunemaxbuffer-recv";
+    public static final String RECORD_HOST_NET_TCP_MAXBUFFER_SEND = "host-net-tcp-maxbuffer-send";
+    public static final String RECORD_HOST_NET_TCP_MAXBUFFER_RECV = "host-net-tcp-maxbuffer-recv";
+    public static final String RECORD_HOST_NET_TCP_CONGESTIONALGORITHM = "host-net-tcp-congestionalgorithm";
+    public static final String RECORD_HOST_OS_NAME = "host-os-name" ;
+    public static final String RECORD_HOST_OS_VERSION = "host-os-version";
+    public static final String RECORD_HOST_OS_KERNEL = "host-os-kernel";
+    public static final String RECORD_HOST_NAME = "host-name";
+    public static final String RECORD_HOST_HARDWARE_MEMORY = "host-hardware-memory";
+    public static final String RECORD_HOST_HARDWARE_PROCESSORSPEED = "host-hardware-processorspeed";
+    public static final String RECORD_HOST_HARDWARE_PROCESSORCOUNT = "host-hardware-processorcount";
+    public static final String RECORD_HOST_HARDWARE_PROCESSORCORE = "host-hardware-processorcore";
 }
