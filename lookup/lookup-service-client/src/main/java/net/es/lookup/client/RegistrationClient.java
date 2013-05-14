@@ -39,6 +39,16 @@ public class RegistrationClient {
 
     }
 
+    public SimpleLS getServer() {
+
+        return server;
+    }
+
+    public Record getRecord() {
+
+        return record;
+    }
+
     public synchronized void setRecord(Record record) throws LSClientException {
         if(record !=null){
             this.record = record;

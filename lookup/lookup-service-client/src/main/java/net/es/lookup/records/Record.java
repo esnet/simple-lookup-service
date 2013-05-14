@@ -112,13 +112,6 @@ public class Record {
     }
 
 
-    public  void setURI(String uri) {
-
-        this.add(ReservedKeys.RECORD_URI, uri);
-
-    }
-
-
     public void setTTL(Long ttl) {
 
         Period p = new Period(ttl);

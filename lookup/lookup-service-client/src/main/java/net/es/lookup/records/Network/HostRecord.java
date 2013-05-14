@@ -81,12 +81,12 @@ public class HostRecord extends Record {
         this.add(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCORE,processorCore);
     }
 
-    public String getOSName() {
+    public List<String> getOSName() {
 
-        return (String) this.getValue(ReservedKeys.RECORD_HOST_OS_NAME);
+        return (List<String>) this.getValue(ReservedKeys.RECORD_HOST_OS_NAME);
     }
 
-    public void setOSName(String osName) throws RecordException {
+    public void setOSName(List<String> osName) throws RecordException {
 
         if (osName == null || osName.isEmpty()) {
             this.add(ReservedKeys.RECORD_HOST_OS_NAME, osName);
@@ -95,12 +95,12 @@ public class HostRecord extends Record {
         }
     }
 
-    public String getOSVersion() {
+    public List<String> getOSVersion() {
 
-        return (String) this.getValue(ReservedKeys.RECORD_HOST_OS_VERSION);
+        return (List<String>) this.getValue(ReservedKeys.RECORD_HOST_OS_VERSION);
     }
 
-    public void setOSVersion(String osVersion) throws RecordException {
+    public void setOSVersion(List<String> osVersion) throws RecordException {
 
         if (osVersion == null || osVersion.isEmpty()) {
             this.add(ReservedKeys.RECORD_HOST_OS_VERSION, osVersion);
@@ -109,12 +109,12 @@ public class HostRecord extends Record {
         }
     }
 
-    public String getOSKernel() {
+    public List<String> getOSKernel() {
 
-        return (String) this.getValue(ReservedKeys.RECORD_HOST_OS_KERNEL);
+        return (List<String>) this.getValue(ReservedKeys.RECORD_HOST_OS_KERNEL);
     }
 
-    public void setOSKernel(String osKernel) throws RecordException {
+    public void setOSKernel(List<String> osKernel) throws RecordException {
 
         if (osKernel == null || osKernel.isEmpty()) {
             this.add(ReservedKeys.RECORD_HOST_OS_KERNEL, osKernel);

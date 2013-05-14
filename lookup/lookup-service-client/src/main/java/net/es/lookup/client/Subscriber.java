@@ -32,7 +32,7 @@ public class Subscriber {
     private String subscribeRequestUrl = DEFAULT_SUBSCRIBE_REQUEST_URL;
 
     private Connection conn;
-    private URI queueUrl;
+    private String queueUrl;
     private String queue;
     private Session session;
     private Topic topic;
@@ -80,7 +80,7 @@ public class Subscriber {
     }
 
 
-    public URI getQueueUrl() {
+    public String getQueueUrl() {
 
         return queueUrl;
     }
@@ -120,12 +120,8 @@ public class Subscriber {
                     throw new LSClientException(e.getMessage());
                 }
                 String queUrl = record.getLocator().get(0);
-                try {
-                    this.queueUrl = new URI(queUrl);
+                    this.queueUrl = queUrl;
                     this.queue = record.getQueues().get(0);
-                } catch (URISyntaxException e) {
-                    throw new LSClientException("Error parsing response. Cannot convert queueUrl from string to URI");
-                }
             } else {
                 throw new LSClientException("Error in response. Response code: " + server.getResponseCode() + ". Error Message: " + server.getErrorMessage());
             }
