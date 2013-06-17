@@ -34,18 +34,16 @@ public class JSONParser {
 
             for (Map.Entry<String, Object> entry : entries) {
 
-                //tmp = tmp.key(entry.getKey()).value(entry.getValue());
-
                 if (entry.getValue() instanceof String) {
-
-                    tmp = tmp.key(entry.getKey()).value(entry.getValue());
+                    tmp = tmp.key(entry.getKey()).array();
+                    tmp = tmp.value(entry.getValue());
+                    tmp.endArray();
 
                 } else {
 
                     List<String> tmpvalues = (List<String>) entry.getValue();
                     Iterator<String> it = tmpvalues.iterator();
-                    tmp = tmp.key(entry.getKey());
-                    tmp = tmp.array();
+                    tmp = tmp.key(entry.getKey()).array();
 
                     while (it.hasNext()) {
 
@@ -89,7 +87,10 @@ public class JSONParser {
 
                 if (entry.getValue() instanceof String) {
 
-                    tmp = tmp.key(entry.getKey()).value(entry.getValue());
+                    tmp = tmp.key(entry.getKey()).array();
+                    tmp = tmp.value(entry.getValue());
+                    tmp.endArray();
+
 
                 } else {
 

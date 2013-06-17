@@ -78,12 +78,24 @@ public class AMQueue extends Queue {
 
     }
 
-    public String getQid() {
+    /**
+     * This method returns the queueid associated with the queue.
+     *
+     * @return String - returns the queueid as a string
+     * */
+     public String getQid() {
 
         return qid;
 
     }
 
+    /**
+     * This method pushes a single message to the Active MQ Queue.
+     *
+     * @param  message The message to be pushed to queue
+     *
+     *
+     * */
     public void push(Message message) throws QueueException {
 
         try {
