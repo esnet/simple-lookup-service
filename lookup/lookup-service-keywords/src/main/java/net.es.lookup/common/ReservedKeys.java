@@ -72,4 +72,10 @@ public class ReservedKeys {
     public static final String RECORD_HOST_HARDWARE_PROCESSORSPEED = "host-hardware-processorspeed";
     public static final String RECORD_HOST_HARDWARE_PROCESSORCOUNT = "host-hardware-processorcount";
     public static final String RECORD_HOST_HARDWARE_PROCESSORCORE = "host-hardware-processorcore";
+
+    //person keys
+    public static final String RECORD_PERSON_EMAILIDS = "person-emails";
+    public static final String RECORD_PERSON_PHONENUMBERS = "person-phonenumbers";
+    public static final String RECORD_PERSON_ORGANIZATION = "person-organization";
+    public static final String RECORD_PERSON_NAME = "person-name";
 }

@@ -16,11 +16,6 @@ import java.util.List;
  */
 public class HostRecord extends Record {
 
-    private long hostHardwareMemory;
-    private long hostHardwareProcessorSpeed;
-    private int hostHardwareProcessorCount;
-    private int hostHardwareProcessorCore;
-
     public HostRecord() {
 
         super(ReservedValues.RECORD_VALUE_TYPE_HOST);
