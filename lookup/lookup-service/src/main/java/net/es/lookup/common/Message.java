@@ -134,47 +134,35 @@ public class Message {
 
             Object o = this.keyValues.get(key);
 
-            if (key.equals(ReservedKeys.RECORD_URI) || key.equals(ReservedKeys.RECORD_TTL)) {
+            if(o == null){
+                returnVal = returnVal & false;
+                return returnVal;
+            }
 
-                if (o instanceof String) {
+            if (o instanceof String && !((String) o).isEmpty()) {
 
-                    returnVal = returnVal & true;
+                returnVal = returnVal & true;
 
-                } else {
+            } else if (o instanceof List<?>) {
 
-                    returnVal = returnVal & false;
-                    return returnVal;
+                for (Object obj : (List) o) {
+
+                    if (obj instanceof String && !((String) obj).isEmpty()) {
+
+                        returnVal = returnVal & true;
+
+                    } else {
+
+                        returnVal = returnVal & false;
+                        return returnVal;
+
+                    }
 
                 }
 
             } else {
-
-                if (o instanceof List<?>) {
-
-                    for (Object obj : (List) o) {
-
-                        if (obj instanceof String) {
-
-                            returnVal = returnVal & true;
-
-                        } else {
-
-                            returnVal = returnVal & false;
-                            return returnVal;
-
-                        }
-
-                    }
-
-                    returnVal = returnVal & true;
-
-                } else {
-
-                    returnVal = returnVal & false;
-                    return returnVal;
-
-                }
-
+                returnVal = returnVal & false;
+                return returnVal;
             }
 
         }

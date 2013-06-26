@@ -21,7 +21,7 @@ public class JSONSubRequest extends SubRequest {
 
                 this.parseJSON(message);
                 this.status = JSONSubRequest.VALID;
-                if(this.getMap().isEmpty()){
+                if (this.getMap().isEmpty()) {
                     this.setDefault();
                 }
             } catch (Exception e) {

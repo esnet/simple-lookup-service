@@ -1,10 +1,13 @@
 package net.es.lookup.protocol.json;
 
 import net.es.lookup.common.RegisterRequest;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import net.sf.json.util.JSONTokener;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class JSONRegisterRequest extends RegisterRequest {
@@ -37,18 +40,22 @@ public class JSONRegisterRequest extends RegisterRequest {
         if (obj != null) {
 
             JSONObject jsonObj = (JSONObject) obj;
-            Set keyValues = jsonObj.entrySet();
 
-            for (Object o : ((JSONObject) obj).keySet()) {
-
-                this.add(o.toString(), ((JSONObject) obj).get(o));
-
+            for (Object key : jsonObj.keySet()) {
+                Object value = jsonObj.get(key);
+                if (value instanceof String) {
+                    List<String> tmpList = new ArrayList<String>(1);
+                    tmpList.add((String) value);
+                    this.add(key.toString(), tmpList);
+                } else if (value instanceof List) {
+                    JSONArray jsonArray = (JSONArray) value;
+                    this.add(key.toString(), jsonArray);
+                }
             }
-
         } else {
 
             this.status = JSONRegisterRequest.INCORRECT_FORMAT;
-
+            return;
         }
 
     }

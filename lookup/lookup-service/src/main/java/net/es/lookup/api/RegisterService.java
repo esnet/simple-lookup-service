@@ -37,9 +37,8 @@ public class RegisterService {
         if (request.getStatus() == JSONRegisterRequest.INCORRECT_FORMAT) {
 
             LOG.info("Register status: FAILED; exiting");
-            LOG.error(" INCORRECT FORMAT OF JSON DATA");
-            // TODO: return correct error code
-            throw new BadRequestException("Error in JSON data");
+            LOG.error("Incorrect JSON Data Format");
+            throw new BadRequestException("Error parsing JSON data.");
 
         }
 
@@ -112,21 +111,21 @@ public class RegisterService {
 
                 } catch (DataFormatException e) {
 
-                    LOG.fatal("Data formating exception");
-                    LOG.info("Register status: FAILED; exiting");
-                    throw new InternalErrorException("Data formatting exception");
+                    LOG.fatal("Data formatting exception");
+                    LOG.info("Register status: FAILED due to Data formatting error; exiting");
+                    throw new InternalErrorException("Error in creating response. Data formatting exception at server.");
 
                 } catch (DuplicateEntryException e) {
 
                     LOG.error("FobiddenRequestException:" + e.getMessage());
-                    LOG.info("Register status: FAILED; exiting");
+                    LOG.info("Register status: FAILED due to Duplicate Entry; exiting");
                     throw new ForbiddenRequestException(e.getMessage());
 
                 } catch (DatabaseException e) {
 
                     LOG.fatal("DatabaseException:" + e.getMessage());
-                    LOG.info("Register status: FAILED; exiting");
-                    throw new InternalErrorException(e.getMessage());
+                    LOG.info("Register status: FAILED due to Database Exception; exiting");
+                    throw new InternalErrorException("Internal Server Error"+e.getMessage());
 
                 }
             } else {
@@ -142,15 +141,15 @@ public class RegisterService {
 
             if (!this.isValid(request)) {
 
-                LOG.error("Invalid requestUrl:");
-                LOG.info("Register status: FAILED; exiting");
-                throw new BadRequestException("Invalid requestUrl");
+                LOG.error("Invalid request");
+                LOG.info("Register status: FAILED due to Invalid Request; exiting");
+                throw new BadRequestException("Invalid request. Please check the key-value pairs");
 
             } else if (!this.isAuthed(request)) {
 
-                LOG.error("Not authorized to perform the requestUrl");
+                LOG.error("Not authorized to perform the request");
                 LOG.info("Register status: FAILED; exiting");
-                throw new UnauthorizedException("Not authorized to perform the requestUrl");
+                throw new UnauthorizedException("Not authorized to perform the request");
 
             }
 
@@ -173,7 +172,7 @@ public class RegisterService {
 
     private boolean isValid(JSONRegisterRequest request) {
 
-        // All mandatory key/value must be present
+        //Checks if ke "type" is present
         boolean res = request.validate();
 
         if (res) {
