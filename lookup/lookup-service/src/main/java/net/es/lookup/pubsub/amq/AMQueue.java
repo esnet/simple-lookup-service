@@ -9,6 +9,7 @@ import net.es.lookup.pubsub.Queue;
 import net.es.lookup.utils.QueueServiceConfigReader;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.log4j.Logger;
 
 
 import javax.jms.*;
@@ -26,7 +27,7 @@ public class AMQueue extends Queue {
     private Topic topic;
     private MessageProducer producer;
     private String qid = "";
-
+    private static Logger LOG = Logger.getLogger(AMQueue.class);
 
     /**
      * The constructor
@@ -48,14 +49,16 @@ public class AMQueue extends Queue {
 
         String url = protocol + "://" + host + ":" + port;
 
-        ConnectionFactory factory = new ActiveMQConnectionFactory(user,password,url);
+        ConnectionFactory factory = new ActiveMQConnectionFactory(user, password, url);
         try {
 
             connection = factory.createConnection();
 
             connection.start();
+            LOG.debug("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Created connection for queue ");
 
         } catch (JMSException e) {
+            LOG.error("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Error creating connection for Queue. "+ e.getMessage());
             throw new QueueException(e.getMessage());
         }
         try {
@@ -65,6 +68,8 @@ public class AMQueue extends Queue {
             producer = session.createProducer(topic);
             producer.setTimeToLive(ttl);
 
+            LOG.debug("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Created ActiveMQ session, topic and producer for Queue");
+
             if (isPersistent) {
                 producer.setDeliveryMode(DeliveryMode.PERSISTENT);
             } else {
@@ -73,17 +78,19 @@ public class AMQueue extends Queue {
 
 
         } catch (JMSException e) {
+            LOG.error("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Error creating session/producer for Queue. "+ e.getMessage());
             throw new QueueException(e.getMessage());
         }
 
+        LOG.info("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Queue Creation Successful!");
     }
 
     /**
      * This method returns the queueid associated with the queue.
      *
      * @return String - returns the queueid as a string
-     * */
-     public String getQid() {
+     */
+    public String getQid() {
 
         return qid;
 
@@ -92,31 +99,40 @@ public class AMQueue extends Queue {
     /**
      * This method pushes a single message to the Active MQ Queue.
      *
-     * @param  message The message to be pushed to queue
-     *
-     *
-     * */
+     * @param message The message to be pushed to queue
+     */
     public void push(Message message) throws QueueException {
 
         try {
             String strmsg = JSONMessage.toString(message);
             TextMessage txtmsg = session.createTextMessage(strmsg);
+            LOG.debug("net.es.lookup.pubsub.amq.AMQueue.push: Received message to push - "+ strmsg);
             producer.send(txtmsg);
+            LOG.info("net.es.lookup.pubsub.amq.AMQueue.push: Pushed message to Queue - "+ txtmsg);
         } catch (DataFormatException e) {
+            LOG.error("net.es.lookup.pubsub.amq.AMQueue.push: Error pushing message to queue - DataFormatException mapped to QueueException"+ e.getMessage());
             throw new QueueException(e.getMessage());
         } catch (JMSException e) {
+            LOG.error("net.es.lookup.pubsub.amq.AMQueue.push: Error pushing message to queue - JMSException mapped to QueueException "+ e.getMessage());
             throw new QueueException(e.getMessage());
         }
     }
 
     public void close() throws QueueException {
 
-        if (connection != null) {
-            try {
-                connection.close();
-            } catch (JMSException e) {
-                throw new QueueException(e.getMessage());
+        try {
+            if (session != null) {
+                session.close();
             }
+            if (connection != null) {
+                connection.close();
+            }
+
+            LOG.info("net.es.lookup.pubsub.amq.AMQueue.close: Closed Queue ");
+
+        } catch (JMSException e) {
+            LOG.error("net.es.lookup.pubsub.amq.AMQueue.close: Error closing Queue - JMSException mapped to QueueException "+ e.getMessage());
+            throw new QueueException(e.getMessage());
         }
     }
 }

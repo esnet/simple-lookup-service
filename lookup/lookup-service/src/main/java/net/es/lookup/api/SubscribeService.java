@@ -21,7 +21,6 @@ import java.util.List;
 
 public class SubscribeService {
 
-    private String params;
     private static Logger LOG = Logger.getLogger(SubscribeService.class);
 
     public String subscribe(String message) {
@@ -35,14 +34,14 @@ public class SubscribeService {
             LOG.error("net.es.lookup.api.SubscribeService.subscribe: Incorrect JSON format ");
             throw new BadRequestException("Error parsing request. Please check the key-value pairs.");
         }
-        if(!queueServiceConfigReader.isServiceUp()){
+        if (!queueServiceConfigReader.isServiceUp()) {
             LOG.error("net.es.lookup.api.SubscribeService.subscribe: Subscribe Service is not supported.");
             throw new NotSupportedException("Subscribe Service Not Supported");
         }
         // Verify that request is valid and authorized
         if (this.isValid(request) && this.isAuthed(request)) {
             // Build response
-            LOG.info("net.es.lookup.api.SubscribeService.subscribe: Valid request "+request.getMap());
+            LOG.debug("net.es.lookup.api.SubscribeService.subscribe: Valid request " + request.getMap());
             JSONSubResponse res = new JSONSubResponse();
             List<String> locator = new ArrayList<String>();
             locator.add(queueServiceConfigReader.getUrl());
@@ -53,7 +52,7 @@ public class SubscribeService {
                 List<String> qlist = amqmanager.getQueues(request);
                 res.add(ReservedKeys.RECORD_SUBSCRIBE_QUEUE, qlist);
                 response = JSONMessage.toString(res);
-                LOG.info("net.es.lookup.api.SubscribeService.subscribe: Returning queues - "+ response);
+                LOG.info("net.es.lookup.api.SubscribeService.subscribe: Returning queues - " + response);
                 return response;
             } catch (QueryException e) {
                 throw new InternalErrorException(e.getMessage());
@@ -64,12 +63,10 @@ public class SubscribeService {
             }
 
 
-        }else{
+        } else {
             LOG.error("net.es.lookup.api.SubscribeService.subscribe: Query contains > 1 key-value pairs ");
             throw new BadRequestException("Subscribe supports only queries with 0 or 1 key-value pairs");
         }
-
-
 
 
     }
@@ -86,16 +83,16 @@ public class SubscribeService {
 
     /**
      * Checks if the message is valid
-     * */
+     */
     private boolean isValid(JSONSubRequest request) {
 
         // Can contain 0 or 1 key-value pair
         boolean res = true;
-        if(request.getMap().size() >1  ) {
+        if (request.getMap().size() > 1) {
             res = false;
         }
-        System.out.println("Query size: "+ request.getMap().size());
-        System.out.println("Return value: "+ res);
+        LOG.debug("net.es.lookup.api.SubscribeService.isValid: Query size - " + request.getMap().size());
+        LOG.debug("net.es.lookup.api.SubscribeService.isValid: Return Value - " + res);
         return res;
 
     }

@@ -9,8 +9,11 @@ lookupservice:
         min: 7200
     mode: 'replication'
 #    sources:
- #       - host: 'localhost'
-  #        port: 8090
+#        - host: 'localhost'
+#          port: 8090
+ #         queries:
+  #            - type: 'host'
+   #           - group-domains: 'es.net'
 
 
 #Database settings  
