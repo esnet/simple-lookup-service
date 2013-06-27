@@ -43,6 +43,12 @@ public class Message {
 
     }
 
+    public final boolean hasKey(Object key) {
+
+        return this.keyValues.containsKey(key);
+
+    }
+
     public final Object getKey(Object key) {
 
         return this.keyValues.get(key);

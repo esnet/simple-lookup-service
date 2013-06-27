@@ -6,6 +6,7 @@ import net.es.lookup.common.exception.internal.QueueException;
 import net.es.lookup.pubsub.QueuePump;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Author: sowmya
@@ -40,22 +41,26 @@ public class AMQueuePump implements QueuePump {
 
     public void fillQueues(List<Message> messageList) throws QueueException, QueryException {
 
-
-        Message query = null;
         List<Message> queries = amQueueManager.getAllQueries();
 
-        if(queries != null && !queries.isEmpty()){
-            query = queries.get(0);
-        }
+        //optimized for queries with only 1 key-value pair
+        for (Message query : queries){
+            Map<String,Object> queryMap = query.getMap();
+            for (String key: queryMap.keySet()){
+                for (Message message : messageList){
+                    if (message.hasKey(key) && message.getKey(key).equals(queryMap.get(key))){
+                        System.out.println("Found a queue with key value");
+                        List <String> qids = amQueueManager.getQueues(query);
 
-        if(query !=null){
-            String qid = amQueueManager.getQueues(query).get(0);
-            if(qid != null && !qid.isEmpty()){
-                for(int i=0; i< messageList.size(); i++){
-                    amQueueManager.push(qid,messageList.get(i));
+                        for(String qid: qids){
+                            if(qid != null && !qid.isEmpty()){
+                                    amQueueManager.push(qid,message);
+                            }
+                        }
+
+                    }
                 }
             }
-
         }
 
     }

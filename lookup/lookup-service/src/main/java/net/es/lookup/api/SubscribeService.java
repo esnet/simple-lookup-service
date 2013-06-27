@@ -12,32 +12,37 @@ import net.es.lookup.protocol.json.JSONSubRequest;
 import net.es.lookup.protocol.json.JSONSubResponse;
 import net.es.lookup.pubsub.amq.AMQueueManager;
 import net.es.lookup.utils.QueueServiceConfigReader;
+import org.apache.log4j.Logger;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class QuerySubscribe {
+public class SubscribeService {
 
     private String params;
-
+    private static Logger LOG = Logger.getLogger(SubscribeService.class);
 
     public String subscribe(String message) {
 
         QueueServiceConfigReader queueServiceConfigReader = QueueServiceConfigReader.getInstance();
         String response;
+
+        LOG.info("net.es.lookup.api.SubscribeService.subscribe: Received request - " + message);
         JSONSubRequest request = new JSONSubRequest(message);
         if (request.getStatus() == JSONSubRequest.INCORRECT_FORMAT) {
-            System.out.println("INCORRECT FORMAT");
-            // TODO: return correct error code
-            throw new BadRequestException("Error parsing requestUrl");
+            LOG.error("net.es.lookup.api.SubscribeService.subscribe: Incorrect JSON format ");
+            throw new BadRequestException("Error parsing request. Please check the key-value pairs.");
         }
         if(!queueServiceConfigReader.isServiceUp()){
-            throw new NotSupportedException("Queue ServiceRecord Not Supported");
+            LOG.error("net.es.lookup.api.SubscribeService.subscribe: Subscribe Service is not supported.");
+            throw new NotSupportedException("Subscribe Service Not Supported");
         }
-        // Verify that requestUrl is valid and authorized
+        // Verify that request is valid and authorized
         if (this.isValid(request) && this.isAuthed(request)) {
             // Build response
-
+            LOG.info("net.es.lookup.api.SubscribeService.subscribe: Valid request "+request.getMap());
             JSONSubResponse res = new JSONSubResponse();
             List<String> locator = new ArrayList<String>();
             locator.add(queueServiceConfigReader.getUrl());
@@ -46,9 +51,10 @@ public class QuerySubscribe {
             AMQueueManager amqmanager = AMQueueManager.getInstance();
             try {
                 List<String> qlist = amqmanager.getQueues(request);
-
                 res.add(ReservedKeys.RECORD_SUBSCRIBE_QUEUE, qlist);
                 response = JSONMessage.toString(res);
+                LOG.info("net.es.lookup.api.SubscribeService.subscribe: Returning queues - "+ response);
+                return response;
             } catch (QueryException e) {
                 throw new InternalErrorException(e.getMessage());
             } catch (QueueException e) {
@@ -57,9 +63,10 @@ public class QuerySubscribe {
                 throw new InternalErrorException(e.getMessage());
             }
 
-            return response;
+
         }else{
-            throw new BadRequestException("Subscribe supports only empty queries");
+            LOG.error("net.es.lookup.api.SubscribeService.subscribe: Query contains > 1 key-value pairs ");
+            throw new BadRequestException("Subscribe supports only queries with 0 or 1 key-value pairs");
         }
 
 
@@ -82,9 +89,9 @@ public class QuerySubscribe {
      * */
     private boolean isValid(JSONSubRequest request) {
 
-        // Should be an empty query
+        // Can contain 0 or 1 key-value pair
         boolean res = true;
-        if(request.getMap().size()<1  ) {
+        if(request.getMap().size() >1  ) {
             res = false;
         }
         System.out.println("Query size: "+ request.getMap().size());

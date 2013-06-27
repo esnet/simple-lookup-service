@@ -1,15 +1,12 @@
 package net.es.lookup.resources;
 
-import net.es.lookup.api.QuerySubscribe;
+import net.es.lookup.api.SubscribeService;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.core.StreamingOutput;
-import java.io.IOException;
-import java.io.OutputStream;
 
 
 /**
@@ -20,7 +17,7 @@ import java.io.OutputStream;
 @Produces("text/plain")
 
 public class SubscribeResource {
-    private QuerySubscribe qs = new QuerySubscribe();
+    private SubscribeService qs = new SubscribeService();
 
 
     @POST

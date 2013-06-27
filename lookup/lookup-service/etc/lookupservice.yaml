@@ -8,11 +8,9 @@ lookupservice:
         default: 1800
         min: 7200
     mode: 'replication'
-    sources:
-        - host: 'localhost'
-          port: 8090
-        - host: 'sowmya-dev-vm.es.net'
-          port: 8090
+#    sources:
+ #       - host: 'localhost'
+  #        port: 8090
 
 
 #Database settings  
