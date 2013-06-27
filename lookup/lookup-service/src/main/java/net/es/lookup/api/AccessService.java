@@ -16,6 +16,7 @@ import net.es.lookup.pubsub.amq.AMQueuePump;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +35,7 @@ public class AccessService {
         LOG.info(" serviceid: " + serviceid);
 
         JSONSubGetResponse response;
-        Service serviceRecord = new Service();
+        Service serviceRecord;
 
         try {
 
@@ -45,25 +46,20 @@ public class AccessService {
                 LOG.debug("servicerecord not null");
                 Map<String, Object> serviceMap = serviceRecord.getMap();
 
-                Message newRequest = new Message(serviceMap);
+                response = new JSONSubGetResponse(serviceMap);
+                try {
 
-                if (newRequest.getError() == 200) {
+                    LOG.info("GetService status: SUCCESS; exiting");
+                    return JSONMessage.toString(response);
 
-                    response = new JSONSubGetResponse(newRequest.getMap());
-                    try {
+                } catch (DataFormatException e) {
 
-                        LOG.info("GetService status: SUCCESS; exiting");
-                        return JSONMessage.toString(response);
-
-                    } catch (DataFormatException e) {
-
-                        LOG.error("Data formating exception.");
-                        LOG.info("GetService status: FAILED; exiting");
-                        throw new InternalErrorException("Data formatting exception");
-
-                    }
+                    LOG.error("Data formating exception.");
+                    LOG.info("GetService status: FAILED; exiting");
+                    throw new InternalErrorException("Data formatting exception");
 
                 }
+
 
             } else {
 
@@ -81,7 +77,6 @@ public class AccessService {
 
         }
 
-        return serviceRecord.getMap() + "";
 
     }
 
@@ -92,42 +87,39 @@ public class AccessService {
         LOG.info(" serviceid: " + serviceid);
 
         JSONSubGetResponse response;
-        Service serviceRecord = new Service();
-        Message errorResponse = new Message();
+        Service serviceRecord;
 
         try {
 
             serviceRecord = ServiceDAOMongoDb.getInstance().getServiceByURI(serviceid);
 
             if (serviceRecord != null) {
-                LOG.debug("servicerecord not null");
-                Map<String, Object> serviceMap = serviceRecord.getMap();
 
-                Message newRequest = new Message(serviceMap);
-
-                if (newRequest.getError() == 200) {
-
-                    response = new JSONSubGetResponse(newRequest.getMap());
-
-                    try {
-
-                        return JSONMessage.toString(response);
-
-                    } catch (DataFormatException e) {
-
-                        LOG.error("Data formating exception.");
-                        LOG.info("GetServiceKey status: FAILED; exiting");
-                        throw new InternalErrorException("Data formatting exception");
-
-                    }
-
-                } else if (serviceRecord.getKey(key) == null) {
+                if (serviceRecord.getKey(key) == null) {
 
                     LOG.error("The key does not exist.");
                     LOG.info("GetServiceKey status: FAILED; exiting");
                     throw new NotFoundException("The key does not exist\n");
 
                 }
+
+                LOG.info("GetServiceKey status: SUCCESS");
+                Map<String, Object> keyValueMap = new HashMap<String, Object>();
+                keyValueMap.put(key,serviceRecord.getKey(key));
+                response = new JSONSubGetResponse(keyValueMap);
+
+                try {
+
+                    return JSONMessage.toString(response);
+
+                } catch (DataFormatException e) {
+
+                    LOG.error("Data formating exception.");
+                    LOG.info("GetServiceKey status: FAILED; exiting");
+                    throw new InternalErrorException("Data formatting exception");
+
+                }
+
 
             } else {
 
@@ -145,8 +137,6 @@ public class AccessService {
 
         }
 
-        LOG.info("GetServiceKey status: SUCCESS");
-        return key + ":" + serviceRecord.getKey(key) + "\n";
 
     }
 
@@ -215,8 +205,6 @@ public class AccessService {
                             LOG.info("Renew: Caught Query Exception");
                         }
 
-                        if (res.getError() == 200) {
-
                             response = new JSONRenewResponse(res.getMap());
 
                             try {
@@ -230,8 +218,6 @@ public class AccessService {
                                 throw new InternalErrorException("Data formatting exception");
 
                             }
-
-                        }
 
                     } else {
 
@@ -288,18 +274,15 @@ public class AccessService {
 
         }
 
-        return "\n";
-
     }
 
 
     public String deleteService(String serviceid, String service) {
 
         LOG.info("Processing deleteService...");
-        LOG.info(" serviceid: " + serviceid);
+        LOG.info("serviceid: " + serviceid);
         JSONDeleteResponse response;
 
-        Message errorResponse = new Message();
         JSONDeleteRequest request = new JSONDeleteRequest(service);
 
         if (request.getStatus() == JSONDeleteRequest.INCORRECT_FORMAT) {
@@ -322,9 +305,11 @@ public class AccessService {
 
                 //update state
                 serviceRecord.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_DELETE);
+                response = new JSONDeleteResponse(serviceRecord.getMap());
 
                 List<Message> sList = new ArrayList();
                 sList.add(serviceRecord);
+
                 try {
                     AMQueuePump.getInstance().fillQueues(sList);
                 } catch (QueueException e) {
@@ -347,7 +332,7 @@ public class AccessService {
 
                         LOG.info("ServiceRecord Deleted");
                         LOG.info("DeleteService status: SUCCESS; exiting");
-                        return JSONMessage.toString(serviceRecord);
+                        return JSONMessage.toString(response);
 
                     } catch (DataFormatException e) {
 
@@ -368,14 +353,14 @@ public class AccessService {
             }
 
         } else {
-
+            //fails either because it is not valid or not authorized
             if (!this.isValid(request)) {
 
                 LOG.error("ServiceRecord Request is invalid");
                 LOG.info("DeleteService status: FAILED; exiting");
                 throw new BadRequestException("ServiceRecord Request is invalid\n");
 
-            } else if (!this.isAuthed(serviceid, request)) {
+            } else  {
 
                 LOG.error("The private-key is not authorized to access this service");
                 LOG.info("DeleteService status: FAILED; exiting");
@@ -384,8 +369,6 @@ public class AccessService {
             }
 
         }
-
-        return "\n";
 
     }
 

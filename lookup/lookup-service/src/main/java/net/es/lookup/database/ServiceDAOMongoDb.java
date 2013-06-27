@@ -116,8 +116,6 @@ public class ServiceDAOMongoDb {
     //should use json specific register requestUrl and response.
     public Message queryAndPublishService(Message message, Message queryRequest, Message operators) throws DatabaseException, DuplicateEntryException {
 
-        int errorcode;
-        String errormsg;
         Message response;
 
         //check for duplicates
@@ -143,29 +141,19 @@ public class ServiceDAOMongoDb {
         WriteResult wrt = coll.insert(doc);
         CommandResult cmdres = wrt.getLastError();
 
-        if (cmdres.ok()) {
-
-            errorcode = 200;
-            errormsg = "SUCCESS";
-
-        } else {
+        if (!cmdres.ok()) {
 
             throw new DatabaseException("Error inserting record");
 
         }
 
         response = new Message(services);
-        response.setError(errorcode);
-        response.setErrorMessage(errormsg);
         return response;
 
     }
 
 
     public Message deleteService(String serviceid) throws DatabaseException {
-
-        int errorcode;
-        String errormsg;
 
         Message response = new Message();
         BasicDBObject query = new BasicDBObject();
@@ -179,12 +167,7 @@ public class ServiceDAOMongoDb {
 
             CommandResult cmdres = wrt.getLastError();
 
-            if (cmdres.ok()) {
-
-                errorcode = 200;
-                errormsg = "SUCCESS";
-
-            } else {
+            if (!cmdres.ok()) {
 
                 throw new DatabaseException(cmdres.getErrorMessage());
 
@@ -196,18 +179,12 @@ public class ServiceDAOMongoDb {
 
         }
 
-
-        response.setError(errorcode);
-        response.setErrorMessage(errormsg);
         return response;
 
     }
 
 
     public Message updateService(String serviceid, Message updateRequest) throws DatabaseException {
-
-        int errorcode;
-        String errormsg;
 
         Message response = new Message();
 
@@ -227,8 +204,6 @@ public class ServiceDAOMongoDb {
                 if (cmdres.ok()) {
 
                     response = (Message) getServiceByURI(serviceid);
-                    errorcode = 200;
-                    errormsg = "SUCCESS";
 
                 } else {
 
@@ -248,8 +223,6 @@ public class ServiceDAOMongoDb {
 
         }
 
-        response.setError(errorcode);
-        response.setErrorMessage(errormsg);
         return response;
 
     }
@@ -475,9 +448,6 @@ public class ServiceDAOMongoDb {
 
     public Service getServiceByURI(String URI) throws DatabaseException {
 
-        int errorcode;
-        String errormsg;
-
         BasicDBObject query = new BasicDBObject();
         query.put(ReservedKeys.RECORD_URI, URI);
         Service result = null;
@@ -485,8 +455,6 @@ public class ServiceDAOMongoDb {
         try {
 
             DBCursor cur = coll.find(query);
-
-            //System.out.println("Came inside getServiceByURI");
 
             if (cur.size() == 1) {
 
