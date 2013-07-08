@@ -153,16 +153,20 @@ public class JSONParser {
     public static List<Record> toRecords(String jsonString) throws ParserException {
 
         List<Record> result = new ArrayList<Record>();
-        System.out.println("executing JSONParser.toRecord");
 
         JSONArray jsonArray = JSONArray.fromObject(jsonString);
-        System.out.println("created jsonArray"+ jsonArray);
         Iterator it = jsonArray.iterator();
 
         while (it.hasNext()){
             JSONObject jobj = JSONObject.fromObject(it.next());
             try {
-                Record r = RecordFactory.getRecord((String)jobj.get(ReservedKeys.RECORD_TYPE));
+                String type;
+                if(jobj.get(ReservedKeys.RECORD_TYPE) instanceof List){
+                    type  = (String) ((List) jobj.get(ReservedKeys.RECORD_TYPE)).get(0);
+                }else{
+                    type = (String) jobj.get(ReservedKeys.RECORD_TYPE);
+                }
+                Record r = RecordFactory.getRecord(type);
                 r.setMap(jobj);
                 result.add(r);
             } catch (RecordException e) {
