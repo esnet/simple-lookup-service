@@ -34,11 +34,8 @@ public class Record {
     }
 
     public Record(Map<String, Object> map) throws RecordException {
-
-        this.keyValues = map;
-        if (!this.validate()) {
-            throw new RecordException("Error creating record. Missing mandatory key: type");
-        }
+        this.keyValues = new HashMap<String, Object>();
+        this.setMap(map);
     }
 
 
@@ -60,6 +57,31 @@ public class Record {
             throw new RecordException("Error creating record. Missing mandatory key: type");
         }
 
+        this.format();
+
+    }
+
+
+    protected void format() {
+        if (this.keyValues.containsKey(ReservedKeys.RECORD_TYPE) && this.keyValues.get(ReservedKeys.RECORD_TYPE) instanceof List){
+            String tmp = (String)((List) this.keyValues.get(ReservedKeys.RECORD_TYPE)).get(0);
+            this.keyValues.put(ReservedKeys.RECORD_TYPE, tmp);
+        }
+
+        if (this.keyValues.containsKey(ReservedKeys.RECORD_TTL) && this.keyValues.get(ReservedKeys.RECORD_TTL) instanceof List){
+            String tmp = (String)((List) this.keyValues.get(ReservedKeys.RECORD_TTL)).get(0);
+            this.keyValues.put(ReservedKeys.RECORD_TTL, tmp);
+        }
+
+        if (this.keyValues.containsKey(ReservedKeys.RECORD_EXPIRES) && this.keyValues.get(ReservedKeys.RECORD_EXPIRES) instanceof List){
+            String tmp = (String)((List) this.keyValues.get(ReservedKeys.RECORD_TTL)).get(0);
+            this.keyValues.put(ReservedKeys.RECORD_TTL, tmp);
+        }
+
+        if (this.keyValues.containsKey(ReservedKeys.RECORD_URI) && this.keyValues.get(ReservedKeys.RECORD_URI) instanceof List){
+            String tmp = (String)((List) this.keyValues.get(ReservedKeys.RECORD_TTL)).get(0);
+            this.keyValues.put(ReservedKeys.RECORD_TTL, tmp);
+        }
     }
 
 
