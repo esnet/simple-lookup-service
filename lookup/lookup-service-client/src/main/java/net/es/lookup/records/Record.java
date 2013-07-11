@@ -134,7 +134,7 @@ public class Record {
     }
 
 
-    public void setTTL(Long ttl) {
+    public void setTTL(long ttl) {
 
         Period p = new Period(ttl);
         PeriodFormatter fmt = ISOPeriodFormat.standard();
