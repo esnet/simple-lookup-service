@@ -74,13 +74,13 @@ public class Record {
         }
 
         if (this.keyValues.containsKey(ReservedKeys.RECORD_EXPIRES) && this.keyValues.get(ReservedKeys.RECORD_EXPIRES) instanceof List){
-            String tmp = (String)((List) this.keyValues.get(ReservedKeys.RECORD_TTL)).get(0);
-            this.keyValues.put(ReservedKeys.RECORD_TTL, tmp);
+            String tmp = (String)((List) this.keyValues.get(ReservedKeys.RECORD_EXPIRES)).get(0);
+            this.keyValues.put(ReservedKeys.RECORD_EXPIRES, tmp);
         }
 
         if (this.keyValues.containsKey(ReservedKeys.RECORD_URI) && this.keyValues.get(ReservedKeys.RECORD_URI) instanceof List){
-            String tmp = (String)((List) this.keyValues.get(ReservedKeys.RECORD_TTL)).get(0);
-            this.keyValues.put(ReservedKeys.RECORD_TTL, tmp);
+            String tmp = (String)((List) this.keyValues.get(ReservedKeys.RECORD_URI)).get(0);
+            this.keyValues.put(ReservedKeys.RECORD_URI, tmp);
         }
     }
 
