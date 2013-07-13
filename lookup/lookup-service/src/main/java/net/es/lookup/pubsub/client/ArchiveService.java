@@ -76,19 +76,14 @@ public class ArchiveService implements SubscriberListener {
             index++;
             if (queryList != null && !queryList.isEmpty()) {
                 for (int i=0; i<queryList.size();i++) {
-                    System.out.println(i+" query size"+queryList.size());
-                    System.out.println(i+" query"+queryList.get(i).values());
                     Map<String,Object> m = queryList.get(i);
                     if (m != null) {
                         try {
                             Query query = new Query(m);
                             Subscriber subscriber = new Subscriber(server, query);
                             subscriber.addListener(this);
-                            System.out.println("I'm back!!");
                             subscriber.startSubscription();
-                            System.out.println("I'm back!!");
                             subscribers.add(subscriber);
-                            System.out.println("Finished an iteration");
                         } catch (RecordException e) {
                           e.printStackTrace();
                         }
