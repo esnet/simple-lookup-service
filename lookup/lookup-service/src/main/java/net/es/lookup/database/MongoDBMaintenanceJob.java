@@ -94,7 +94,10 @@ public class MongoDBMaintenanceJob implements Job {
         }
 
         try {
-            AMQueuePump.getInstance().fillQueues(messages);
+            AMQueuePump amQueuePump = AMQueuePump.getInstance();
+            if (amQueuePump.isUp()){
+                amQueuePump.fillQueues(messages);
+            }
         } catch (QueueException e) {
             LOG.error("Error sending Expired Record  to Queue");
             LOG.info("Expired Prune: Caught Queue Exception");

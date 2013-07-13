@@ -22,7 +22,7 @@ public class AMQueuePump implements QueuePump {
     private static Logger LOG = Logger.getLogger(AMQueuePump.class);
 
 
-    public AMQueuePump() {
+    private AMQueuePump() {
         setInstance(this);
         amQueueManager = AMQueueManager.getInstance();
     }
@@ -39,7 +39,19 @@ public class AMQueuePump implements QueuePump {
 
 
     public static AMQueuePump getInstance(){
+        if(instance == null){
+            AMQueuePump amQueuePump = new AMQueuePump();
+        }
         return instance;
+    }
+
+
+    public boolean isUp(){
+        if(instance != null){
+            return true;
+        }else{
+            return false;
+        }
     }
 
 

@@ -4,3 +4,8 @@ sources:
       queries:
         - type: ['host']
         - group-domains: ['es.net']
+    - host: 'localhost'
+      port: 8090
+      queries:
+        - type: ['vp']
+        - record-vp-domain: ['ESnet']

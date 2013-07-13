@@ -191,13 +191,16 @@ public class AccessService {
                         LOG.debug("gotLease for " + serviceid);
                         //update state
 
-                        newRequest.add(ReservedKeys.RECORD_STATE, new ArrayList<String>().add(ReservedValues.RECORD_VALUE_STATE_RENEW));
+                        newRequest.add(ReservedKeys.RECORD_STATE,ReservedValues.RECORD_VALUE_STATE_RENEW);
                         Message res = ServiceDAOMongoDb.getInstance().updateService(serviceid, newRequest);
 
                         List<Message> sList = new ArrayList();
                         sList.add(res);
                         try {
-                            AMQueuePump.getInstance().fillQueues(sList);
+                            AMQueuePump amQueuePump = AMQueuePump.getInstance();
+                            if (amQueuePump.isUp()){
+                                amQueuePump.fillQueues(sList);
+                            }
                         } catch (QueueException e) {
                             LOG.error("Error sending Renew Record  to Queue");
                             LOG.info("Renew: Caught Queue Exception");
@@ -209,7 +212,6 @@ public class AccessService {
                             response = new JSONRenewResponse(res.getMap());
 
                             try {
-
                                 return JSONMessage.toString(response);
 
                             } catch (DataFormatException e) {
@@ -304,23 +306,6 @@ public class AccessService {
 
                 Message serviceRecord = ServiceDAOMongoDb.getInstance().deleteService(serviceid);
 
-                //update state
-                serviceRecord.add(ReservedKeys.RECORD_STATE, new ArrayList<String>().add(ReservedValues.RECORD_VALUE_STATE_DELETE));
-                response = new JSONDeleteResponse(serviceRecord.getMap());
-
-                List<Message> sList = new ArrayList();
-                sList.add(serviceRecord);
-
-                try {
-                    AMQueuePump.getInstance().fillQueues(sList);
-                } catch (QueueException e) {
-                    LOG.error("Error sending Delete Record  to Queue");
-                    LOG.info("Delete: Caught Queue Exception");
-                } catch (QueryException e) {
-                    LOG.error("Error sending Delete Record  to Queue");
-                    LOG.info("Delete: Caught Query Exception");
-                }
-
                 if (serviceRecord == null) {
 
                     LOG.error("ServiceRecord Not found");
@@ -328,6 +313,25 @@ public class AccessService {
                     throw new NotFoundException("ServiceRecord not found in DB\n");
 
                 } else {
+                    //update state
+                    serviceRecord.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_DELETE);
+                    response = new JSONDeleteResponse(serviceRecord.getMap());
+
+                    List<Message> sList = new ArrayList();
+                    sList.add(serviceRecord);
+
+                    try {
+                        AMQueuePump amQueuePump = AMQueuePump.getInstance();
+                        if (amQueuePump.isUp()){
+                            amQueuePump.fillQueues(sList);
+                        }
+                    } catch (QueueException e) {
+                        LOG.error("Error sending Delete Record  to Queue");
+                        LOG.info("Delete: Caught Queue Exception");
+                    } catch (QueryException e) {
+                        LOG.error("Error sending Delete Record  to Queue");
+                        LOG.info("Delete: Caught Query Exception");
+                    }
 
                     try {
 

@@ -97,7 +97,10 @@ public class RegisterService {
                     List<Message> resList = new ArrayList<Message>();
                     resList.add(res);
                     try {
-                        AMQueuePump.getInstance().fillQueues(resList);
+                        AMQueuePump amQueuePump = AMQueuePump.getInstance();
+                        if (amQueuePump.isUp()){
+                            amQueuePump.fillQueues(resList);
+                        }
                     } catch (QueueException e) {
                         LOG.error("Error sending Register Record  to Queue");
                         LOG.info("Register: Caught Queue Exception");

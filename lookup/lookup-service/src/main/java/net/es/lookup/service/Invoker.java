@@ -108,8 +108,8 @@ public class Invoker {
         if(qcfg.getServiceState().equals(LookupServiceOptions.SERVICE_ON)){
             queueservice = true;
             //starting queueservice
-            Invoker.amQueueManager = new AMQueueManager();
-            Invoker.amQueuePump = new AMQueuePump();
+            Invoker.amQueueManager = AMQueueManager.getInstance();
+            Invoker.amQueuePump = AMQueuePump.getInstance();
             Invoker.lookupService.setQueueurl(qcfg.getUrl());
 
         }else{

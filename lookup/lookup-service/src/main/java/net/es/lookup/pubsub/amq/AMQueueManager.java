@@ -28,7 +28,7 @@ public class AMQueueManager implements QueueManager {
     private static AMQueueManager instance = null;
     private static Logger LOG = Logger.getLogger(AMQueueManager.class);
 
-    public AMQueueManager() {
+    private AMQueueManager() {
 
         setInstance(this);
     }
@@ -44,8 +44,18 @@ public class AMQueueManager implements QueueManager {
     }
 
     public static AMQueueManager getInstance() {
-
+        if(instance ==null){
+            new AMQueueManager();
+        }
         return instance;
+    }
+
+    public boolean isUp(){
+        if(instance != null){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     /**
