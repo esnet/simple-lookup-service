@@ -10,6 +10,7 @@ import net.es.lookup.records.PubSub.SubscribeRecord;
 import net.es.lookup.records.Record;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import sun.font.CreatedFontTracker;
 
 import javax.jms.*;
 import java.lang.ref.WeakReference;
@@ -224,9 +225,10 @@ public class Subscriber {
                 waitForRecords();
             }
         };
-
+        recordWaitThread.setName("+"+Math.random());
+        System.out.println("Created thread. About to start thread: "+ recordWaitThread.getName());
         recordWaitThread.start();
-
+        System.out.println("Thread started");
     }
 
 

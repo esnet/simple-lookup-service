@@ -61,23 +61,23 @@ public class Message {
 
     }
 
-    public String getURI() {
+    public List<String> getURI() {
 
-        return (String) this.getMap().get(ReservedKeys.RECORD_URI);
-
-    }
-
-
-    public String getTTL() {
-
-        return (String) this.getMap().get(ReservedKeys.RECORD_TTL);
+        return (List<String>) this.getMap().get(ReservedKeys.RECORD_URI);
 
     }
 
 
-    public String getExpires() {
+    public List<String> getTTL() {
 
-        return (String) this.getMap().get(ReservedKeys.RECORD_EXPIRES);
+        return (List<String>) this.getMap().get(ReservedKeys.RECORD_TTL);
+
+    }
+
+
+    public List<String> getExpires() {
+
+        return (List<String>) this.getMap().get(ReservedKeys.RECORD_EXPIRES);
 
     }
 
@@ -145,11 +145,7 @@ public class Message {
                 return returnVal;
             }
 
-            if (o instanceof String && !((String) o).isEmpty()) {
-
-                returnVal = returnVal & true;
-
-            } else if (o instanceof List<?>) {
+            if (o instanceof List<?>) {
 
                 for (Object obj : (List) o) {
 
@@ -166,7 +162,9 @@ public class Message {
 
                 }
 
-            } else {
+            }else if(o instanceof String){
+                returnVal = returnVal & true;
+            }else {
                 returnVal = returnVal & false;
                 return returnVal;
             }

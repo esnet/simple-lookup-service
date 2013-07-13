@@ -51,6 +51,7 @@ public class SubscribeService {
             try {
                 List<String> qlist = amqmanager.getQueues(request);
                 res.add(ReservedKeys.RECORD_SUBSCRIBE_QUEUE, qlist);
+                LOG.info("net.es.lookup.api.SubscribeService.subscribe: Returning queues - " + res);
                 response = JSONMessage.toString(res);
                 LOG.info("net.es.lookup.api.SubscribeService.subscribe: Returning queues - " + response);
                 return response;

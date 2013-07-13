@@ -11,6 +11,8 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 
+import java.util.ArrayList;
+
 
 public class LeaseManager {
 
@@ -50,11 +52,20 @@ public class LeaseManager {
 
         Instant now = new Instant();
         // Retrieve requested TTL
-        String requestedTTL = message.getTTL();
+        String requestedTTL = "";
+
+        if(requestedTTL != null && !requestedTTL.isEmpty()){
+            requestedTTL = message.getTTL().get(0);
+        }
+
         long ttl = 0;
 
         //check if expires field is beyond pruning threshold. If yes, do not give lease. Record needs to be deleted.
-        String expires = message.getExpires();
+        String expires = "";
+        if(message.getExpires() != null && !message.getExpires().isEmpty()){
+            expires = (String) message.getExpires().get(0);
+        }
+
 
         if (expires != null && expires != "") {
 
@@ -104,7 +115,11 @@ public class LeaseManager {
 
         Instant newExpires = now.plus(ttl * 1000); //this method requires milliseconds
         LOG.info("Lease granted. ttl value: " + ttl);
-        message.add(ReservedKeys.RECORD_EXPIRES, this.fmt.print(newExpires));
+
+        ArrayList<String> list = new ArrayList<String>();
+        list.add(this.fmt.print(newExpires));
+        message.add(ReservedKeys.RECORD_EXPIRES, list);
+
         LOG.info("Lease granted. expires value: " + newExpires);
         return true;
 

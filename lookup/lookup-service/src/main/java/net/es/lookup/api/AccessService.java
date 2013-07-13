@@ -173,13 +173,13 @@ public class AccessService {
                     LOG.debug("servicerecord not null");
                     Map<String, Object> serviceMap = serviceRecord.getMap();
 
-                    if (request.getTTL() != null && request.getTTL() != "") {
+                    if (request.getTTL() != null && !request.getTTL().isEmpty()) {
 
                         serviceMap.put(ReservedKeys.RECORD_TTL, request.getTTL());
 
                     } else {
 
-                        serviceMap.put(ReservedKeys.RECORD_TTL, "");
+                        serviceMap.put(ReservedKeys.RECORD_TTL, new ArrayList());
 
                     }
 
@@ -190,7 +190,8 @@ public class AccessService {
 
                         LOG.debug("gotLease for " + serviceid);
                         //update state
-                        newRequest.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_RENEW);
+
+                        newRequest.add(ReservedKeys.RECORD_STATE, new ArrayList<String>().add(ReservedValues.RECORD_VALUE_STATE_RENEW));
                         Message res = ServiceDAOMongoDb.getInstance().updateService(serviceid, newRequest);
 
                         List<Message> sList = new ArrayList();
@@ -304,7 +305,7 @@ public class AccessService {
                 Message serviceRecord = ServiceDAOMongoDb.getInstance().deleteService(serviceid);
 
                 //update state
-                serviceRecord.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_DELETE);
+                serviceRecord.add(ReservedKeys.RECORD_STATE, new ArrayList<String>().add(ReservedValues.RECORD_VALUE_STATE_DELETE));
                 response = new JSONDeleteResponse(serviceRecord.getMap());
 
                 List<Message> sList = new ArrayList();

@@ -90,7 +90,7 @@ public class JSONMessage {
 
                         tmp = tmp.key(entry.getKey()).value(entry.getValue());
 
-                    } else {
+                    } else if (entry.getValue() instanceof List) {
 
                         List<String> tmpvalues = (List) entry.getValue();
                         Iterator<String> it = tmpvalues.iterator();

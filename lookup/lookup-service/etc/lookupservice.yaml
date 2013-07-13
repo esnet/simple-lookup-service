@@ -2,18 +2,12 @@
 #Lookup Service settings
 lookupservice:
     host: 'localhost'
-    port: 8090
+    port: 9090
     lease:
         max: 2592000
         default: 1800
         min: 7200
-    mode: 'replication'
-#    sources:
-#        - host: 'localhost'
-#          port: 8090
- #         queries:
-  #            - type: 'host'
-   #           - group-domains: 'es.net'
+    mode: 'archive'
 
 
 #Database settings  

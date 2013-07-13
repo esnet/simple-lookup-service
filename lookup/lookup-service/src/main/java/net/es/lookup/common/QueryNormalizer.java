@@ -29,7 +29,18 @@ public class QueryNormalizer {
 
         Map mmap = query.getMap();
 
-        if(!mmap.isEmpty()){
+        if(mmap.isEmpty()){
+            result= "empty";
+
+
+
+        }else if (mmap.size()==1){
+            try {
+                result = JSONMessage.toString(query);
+            } catch (DataFormatException e) {
+                throw new QueryException(e.getMessage());
+            }
+        }else{
             //Sort the keys
             List<String> keyv = new ArrayList<String>(mmap.keySet());
             Collections.sort(keyv);
@@ -47,9 +58,6 @@ public class QueryNormalizer {
             } catch (DataFormatException e) {
                 throw new QueryException(e.getMessage());
             }
-
-        }else{
-            result= "empty";
         }
 
         return result;

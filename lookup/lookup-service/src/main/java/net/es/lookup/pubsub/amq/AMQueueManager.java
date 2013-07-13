@@ -58,8 +58,9 @@ public class AMQueueManager implements QueueManager {
         LOG.info("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Creating/Retrieving Queues");
         List<String> res = new ArrayList<String>();
         String normalizedQuery = "";
+        LOG.info("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Calling Normalize query - ");
         normalizedQuery = QueryNormalizer.normalize(query);
-
+        LOG.info("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Normalized query - "+ normalizedQuery);
         if (!normalizedQuery.isEmpty()) {
 
             if (queryMap.containsKey(normalizedQuery)) {
@@ -89,7 +90,7 @@ public class AMQueueManager implements QueueManager {
             }
 
         }
-
+        LOG.debug("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Returning - " + res);
         return res;
 
     }

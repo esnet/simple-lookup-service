@@ -1,0 +1,6 @@
+sources:
+    - host: 'localhost'
+      port: 8090
+      queries:
+        - type: ['host']
+        - group-domains: ['es.net']
