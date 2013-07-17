@@ -15,6 +15,7 @@ import net.es.lookup.queries.Query;
 import net.es.lookup.records.Record;
 import net.es.lookup.utils.LookupServiceConfigReader;
 import net.es.lookup.utils.SubscriberConfigReader;
+import org.apache.log4j.Logger;
 
 import java.util.*;
 
@@ -31,6 +32,7 @@ public class ArchiveService implements SubscriberListener {
     private List<Subscriber> subscribers;
     private ServiceDAOMongoDb db = ServiceDAOMongoDb.getInstance();
     SubscriberConfigReader subscriberConfigReadercfg;
+    private static Logger LOG = Logger.getLogger(ArchiveService.class);
 
     public ArchiveService() throws LSClientException {
 
@@ -39,7 +41,7 @@ public class ArchiveService implements SubscriberListener {
         queries = new ArrayList<List<Map<String, Object>>>();
         subscribers = new ArrayList<Subscriber>();
         int count = subscriberConfigReadercfg.getSourceCount();
-
+        LOG.info("net.es.lookup.pubsub.client.ArchiveService: Initializing "+count+ " hosts");
         for (int i = 0; i < count; i++) {
             try {
                 String host = subscriberConfigReadercfg.getSourceHost(i);
@@ -50,10 +52,12 @@ public class ArchiveService implements SubscriberListener {
                 servers.add(server);
 
             } catch (ConfigurationException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                LOG.error("net.es.lookup.pubsub.client.ArchiveService: Initializing "+count+ " hosts");
+                throw new LSClientException("net.es.lookup.pubsub.client.ArchiveService: Error initializing subscribe hosts -"+ e.getMessage());
             }
 
         }
+
         init();
     }
 
@@ -67,7 +71,7 @@ public class ArchiveService implements SubscriberListener {
     }
 
     public void start() throws LSClientException {
-
+        LOG.info("net.es.lookup.pubsub.client.ArchiveService.start: Creating and starting the subscriber connections");
         int index = 0;
         for (SimpleLS server : servers) {
             List<Map<String, Object>> queryList = null;
@@ -75,8 +79,8 @@ public class ArchiveService implements SubscriberListener {
             queryList = queries.get(index);
             index++;
             if (queryList != null && !queryList.isEmpty()) {
-                for (int i=0; i<queryList.size();i++) {
-                    Map<String,Object> m = queryList.get(i);
+                for (int i = 0; i < queryList.size(); i++) {
+                    Map<String, Object> m = queryList.get(i);
                     if (m != null) {
                         try {
                             Query query = new Query(m);
@@ -85,7 +89,8 @@ public class ArchiveService implements SubscriberListener {
                             subscriber.startSubscription();
                             subscribers.add(subscriber);
                         } catch (RecordException e) {
-                          e.printStackTrace();
+                            LOG.error("net.es.lookup.pubsub.client.ArchiveService.start: Error defining query");
+                            throw new LSClientException("Query could not be defined"+ e.getMessage());
                         }
                     }
 
@@ -102,29 +107,34 @@ public class ArchiveService implements SubscriberListener {
 
         }
 
+        LOG.info("net.es.lookup.pubsub.client.ArchiveService.start: Created and initialized "+ subscribers.size() +" subscriber connections");
+
 
     }
 
     public void stop() throws LSClientException {
 
-        System.out.println("Stop service");
+        LOG.info("net.es.lookup.pubsub.client.ArchiveService.stop: Stopping "+ subscribers.size() +" subscriber connections");
         for (Subscriber subscriber : subscribers) {
             subscriber.removeListener(this);
             subscriber.stopSubscription();
         }
 
+        LOG.info("net.es.lookup.pubsub.client.ArchiveService.stop: Stopped "+ subscribers.size() +" subscriber connections");
+
     }
 
     public void onRecord(Record record) {
-
+        LOG.info("net.es.lookup.pubsub.client.ArchiveService.onRecord: Processing Received message");
         if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_REGISTER)) {
+            LOG.info("net.es.lookup.pubsub.client.ArchiveService.onRecord: insert as new record");
             Message message = new Message(record.getMap());
             Map<String, Object> keyValues = record.getMap();
             Message operators = new Message();
             Message query = new Message();
 
             Iterator it = keyValues.entrySet().iterator();
-
+            LOG.info("net.es.lookup.pubsub.client.ArchiveService.onRecord: Constructing query based on message");
             while (it.hasNext()) {
 
                 Map.Entry<String, Object> pairs = (Map.Entry) it.next();
@@ -132,41 +142,43 @@ public class ArchiveService implements SubscriberListener {
                 query.add(pairs.getKey(), pairs.getValue());
 
             }
-
+            LOG.info("net.es.lookup.pubsub.client.ArchiveService.onRecord: Check and insert record");
             try {
                 db.queryAndPublishService(message, query, operators);
             } catch (DatabaseException e) {
-                e.printStackTrace();
+                LOG.error("net.es.lookup.pubsub.client.ArchiveService.onRecord: Error inserting record. Database Error"+ e.getMessage());
             } catch (DuplicateEntryException e) {
-                e.printStackTrace();
+                LOG.error("net.es.lookup.pubsub.client.ArchiveService.onRecord: Error inserting record. Duplicate Exception Error"+ e.getMessage());
             }
+
+            LOG.info("net.es.lookup.pubsub.client.ArchiveService.onRecord: Inserted record");
 
         } else if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_RENEW)) {
             String recordUri = record.getURI();
             Message message = new Message(record.getMap());
-            System.out.println("Got a renew message. Inserting into db");
+            LOG.info("net.es.lookup.pubsub.client.ArchiveService.onRecord: renew existing record");
             try {
                 db.updateService(recordUri, message);
             } catch (DatabaseException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                LOG.error("net.es.lookup.pubsub.client.ArchiveService.onRecord: Error renewing record. Database Error"+ e.getMessage());
             }
         } else if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_EXPIRE)) {
             String recordUri = record.getURI();
             Message message = new Message(record.getMap());
-            System.out.println("Got an expired message. Inserting into db");
+            LOG.info("net.es.lookup.pubsub.client.ArchiveService.onRecord: received expired record");
             try {
                 db.updateService(recordUri, message);
             } catch (DatabaseException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                LOG.error("net.es.lookup.pubsub.client.ArchiveService.onRecord: Error expiring record. Database Error"+ e.getMessage());
             }
         } else if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_DELETE)) {
             String recordUri = record.getURI();
             Message message = new Message(record.getMap());
-            System.out.println("Got delete message. Inserting into db");
+            LOG.info("net.es.lookup.pubsub.client.ArchiveService.onRecord: received deleted record");
             try {
                 db.updateService(recordUri, message);
             } catch (DatabaseException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                LOG.error("net.es.lookup.pubsub.client.ArchiveService.onRecord: Updating delete record. Database Error"+ e.getMessage());
             }
         }
     }
