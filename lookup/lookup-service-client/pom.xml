@@ -50,6 +50,12 @@
             <artifactId>activemq-optional</artifactId>
             <version>5.5.1</version>
         </dependency>
+        <!-- logging -->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
         <!-- lookup-service keywords -->
         <dependency>
             <artifactId>lookup-service-keywords</artifactId>

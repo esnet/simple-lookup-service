@@ -105,14 +105,14 @@ public class Invoker {
         //Queue service
         QueueServiceConfigReader qcfg = QueueServiceConfigReader.getInstance();
 
-        if(qcfg.getServiceState().equals(LookupServiceOptions.SERVICE_ON)){
+        if (qcfg.getServiceState().equals(LookupServiceOptions.SERVICE_ON)) {
             queueservice = true;
             //starting queueservice
             Invoker.amQueueManager = AMQueueManager.getInstance();
             Invoker.amQueuePump = AMQueuePump.getInstance();
             Invoker.lookupService.setQueueurl(qcfg.getUrl());
 
-        }else{
+        } else {
             queueservice = false;
         }
 
@@ -121,43 +121,42 @@ public class Invoker {
         // Start the service
         Invoker.lookupService.startService();
 
-        if(mode.equalsIgnoreCase(LookupServiceOptions.MODE_REPLICATION)){
+        if (mode.equalsIgnoreCase(LookupServiceOptions.MODE_REPLICATION)) {
             ReplicationService replicationService = new ReplicationService();
             replicationService.start();
 
-        }else if(mode.equalsIgnoreCase(LookupServiceOptions.MODE_ARCHIVE)){
+        } else if (mode.equalsIgnoreCase(LookupServiceOptions.MODE_ARCHIVE)) {
             ArchiveService archiveService = new ArchiveService();
             archiveService.start();
-        }else if(mode.equalsIgnoreCase(LookupServiceOptions.MODE_MASTER)){
-            //DB Pruning
-            try {
+        }
+        //DB Pruning
+        try {
 
-                Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
-                scheduler.start();
+            Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+            scheduler.start();
 
-                // define the job and tie it to  mongoJob class
-                JobDetail job = newJob(MongoDBMaintenanceJob.class)
-                        .withIdentity("mongoJob", "DBMaintenance")
-                        .build();
-                job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
+            // define the job and tie it to  mongoJob class
+            JobDetail job = newJob(MongoDBMaintenanceJob.class)
+                    .withIdentity("mongoJob", "DBMaintenance")
+                    .build();
+            job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
 
-                // Trigger the job to run now, and then every dbpruneInterval seconds
-                Trigger trigger = newTrigger().withIdentity("DBTrigger", "DBMaintenance")
-                        .startNow()
-                        .withSchedule(simpleSchedule()
-                                .withIntervalInSeconds(dbpruneInterval)
-                                .repeatForever())
-                        .build();
+            // Trigger the job to run now, and then every dbpruneInterval seconds
+            Trigger trigger = newTrigger().withIdentity("DBTrigger", "DBMaintenance")
+                    .startNow()
+                    .withSchedule(simpleSchedule()
+                            .withIntervalInSeconds(dbpruneInterval)
+                            .repeatForever())
+                    .build();
 
-                scheduler.scheduleJob(job, trigger);
+            scheduler.scheduleJob(job, trigger);
 
-            } catch (SchedulerException se) {
+        } catch (SchedulerException se) {
 
-                se.printStackTrace();
-
-            }
+            se.printStackTrace();
 
         }
+
 
         // Block forever
         Object blockMe = new Object();
@@ -208,7 +207,7 @@ public class Invoker {
 
         if (options.has(LOGCONFIG)) {
 
-            logConfig =  options.valueOf(LOGCONFIG);
+            logConfig = options.valueOf(LOGCONFIG);
 
         }
 

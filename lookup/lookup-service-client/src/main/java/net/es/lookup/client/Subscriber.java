@@ -10,6 +10,7 @@ import net.es.lookup.records.PubSub.SubscribeRecord;
 import net.es.lookup.records.Record;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.log4j.Logger;
 import sun.font.CreatedFontTracker;
 
 import javax.jms.*;
@@ -43,6 +44,8 @@ public class Subscriber {
 
     private List<WeakReference<SubscriberListener>> listeners;
 
+    private static Logger LOG = Logger.getLogger(Subscriber.class);
+
     public Subscriber(SimpleLS server, Query query) throws LSClientException {
 
         this(server, query, "");
@@ -53,14 +56,16 @@ public class Subscriber {
         this.server = server;
         this.server.connect();
         this.query = query;
-
+        LOG.info("net.es.lookup.client.Subsciber: Creating Subscriber");
         if (subscribeURL != null && !subscribeURL.isEmpty()) {
             this.subscribeRequestUrl = subscribeURL;
         } else {
             this.subscribeRequestUrl = DEFAULT_SUBSCRIBE_REQUEST_URL;
         }
         listeners = new LinkedList<WeakReference<SubscriberListener>>();
+        LOG.info("net.es.lookup.client.Subsciber: Created Subscriber listener");
         initiateSubscription();
+        LOG.info("net.es.lookup.client.Subsciber: Created Subscriber");
     }
 
     public SimpleLS getServer() {
@@ -95,8 +100,11 @@ public class Subscriber {
     private void initiateSubscription() throws LSClientException {
 
         if (server != null && server.getStatus().equals(ReservedKeys.SERVER_STATUS_ALIVE)) {
+            LOG.info("net.es.lookup.client.Subscriber: Initiating subscription");
+            LOG.debug("net.es.lookup.client.Subscriber: Parsing query");
             String queryString = "";
             if (query != null) {
+                LOG.debug("net.es.lookup.client.Subscriber: Query is not null");
                 try {
                     queryString = JSONParser.toString(query);
                 } catch (ParserException e) {
@@ -104,38 +112,46 @@ public class Subscriber {
                 }
             }
 
-            System.out.println(queryString);
+            LOG.debug("net.es.lookup.client.Subscriber: Query=" + queryString);
 
-
+            LOG.debug("net.es.lookup.client.Subscriber: Setting server config");
             server.setRelativeUrl(subscribeRequestUrl);
             server.setConnectionType("POST");
             server.setData(queryString);
+            LOG.debug("net.es.lookup.client.Subscriber: Sending subscribe request to server");
             server.send();
+            LOG.debug("net.es.lookup.client.Subscriber: Response Code from server=" + server.getResponseCode());
             if (server.getResponseCode() == 200) {
-
+                LOG.debug("net.es.lookup.client.Subscriber: Parsing response");
                 String response = server.getResponse();
                 SubscribeRecord record = null;
                 try {
                     record = (SubscribeRecord) JSONParser.toRecord(response);
                 } catch (ParserException e) {
+                    LOG.error("net.es.lookup.client.Subscriber: Error Parsing response");
                     throw new LSClientException(e.getMessage());
                 }
                 String queUrl = record.getLocator().get(0);
-                    this.queueUrl = queUrl;
-                    this.queue = record.getQueues().get(0);
+                this.queueUrl = queUrl;
+                this.queue = record.getQueues().get(0);
             } else {
+                LOG.debug("net.es.lookup.client.Subscriber: Error in response:" + server.getErrorMessage());
                 throw new LSClientException("Error in response. Response code: " + server.getResponseCode() + ". Error Message: " + server.getErrorMessage());
             }
 
         } else {
+            LOG.debug("net.es.lookup.client.Subscriber: Error initializing server");
             throw new LSClientException("Server Initialization Error");
         }
+
+        LOG.info("net.es.lookup.client.Subsciber: Initialized Subscriber");
 
 
     }
 
     public void startSubscription() throws LSClientException {
 
+        LOG.info("net.es.lookup.client.Subsciber: Starting Subscriber Connection");
         String user = ActiveMQConnection.DEFAULT_USER;
         String password = ActiveMQConnection.DEFAULT_PASSWORD;
 
@@ -156,11 +172,13 @@ public class Subscriber {
         if (!listeners.isEmpty() && recordWaitThread == null) {
             createRecordWaitThread();
         }
+        LOG.info("net.es.lookup.client.Subscriber: Started Subscriber Connection");
 
     }
 
     public Record retrieveMessage() throws LSClientException {
 
+        LOG.info("net.es.lookup.client.Subscriber: REtrieving message");
         Record record;
         try {
 
@@ -170,8 +188,10 @@ public class Subscriber {
 
 
         } catch (JMSException e) {
+            LOG.error("net.es.lookup.client.Subscriber: Connection exception" + e.getMessage());
             throw new LSClientException(e.getMessage());
         } catch (ParserException e) {
+            LOG.error("net.es.lookup.client.Subscriber: Connection exception" + e.getMessage());
             throw new LSClientException(e.getMessage());
         }
         return record;
@@ -179,6 +199,8 @@ public class Subscriber {
 
 
     public synchronized SubscriberListener addListener(SubscriberListener listener) {
+
+        LOG.info("net.es.lookup.client.Subscriber: Adding listener");
         if (listener != null) {
             WeakReference<SubscriberListener> weakListener = new WeakReference<SubscriberListener>(listener);
 
@@ -188,12 +210,14 @@ public class Subscriber {
             }
 
         }
-
+        LOG.info("net.es.lookup.client.Subscriber: Successfully Added listener");
         return listener;
 
     }
 
     public synchronized SubscriberListener removeListener(SubscriberListener listener) {
+
+        LOG.info("net.es.lookup.client.Subscriber: Removing listener");
         ListIterator<WeakReference<SubscriberListener>> listIterator = listeners.listIterator();
         boolean result = false;
         while (listIterator.hasNext()) {
@@ -207,6 +231,7 @@ public class Subscriber {
         if (listeners.isEmpty()) {
             recordWaitThread = null;
         }
+        LOG.info("net.es.lookup.client.Subscriber: Successfully removed listener");
         if (result) {
             return listener;
         } else {
@@ -218,17 +243,15 @@ public class Subscriber {
 
     private void createRecordWaitThread() {
 
-        System.out.println("Creating thread");
+        LOG.info("net.es.lookup.client.Subscriber: Creating message wait thread");
         recordWaitThread = new Thread() {
             public void run() {
 
                 waitForRecords();
             }
         };
-        recordWaitThread.setName("+"+Math.random());
-        System.out.println("Created thread. About to start thread: "+ recordWaitThread.getName());
         recordWaitThread.start();
-        System.out.println("Thread started");
+        LOG.info("Message wait Thread started");
     }
 
 
@@ -236,16 +259,16 @@ public class Subscriber {
 
         while (true) {
             try {
-                System.out.println("Waiting for records");
+                LOG.debug("net.es.lookup.client.Subscriber: Waiting for records");
                 TextMessage textMessage = (TextMessage) consumer.receive();
 
                 Record r = JSONParser.toRecord(textMessage.getText());
                 recordNotifier(r);
             } catch (JMSException e) {
-                e.printStackTrace();
+                LOG.error("net.es.lookup.client.Subscriber: Error in connection" + e.getMessage());
                 break;
             } catch (ParserException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                LOG.error("net.es.lookup.client.Subscriber: Parser error" + e.getMessage());
             }
         }
 
@@ -256,9 +279,7 @@ public class Subscriber {
         ListIterator<WeakReference<SubscriberListener>> listIterator = listeners.listIterator();
         while (listIterator.hasNext()) {
             try {
-                System.out.println("Notifying listener");
-
-                //add record.duplicate() for cloning
+                LOG.info("net.es.lookup.client.Subscriber: PNotifying listener");
                 //potential deadlock -  need to use weak reference
                 Record tmp = record.duplicate();
                 SubscriberListener listener = listIterator.next().get();
@@ -267,14 +288,14 @@ public class Subscriber {
                     try {
                         listener.onRecord(tmp);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        LOG.error("net.es.lookup.client.Subscriber: Exception = " + e.getMessage());
                     }
-                }else{
+                } else {
                     listIterator.remove();
                 }
 
             } catch (RecordException e) {
-                e.printStackTrace();
+                LOG.error("net.es.lookup.client.Subscriber: Record Exception = " + e.getMessage());
             }
         }
 
@@ -282,14 +303,16 @@ public class Subscriber {
 
     public void stopSubscription() throws LSClientException {
 
+        LOG.info("net.es.lookup.client.Subscriber: Stopping connection");
         if (conn != null) {
             try {
-                System.out.println("Stopping connection");
+
                 recordWaitThread = null;
                 listeners = null;
                 consumer.close();
                 conn.close();
             } catch (JMSException e) {
+                LOG.error("net.es.lookup.client.Subscriber: Connection Exception = " + e.getMessage());
                 throw new LSClientException(e.getMessage());
             }
         }
