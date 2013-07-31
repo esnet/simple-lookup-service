@@ -9,6 +9,7 @@ package net.es.lookup.client;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -178,22 +179,20 @@ public class SimpleLS {
     }
 
     public synchronized void connect() throws LSClientException {
-
+        Socket socket = null;
         try {
             long start = System.nanoTime();
-            boolean stat = InetAddress.getByName(host).isReachable(5000);
-            if (stat) {
-                long end = System.nanoTime();
-                long lat = end - start;
-                this.latency = lat;
-                this.status = ReservedKeys.SERVER_STATUS_ALIVE;
-            } else {
-                this.latency = 0;
-                this.status = ReservedKeys.SERVER_STATUS_UNREACHABLE;
-            }
-
-        } catch (IOException e) {
+            socket = new Socket(host, port);
+            long end = System.nanoTime();
+            long lat = end - start;
+            this.latency = lat;
+            this.status = ReservedKeys.SERVER_STATUS_ALIVE;
+        }catch (IOException e){
+            this.latency = 0;
+            this.status = ReservedKeys.SERVER_STATUS_UNREACHABLE;
             throw new LSClientException(e.getMessage());
+        }finally {
+            if (socket != null) try { socket.close(); } catch(IOException e) {}
         }
         return;
     }
