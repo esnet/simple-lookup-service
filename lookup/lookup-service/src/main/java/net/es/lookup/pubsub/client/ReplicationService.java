@@ -29,12 +29,12 @@ public class ReplicationService implements SubscriberListener {
     private List<SimpleLS> servers;
     private List<List<Map<String, Object>>> queries;
     private List<Subscriber> subscribers;
-    private ServiceDAOMongoDb db = ServiceDAOMongoDb.getInstance();
+    private ServiceDAOMongoDb db;
     SubscriberConfigReader subscriberConfigReadercfg;
     private static Logger LOG = Logger.getLogger(ReplicationService.class);
 
     public ReplicationService() throws LSClientException {
-
+        db  = ServiceDAOMongoDb.getInstance();
         subscriberConfigReadercfg = SubscriberConfigReader.getInstance();
         servers = new ArrayList<SimpleLS>();
         queries = new ArrayList<List<Map<String, Object>>>();
