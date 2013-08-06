@@ -1,93 +1,111 @@
-//package net.es.lookup.bootstrap;
-//
-///**
-// * User: sowmya
-// * Date: 1/3/13
-// * Time: 2:11 PM
-// */
-//import net.es.lookup.common.Message;
-//import net.es.lookup.common.ReservedKeys;
-//import net.es.lookup.common.ServiceRecord;
-//import net.es.lookup.common.exception.internal.DatabaseException;
-//import net.es.lookup.database.ServiceDAOMongoDb;
-//import org.apache.log4j.Logger;
-//import org.joda.time.DateTime;
-//import org.joda.time.DateTimeComparator;
-//import org.joda.time.Instant;
-//import org.joda.time.format.DateTimeFormatter;
-//import org.joda.time.format.ISODateTimeFormat;
-//import org.quartz.*;
-//
-//import java.util.ArrayList;
-//import java.util.List;
-//import java.util.Map;
-//
-//
-//@DisallowConcurrentExecution
-//public class ScanLSJob {
-//    private static Logger LOG = Logger.getLogger(ScanLSJob.class);
-//    private String filename = "";
-//    public static String PRUNE_THRESHOLD = "prune_threshold"; //parameter will be set during run time
-//
-//
-//    public ScanLSJob(String filename) {
-//
-//        this.filename = filename;
-//
-//    }
-//
-//
-//    public void execute(JobExecutionContext context) throws JobExecutionException {
-//
-//        List<ServiceRecord> result = null;
-//        LOG.info("Running MongoDBPrune...");
-//        JobDataMap data = context.getJobDetail().getJobDataMap();
-//        long prune_threshold = data.getLong(PRUNE_THRESHOLD);
-//        Instant now = new Instant();
-//        Instant pTime = now.minus(prune_threshold);
-//        DateTime pruneTime = pTime.toDateTime();
-//
-//        try {
-//
-//            result = db.queryAll();
-//
-//        } catch (DatabaseException e) {
-//
-//            LOG.error("DBException! Could not query database");
-//
-//        }
-//
-//        List<Message> messages = new ArrayList<Message>();
-//
-//        if (result != null && result.size() > 0) {
-//
-//            for (int i = 0; i < result.size(); i++) {
-//
-//                Map m = result.get(i).getMap();
-//                DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-//                DateTime dt = fmt.parseDateTime((String) m.get(ReservedKeys.RECORD_EXPIRES));
-//                DateTimeComparator dtc = DateTimeComparator.getInstance();
-//
-//                if (dtc.compare(dt, pruneTime) < 0) {
-//
-//                    String uri = (String) m.get(ReservedKeys.RECORD_URI);
-//
-//                    try {
-//
-//                        messages.add(db.deleteService(uri));
-//
-//                    } catch (Exception e) {
-//
-//                        LOG.error("Error pruning DB!!");
-//
-//                    }
-//
-//                }
-//
-//            }
-//
-//        }
-//
-//    }
-//
-//}
+package net.es.lookup.bootstrap;
+
+import net.es.lookup.client.SimpleLS;
+import net.es.lookup.common.Message;
+import net.es.lookup.common.ReservedKeys;
+import net.es.lookup.common.ReservedValues;
+import net.es.lookup.common.Service;
+import net.es.lookup.common.exception.LSClientException;
+import net.es.lookup.common.exception.internal.ConfigurationException;
+import net.es.lookup.common.exception.internal.DataFormatException;
+import net.es.lookup.protocol.json.JSONMessage;
+import net.es.lookup.protocol.json.JSONParser;
+import net.es.lookup.service.Invoker;
+import net.es.lookup.utils.BootStrapConfigReader;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.sql.Time;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+@DisallowConcurrentExecution
+public class ScanLSJob implements Job {
+    BootStrapConfigReader bootStrapConfigReader;
+    List<Service> hostStatus = new ArrayList<Service>();
+    public ScanLSJob() throws ConfigurationException {
+        bootStrapConfigReader = BootStrapConfigReader.getInstance();
+    }
+
+    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+        int count = bootStrapConfigReader.getSourceCount();
+
+        for(int i=0; i<count; i++) {
+            String status = ReservedValues.SERVER_STATUS_UNKNOWN;
+            Service hostDetails = new Service();
+
+            String hostlocator = null;
+            int priority;
+            try {
+                hostlocator = bootStrapConfigReader.getSourceLocator(i);
+                priority = bootStrapConfigReader.getSourcePriority(i);
+                hostDetails.add(ReservedKeys.SERVER_LOCATOR, hostlocator);
+                hostDetails.add(ReservedKeys.SERVER_PRIORITY, priority);
+
+
+                URI uri = null;
+                try {
+
+                    uri = new URI(hostlocator);
+                    System.out.println(uri.getHost() + ":" + uri.getPort());
+                    SimpleLS lsclient = null;
+                    try {
+                        lsclient = new SimpleLS(uri.getHost(), uri.getPort());
+
+                        try{
+                            lsclient.connect();
+                        } catch (LSClientException e) {
+                            //log error and continue since connect() method updates status even when host cannot be reached
+                        }
+
+                        status = lsclient.getStatus();
+
+                        hostDetails.add(ReservedKeys.SERVER_STATUS, status);
+                    } catch (LSClientException e) {
+                        status = ReservedValues.SERVER_STATUS_UNKNOWN;
+                    }
+
+                    DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+                    String timestamp = fmt.print(new Date().getTime());
+                    hostDetails.add(ReservedKeys.SERVER_TIMESTAMP, timestamp);
+
+                    hostStatus.add(hostDetails);
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
+
+
+            } catch (ConfigurationException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+
+
+
+
+        }
+        String filename = Invoker.getConfigPath()+Invoker.getBootstrapoutput();
+
+        try {
+            String res = JSONMessage.toString(hostStatus);
+            System.out.println(res);
+            PrintWriter writer = new PrintWriter(filename);
+            writer.println(res);
+            writer.close();
+        } catch (DataFormatException e) {
+            System.out.println("ErROR");
+        } catch (FileNotFoundException e) {
+            System.out.println("ErROR");
+        }
+    }
+}

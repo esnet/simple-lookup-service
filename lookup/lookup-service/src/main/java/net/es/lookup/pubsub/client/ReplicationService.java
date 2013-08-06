@@ -33,7 +33,7 @@ public class ReplicationService implements SubscriberListener {
     SubscriberConfigReader subscriberConfigReadercfg;
     private static Logger LOG = Logger.getLogger(ReplicationService.class);
 
-    public ReplicationService() throws LSClientException {
+    public ReplicationService() throws LSClientException, ConfigurationException {
         db  = ServiceDAOMongoDb.getInstance();
         subscriberConfigReadercfg = SubscriberConfigReader.getInstance();
         servers = new ArrayList<SimpleLS>();

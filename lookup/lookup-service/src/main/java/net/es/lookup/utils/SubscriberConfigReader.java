@@ -3,6 +3,7 @@ package net.es.lookup.utils;
 import net.es.lookup.common.exception.internal.ConfigurationException;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,9 +17,7 @@ import java.util.Map;
 public class SubscriberConfigReader {
 
     private static SubscriberConfigReader instance;
-    private static final String DEFAULT_FILE = "subscriber.yaml";
-    private static final String DEFAULT_PATH = "etc";
-    private static String configFile = DEFAULT_PATH + "/" + DEFAULT_FILE;
+    private static String configFile = "";
 
     private List<String> sourceHost = new ArrayList<String>();
     private List<Integer> sourcePort = new ArrayList<Integer>();
@@ -47,7 +46,7 @@ public class SubscriberConfigReader {
     /**
      * @return the initialized LookupServiceConfigReader singleton instance
      */
-    public static SubscriberConfigReader getInstance() {
+    public static SubscriberConfigReader getInstance() throws ConfigurationException {
 
         if (SubscriberConfigReader.instance == null) {
             SubscriberConfigReader.instance = new SubscriberConfigReader();
@@ -89,12 +88,15 @@ public class SubscriberConfigReader {
         }
     }
 
-    private void setInfo(String configPath) {
+    private void setInfo(String configFile) throws ConfigurationException {
 
+        if(configFile == null || configFile.isEmpty()){
+            throw new ConfigurationException("Configuration file is not specified");
+        }
         ConfigHelper cfg = ConfigHelper.getInstance();
-        Map yamlMap = cfg.getConfiguration(configPath);
+        Map yamlMap = cfg.getConfiguration(configFile);
         assert yamlMap != null : "Could not load configuration file from " +
-                "file: ${basedir}/" + configPath;
+                "file: ${basedir}/" + configFile;
 
 
         try {

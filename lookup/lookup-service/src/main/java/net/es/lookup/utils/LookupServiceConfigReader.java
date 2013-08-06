@@ -28,12 +28,10 @@ public class LookupServiceConfigReader {
     private int maxlease;
     private int minlease;
     private int defaultlease;
+    private boolean bootstrapservice = false;
 
 
     private String mode = DEFAULT_MODE;
-
-    private List<HashMap<String,Object>> sources;
-    private int sourceCount;
 
     private static final int MINIMUM_INTERVAL = 1800;
     private static final int MINIMUM_THRESHOLD = 0;
@@ -138,33 +136,10 @@ public class LookupServiceConfigReader {
         return mode;
     }
 
-    public Map<String,Object> getSource(int index) {
+    public boolean isBootstrapserviceOn() {
 
-        return sources.get(index);
+        return bootstrapservice;
     }
-
-    public int getSourceCount(){
-        return sourceCount;
-    }
-
-    public String getSourceHost(int index) throws ConfigurationException {
-
-        if(sources != null && !sources.isEmpty() && (index>=0 && index<sourceCount)){
-            return (String) sources.get(index).get("host");
-        }else{
-            throw new ConfigurationException("Error retrieving source host information");
-        }
-
-    }
-
-    public int getSourcePort(int index) throws ConfigurationException {
-        if(sources != null && !sources.isEmpty() && (index>=0 && index<sourceCount)){
-            return (Integer) sources.get(index).get("port");
-        }else{
-            throw new ConfigurationException("Error retrieving source port information");
-        }
-    }
-
 
     private void setInfo(String configPath) {
 
@@ -179,15 +154,13 @@ public class LookupServiceConfigReader {
             host = (String) lookupServiceMap.get("host");
             port = (Integer) lookupServiceMap.get("port");
             mode = (String) lookupServiceMap.get("mode");
+            String bootstrap = (String) lookupServiceMap.get("bootstrapservice");
 
-            if (lookupServiceMap.containsKey("sources")) {
-
-                sources = (List<HashMap<String,Object>>) lookupServiceMap.get("sources");
-                sourceCount = sources.size();
-
+            if(bootstrap != null && bootstrap.equalsIgnoreCase("on")){
+                bootstrapservice = true;
+            }else{
+                bootstrapservice = false;
             }
-
-
             leaseTimeMap = (HashMap) lookupServiceMap.get("lease");
             maxlease = (Integer) leaseTimeMap.get("max");
             minlease = (Integer) leaseTimeMap.get("min");

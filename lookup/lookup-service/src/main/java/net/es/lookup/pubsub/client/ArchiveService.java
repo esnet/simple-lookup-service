@@ -7,6 +7,7 @@ import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.RecordException;
+import net.es.lookup.common.exception.internal.QueryException;
 import net.es.lookup.common.exception.internal.ConfigurationException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
@@ -34,7 +35,7 @@ public class ArchiveService implements SubscriberListener {
     SubscriberConfigReader subscriberConfigReadercfg;
     private static Logger LOG = Logger.getLogger(ArchiveService.class);
 
-    public ArchiveService() throws LSClientException {
+    public ArchiveService() throws LSClientException, ConfigurationException {
 
         subscriberConfigReadercfg = SubscriberConfigReader.getInstance();
         servers = new ArrayList<SimpleLS>();
@@ -79,8 +80,8 @@ public class ArchiveService implements SubscriberListener {
             queryList = queries.get(index);
             index++;
             if (queryList != null && !queryList.isEmpty()) {
-                for (int i = 0; i < queryList.size(); i++) {
-                    Map<String, Object> m = queryList.get(i);
+                for (int i=0; i<queryList.size();i++) {
+                    Map<String,Object> m = queryList.get(i);
                     if (m != null) {
                         try {
                             Query query = new Query(m);

@@ -18,14 +18,15 @@ public class ReservedKeys {
     public static final String ERROR_MESSAGE = "error-message";
     public static final String ERROR_CODE = "error-code";
 
+    //server (bootstrap) keys
+    public static final String SERVER_STATUS = "status";
+    public static final String SERVER_TIMESTAMP = "lastupdated";
+    public static final String SERVER_LOCATOR = "locator";
+    public static final String SERVER_PRIORITY = "priority";
+
     //subscribe keys
     public static final String RECORD_SUBSCRIBE_QUEUE = "subscribe-queue";
     public static final String RECORD_SUBSCRIBE_LOCATOR = "subscribe-locator";
-
-    //server keys
-    public static final String SERVER_STATUS_UNKNOWN = "unknown";
-    public static final String SERVER_STATUS_ALIVE = "alive";
-    public static final String SERVER_STATUS_UNREACHABLE = "unreachable";
 
     //operator keys
     public static final String RECORD_OPERATOR_SUFFIX = "operator";

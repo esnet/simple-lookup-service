@@ -28,4 +28,8 @@ public class ReservedValues {
     public static final String RECORD_OPERATOR_DEFAULT = RECORD_OPERATOR_ALL;
 
     public static final String RECORD_VALUE_TYPE_ERROR = "error" ;
+    //server keys
+    public static final String SERVER_STATUS_UNKNOWN = "unknown";
+    public static final String SERVER_STATUS_ALIVE = "alive";
+    public static final String SERVER_STATUS_UNREACHABLE = "unreachable";
 }

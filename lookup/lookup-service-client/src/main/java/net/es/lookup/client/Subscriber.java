@@ -1,6 +1,6 @@
 package net.es.lookup.client;
 
-import net.es.lookup.common.ReservedKeys;
+import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.ParserException;
 import net.es.lookup.common.exception.RecordException;
 import net.es.lookup.protocol.json.JSONParser;
@@ -11,12 +11,9 @@ import net.es.lookup.records.Record;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.log4j.Logger;
-import sun.font.CreatedFontTracker;
 
 import javax.jms.*;
 import java.lang.ref.WeakReference;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -56,16 +53,16 @@ public class Subscriber {
         this.server = server;
         this.server.connect();
         this.query = query;
-        LOG.info("net.es.lookup.client.Subsciber: Creating Subscriber");
+        LOG.info("net.es.lookup.client.Subscriber: Creating Subscriber");
         if (subscribeURL != null && !subscribeURL.isEmpty()) {
             this.subscribeRequestUrl = subscribeURL;
         } else {
             this.subscribeRequestUrl = DEFAULT_SUBSCRIBE_REQUEST_URL;
         }
         listeners = new LinkedList<WeakReference<SubscriberListener>>();
-        LOG.info("net.es.lookup.client.Subsciber: Created Subscriber listener");
+        LOG.info("net.es.lookup.client.Subscriber: Created Subscriber listener");
         initiateSubscription();
-        LOG.info("net.es.lookup.client.Subsciber: Created Subscriber");
+        LOG.info("net.es.lookup.client.Subscriber: Created Subscriber");
     }
 
     public SimpleLS getServer() {
@@ -99,7 +96,7 @@ public class Subscriber {
 
     private void initiateSubscription() throws LSClientException {
 
-        if (server != null && server.getStatus().equals(ReservedKeys.SERVER_STATUS_ALIVE)) {
+        if (server != null && server.getStatus().equals(ReservedValues.SERVER_STATUS_ALIVE)) {
             LOG.info("net.es.lookup.client.Subscriber: Initiating subscription");
             LOG.debug("net.es.lookup.client.Subscriber: Parsing query");
             String queryString = "";

@@ -3,6 +3,8 @@ package net.es.lookup.service;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import net.es.lookup.bootstrap.ScanLSJob;
+import net.es.lookup.client.Subscriber;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.database.ServiceDAOMongoDb;
@@ -10,9 +12,7 @@ import net.es.lookup.pubsub.client.ArchiveService;
 import net.es.lookup.pubsub.amq.AMQueueManager;
 import net.es.lookup.pubsub.amq.AMQueuePump;
 import net.es.lookup.pubsub.client.ReplicationService;
-import net.es.lookup.utils.LookupServiceOptions;
-import net.es.lookup.utils.LookupServiceConfigReader;
-import net.es.lookup.utils.QueueServiceConfigReader;
+import net.es.lookup.utils.*;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -32,13 +32,54 @@ public class Invoker {
     private static ServiceDAOMongoDb dao = null;
     private static String host = "localhost";
     private static LookupServiceConfigReader lcfg;
-    private static String cfg = "";
+    private static String configPath="etc/";
+    private static String lookupservicecfg = "lookupservice.yaml";
+    private static String queuecfg = "queueservice.yaml";
+    private static String subscribecfg = "subscriber.yaml";
+    private static String bootstrapcfg = "bootstrap.yaml";
+    private static String bootstrapoutput = "active-hosts.json";
     private static String logConfig = "./etc/log4j.properties";
     private static AMQueueManager amQueueManager = null;
     private static AMQueuePump amQueuePump = null;
-    private static String queueConfig = "";
+
     private static boolean queueservice = false;
     private static String mode;
+    private static boolean bootstrapservice = false;
+
+    public static String getConfigPath() {
+
+        return configPath;
+    }
+
+    public static String getLookupservicecfg() {
+
+        return lookupservicecfg;
+    }
+
+    public static String getQueuecfg() {
+
+        return queuecfg;
+    }
+
+    public static String getSubscribecfg() {
+
+        return subscribecfg;
+    }
+
+    public static String getBootstrapcfg() {
+
+        return bootstrapcfg;
+    }
+
+    public static String getBootstrapoutput() {
+
+        return bootstrapoutput;
+    }
+
+    public static String getLogConfig() {
+
+        return logConfig;
+    }
 
     /**
      * Main program to start the Lookup ServiceRecord
@@ -53,34 +94,19 @@ public class Invoker {
         //set log config
         System.setProperty("log4j.configuration", "file:" + logConfig);
 
-        if (cfg != null && !cfg.isEmpty()) {
 
-            System.out.println("Using config File: " + cfg);
-            LookupServiceConfigReader.init(cfg);
+        LookupServiceConfigReader.init(configPath + lookupservicecfg);
+        QueueServiceConfigReader.init(configPath+queuecfg);
+        SubscriberConfigReader.init(configPath+subscribecfg);
+        BootStrapConfigReader.init(configPath+bootstrapcfg);
 
-        } else {
-
-            System.out.println("Using default config file");
-
-        }
-
-        if (queueConfig != null && !queueConfig.isEmpty()) {
-
-            System.out.println("Using queue config File: " + queueConfig);
-            QueueServiceConfigReader.init(queueConfig);
-
-        } else {
-
-            System.out.println("Using default config file");
-
-        }
 
         lcfg = LookupServiceConfigReader.getInstance();
 
         mode = lcfg.getMode();
         port = lcfg.getPort();
         host = lcfg.getHost();
-
+        bootstrapservice = lcfg.isBootstrapserviceOn();
 
         int dbpruneInterval = lcfg.getPruneInterval();
         long prunethreshold = lcfg.getPruneThreshold();
@@ -97,7 +123,7 @@ public class Invoker {
 
         }
 
-        System.out.println("starting Lookup ServiceRecord");
+        System.out.println("starting Lookup Service");
         // Create the REST service
         Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
 
@@ -129,7 +155,7 @@ public class Invoker {
             ArchiveService archiveService = new ArchiveService();
             archiveService.start();
         }
-        //DB Pruning
+        //DB Pruning  and Bootstrap
         try {
 
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
@@ -150,6 +176,24 @@ public class Invoker {
                     .build();
 
             scheduler.scheduleJob(job, trigger);
+
+            //bootstrap job
+            Scheduler bootstrapScheduler = StdSchedulerFactory.getDefaultScheduler();
+            bootstrapScheduler.start();
+            if(bootstrapservice){
+                JobDetail bootstrapJob = newJob(ScanLSJob.class)
+                        .withIdentity("scanLS","bootstrap")
+                        .build();
+
+                Trigger bootstrapTrigger = newTrigger().withIdentity("scanLSTrigger","bootstrap")
+                        .startNow()
+                        .withSchedule(simpleSchedule()
+                                .repeatForever()
+                                .withIntervalInSeconds(180))
+                        .build();
+
+                bootstrapScheduler.scheduleJob(bootstrapJob,bootstrapTrigger);
+            }
 
         } catch (SchedulerException se) {
 
@@ -174,9 +218,8 @@ public class Invoker {
         parser.acceptsAll(asList("h", "?"), "show help then exit");
         OptionSpec<String> PORT = parser.accepts("p", "server port").withRequiredArg().ofType(String.class);
         OptionSpec<String> HOST = parser.accepts("h", "host").withRequiredArg().ofType(String.class);
-        OptionSpec<String> CONFIG = parser.accepts("c", "config").withRequiredArg().ofType(String.class);
+        OptionSpec<String> CONFIG = parser.accepts("c", "configPath").withRequiredArg().ofType(String.class);
         OptionSpec<String> LOGCONFIG = parser.accepts("l", "logConfig").withRequiredArg().ofType(String.class);
-        OptionSpec<String> QUEUECONFIG = parser.accepts("q", "queueConfig").withRequiredArg().ofType(String.class);
         OptionSet options = parser.parse(args);
 
         // check for help
@@ -200,20 +243,14 @@ public class Invoker {
         }
 
         if (options.has(CONFIG)) {
-
-            cfg = options.valueOf(CONFIG);
+            System.out.println("Config files Path:"+ CONFIG);
+            configPath = options.valueOf(CONFIG);
 
         }
 
         if (options.has(LOGCONFIG)) {
 
             logConfig = options.valueOf(LOGCONFIG);
-
-        }
-
-        if (options.has(QUEUECONFIG)) {
-
-            queueConfig = options.valueOf(LOGCONFIG);
 
         }
 

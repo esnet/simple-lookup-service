@@ -3,10 +3,7 @@ package net.es.lookup.service;
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.ClassNamesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
-import net.es.lookup.resources.AccessRecordResource;
-import net.es.lookup.resources.KeyResource;
-import net.es.lookup.resources.RecordResource;
-import net.es.lookup.resources.SubscribeResource;
+import net.es.lookup.resources.*;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.apache.activemq.broker.BrokerService;
 
@@ -195,7 +192,7 @@ public class LookupService {
                 KeyResource.class.getName(),
                 RecordResource.class.getName(),
                 SubscribeResource.class.getName(),
-
+                BootStrapResource.class.getName()
         };
 
         return services;
