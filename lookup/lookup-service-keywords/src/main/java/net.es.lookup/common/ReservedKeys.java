@@ -79,4 +79,6 @@ public class ReservedKeys {
     public static final String RECORD_PERSON_PHONENUMBERS = "person-phonenumbers";
     public static final String RECORD_PERSON_ORGANIZATION = "person-organization";
     public static final String RECORD_PERSON_NAME = "person-name";
+
+    public static final String BOOTSTRAP_HOSTS = "hosts";
 }

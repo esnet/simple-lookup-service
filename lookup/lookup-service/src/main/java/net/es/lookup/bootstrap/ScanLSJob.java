@@ -97,7 +97,10 @@ public class ScanLSJob implements Job {
         String filename = Invoker.getConfigPath()+Invoker.getBootstrapoutput();
 
         try {
-            String res = JSONMessage.toString(hostStatus);
+
+            Service hosts = new Service();
+            hosts.add(ReservedKeys.BOOTSTRAP_HOSTS, hostStatus);
+            String res = JSONMessage.toString(hosts);
             System.out.println(res);
             PrintWriter writer = new PrintWriter(filename);
             writer.println(res);
