@@ -12,6 +12,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+mvn clean install
+
+if [ $? -ne 0 ]; then
+    echo "\n\nInstallation failed. Maven compilation error!"
+    exit 1
+fi
+
 BASEDIR="/opt/SimpleLookupService"
 SOURCEDIR="lookup-service"
 
@@ -31,7 +38,7 @@ cp -r $SOURCEDIR/bin $BASEDIR/bin
 cp $SOURCEDIR/target/$JAR_FILE $BASEDIR/target/
 
 if [ $? -eq 0 ]; then
-    echo "Installed Simple Lookup Service(sLS) successfully!!\nNOTE: sLS requires MongoDB. Please ensure MongoDB is installed and running before starting sLS."
+    echo "\n\nInstalled Simple Lookup Service(sLS) successfully!!\nNOTE: sLS requires MongoDB. Please ensure MongoDB is installed and running before starting sLS."
 else
     echo "\n\nInstallation failed! Please correct errors and run the install script again as root."
 fi
