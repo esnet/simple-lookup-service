@@ -37,11 +37,7 @@ cp -r $SOURCEDIR/bin $BASEDIR/bin
 cp -r $SOURCEDIR/scripts $BASEDIR/scripts
 cp $SOURCEDIR/target/$JAR_FILE $BASEDIR/target/
 
-if [ $? -eq 0 ]; then
-    echo "\n\nInstalled Simple Lookup Service(sLS) successfully!!\nNOTE: sLS requires MongoDB. Please ensure MongoDB is installed and running before starting sLS."
-else
-    echo "\n\nInstallation failed! Please correct errors and run the install script again as root."
-fi
+
 
 id -u $USER
 
@@ -53,5 +49,11 @@ else
 fi
 
 chown -R $USER:$USER $BASEDIR
+
+if [ $? -eq 0 ]; then
+    echo "\n\nInstalled Simple Lookup Service(sLS) successfully!!\nNOTE: sLS requires MongoDB. Please ensure MongoDB is installed and running before starting sLS."
+else
+    echo "\n\nInstallation failed! Please correct errors and run the install script again as root."
+fi
 
 exit 0
