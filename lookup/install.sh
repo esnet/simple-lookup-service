@@ -45,7 +45,7 @@ fi
 
 id -u $USER
 
-if[ $? -ne 0 ]; then
+if [ $? -ne 0 ]; then
         echo "Creating user lookup"
         useradd lookup
 else
