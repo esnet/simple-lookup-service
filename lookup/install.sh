@@ -4,6 +4,7 @@ APP_NAME="Simple Lookup Service"
 VERSION="0.1"
 SHORTNAME=lookup-service
 JAR_FILE=${SHORTNAME}-${VERSION}.one-jar.jar
+USER=lookup
 
 mvn --version > /dev/null
 
@@ -27,14 +28,13 @@ if [ -d "$BASEDIR" ]; then
 fi
 
 mkdir $BASEDIR
-mkdir $BASEDIR/log
-mkdir $BASEDIR/out
-mkdir $BASEDIR/process
 mkdir $BASEDIR/target
 mkdir $BASEDIR/etc
 mkdir $BASEDIR/bin
+mkdir $BASEDIR/scripts
 cp -r $SOURCEDIR/etc $BASEDIR/etc
 cp -r $SOURCEDIR/bin $BASEDIR/bin
+cp -r $SOURCEDIR/scripts $BASEDIR/scripts
 cp $SOURCEDIR/target/$JAR_FILE $BASEDIR/target/
 
 if [ $? -eq 0 ]; then
@@ -42,5 +42,16 @@ if [ $? -eq 0 ]; then
 else
     echo "\n\nInstallation failed! Please correct errors and run the install script again as root."
 fi
+
+id -u $USER
+
+if[ $? -ne 0 ]; then
+        echo "Creating user lookup"
+        useradd lookup
+else
+        echo "user lookup exists"
+fi
+
+chown -R $USER:$USER $BASEDIR
 
 exit 0

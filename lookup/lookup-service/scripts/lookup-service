@@ -13,7 +13,7 @@ SHORT_NAME=lookup-service
 LONG_NAME="Lookup Service"
 
 #LS variables
-HOME_PREFIX=/etc/${SHORT_NAME}
+HOME_PREFIX=/etc/opt/${SHORT_NAME}
 DIST_PREFIX=/opt/${SHORT_NAME}
 BINDIR=${DIST_PREFIX}/bin
 CONFDIR=${HOME_PREFIX}
