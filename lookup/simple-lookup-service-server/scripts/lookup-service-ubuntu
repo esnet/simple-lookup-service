@@ -26,7 +26,7 @@ LOOKUPSERVICE_CMD="$BINDIR/startServer.sh $PIDFILE $JARFILE -c $CONFDIR/ -l $CON
 start(){
     echo -n $"Starting $SHORT_NAME: "
     echo $LOOKUPSERVICE_CMD
-    daemon --pidfile=$PIDFILE --user=$USER $LOOKUPSERVICE_CMD
+    start_daemon --pidfile=$PIDFILE --user=$USER $LOOKUPSERVICE_CMD
     RETVAL=$?
     echo
     [ $RETVAL = 0 ] && touch ${LOCK_FILE}
@@ -35,7 +35,7 @@ start(){
 
 stop(){
     echo -n $"Stopping $SHORT_NAME: "
-	killproc -p $PIDFILE -d $STOP_TIMEOUT java
+	killproc -p $PIDFILE java
 	RETVAL=$?
 	echo
 	[ $RETVAL = 0 ] && rm -f $LOCK_FILE $PIDFILE
@@ -63,7 +63,12 @@ do
     	start
 	;;
 	status)
-	    status -p $PIDFILE $SHORT_NAME
+	    pidofproc -p $PIDFILE $SHORT_NAME
+	    if [ $? ne 0]
+	         "$SHORT_NAME is running"
+	    else
+	        "SHORT_NAME is not running"
+	    fi
 	;;
     *)
 	echo "usage: $0 (start|stop|restart|help)"
