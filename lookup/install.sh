@@ -24,7 +24,7 @@ BASEDIR="/opt/$SHORTNAME"
 SOURCEDIR="$SHORTNAME-server"
 CONFIGDIR="/etc/opt/$SHORTNAME"
 LOGDIR="/var/log/$SHORTNAME"
-RUNDIR="/var/run/${SHORT_NAME}"
+RUNDIR="/var/run/$SHORT_NAME"
 
 if [ -d "$BASEDIR" ]; then
     rm -rf $BASEDIR
