@@ -42,9 +42,12 @@ mkdir $CONFIGDIR
 mkdir $LOGDIR
 mkdir $BASEDIR/target
 mkdir $BASEDIR/bin
-cp -r $SOURCEDIR/bin/ $BASEDIR/bin
-cp -r $SOURCEDIR/etc/ $CONFIGDIR
+mkdir $BASEDIR/scripts
+cp -r $SOURCEDIR/bin/ $BASEDIR/bin/
+cp -r $SOURCEDIR/etc/ $CONFIGDIR/
+cp -r $SOURCEDIR/scripts $BASEDIR/scripts/
 cp $SOURCEDIR/target/$JAR_FILE $BASEDIR/target/
+
 
 
 id -u $USER
