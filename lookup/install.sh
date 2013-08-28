@@ -51,8 +51,13 @@ mkdir $BASEDIR/bin
 mkdir $BASEDIR/scripts
 cp -r $SOURCEDIR/bin/* $BASEDIR/bin/
 cp -r $SOURCEDIR/etc/* $CONFIGDIR/
-cp -r $SOURCEDIR/scripts/* $BASEDIR/scripts/
 cp $SOURCEDIR/target/$JAR_FILE $BASEDIR/target/
+
+if [ -f /etc/redhat-release ] ; then
+    cp $SOURCEDIR/scripts/lookup-service-centos $BASEDIR/scripts/lookup-service
+elif [ -f /etc/ubuntu-release ] ; then
+    cp $SOURCEDIR/scripts/lookup-service-centos $BASEDIR/scripts/lookup-service
+fi
 
 id -u $USER
 

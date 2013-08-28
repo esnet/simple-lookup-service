@@ -117,14 +117,14 @@
             <version>5.5.1</version>
         </dependency>
 
-        <!-- lookup-service client -->
+        <!-- lookup-service-centos client -->
         <dependency>
             <artifactId>simple-lookup-service-client</artifactId>
             <groupId>net.es.lookup</groupId>
             <version>0.1</version>
         </dependency>
 
-        <!-- lookup-service keywords -->
+        <!-- lookup-service-centos keywords -->
         <dependency>
             <artifactId>simple-lookup-service-keywords</artifactId>
             <groupId>net.es.lookup</groupId>
