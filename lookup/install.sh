@@ -38,7 +38,7 @@ if [ -d "$LOGDIR" ]; then
 fi
 
 mkdir $BASEDIR
-mkdir $CONFDIR
+mkdir $CONFIGDIR
 mkdir $LOGDIR
 mkdir $BASEDIR/target
 mkdir $BASEDIR/bin
