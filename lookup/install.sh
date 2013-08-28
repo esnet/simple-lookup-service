@@ -24,6 +24,7 @@ BASEDIR="/opt/$SHORTNAME"
 SOURCEDIR="$SHORTNAME-server"
 CONFIGDIR="/etc/opt/$SHORTNAME"
 LOGDIR="/var/log/$SHORTNAME"
+RUNDIR=/var/run/${SHORT_NAME}
 
 if [ -d "$BASEDIR" ]; then
     rm -rf $BASEDIR
@@ -35,6 +36,10 @@ fi
 
 if [ -d "$LOGDIR" ]; then
     rm -rf $LOGDIR
+fi
+
+if [ -d "$RUNDIR" ]; then
+    rm -rf $RUNDIR
 fi
 
 mkdir $BASEDIR
@@ -60,6 +65,9 @@ else
 fi
 
 chown -R $USER:$USER $BASEDIR
+chown -R $USER:$USER $CONFIGDIR
+chown -R $USER:$USER $RUNDIR
+chown -R $USER:$USER $LOGDIR
 
 if [ $? -eq 0 ]; then
     echo "\n\nInstalled Simple Lookup Service(sLS) successfully!!\nNOTE: sLS requires MongoDB. Please ensure MongoDB is installed and running before starting sLS."
