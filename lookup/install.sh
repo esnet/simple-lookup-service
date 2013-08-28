@@ -55,8 +55,8 @@ cp $SOURCEDIR/target/$JAR_FILE $BASEDIR/target/
 
 if [ -f /etc/redhat-release ] ; then
     cp $SOURCEDIR/scripts/lookup-service-centos $BASEDIR/scripts/lookup-service
-elif [ -f /etc/ubuntu-release ] ; then
-    cp $SOURCEDIR/scripts/lookup-service-centos $BASEDIR/scripts/lookup-service
+elif [ -f /etc/lsb-release ] ; then
+    cp $SOURCEDIR/scripts/lookup-service-ubuntu $BASEDIR/scripts/lookup-service
 fi
 
 id -u $USER
