@@ -1,7 +1,6 @@
 #!/bin/bash
 
 . /lib/lsb/init-functions
-
 #Service specific variables
 SHORT_NAME=simple-lookup-service
 LONG_NAME="Simple Lookup Service"
@@ -21,7 +20,7 @@ STOP_TIMEOUT=10
 RESTART_DELAY=5
 PIDFILE=$RUNDIR/$SHORT_NAME.pid
 JARFILE=$DIST_PREFIX/target/$SHORT_NAME-server-$VERSION.one-jar.jar
-LOOKUPSERVICE_CMD="$BINDIR/startServer.sh $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.properties > $LOGDIR/$SHORT_NAME.out"
+LOOKUPSERVICE_CMD="$BINDIR/startServer.sh $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.properties > $LOGDIR/$SHORT_NAME.out 2>&1 &"
 
 #functions
 start(){
