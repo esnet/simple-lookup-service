@@ -1,13 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <artifactId>LOOKUP</artifactId>
+        <artifactId>SIMPLELOOKUPSERVICE</artifactId>
         <groupId>net.es.lookup</groupId>
         <version>0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.es.lookup</groupId>
-    <artifactId>lookup-service</artifactId>
-    <name>Lookup Service</name>
+    <artifactId>simple-lookup-service-server</artifactId>
 
        <!-- puts all code & libraries in one jar -->
     <pluginRepositories>
@@ -120,14 +119,14 @@
 
         <!-- lookup-service client -->
         <dependency>
-            <artifactId>lookup-service-client</artifactId>
+            <artifactId>simple-lookup-service-client</artifactId>
             <groupId>net.es.lookup</groupId>
             <version>0.1</version>
         </dependency>
 
         <!-- lookup-service keywords -->
         <dependency>
-            <artifactId>lookup-service-keywords</artifactId>
+            <artifactId>simple-lookup-service-keywords</artifactId>
             <groupId>net.es.lookup</groupId>
             <version>0.1</version>
         </dependency>

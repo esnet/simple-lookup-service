@@ -2,19 +2,19 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.es.lookup</groupId>
-    <artifactId>LOOKUP</artifactId>
+    <artifactId>SIMPLELOOKUPSERVICE</artifactId>
     <version>0.1</version>
     <packaging>pom</packaging>
-    <name>Lookup Service</name>
+    <name>Simple Lookup Service</name>
     <properties>
         <lookup.version>0.1</lookup.version>
         <java.version>1.5</java.version>
     </properties>
 
     <modules>
-        <module>lookup-service</module>
-        <module>lookup-service-keywords</module>
-        <module>lookup-service-client</module>
+        <module>simple-lookup-service-server</module>
+        <module>simple-lookup-service-keywords</module>
+        <module>simple-lookup-service-client</module>
     </modules>
     <build>
         <pluginManagement>

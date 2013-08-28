@@ -2,7 +2,7 @@
 
 APP_NAME="Simple Lookup Service"
 VERSION="0.1"
-SHORTNAME=lookup-service
+SHORTNAME=simple-lookup-service
 JAR_FILE=${SHORTNAME}-${VERSION}.one-jar.jar
 USER=lookup
 
@@ -20,23 +20,31 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-BASEDIR="/opt/SimpleLookupService"
-SOURCEDIR="lookup-service"
+BASEDIR="/opt/$SHORTNAME"
+SOURCEDIR="$SHORTNAME-server"
+CONFIGDIR = "/etc/opt/$SHORTNAME"
+LOGDIR = "/var/log/$SHORTNAME"
 
 if [ -d "$BASEDIR" ]; then
     rm -rf $BASEDIR
 fi
 
-mkdir $BASEDIR
-mkdir $BASEDIR/target
-mkdir $BASEDIR/etc
-mkdir $BASEDIR/bin
-mkdir $BASEDIR/scripts
-cp -r $SOURCEDIR/etc $BASEDIR/etc
-cp -r $SOURCEDIR/bin $BASEDIR/bin
-cp -r $SOURCEDIR/scripts $BASEDIR/scripts
-cp $SOURCEDIR/target/$JAR_FILE $BASEDIR/target/
+if [ -d "$CONFIGDIR" ]; then
+    rm -rf $CONFIGDIR
+fi
 
+if [ -d "$LOGDIR" ]; then
+    rm -rf $LOGDIR
+fi
+
+mkdir $BASEDIR
+mkdir $CONFDIR
+mkdir $LOGDIR
+mkdir $BASEDIR/target
+mkdir $BASEDIR/bin
+cp -r $SOURCEDIR/bin/ $BASEDIR/bin
+cp -r $SOURCEDIR/etc/ $CONFIGDIR
+cp $SOURCEDIR/target/$JAR_FILE $BASEDIR/target/
 
 
 id -u $USER

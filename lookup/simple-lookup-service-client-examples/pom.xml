@@ -3,13 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>LOOKUP</artifactId>
+        <artifactId>SIMPLELOOKUPSERVICE</artifactId>
         <groupId>net.es.lookup</groupId>
         <version>0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>lookup-service-client</artifactId>
+    <artifactId>simple-lookup-service-client-examples</artifactId>
 
     <dependencies>
 
@@ -50,11 +50,12 @@
             <artifactId>activemq-optional</artifactId>
             <version>5.5.1</version>
         </dependency>
-        <!-- logging -->
+
+        <!-- lookup-service client -->
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
+            <artifactId>simple-lookup-service-client</artifactId>
+            <groupId>net.es.lookup</groupId>
+            <version>0.1</version>
         </dependency>
         <!-- lookup-service keywords -->
         <dependency>
