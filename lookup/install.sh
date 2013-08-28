@@ -54,8 +54,6 @@ cp -r $SOURCEDIR/etc/* $CONFIGDIR/
 cp -r $SOURCEDIR/scripts/* $BASEDIR/scripts/
 cp $SOURCEDIR/target/$JAR_FILE $BASEDIR/target/
 
-
-
 id -u $USER
 
 if [ $? -ne 0 ]; then
@@ -65,10 +63,14 @@ else
         echo "user lookup exists"
 fi
 
+#set permissions
 chown -R $USER:$USER $BASEDIR
 chown -R $USER:$USER $CONFIGDIR
 chown -R $USER:$USER $RUNDIR
 chown -R $USER:$USER $LOGDIR
+
+chmod 755 $BASEDIR/bin/*
+chmod 755 $BASEDIR/scripts/*
 
 if [ $? -eq 0 ]; then
     echo "\n\nInstalled Simple Lookup Service(sLS) successfully!!\nNOTE: sLS requires MongoDB. Please ensure MongoDB is installed and running before starting sLS."
