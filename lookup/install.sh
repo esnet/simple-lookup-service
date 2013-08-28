@@ -3,7 +3,7 @@
 APP_NAME="Simple Lookup Service"
 VERSION="0.1"
 SHORTNAME=simple-lookup-service
-JAR_FILE=${SHORTNAME}-${VERSION}.one-jar.jar
+JAR_FILE=${SHORTNAME}-server-${VERSION}.one-jar.jar
 USER=lookup
 
 mvn --version > /dev/null
@@ -22,8 +22,8 @@ fi
 
 BASEDIR="/opt/$SHORTNAME"
 SOURCEDIR="$SHORTNAME-server"
-CONFIGDIR = "/etc/opt/$SHORTNAME"
-LOGDIR = "/var/log/$SHORTNAME"
+CONFIGDIR="/etc/opt/$SHORTNAME"
+LOGDIR="/var/log/$SHORTNAME"
 
 if [ -d "$BASEDIR" ]; then
     rm -rf $BASEDIR
