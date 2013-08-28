@@ -6,26 +6,26 @@ LONG_NAME="Simple Lookup Service"
 VERSION="0.1"
 
 #LS variables
-HOME_PREFIX=/etc/opt/${SHORT_NAME}
-DIST_PREFIX=/opt/${SHORT_NAME}
-BINDIR=${DIST_PREFIX}/bin
-CONFDIR=${HOME_PREFIX}
-RUNDIR=/var/run/${SHORT_NAME}
-LOGDIR=/var/log/${SHORT_NAME}
-LOCK_FILE=/var/lock/subsys/${SHORT_NAME}
+HOME_PREFIX=/etc/opt/$SHORT_NAME
+DIST_PREFIX=/opt/$SHORT_NAME
+BINDIR=$DIST_PREFIX/bin
+CONFDIR=$HOME_PREFIX
+RUNDIR=/var/run/$SHORT_NAME
+LOGDIR=/var/log/$SHORT_NAME
+LOCK_FILE=/var/lock/subsys/$SHORT_NAME
 USER=lookup
 GROUP=lookup
 STOP_TIMEOUT=10
 RESTART_DELAY=5
-PIDFILE=${RUNDIR}/${SHORT_NAME}.pid
-JARFILE=${DIST_PREFIX}/target/${SHORT_NAME}-server-$VERSION.one-jar.jar
-LOOKUPSERVICE_CMD="${BINDIR}/startServer.sh ${PIDFILE} ${JARFILE} -c ${CONFDIR}/ -l ${CONFDIR}/log4j.properties > ${LOGDIR}/${SHORT_NAME}.out 2>&1 &"
+PIDFILE=$RUNDIR/$SHORT_NAME.pid
+JARFILE=$DIST_PREFIX/target/$SHORT_NAME-server-$VERSION.one-jar.jar
+LOOKUPSERVICE_CMD="$BINDIR/startServer.sh $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.properties > $LOGDIR/$SHORT_NAME.out 2>&1 &"
 
 #functions
 start(){
-    echo -n $"Starting ${SHORT_NAME}: "
+    echo -n $"Starting $SHORT_NAME: "
     echo $LOOKUPSERVICE_CMD
-    daemon --pidfile=${PIDFILE} --user=${USER} $LOOKUPSERVICE_CMD
+    daemon --pidfile=$PIDFILE --user=$USER $LOOKUPSERVICE_CMD
     RETVAL=$?
     echo
     [ $RETVAL = 0 ] && touch ${LOCK_FILE}
@@ -33,11 +33,11 @@ start(){
 }
 
 stop(){
-    echo -n $"Stopping ${SHORT_NAME}: "
-	killproc -p ${PIDFILE} -d ${STOP_TIMEOUT} java
+    echo -n $"Stopping $SHORT_NAME: "
+	killproc -p $PIDFILE -d $STOP_TIMEOUT java
 	RETVAL=$?
 	echo
-	[ $RETVAL = 0 ] && rm -f ${LOCK_FILE} ${PIDFILE}
+	[ $RETVAL = 0 ] && rm -f $LOCK_FILE $PIDFILE
 }
 
 #handle arguments
@@ -62,17 +62,17 @@ do
     	start
 	;;
 	status)
-	    status -p ${PIDFILE} ${SHORT_NAME}
+	    status -p $PIDFILE $SHORT_NAME
 	;;
     *)
 	echo "usage: $0 (start|stop|restart|help)"
 	cat <<EOF
 
-start      - start ${LONG_NAME}
-stop       - stop ${LONG_NAME}
-restart    - restart ${LONG_NAME} if running by sending a SIGHUP or start if 
+start      - start $LONG_NAME
+stop       - stop $LONG_NAME
+restart    - restart $LONG_NAME if running by sending a SIGHUP or start if
              not running
-status     - status of ${LONG_NAME}
+status     - status of $LONG_NAME
 help       - this screen
 
 EOF
