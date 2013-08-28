@@ -9,8 +9,8 @@
 . /etc/rc.d/init.d/functions
 
 #Service specific variables
-SHORT_NAME=lookup-service
-LONG_NAME="Lookup Service"
+SHORT_NAME=simple-lookup-service
+LONG_NAME="Simple Lookup Service"
 
 #LS variables
 HOME_PREFIX=/etc/opt/${SHORT_NAME}
