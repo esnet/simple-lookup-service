@@ -64,7 +64,7 @@ do
 	;;
 	status)
 	    pidofproc -p $PIDFILE $SHORT_NAME
-	    if [ $? ne 0]
+	    if [ $? ne 0]; then
 	         "$SHORT_NAME is running"
 	    else
 	        "SHORT_NAME is not running"
