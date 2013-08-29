@@ -26,8 +26,6 @@ LOOKUPSERVICE_CMD_OPTION=" $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.prop
 #functions
 start(){
     echo -n $"Starting $SHORT_NAME: "
-    #echo $LOOKUPSERVICE_CMD
-    env USER=$USER
     start-stop-daemon --start --pidfile $PIDFILE --chuid $USER --background --exec $LOOKUPSERVICE_CMD -- $LOOKUPSERVICE_CMD_OPTION
     RETVAL=$?
     echo
