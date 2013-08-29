@@ -26,6 +26,7 @@ LOOKUPSERVICE_CMD="$BINDIR/startServer.sh $PIDFILE $JARFILE -c $CONFDIR/ -l $CON
 start(){
     echo -n $"Starting $SHORT_NAME: "
     echo $LOOKUPSERVICE_CMD
+    env USER=$USER
     start-stop-daemon --pidfile $PIDFILE --user $USER $LOOKUPSERVICE_CMD
     RETVAL=$?
     echo
