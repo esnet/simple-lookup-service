@@ -27,7 +27,7 @@ start(){
     echo -n $"Starting $SHORT_NAME: "
     echo $LOOKUPSERVICE_CMD
     env USER=$USER
-    start-stop-daemon --pidfile $PIDFILE --user $USER $LOOKUPSERVICE_CMD
+    start-stop-daemon --pidfile $PIDFILE --chuid $USER $LOOKUPSERVICE_CMD
     RETVAL=$?
     echo
     [ $RETVAL = 0 ] && touch ${LOCK_FILE}
