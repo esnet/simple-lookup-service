@@ -13,7 +13,7 @@ BINDIR=$DIST_PREFIX/bin
 CONFDIR=$HOME_PREFIX
 RUNDIR=/var/run/$SHORT_NAME
 LOGDIR=/var/log/$SHORT_NAME
-LOCK_FILE=/var/lock/subsys/$SHORT_NAME
+LOCK_FILE=/var/lock/$SHORT_NAME
 USER=lookup
 GROUP=lookup
 STOP_TIMEOUT=10
@@ -26,9 +26,9 @@ LOOKUPSERVICE_CMD_OPTION=" $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.prop
 #functions
 start(){
     echo -n $"Starting $SHORT_NAME: "
-    echo $LOOKUPSERVICE_CMD
+    #echo $LOOKUPSERVICE_CMD
     env USER=$USER
-    start-stop-daemon --pidfile $PIDFILE --chuid $USER --daemon $LOOKUPSERVICE_CMD -- $LOOKUPSERVICE_CMD_OPTION
+    start-stop-daemon --start --pidfile $PIDFILE --chuid $USER --background --exec $LOOKUPSERVICE_CMD -- $LOOKUPSERVICE_CMD_OPTION
     RETVAL=$?
     echo
     [ $RETVAL = 0 ] && touch $LOCK_FILE
@@ -37,7 +37,7 @@ start(){
 
 stop(){
     echo -n $"Stopping $SHORT_NAME: "
-	killproc -p $PIDFILE java
+	start-stop-daemon --stop -p $PIDFILE
 	RETVAL=$?
 	echo
 	[ $RETVAL = 0 ] && rm -f $LOCK_FILE $PIDFILE
@@ -66,11 +66,6 @@ do
 	;;
 	status)
 	    pidofproc -p $PIDFILE $SHORT_NAME
-	    if [ $? ne 0 ]; then
-	         "$SHORT_NAME is running"
-	    else
-	        "SHORT_NAME is not running"
-	    fi
 	;;
     *)
 	echo "usage: $0 (start|stop|restart|help)"
@@ -83,7 +78,7 @@ do
         status     - status of $LONG_NAME
         help       - this screen
 
-    EOF
+EOF
 	ERROR=2
     ;;
 
