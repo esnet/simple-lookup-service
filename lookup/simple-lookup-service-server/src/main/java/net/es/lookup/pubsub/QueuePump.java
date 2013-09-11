@@ -1,8 +1,8 @@
 package net.es.lookup.pubsub;
 
 import net.es.lookup.common.Message;
-import net.es.lookup.common.exception.internal.QueryException;
-import net.es.lookup.common.exception.internal.QueueException;
+import net.es.lookup.common.exception.internal.PubSubQueryException;
+import net.es.lookup.common.exception.internal.PubSubQueueException;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public interface QueuePump {
      * @param messageList The records that need to be sent to queue(s)
      * @return void
      */
-    public void fillQueues(List<Message> messageList) throws QueueException, QueryException;
+    public void fillQueues(List<Message> messageList) throws PubSubQueueException, PubSubQueryException;
 
 
 }

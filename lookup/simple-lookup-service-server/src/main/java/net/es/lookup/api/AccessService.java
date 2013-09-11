@@ -8,8 +8,8 @@ import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.common.exception.internal.QueryException;
-import net.es.lookup.common.exception.internal.QueueException;
+import net.es.lookup.common.exception.internal.PubSubQueryException;
+import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.*;
 import net.es.lookup.pubsub.amq.AMQueuePump;
@@ -201,10 +201,10 @@ public class AccessService {
                             if (amQueuePump.isUp()){
                                 amQueuePump.fillQueues(sList);
                             }
-                        } catch (QueueException e) {
+                        } catch (PubSubQueueException e) {
                             LOG.error("Error sending Renew Record  to Queue");
                             LOG.info("Renew: Caught Queue Exception");
-                        } catch (QueryException e) {
+                        } catch (PubSubQueryException e) {
                             LOG.error("Error sending Renew Record  to Queue");
                             LOG.info("Renew: Caught Query Exception");
                         }
@@ -325,10 +325,10 @@ public class AccessService {
                         if (amQueuePump.isUp()){
                             amQueuePump.fillQueues(sList);
                         }
-                    } catch (QueueException e) {
+                    } catch (PubSubQueueException e) {
                         LOG.error("Error sending Delete Record  to Queue");
                         LOG.info("Delete: Caught Queue Exception");
-                    } catch (QueryException e) {
+                    } catch (PubSubQueryException e) {
                         LOG.error("Error sending Delete Record  to Queue");
                         LOG.info("Delete: Caught Query Exception");
                     }

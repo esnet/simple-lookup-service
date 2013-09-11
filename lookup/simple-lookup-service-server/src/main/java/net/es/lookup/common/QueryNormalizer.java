@@ -1,7 +1,7 @@
 package net.es.lookup.common;
 
 import net.es.lookup.common.exception.internal.DataFormatException;
-import net.es.lookup.common.exception.internal.QueryException;
+import net.es.lookup.common.exception.internal.PubSubQueryException;
 import net.es.lookup.protocol.json.JSONMessage;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +23,7 @@ public class QueryNormalizer {
      * @param  query     The query that needs to be normalized
      * @return String   Returns the normalized query as a string
      */
-    public static String normalize(Message query) throws QueryException {
+    public static String normalize(Message query) throws PubSubQueryException {
 
         String result;
 
@@ -38,7 +38,7 @@ public class QueryNormalizer {
             try {
                 result = JSONMessage.toString(query);
             } catch (DataFormatException e) {
-                throw new QueryException(e.getMessage());
+                throw new PubSubQueryException(e.getMessage());
             }
         }else{
             //Sort the keys
@@ -56,7 +56,7 @@ public class QueryNormalizer {
                 Message res = new Message(resultmap);
                 result = JSONMessage.toString(res);
             } catch (DataFormatException e) {
-                throw new QueryException(e.getMessage());
+                throw new PubSubQueryException(e.getMessage());
             }
         }
 

@@ -5,8 +5,8 @@ import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.Service;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.common.exception.internal.QueryException;
-import net.es.lookup.common.exception.internal.QueueException;
+import net.es.lookup.common.exception.internal.PubSubQueryException;
+import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.pubsub.amq.AMQueuePump;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -98,10 +98,10 @@ public class MongoDBMaintenanceJob implements Job {
             if (amQueuePump.isUp()){
                 amQueuePump.fillQueues(messages);
             }
-        } catch (QueueException e) {
+        } catch (PubSubQueueException e) {
             LOG.error("Error sending Expired Record  to Queue");
             LOG.info("Expired Prune: Caught Queue Exception");
-        } catch (QueryException e) {
+        } catch (PubSubQueryException e) {
             LOG.error("Error sending Expired Record  to Queue");
             LOG.info("Expired Prune: Caught Query Exception");
         }

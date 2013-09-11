@@ -20,8 +20,6 @@ public class ServiceRecord extends Record {
         super(ReservedValues.RECORD_VALUE_TYPE_SERVICE);
     }
 
-
-
     public String getServiceName() {
 
         return (String) this.getValue(ReservedKeys.RECORD_SERVICE_NAME);
@@ -30,9 +28,9 @@ public class ServiceRecord extends Record {
     public void setServiceName(String serviceName) throws RecordException {
 
         if(serviceName ==null || serviceName.isEmpty()){
-            this.add(ReservedKeys.RECORD_SERVICE_NAME, serviceName);
-        }else{
             throw new RecordException(ReservedKeys.RECORD_SERVICE_NAME+" is empty");
+        }else{
+            this.add(ReservedKeys.RECORD_SERVICE_NAME, serviceName);
         }
 
     }
@@ -165,13 +163,13 @@ public class ServiceRecord extends Record {
 
     public double getLatitude() {
 
-        return (Double) this.getValue(ReservedKeys.RECORD_LOCATION_LATITUDE);
+        return Double.parseDouble((String) this.getValue(ReservedKeys.RECORD_LOCATION_LATITUDE));
     }
 
     public void setLatitude(double latitude) throws RecordException {
 
         if(DataValidator.isValidLatitude(latitude)){
-            this.add(ReservedKeys.RECORD_LOCATION_LATITUDE, latitude);
+            this.add(ReservedKeys.RECORD_LOCATION_LATITUDE, Double.toString(latitude));
         }else{
             throw new RecordException(ReservedKeys.RECORD_LOCATION_LATITUDE+" is out of range (-90,90)");
         }
@@ -179,13 +177,13 @@ public class ServiceRecord extends Record {
 
     public double getLongitude() {
 
-        return (Double) this.getValue(ReservedKeys.RECORD_LOCATION_LONGITUDE);
+        return Double.parseDouble((String) this.getValue(ReservedKeys.RECORD_LOCATION_LONGITUDE));
     }
 
     public void setLongitude(double longitude) throws RecordException {
 
         if(DataValidator.isValidLongitude(longitude)){
-            this.add(ReservedKeys.RECORD_LOCATION_LONGITUDE, longitude);
+            this.add(ReservedKeys.RECORD_LOCATION_LONGITUDE, Double.toString(longitude));
         }else{
             throw new RecordException(ReservedKeys.RECORD_LOCATION_LONGITUDE+" is out of range (-180,180)");
         }
@@ -218,8 +216,4 @@ public class ServiceRecord extends Record {
             throw new RecordException(ReservedKeys.RECORD_SERVICE_HOST+" is empty");
         }
     }
-
-
-
-
 }

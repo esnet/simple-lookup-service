@@ -1,8 +1,5 @@
 package net.es.lookup.records;
 
-import net.es.lookup.common.exception.ParserException;
-
-import javax.tools.JavaFileManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,8 +19,7 @@ public class DataValidator {
         Scanner sc = null;
         try {
             String current = new File( "." ).getCanonicalPath();
-            System.out.println("Current dir:"+current);
-            sc = new Scanner(new File("lookup-service-client/etc/countries.csv"));
+            sc = new Scanner(new File(current + "/etc/countries.csv"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -38,7 +34,7 @@ public class DataValidator {
 
 
         if (code == null || code.isEmpty() || code.length() > 2) {
-           return false;
+            return false;
         } else {
             if (countryCode.containsKey(code)) {
                 return true;

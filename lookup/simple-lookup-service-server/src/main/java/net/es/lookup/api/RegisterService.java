@@ -101,10 +101,10 @@ public class RegisterService {
                         if (amQueuePump.isUp()){
                             amQueuePump.fillQueues(resList);
                         }
-                    } catch (QueueException e) {
+                    } catch (PubSubQueueException e) {
                         LOG.error("Error sending Register Record  to Queue");
                         LOG.info("Register: Caught Queue Exception");
-                    } catch (QueryException e) {
+                    } catch (PubSubQueryException e) {
                         LOG.error("Error sending Register Record  to Queue");
                         LOG.info("Register: Caught Query Exception");
                     }

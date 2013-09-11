@@ -1,8 +1,8 @@
 package net.es.lookup.pubsub.amq;
 
 import net.es.lookup.common.Message;
-import net.es.lookup.common.exception.internal.QueryException;
-import net.es.lookup.common.exception.internal.QueueException;
+import net.es.lookup.common.exception.internal.PubSubQueryException;
+import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.pubsub.QueuePump;
 import org.apache.log4j.Logger;
 
@@ -55,7 +55,7 @@ public class AMQueuePump implements QueuePump {
     }
 
 
-    public void fillQueues(List<Message> messageList) throws QueueException, QueryException {
+    public void fillQueues(List<Message> messageList) throws PubSubQueueException, PubSubQueryException {
         LOG.info("net.es.lookup.pubsub.amq.AMQueuePump.fillQueues: Filling up queues with message");
         List<Message> queries = amQueueManager.getAllQueries();
 

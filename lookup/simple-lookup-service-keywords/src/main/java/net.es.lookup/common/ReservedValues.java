@@ -33,4 +33,7 @@ public class ReservedValues {
     public static final String SERVER_STATUS_ALIVE = "alive";
     public static final String SERVER_STATUS_UNREACHABLE = "unreachable";
 
+
+    public static final String RECORD_VALUE_TYPE_KEY_VALUE_PAIR = "key-value-pair";
+
 }

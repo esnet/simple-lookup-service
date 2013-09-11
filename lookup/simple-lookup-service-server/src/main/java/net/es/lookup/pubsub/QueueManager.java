@@ -1,8 +1,8 @@
 package net.es.lookup.pubsub;
 
 import net.es.lookup.common.Message;
-import net.es.lookup.common.exception.internal.QueryException;
-import net.es.lookup.common.exception.internal.QueueException;
+import net.es.lookup.common.exception.internal.PubSubQueryException;
+import net.es.lookup.common.exception.internal.PubSubQueueException;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public interface QueueManager {
      * @param query The lookup service query for which a queue is required
      * @return Returns a list of queue identifiers (string)
      */
-    public List<String> getQueues(Message query) throws QueryException, QueueException;
+    public List<String> getQueues(Message query) throws PubSubQueryException, PubSubQueueException;
 
     /**
      * This method returns true if one or more queues exists for a particular query
@@ -31,7 +31,7 @@ public interface QueueManager {
      * @param query The lookup service query for which a queue is required
      * @return Returns true if one or more queue is found for the query
      */
-    public boolean hasQueues(Message query) throws QueryException, QueueException;
+    public boolean hasQueues(Message query) throws PubSubQueryException, PubSubQueueException;
 
     /**
      * This method pushes data to queue
@@ -41,7 +41,7 @@ public interface QueueManager {
      *
      * @return void
      */
-    public void push(String qid, Message message) throws QueueException;
+    public void push(String qid, Message message) throws PubSubQueueException;
 
     /**
      * This method returns all the queries that the QueueManager is handling

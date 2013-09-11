@@ -1,0 +1,146 @@
+---
+# Host values for SLS instance
+lookupservice:
+    host: 'antg-test-vm.es.net'
+    port: 8090
+
+# Test values for specified service parameters
+test-values:
+    # Acceptable values
+    string: &S 'simple'
+    country: &C 'AF'
+    positive-int-string: &IS '1'
+    double-string: &DS '1.0'
+    list-of-string: &LOS ['simple', 'lookup']
+    list-of-int: &LOI [1, 2]
+    list-of-double: &LOD [1.0, 2.0]
+    list-of-string-partial: &LOP ['simple']
+    list-of-country: &LOC ['AF']
+    list-of-phone: &LOP ["1", "2"]
+    type: &T 'client-test'
+    type-list: ['client-test']
+    type-list-as-string: &TLS '["client-test"]'
+    key-1: &K1 'client-test-key1'
+    key-2: &K2 'client-test-key2'
+    wild-card-list: ['si*']
+    latitude-lower-bound: '-90.1'
+    latitude-upper-bound: '90.1'
+    longitude-lower-bound: '-180.1'
+    longitude-upper-bound: '180.1'
+    mtu-lower-bound: '1'
+    registration-data: '{"type":["client-test"], "client-test-key1":["simple", "lookup"], "unique":["000"]}'
+    registration-data-complex: '{"type":["client-test"], "client-test-key1":["simple", "lookup"], "client-test-key2":["simple", "lookup"], "unique":["000"]}'
+    registration-data-partial: '{"type":["client-test"], "client-test-key1":["simple"], "unique":["000"]}'
+
+# RecordTest record maps
+records:
+    generic-record:
+        type: *S
+        state: *S
+    host-record:
+        type: 'host'
+        location-city: *S
+        location-sitename: *S
+        host-name: *S
+        host-net-tcp-congestionalgorithm: *S
+        location-zipcode: *S
+        location-region: *S
+        location-country: *C
+        group-domains: *LOS
+        service-administrators: *LOS
+        host-net-interfaces: *LOS
+        host-os-kernel: *LOS
+        host-os-name: *LOS
+        host-os-version: *LOS
+        host-net-tcp-maxbacklog: *IS
+        host-hardware-processorcount: *IS
+        host-hardware-memory: *IS
+        host-hardware-processorcore: *IS
+        host-hardware-processorspeed: *IS
+        location-latitude: *DS
+        location-longitude: *DS
+        host-net-tcp-autotunemaxbuffer-recv: *IS
+        host-net-tcp-maxbuffer-recv: *IS
+        host-net-tcp-autotunemaxbuffer-send: *IS
+        host-net-tcp-maxbuffer-send: *IS
+    interface-record:
+        type: 'interface'
+        service-name: *S
+        interface-mac: *S
+        group-domains: *LOS
+        interface-mtu: *IS
+        interface-capacity: *IS
+    service-record:
+        type: 'service'
+        location-city: *S
+        service-host: *S
+        service-name: *S
+        service-version: *S
+        service-type: *S
+        location-sitename: *S
+        location-zipcode: *S
+        location-region: *S
+        location-country: *C
+        service-administrators: *LOS
+        group-domains: *LOS
+        service-locator: *LOS
+        location-latitude: *DS
+        location-longitude: *DS
+    person-record:
+        type: 'person'
+        location-city: *S
+        person-name: *S
+        person-organization: *S
+        location-region: *S
+        location-sitename: *S
+        location-zipcode: *S
+        location-country: *C
+        group-domains: *LOS
+        person-emails: *LOS
+        person-phonenumbers: *LOS
+        location-latitude: *DS
+        location-longitude: *DS
+
+# QueryTest query maps
+queries:
+    host-query:
+        location-city: *LOS
+        location-sitename: *LOS
+        host-name: *LOS
+        host-net-tcp-congestionalgorithm: *LOS
+        location-zipcode: *LOS
+        location-region: *LOS
+        location-country: *LOC
+        group-domains: *LOS
+        service-administrators: *LOS
+        host-net-interfaces: *LOS
+        host-os-kernel: *LOS
+        host-os-name: *LOS
+        host-os-version: *LOS
+    interface-query:
+        service-name: *LOS
+        interface-mac: *LOS
+        group-domains: *LOS
+    service-query:
+        location-city: *LOS
+        service-host: *LOS
+        service-name: *LOS
+        service-version: *LOS
+        service-type: *LOS
+        location-sitename: *LOS
+        location-zipcode: *LOS
+        location-region: *LOS
+        location-country: *LOC
+        service-administrators: *LOS
+        group-domains: *LOS
+        service-locator: *LOS
+    person-query:
+        location-city: *LOS
+        person-name: *LOS
+        person-organization: *LOS
+        location-region: *LOS
+        location-sitename: *LOS
+        location-zipcode: *LOS
+        location-country: *LOC
+        group-domains: *LOS
+        person-emails: *LOS

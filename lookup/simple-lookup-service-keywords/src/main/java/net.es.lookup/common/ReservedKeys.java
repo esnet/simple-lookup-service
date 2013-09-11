@@ -56,6 +56,7 @@ public class ReservedKeys {
     public static final String RECORD_INTERFACE_SUBNET = "interface-subnet" ;
     public static final String RECORD_INTERFACE_CAPACITY = "interface-capacity" ;
     public static final String RECORD_INTERFACE_MACADDRESS = "interface-mac";
+    public static final String RECORD_INTERFACE_MTU = "interface-mtu";
 
     //host keys
     public static final String RECORD_HOST_NET_INTERFACES = "host-net-interfaces";

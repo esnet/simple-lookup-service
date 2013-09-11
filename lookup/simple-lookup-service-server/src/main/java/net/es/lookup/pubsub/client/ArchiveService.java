@@ -6,8 +6,8 @@ import net.es.lookup.client.SubscriberListener;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.LSClientException;
+import net.es.lookup.common.exception.QueryException;
 import net.es.lookup.common.exception.RecordException;
-import net.es.lookup.common.exception.internal.QueryException;
 import net.es.lookup.common.exception.internal.ConfigurationException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
@@ -89,7 +89,7 @@ public class ArchiveService implements SubscriberListener {
                             subscriber.addListener(this);
                             subscriber.startSubscription();
                             subscribers.add(subscriber);
-                        } catch (RecordException e) {
+                        } catch (QueryException e) {
                             LOG.error("net.es.lookup.pubsub.client.ArchiveService.start: Error defining query");
                             throw new LSClientException("Query could not be defined"+ e.getMessage());
                         }

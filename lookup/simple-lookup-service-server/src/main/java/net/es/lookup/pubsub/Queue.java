@@ -1,7 +1,7 @@
 package net.es.lookup.pubsub;
 
 import net.es.lookup.common.Message;
-import net.es.lookup.common.exception.internal.QueueException;
+import net.es.lookup.common.exception.internal.PubSubQueueException;
 
 /**
  * This abstract class defines a generic pub-sub queue.
@@ -17,7 +17,7 @@ public abstract class Queue {
      * @param message The message that will be pushed to the queue and subsequently to the client
      * @return void This method returns void. In case of errors, an exception is thrown
      * */
-    public abstract void push(Message message) throws QueueException;
+    public abstract void push(Message message) throws PubSubQueueException;
 
 
     /**

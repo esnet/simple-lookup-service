@@ -34,12 +34,13 @@ public class Record {
     }
 
     public Record(Map<String, Object> map) throws RecordException {
+
         this.keyValues = new HashMap<String, Object>();
         this.setMap(map);
     }
 
 
-    public final Map<String,Object> getMap() {
+    public final Map<String, Object> getMap() {
 
         return this.keyValues;
 
@@ -47,7 +48,7 @@ public class Record {
 
     public final void setMap(Map<String, Object> map) throws RecordException {
 
-        if(map != null){
+        if (map != null) {
             for (String s : map.keySet()) {
                 this.keyValues.put(s, map.get(s));
             }
@@ -59,28 +60,44 @@ public class Record {
 
         this.format();
 
+
     }
 
-
+    //This only formats the record data. No validation is performed
     protected void format() {
-        if (this.keyValues.containsKey(ReservedKeys.RECORD_TYPE) && this.keyValues.get(ReservedKeys.RECORD_TYPE) instanceof List){
-            String tmp = (String)((List) this.keyValues.get(ReservedKeys.RECORD_TYPE)).get(0);
-            this.keyValues.put(ReservedKeys.RECORD_TYPE, tmp);
+
+        if (this.keyValues.containsKey(ReservedKeys.RECORD_TYPE)) {
+            convertListToString(ReservedKeys.RECORD_TYPE);
         }
 
-        if (this.keyValues.containsKey(ReservedKeys.RECORD_TTL) && this.keyValues.get(ReservedKeys.RECORD_TTL) instanceof List){
-            String tmp = (String)((List) this.keyValues.get(ReservedKeys.RECORD_TTL)).get(0);
-            this.keyValues.put(ReservedKeys.RECORD_TTL, tmp);
+        if (this.keyValues.containsKey(ReservedKeys.RECORD_TTL)) {
+            convertListToString(ReservedKeys.RECORD_TTL);
         }
 
-        if (this.keyValues.containsKey(ReservedKeys.RECORD_EXPIRES) && this.keyValues.get(ReservedKeys.RECORD_EXPIRES) instanceof List){
-            String tmp = (String)((List) this.keyValues.get(ReservedKeys.RECORD_EXPIRES)).get(0);
-            this.keyValues.put(ReservedKeys.RECORD_EXPIRES, tmp);
+        if (this.keyValues.containsKey(ReservedKeys.RECORD_EXPIRES)) {
+            convertListToString(ReservedKeys.RECORD_EXPIRES);
         }
 
-        if (this.keyValues.containsKey(ReservedKeys.RECORD_URI) && this.keyValues.get(ReservedKeys.RECORD_URI) instanceof List){
-            String tmp = (String)((List) this.keyValues.get(ReservedKeys.RECORD_URI)).get(0);
-            this.keyValues.put(ReservedKeys.RECORD_URI, tmp);
+        if (this.keyValues.containsKey(ReservedKeys.RECORD_URI)) {
+            convertListToString(ReservedKeys.RECORD_URI);
+        }
+
+
+    }
+
+    /*This is used only to convert some of the record-key values to String. Internal method only. Not to be converted to public
+     * Calling function must check if key exists since this method assumes that the supplied key exists.  */
+    private void convertListToString(String key) {
+
+        if (this.keyValues.get(key) instanceof List) {
+            List<String> typeList = (List) this.keyValues.get(key);
+            String tmp;
+            if (typeList.size() > 0) {
+                tmp = (String) typeList.get(0);
+            } else {
+                tmp = "";
+            }
+            this.keyValues.put(key, tmp);
         }
     }
 
@@ -159,10 +176,9 @@ public class Record {
     }
 
     public Record duplicate() throws RecordException {
+
         return new Record(this.getMap());
     }
-
-
 
 
     //validates the type of value
@@ -170,7 +186,7 @@ public class Record {
 
         boolean returnVal = true;
 
-        if(keyValues == null || keyValues.isEmpty()){
+        if (keyValues == null || keyValues.isEmpty()) {
             return false;
         }
         if (!keyValues.containsKey(ReservedKeys.RECORD_TYPE)) {

@@ -5,8 +5,8 @@ package net.es.lookup.common.exception.internal;
  * Date: 3/6/13
  * Time: 1:36 PM
  */
-public class QueryException extends Exception {
-    public QueryException(String message){
+public class PubSubQueryException extends Exception {
+    public PubSubQueryException(String message){
         super(message);
     }
 }

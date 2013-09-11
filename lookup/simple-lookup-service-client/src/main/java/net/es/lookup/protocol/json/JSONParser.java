@@ -2,6 +2,7 @@ package net.es.lookup.protocol.json;
 
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.exception.ParserException;
+import net.es.lookup.common.exception.QueryException;
 import net.es.lookup.common.exception.RecordException;
 import net.es.lookup.queries.Query;
 import net.es.lookup.records.Record;
@@ -193,7 +194,7 @@ public class JSONParser {
             try {
                 Query q = new Query(jobj);
                 result.add(q);
-            } catch (RecordException e) {
+            } catch (QueryException e) {
                 throw new ParserException("Error parsing String. Cannot convert to Query");
             }
         }

@@ -5,15 +5,14 @@ import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotSupportedException;
 import net.es.lookup.common.exception.internal.DataFormatException;
-import net.es.lookup.common.exception.internal.QueryException;
-import net.es.lookup.common.exception.internal.QueueException;
+import net.es.lookup.common.exception.internal.PubSubQueryException;
+import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONSubRequest;
 import net.es.lookup.protocol.json.JSONSubResponse;
 import net.es.lookup.pubsub.amq.AMQueueManager;
 import net.es.lookup.utils.QueueServiceConfigReader;
 import org.apache.log4j.Logger;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,9 +54,9 @@ public class SubscribeService {
                 response = JSONMessage.toString(res);
                 LOG.info("net.es.lookup.api.SubscribeService.subscribe: Returning queues - " + response);
                 return response;
-            } catch (QueryException e) {
+            } catch (PubSubQueryException e) {
                 throw new InternalErrorException(e.getMessage());
-            } catch (QueueException e) {
+            } catch (PubSubQueueException e) {
                 throw new InternalErrorException(e.getMessage());
             } catch (DataFormatException e) {
                 throw new InternalErrorException(e.getMessage());

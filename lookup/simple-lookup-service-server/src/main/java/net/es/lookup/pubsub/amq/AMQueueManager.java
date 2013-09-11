@@ -2,8 +2,8 @@ package net.es.lookup.pubsub.amq;
 
 import net.es.lookup.common.Message;
 import net.es.lookup.common.QueryNormalizer;
-import net.es.lookup.common.exception.internal.QueryException;
-import net.es.lookup.common.exception.internal.QueueException;
+import net.es.lookup.common.exception.internal.PubSubQueryException;
+import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.pubsub.QueueManager;
 
 import java.util.ArrayList;
@@ -63,7 +63,7 @@ public class AMQueueManager implements QueueManager {
      * The method normalizes the query and searches if queue exists for the query. If queue exists,
      * the queue id is returned. Else, a queue is created and the id is returned.
      */
-    public List<String> getQueues(Message query) throws QueryException, QueueException {
+    public List<String> getQueues(Message query) throws PubSubQueryException, PubSubQueueException {
 
         LOG.info("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Creating/Retrieving Queues");
         List<String> res = new ArrayList<String>();
@@ -109,7 +109,7 @@ public class AMQueueManager implements QueueManager {
      * This method is the implementation of the hasQueues method declared by QueueManager interface.
      * This method simply returns true if queue exists for a query and false if not .
      */
-    public boolean hasQueues(Message query) throws QueryException, QueueException {
+    public boolean hasQueues(Message query) throws PubSubQueryException, PubSubQueueException {
 
         String normalizedQuery = QueryNormalizer.normalize(query);
         if (queryMap.containsKey(normalizedQuery)) {
@@ -123,9 +123,9 @@ public class AMQueueManager implements QueueManager {
     /**
      * This method is the implementation of the push method declared by QueueManager interface.
      * This method simply checks if queue exists and pushes the message to the queue. If queue does
-     * not exist, it throws a QueueException.
+     * not exist, it throws a PubSubQueueException.
      */
-    public void push(String qid, Message message) throws QueueException {
+    public void push(String qid, Message message) throws PubSubQueueException {
 
         LOG.info("net.es.lookup.pubsub.amq.AMQueueManager.push: Pushing Message" + message + " to Queue " + qid);
         AMQueue queue = queueMap.get(qid);
@@ -135,7 +135,7 @@ public class AMQueueManager implements QueueManager {
             LOG.debug("net.es.lookup.pubsub.amq.AMQueueManager.push: Pushed Message" + message + " to Queue " + qid);
         } else {
             LOG.error("net.es.lookup.pubsub.amq.AMQueueManager.push: Error pushing message to Queue. Queue does not exist");
-            throw new QueueException("Queue does not exist");
+            throw new PubSubQueueException("Queue does not exist");
         }
 
     }

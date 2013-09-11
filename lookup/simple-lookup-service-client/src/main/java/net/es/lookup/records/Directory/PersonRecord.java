@@ -166,13 +166,13 @@ public class PersonRecord extends Record {
 
     public double getLatitude() {
 
-        return (Double) this.getValue(ReservedKeys.RECORD_LOCATION_LATITUDE);
+        return Double.parseDouble((String) this.getValue(ReservedKeys.RECORD_LOCATION_LATITUDE));
     }
 
     public void setLatitude(double latitude) throws RecordException {
 
         if(DataValidator.isValidLatitude(latitude)){
-            this.add(ReservedKeys.RECORD_LOCATION_LATITUDE, latitude);
+            this.add(ReservedKeys.RECORD_LOCATION_LATITUDE, Double.toString(latitude));
         }else{
             throw new RecordException(ReservedKeys.RECORD_LOCATION_LATITUDE+" is out of range (-90,90)");
         }
@@ -180,13 +180,13 @@ public class PersonRecord extends Record {
 
     public double getLongitude() {
 
-        return (Double) this.getValue(ReservedKeys.RECORD_LOCATION_LONGITUDE);
+        return Double.parseDouble((String) this.getValue(ReservedKeys.RECORD_LOCATION_LONGITUDE));
     }
 
     public void setLongitude(double longitude) throws RecordException {
 
         if(DataValidator.isValidLongitude(longitude)){
-            this.add(ReservedKeys.RECORD_LOCATION_LONGITUDE, longitude);
+            this.add(ReservedKeys.RECORD_LOCATION_LONGITUDE, Double.toString(longitude));
         }else{
             throw new RecordException(ReservedKeys.RECORD_LOCATION_LONGITUDE+" is out of range (-180,180)");
         }

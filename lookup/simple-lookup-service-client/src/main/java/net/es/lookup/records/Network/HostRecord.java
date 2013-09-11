@@ -29,51 +29,51 @@ public class HostRecord extends Record {
     public void setHostName(String hostName) throws RecordException {
 
         if (hostName == null || hostName.isEmpty()) {
-            this.add(ReservedKeys.RECORD_HOST_NAME, hostName);
-        } else {
             throw new RecordException(ReservedKeys.RECORD_HOST_NAME + " is empty");
+        } else {
+            this.add(ReservedKeys.RECORD_HOST_NAME, hostName);
         }
 
     }
 
     public long getHostMemory() {
 
-        return (Long) this.getValue(ReservedKeys.RECORD_HOST_HARDWARE_MEMORY);
+        return Long.decode((String) this.getValue(ReservedKeys.RECORD_HOST_HARDWARE_MEMORY));
     }
 
     public void setHostMemory(long hostHardwareMemory) {
 
-        this.add(ReservedKeys.RECORD_HOST_HARDWARE_MEMORY,hostHardwareMemory);
+        this.add(ReservedKeys.RECORD_HOST_HARDWARE_MEMORY, Long.toString(hostHardwareMemory));
     }
 
     public long getHostProcessorSpeed() {
 
-        return (Long) this.getValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORSPEED);
+        return Long.decode((String) this.getValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORSPEED));
     }
 
     public void setHostProcessorSpeed(long processorSpeed) {
 
-        this.add(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORSPEED,processorSpeed);
+        this.add(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORSPEED, Long.toString(processorSpeed));
     }
 
     public int getHostProcessorCount() {
 
-        return (Integer) this.getValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCOUNT);
+        return Integer.decode((String) this.getValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCOUNT));
     }
 
     public void setHosProcessorCount(int processorCount) {
 
-        this.add(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCOUNT,processorCount);
+        this.add(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCOUNT, Integer.toString(processorCount));
     }
 
     public int getHostProcessorCore() {
 
-        return (Integer) this.getValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCORE);
+        return Integer.decode((String) this.getValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCORE));
     }
 
     public void setHostProcessorCore(int processorCore) {
 
-        this.add(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCORE,processorCore);
+        this.add(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCORE, Integer.toString(processorCore));
     }
 
     public List<String> getOSName() {
@@ -84,9 +84,9 @@ public class HostRecord extends Record {
     public void setOSName(List<String> osName) throws RecordException {
 
         if (osName == null || osName.isEmpty()) {
-            this.add(ReservedKeys.RECORD_HOST_OS_NAME, osName);
-        } else {
             throw new RecordException(ReservedKeys.RECORD_HOST_OS_NAME + " is empty");
+        } else {
+            this.add(ReservedKeys.RECORD_HOST_OS_NAME, osName);
         }
     }
 
@@ -98,9 +98,9 @@ public class HostRecord extends Record {
     public void setOSVersion(List<String> osVersion) throws RecordException {
 
         if (osVersion == null || osVersion.isEmpty()) {
-            this.add(ReservedKeys.RECORD_HOST_OS_VERSION, osVersion);
-        } else {
             throw new RecordException(ReservedKeys.RECORD_HOST_OS_VERSION + " is empty");
+        } else {
+            this.add(ReservedKeys.RECORD_HOST_OS_VERSION, osVersion);
         }
     }
 
@@ -112,9 +112,9 @@ public class HostRecord extends Record {
     public void setOSKernel(List<String> osKernel) throws RecordException {
 
         if (osKernel == null || osKernel.isEmpty()) {
-            this.add(ReservedKeys.RECORD_HOST_OS_KERNEL, osKernel);
-        } else {
             throw new RecordException(ReservedKeys.RECORD_HOST_OS_KERNEL + " is empty");
+        } else {
+            this.add(ReservedKeys.RECORD_HOST_OS_KERNEL, osKernel);
         }
     }
 
@@ -126,63 +126,63 @@ public class HostRecord extends Record {
     public void setTcpCongestionAlgorithm(String congestionAlgorithm) throws RecordException {
 
         if (congestionAlgorithm == null || congestionAlgorithm.isEmpty()) {
-            this.add(ReservedKeys.RECORD_HOST_NET_TCP_CONGESTIONALGORITHM, congestionAlgorithm);
-        } else {
             throw new RecordException(ReservedKeys.RECORD_HOST_NET_TCP_CONGESTIONALGORITHM + " is empty");
+        } else {
+            this.add(ReservedKeys.RECORD_HOST_NET_TCP_CONGESTIONALGORITHM, congestionAlgorithm);
         }
 
     }
 
     public int getSendTcpMaxBuffer() {
 
-        return (Integer) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_SEND);
+        return Integer.decode((String) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_SEND));
     }
 
     public void setSendTcpMaxBuffer(int maxbuf) {
 
-        this.add(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_SEND, maxbuf);
+        this.add(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_SEND, Integer.toString(maxbuf));
     }
 
     public int getReceiveTcpMaxBuffer() {
 
-        return (Integer) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_RECV);
+        return Integer.decode((String) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_RECV));
     }
 
     public void setReceiveTcpMaxBuffer(int maxbuf) {
 
-        this.add(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_RECV, maxbuf);
+        this.add(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_RECV, Integer.toString(maxbuf));
     }
 
     public int getSendTcpAutotuneMaxBuffer() {
 
-        return (Integer) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_SEND);
+        return Integer.decode((String) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_SEND));
     }
 
     public void setSendTcpAutotuneMaxBuffer(int autotune) {
 
-        this.add(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_SEND, autotune);
+        this.add(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_SEND, Integer.toString(autotune));
     }
 
     public int getReceiveTcpAutotuneMaxBuffer() {
 
-        return (Integer) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_RECV);
+        return Integer.decode((String) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_RECV));
     }
 
     public void setReceiveTcpAutotuneMaxBuffer(int autotune) {
 
-        this.add(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_RECV, autotune);
+        this.add(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_RECV, Integer.toString(autotune));
     }
 
 
     public int getTcpMaxBackLog() {
 
-        return (Integer) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBACKLOG);
+        return Integer.decode((String) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBACKLOG));
     }
 
     public void setgetTcpMaxBackLog(int maxbacklog) {
 
 
-        this.add(ReservedKeys.RECORD_HOST_NET_TCP_MAXBACKLOG, maxbacklog);
+        this.add(ReservedKeys.RECORD_HOST_NET_TCP_MAXBACKLOG, Integer.toString(maxbacklog));
 
     }
 
@@ -286,13 +286,13 @@ public class HostRecord extends Record {
 
     public double getLatitude() {
 
-        return (Double) this.getValue(ReservedKeys.RECORD_LOCATION_LATITUDE);
+        return Double.parseDouble((String) this.getValue(ReservedKeys.RECORD_LOCATION_LATITUDE));
     }
 
     public void setLatitude(double latitude) throws RecordException {
 
         if (DataValidator.isValidLatitude(latitude)) {
-            this.add(ReservedKeys.RECORD_LOCATION_LATITUDE, latitude);
+            this.add(ReservedKeys.RECORD_LOCATION_LATITUDE, Double.toString(latitude));
         } else {
             throw new RecordException(ReservedKeys.RECORD_LOCATION_LATITUDE + " is out of range (-90,90)");
         }
@@ -300,13 +300,13 @@ public class HostRecord extends Record {
 
     public double getLongitude() {
 
-        return (Double) this.getValue(ReservedKeys.RECORD_LOCATION_LONGITUDE);
+        return Double.parseDouble((String) this.getValue(ReservedKeys.RECORD_LOCATION_LONGITUDE));
     }
 
     public void setLongitude(double longitude) throws RecordException {
 
         if (DataValidator.isValidLongitude(longitude)) {
-            this.add(ReservedKeys.RECORD_LOCATION_LONGITUDE, longitude);
+            this.add(ReservedKeys.RECORD_LOCATION_LONGITUDE, Double.toString(longitude));
         } else {
             throw new RecordException(ReservedKeys.RECORD_LOCATION_LONGITUDE + " is out of range (-180,180)");
         }

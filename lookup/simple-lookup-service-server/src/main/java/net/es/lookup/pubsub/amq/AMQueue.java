@@ -2,8 +2,7 @@ package net.es.lookup.pubsub.amq;
 
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DataFormatException;
-import net.es.lookup.common.exception.internal.QueueException;
-import net.es.lookup.common.exception.internal.ServiceNotSupported;
+import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.pubsub.Queue;
 import net.es.lookup.utils.QueueServiceConfigReader;
@@ -34,7 +33,7 @@ public class AMQueue extends Queue {
      * 1) creates a queue - starts a connection, creates the producer
      * 2) Generates queueId which used as topic. Subscriber uses this qid to subscribe to queues
      */
-    public AMQueue() throws QueueException {
+    public AMQueue() throws PubSubQueueException {
 
         //TODO: Make ActiveMQ user, password options configurable
         String user = ActiveMQConnection.DEFAULT_USER;
@@ -59,7 +58,7 @@ public class AMQueue extends Queue {
 
         } catch (JMSException e) {
             LOG.error("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Error creating connection for Queue. "+ e.getMessage());
-            throw new QueueException(e.getMessage());
+            throw new PubSubQueueException(e.getMessage());
         }
         try {
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE); // false=NotTransacted
@@ -79,7 +78,7 @@ public class AMQueue extends Queue {
 
         } catch (JMSException e) {
             LOG.error("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Error creating session/producer for Queue. "+ e.getMessage());
-            throw new QueueException(e.getMessage());
+            throw new PubSubQueueException(e.getMessage());
         }
 
         LOG.info("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Queue Creation Successful!");
@@ -101,7 +100,7 @@ public class AMQueue extends Queue {
      *
      * @param message The message to be pushed to queue
      */
-    public void push(Message message) throws QueueException {
+    public void push(Message message) throws PubSubQueueException {
 
         try {
             String strmsg = JSONMessage.toString(message);
@@ -110,15 +109,15 @@ public class AMQueue extends Queue {
             producer.send(txtmsg);
             LOG.info("net.es.lookup.pubsub.amq.AMQueue.push: Pushed message to Queue - "+ txtmsg);
         } catch (DataFormatException e) {
-            LOG.error("net.es.lookup.pubsub.amq.AMQueue.push: Error pushing message to queue - DataFormatException mapped to QueueException"+ e.getMessage());
-            throw new QueueException(e.getMessage());
+            LOG.error("net.es.lookup.pubsub.amq.AMQueue.push: Error pushing message to queue - DataFormatException mapped to PubSubQueueException"+ e.getMessage());
+            throw new PubSubQueueException(e.getMessage());
         } catch (JMSException e) {
-            LOG.error("net.es.lookup.pubsub.amq.AMQueue.push: Error pushing message to queue - JMSException mapped to QueueException "+ e.getMessage());
-            throw new QueueException(e.getMessage());
+            LOG.error("net.es.lookup.pubsub.amq.AMQueue.push: Error pushing message to queue - JMSException mapped to PubSubQueueException "+ e.getMessage());
+            throw new PubSubQueueException(e.getMessage());
         }
     }
 
-    public void close() throws QueueException {
+    public void close() throws PubSubQueueException {
 
         try {
             if (session != null) {
@@ -131,8 +130,8 @@ public class AMQueue extends Queue {
             LOG.info("net.es.lookup.pubsub.amq.AMQueue.close: Closed Queue ");
 
         } catch (JMSException e) {
-            LOG.error("net.es.lookup.pubsub.amq.AMQueue.close: Error closing Queue - JMSException mapped to QueueException "+ e.getMessage());
-            throw new QueueException(e.getMessage());
+            LOG.error("net.es.lookup.pubsub.amq.AMQueue.close: Error closing Queue - JMSException mapped to PubSubQueueException "+ e.getMessage());
+            throw new PubSubQueueException(e.getMessage());
         }
     }
 }
