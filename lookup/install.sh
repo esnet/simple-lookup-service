@@ -49,6 +49,7 @@ mkdir $RUNDIR
 mkdir $BASEDIR/target
 mkdir $BASEDIR/bin
 mkdir $BASEDIR/scripts
+mkdir $BASEDIR/data
 cp -r $SOURCEDIR/bin/* $BASEDIR/bin/
 cp -r $SOURCEDIR/etc/* $CONFIGDIR/
 cp $SOURCEDIR/target/$JAR_FILE $BASEDIR/target/

@@ -97,16 +97,13 @@ public class ScanLSJob implements Job {
         String filename = Invoker.getConfigPath()+Invoker.getBootstrapoutput();
 
         try {
-
-            Service hosts = new Service();
-            hosts.add(ReservedKeys.BOOTSTRAP_HOSTS, hostStatus);
-            String res = JSONMessage.toString(hosts);
+            String res = JSONMessage.toString(hostStatus, ReservedKeys.BOOTSTRAP_HOSTS);
             System.out.println(res);
             PrintWriter writer = new PrintWriter(filename);
             writer.println(res);
             writer.close();
         } catch (DataFormatException e) {
-            System.out.println("ErROR");
+            System.out.println(e.getMessage());
         } catch (FileNotFoundException e) {
             System.out.println("ErROR");
         }

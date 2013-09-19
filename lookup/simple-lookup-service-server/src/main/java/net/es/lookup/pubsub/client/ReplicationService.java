@@ -1,11 +1,13 @@
 package net.es.lookup.pubsub.client;
 
+import net.es.lookup.client.QueryClient;
 import net.es.lookup.client.SimpleLS;
 import net.es.lookup.client.Subscriber;
 import net.es.lookup.client.SubscriberListener;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.LSClientException;
+import net.es.lookup.common.exception.ParserException;
 import net.es.lookup.common.exception.QueryException;
 import net.es.lookup.common.exception.RecordException;
 import net.es.lookup.common.exception.internal.ConfigurationException;
@@ -76,26 +78,51 @@ public class ReplicationService implements SubscriberListener {
             List<Map<String, Object>> queryList = null;
 
             queryList = queries.get(index);
+            SimpleLS queryserver =  new SimpleLS(server.getHost(),server.getPort());
             index++;
+
+
             if (queryList != null && !queryList.isEmpty()) {
-                for (int i=0; i<queryList.size();i++) {
-                    Map<String,Object> m = queryList.get(i);
+                for (int i = 0; i < queryList.size(); i++) {
+                    Map<String, Object> m = queryList.get(i);
                     if (m != null) {
                         try {
                             Query query = new Query(m);
+
+                            //get the initial set of records before starting subscribe
+                            try {
+                                getRecords(query, queryserver);
+                            } catch (ParserException e) {
+                                LOG.error("net.es.lookup.pubsub.client.ReplicationService.start: Error parsing query results - " + e.getMessage());
+                            } catch (QueryException e) {
+                                LOG.error("net.es.lookup.pubsub.client.ReplicationService.start: Error processing query - " + e.getMessage());
+                            }
                             Subscriber subscriber = new Subscriber(server, query);
                             subscriber.addListener(this);
                             subscriber.startSubscription();
                             subscribers.add(subscriber);
                         } catch (QueryException e) {
-                            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                            LOG.error("net.es.lookup.pubsub.client.ReplicationService.start: Error defining query");
+                            throw new LSClientException("Query could not be defined" + e.getMessage());
                         }
                     }
 
                 }
+
+
             } else {
                 //if no list exists, create empty query
                 Query query = new Query();
+
+
+                //get the initial set of records before starting subscribe
+                try {
+                    getRecords(query, queryserver);
+                } catch (ParserException e) {
+                    LOG.error("net.es.lookup.pubsub.client.ReplicationService.start: Error parsing query results - " + e.getMessage());
+                } catch (QueryException e) {
+                    LOG.error("net.es.lookup.pubsub.client.ReplicationService.start: Error processing query - " + e.getMessage());
+                }
                 Subscriber subscriber = new Subscriber(server, query);
                 subscriber.addListener(this);
                 subscriber.startSubscription();
@@ -103,9 +130,12 @@ public class ReplicationService implements SubscriberListener {
 
             }
 
+
+
         }
 
-        LOG.info("net.es.lookup.pubsub.client.ReplicationService.start: Created and initialized "+ subscribers.size() +" subscriber connections");
+        LOG.info("net.es.lookup.pubsub.client.ReplicationService.start: Created and initialized " + subscribers.size() + " subscriber connections");
+
 
     }
 
@@ -122,6 +152,24 @@ public class ReplicationService implements SubscriberListener {
 
 
     public void onRecord(Record record) {
+        LOG.info("net.es.lookup.pubsub.client.ReplicationService.onRecord: Processing Received message");
+        try {
+            save(record);
+        } catch (DuplicateEntryException e) {
+            LOG.error("net.es.lookup.pubsub.client.ReplcationService.onRecord: Error saving record" + e.getMessage());
+        } catch (DatabaseException e) {
+            LOG.error("net.es.lookup.pubsub.client.ReplicationService.onRecord: Error saving record" + e.getMessage());
+        }
+    }
+
+    /**
+     * The records' record-state will be updated.
+     * If unable to update, then an exception will be thrown.
+     * No records are deleted
+     *
+     * @param record The record to be save or updated
+     */
+    private void save(Record record) throws DuplicateEntryException, DatabaseException{
         LOG.info("net.es.lookup.pubsub.client.ReplicationService.onRecord: Processing Received message");
         if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_REGISTER)) {
             LOG.info("net.es.lookup.pubsub.client.ReplicationService.onRecord: insert as new record");
@@ -178,6 +226,57 @@ public class ReplicationService implements SubscriberListener {
                 LOG.error("net.es.lookup.pubsub.client.ReplicationService.onRecord: Error deleting record. Database Error"+ e.getMessage());
             }
         }
+    }
+
+
+    /**
+     * This method will only create a new entry for the record.
+     * If an entry already exists, the insert operation is ignored and method returns.
+     *
+     * @param record The record to be save or updated
+     */
+    private void forceSave(Record record) throws DuplicateEntryException, DatabaseException {
+
+        LOG.info("net.es.lookup.pubsub.client.ReplicationService.forceSave: insert as new record");
+        Message message = new Message(record.getMap());
+        Map<String, Object> keyValues = record.getMap();
+        Message operators = new Message();
+        Message query = new Message();
+
+        Iterator it = keyValues.entrySet().iterator();
+        LOG.info("net.es.lookup.pubsub.client.ReplicationService.forceSave: Constructing query based on message");
+        while (it.hasNext()) {
+
+            Map.Entry<String, Object> pairs = (Map.Entry) it.next();
+            operators.add(pairs.getKey(), ReservedValues.RECORD_OPERATOR_ALL);
+            query.add(pairs.getKey(), pairs.getValue());
+
+        }
+        LOG.info("net.es.lookup.pubsub.client.ReplicationService.forceSave: Check and insert record");
+
+        db.queryAndPublishService(message, query, operators);
+
+        LOG.info("net.es.lookup.pubsub.client.ReplicationService.forceSave: Inserted record");
+    }
+
+
+    private void getRecords(Query query, SimpleLS server) throws LSClientException, QueryException, ParserException {
+
+
+        QueryClient queryClient = new QueryClient(server);
+        queryClient.setQuery(query);
+        List<Record> results = queryClient.query();
+        for (Record record : results) {
+            try {
+                forceSave(record);
+            } catch (DuplicateEntryException e) {
+                LOG.error("net.es.lookup.pubsub.client.ReplicationService.getRecords: Error inserting record to DB - " + e.getMessage());
+            } catch (DatabaseException e) {
+                LOG.error("net.es.lookup.pubsub.client.ReplicationService.getRecords: Error inserting record to DB - " + e.getMessage());
+            }
+        }
+
+
     }
 
 }

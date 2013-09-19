@@ -129,4 +129,68 @@ public class JSONMessage {
     }
 
 
+
+    public static String toString(List<Service> services, String listname) throws DataFormatException {
+
+        JSONStringer stringer = new JSONStringer();
+        JSONBuilder tmp = stringer;
+
+        if(listname == null || listname.isEmpty()){
+            throw new DataFormatException("List name was null");
+        }
+
+        try {
+
+            tmp = tmp.object().key(listname).array();
+            //tmp = tmp.array();
+
+            for (Message service : services) {
+
+                Map<String, Object> map = service.getMap();
+                Set<Map.Entry<String, Object>> entries = map.entrySet();
+                tmp = tmp.object();
+
+                for (Map.Entry<String, Object> entry : entries) {
+
+                    if (entry.getValue() instanceof String) {
+
+                        tmp = tmp.key(entry.getKey()).value(entry.getValue());
+
+                    } else if (entry.getValue() instanceof List) {
+
+                        List<String> tmpvalues = (List) entry.getValue();
+                        Iterator<String> it = tmpvalues.iterator();
+                        tmp = tmp.key(entry.getKey());
+                        tmp = tmp.array();
+
+                        while (it.hasNext()) {
+
+                            tmp = tmp.value(it.next());
+
+                        }
+
+                        tmp.endArray();
+
+                    }
+
+                }
+
+                tmp = tmp.endObject();
+
+            }
+
+            tmp = tmp.endArray().endObject();
+            //tmp = tmp.endArray();
+
+        } catch (JSONException e) {
+
+            throw new DataFormatException("Error in data format");
+
+        }
+
+        return stringer.toString();
+
+    }
+
+
 }

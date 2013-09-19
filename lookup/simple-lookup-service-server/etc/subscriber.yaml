@@ -1,11 +1,5 @@
 sources:
-    - host: 'localhost'
+    - host: 'sowmya-dev-vm.es.net'
       port: 8090
       queries:
-        - type: ['host']
-        - group-domains: ['es.net']
-    - host: 'localhost'
-      port: 8090
-      queries:
-        - type: ['vp']
-        - record-vp-domain: ['ESnet']
+        - group-domains: ["es.net"]
