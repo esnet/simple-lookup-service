@@ -9,10 +9,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Author: sowmya
@@ -26,11 +23,10 @@ public class BootStrapClient {
     private static final int MIN_PRIORITY = 0;
     private String lsUrl = "";
 
-
     public BootStrapClient(URI source) throws BootStrapException {
         this.source = source;
 
-        SimpleLS client = null;
+        SimpleLS client;
         try {
             client = new SimpleLS(source.getHost(), source.getPort());
 
@@ -49,8 +45,6 @@ public class BootStrapClient {
                 JSONArray hosts = (JSONArray)(jsonObject.get("hosts"));
 
                 Iterator hostIterator = hosts.iterator();
-
-                List<JSONObject> host = new ArrayList<JSONObject>();
 
                 int curMax = 0;
                 String url = "";

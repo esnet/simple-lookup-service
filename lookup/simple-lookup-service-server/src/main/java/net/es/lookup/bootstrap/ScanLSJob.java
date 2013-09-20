@@ -9,9 +9,9 @@ import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.internal.ConfigurationException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.protocol.json.JSONMessage;
-import net.es.lookup.protocol.json.JSONParser;
 import net.es.lookup.service.Invoker;
 import net.es.lookup.utils.BootStrapConfigReader;
+import org.apache.log4j.Logger;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.quartz.DisallowConcurrentExecution;
@@ -21,19 +21,18 @@ import org.quartz.JobExecutionException;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 @DisallowConcurrentExecution
 public class ScanLSJob implements Job {
     BootStrapConfigReader bootStrapConfigReader;
     List<Service> hostStatus = new ArrayList<Service>();
+    private static Logger LOG = Logger.getLogger(ScanLSJob.class);
+
     public ScanLSJob() throws ConfigurationException {
         bootStrapConfigReader = BootStrapConfigReader.getInstance();
     }
@@ -42,10 +41,10 @@ public class ScanLSJob implements Job {
         int count = bootStrapConfigReader.getSourceCount();
 
         for(int i=0; i<count; i++) {
-            String status = ReservedValues.SERVER_STATUS_UNKNOWN;
+            String status;
             Service hostDetails = new Service();
 
-            String hostlocator = null;
+            String hostlocator;
             int priority;
             try {
                 hostlocator = bootStrapConfigReader.getSourceLocator(i);
@@ -54,12 +53,12 @@ public class ScanLSJob implements Job {
                 hostDetails.add(ReservedKeys.SERVER_PRIORITY, priority);
 
 
-                URI uri = null;
+                URI uri;
                 try {
 
                     uri = new URI(hostlocator);
-                    System.out.println(uri.getHost() + ":" + uri.getPort());
-                    SimpleLS lsclient = null;
+                    LOG.error("net.es.lookup.bootstrap.ScanLS.execute: Bootstrap scanning host-"+ uri.getHost()+" port-"+uri.getPort());
+                    SimpleLS lsclient;
                     try {
                         lsclient = new SimpleLS(uri.getHost(), uri.getPort());
 
@@ -74,6 +73,8 @@ public class ScanLSJob implements Job {
                         hostDetails.add(ReservedKeys.SERVER_STATUS, status);
                     } catch (LSClientException e) {
                         status = ReservedValues.SERVER_STATUS_UNKNOWN;
+                        hostDetails.add(ReservedKeys.SERVER_STATUS, status);
+
                     }
 
                     DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
@@ -82,12 +83,12 @@ public class ScanLSJob implements Job {
 
                     hostStatus.add(hostDetails);
                 } catch (URISyntaxException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    LOG.error("net.es.lookup.bootstrap.ScanLS.execute: Bootstrap scanning error - "+e.getMessage());
                 }
 
 
             } catch (ConfigurationException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                LOG.error("net.es.lookup.bootstrap.ScanLS.execute: Bootstrap scanning error - "+e.getMessage());
             }
 
 
@@ -98,14 +99,14 @@ public class ScanLSJob implements Job {
 
         try {
             String res = JSONMessage.toString(hostStatus, ReservedKeys.BOOTSTRAP_HOSTS);
-            System.out.println(res);
+            LOG.error("net.es.lookup.bootstrap.ScanLS.execute: Bootstrap scanning results - "+res);
             PrintWriter writer = new PrintWriter(filename);
             writer.println(res);
             writer.close();
         } catch (DataFormatException e) {
-            System.out.println(e.getMessage());
+            LOG.error("net.es.lookup.bootstrap.ScanLS.execute: Bootstrap scanning error - "+e.getMessage());
         } catch (FileNotFoundException e) {
-            System.out.println("ErROR");
+            LOG.error("net.es.lookup.bootstrap.ScanLS.execute: Bootstrap scanning error - "+e.getMessage());
         }
     }
 }
