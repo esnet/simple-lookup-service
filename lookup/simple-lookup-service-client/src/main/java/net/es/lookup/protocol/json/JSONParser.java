@@ -129,7 +129,6 @@ public class JSONParser {
 
 
         JSONObject jsonObject = JSONObject.fromObject(jsonString);
-        System.out.println("JSONObject: "+ jsonObject.toString());
 
         String type;
         if(jsonObject.get(ReservedKeys.RECORD_TYPE) instanceof List){
@@ -141,7 +140,6 @@ public class JSONParser {
         Record result;
         try {
             result = RecordFactory.getRecord(type);
-            System.out.println(type);
             result.setMap(jsonObject);
         } catch (RecordException e) {
             throw new ParserException(e.getMessage());
