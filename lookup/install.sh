@@ -13,7 +13,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-mvn clean install
+mvn clean install -DskipTests
 
 if [ $? -ne 0 ]; then
     echo "\n\nInstallation failed. Maven compilation error!"
