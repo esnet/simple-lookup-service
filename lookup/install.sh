@@ -77,6 +77,7 @@ chown -R $USER:$USER $LOGDIR
 
 chmod 755 $BASEDIR/bin/*
 chmod 755 $BASEDIR/scripts/*
+chmod 766 $BASEDIR/data
 
 if [ $? -eq 0 ]; then
     echo "\n\nInstalled Simple Lookup Service(sLS) successfully!!\nNOTE: sLS requires MongoDB. Please ensure MongoDB is installed and running before starting sLS."
