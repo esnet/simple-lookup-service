@@ -2,7 +2,7 @@
 #
 # Init file for Lookup Service
 # chkconfig: 2345 90 20
-# description: Lookup Service server. Used if using rpm to install
+# description: Lookup Service server.
 #
 #
 # Source function library.
@@ -12,8 +12,6 @@
 SHORT_NAME=simple-lookup-service
 LONG_NAME="Simple Lookup Service"
 VERSION="0.1"
-
-. /etc/init.d/functions
 
 #LS variables
 HOME_PREFIX=/etc/opt/$SHORT_NAME

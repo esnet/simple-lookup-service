@@ -55,10 +55,11 @@ cp -r $SOURCEDIR/etc/* $CONFIGDIR/
 cp $SOURCEDIR/target/$JAR_FILE $BASEDIR/target/
 
 if [ -f /etc/redhat-release ] ; then
-    cp $SOURCEDIR/scripts/lookup-service-centos $BASEDIR/scripts/lookup-service
+    cp $SOURCEDIR/scripts/lookup-service-centos $BASEDIR/scripts/$SHORTNAME
+    ln -s $BASEDIR/scripts/$SHORTNAME /etc/init.d/$SHORTNAME
     /sbin/chkconfig --add $SHORTNAME
 elif [ -f /etc/lsb-release ] ; then
-    cp $SOURCEDIR/scripts/lookup-service-ubuntu $BASEDIR/scripts/lookup-service
+    cp $SOURCEDIR/scripts/lookup-service-ubuntu $BASEDIR/scripts/$SHORTNAME
 fi
 
 id -u $USER
