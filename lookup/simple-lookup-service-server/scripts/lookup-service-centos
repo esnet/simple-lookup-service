@@ -1,4 +1,12 @@
 #!/bin/bash
+#
+# Init file for Lookup Service
+# chkconfig: 2345 90 20
+# description: Lookup Service server. Used if using rpm to install
+#
+#
+# Source function library.
+. /etc/rc.d/init.d/functions
 
 #Service specific variables
 SHORT_NAME=simple-lookup-service

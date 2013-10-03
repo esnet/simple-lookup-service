@@ -1,7 +1,7 @@
-%define package_name lookup-service 
+%define package_name simple-lookup-service
 %define mvn_project_list %{package_name}
 %define install_base /opt/%{package_name}
-%define config_base /etc/%{package_name}
+%define config_base /etc/opt/%{package_name}
 %define log_dir /var/log/%{package_name}
 %define run_dir /var/run/%{package_name}
 %define data_dir /var/lib/%{package_name}

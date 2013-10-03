@@ -51,6 +51,13 @@
             <version>5.5.1</version>
         </dependency>
 
+        <!-- command-line parsing -->
+        <dependency>
+            <groupId>net.sf.jopt-simple</groupId>
+            <artifactId>jopt-simple</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
         <!-- lookup-service client -->
         <dependency>
             <artifactId>simple-lookup-service-client</artifactId>
@@ -59,11 +66,44 @@
         </dependency>
         <!-- lookup-service keywords -->
         <dependency>
-            <artifactId>lookup-service-keywords</artifactId>
+            <artifactId>simple-lookup-service-keywords</artifactId>
             <groupId>net.es.lookup</groupId>
             <version>0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jopt-simple</groupId>
+            <artifactId>jopt-simple</artifactId>
+            <version>3.0.1</version>
         </dependency>
 
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <inherited>true</inherited>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>net.es.lookup.examples.FakeDataGeneration</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
