@@ -56,6 +56,9 @@ cp $SOURCEDIR/target/$JAR_FILE $BASEDIR/target/
 
 if [ -f /etc/redhat-release ] ; then
     cp $SOURCEDIR/scripts/lookup-service-centos $BASEDIR/scripts/$SHORTNAME
+    if [ -e /etc/init.d/$SHORTNAME] ; then
+        rm /etc/init.d/$SHORTNAME
+    fi
     ln -s $BASEDIR/scripts/$SHORTNAME /etc/init.d/$SHORTNAME
     /sbin/chkconfig --add $SHORTNAME
 elif [ -f /etc/lsb-release ] ; then

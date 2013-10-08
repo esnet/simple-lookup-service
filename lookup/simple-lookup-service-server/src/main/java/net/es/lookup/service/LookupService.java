@@ -22,6 +22,8 @@ public class LookupService {
     public static String SERVICE_URI_PREFIX = "lookup";
     private int port = 8080;
     private String host = "localhost";
+
+
     private String datadirectory = "../data";
     private HttpServer httpServer = null;
     private static LookupService instance = null;
@@ -72,6 +74,18 @@ public class LookupService {
     //static {
     //  LookupService.instance = new LookupService();
     //}
+
+
+
+    public String getDatadirectory() {
+
+        return datadirectory;
+    }
+
+    public void setDatadirectory(String datadirectory) {
+
+        this.datadirectory = datadirectory;
+    }
 
 
     public static LookupService getInstance() {

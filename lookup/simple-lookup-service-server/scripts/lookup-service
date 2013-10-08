@@ -17,6 +17,7 @@ HOME_PREFIX=/etc/${SHORT_NAME}
 DIST_PREFIX=/opt/${SHORT_NAME}
 BINDIR=${DIST_PREFIX}/bin
 CONFDIR=${HOME_PREFIX}
+QDATADIR=$DIST_PREFIX/data
 RUNDIR=/var/run/${SHORT_NAME}
 LOGDIR=/var/log/${SHORT_NAME}
 LOCK_FILE=/var/lock/subsys/${SHORT_NAME}
@@ -26,7 +27,7 @@ STOP_TIMEOUT=10
 RESTART_DELAY=5
 PIDFILE=${RUNDIR}/${SHORT_NAME}.pid
 JARFILE=${DIST_PREFIX}/target/${SHORT_NAME}.one-jar.jar
-LOOKUPSERVICE_CMD="${BINDIR}/startServer.sh ${PIDFILE} ${JARFILE} -c ${CONFDIR}/lookup-service.yaml -l ${CONFDIR}/log4j.properties > ${LOGDIR}/${SHORT_NAME}.out 2>&1 &"
+LOOKUPSERVICE_CMD="${BINDIR}/startServer.sh ${PIDFILE} ${JARFILE} -c ${CONFDIR}/lookup-service.yaml -l ${CONFDIR}/log4j.properties -d $QDATADIR > ${LOGDIR}/${SHORT_NAME}.out 2>&1 &"
 
 #functions
 start(){

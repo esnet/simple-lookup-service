@@ -39,6 +39,7 @@ public class Invoker {
     private static String bootstrapcfg = "bootstrap.yaml";
     private static String bootstrapoutput = "active-hosts.json";
     private static String logConfig = "./etc/log4j.properties";
+    private static String queueDataDir = "../data";
     private static AMQueueManager amQueueManager = null;
     private static AMQueuePump amQueuePump = null;
 
@@ -126,7 +127,7 @@ public class Invoker {
         System.out.println("starting Lookup Service");
         // Create the REST service
         Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
-
+        Invoker.lookupService.setDatadirectory(queueDataDir);
 
         //Queue service
         QueueServiceConfigReader qcfg = QueueServiceConfigReader.getInstance();
@@ -220,6 +221,7 @@ public class Invoker {
         OptionSpec<String> HOST = parser.accepts("h", "host").withRequiredArg().ofType(String.class);
         OptionSpec<String> CONFIG = parser.accepts("c", "configPath").withRequiredArg().ofType(String.class);
         OptionSpec<String> LOGCONFIG = parser.accepts("l", "logConfig").withRequiredArg().ofType(String.class);
+        OptionSpec<String> QUEUEDATADIR = parser.accepts("d", "queueDataDir").withRequiredArg().ofType(String.class);
         OptionSet options = parser.parse(args);
 
         // check for help
@@ -251,6 +253,13 @@ public class Invoker {
         if (options.has(LOGCONFIG)) {
 
             logConfig = options.valueOf(LOGCONFIG);
+
+        }
+
+
+        if (options.has(QUEUEDATADIR)) {
+
+            queueDataDir = options.valueOf(LOGCONFIG);
 
         }
 
