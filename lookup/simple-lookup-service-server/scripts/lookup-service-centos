@@ -2,7 +2,7 @@
 #
 # Init file for Lookup Service
 # chkconfig: 2345 90 20
-# description: Lookup Service server.
+# description: Lookup Service server
 #
 #
 # Source function library.
