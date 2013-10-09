@@ -245,8 +245,9 @@ public class Invoker {
         }
 
         if (options.has(CONFIG)) {
-            System.out.println("Config files Path:"+ CONFIG);
+
             configPath = options.valueOf(CONFIG);
+            System.out.println("Config files Path:"+ configPath);
 
         }
 
@@ -259,7 +260,7 @@ public class Invoker {
 
         if (options.has(QUEUEDATADIR)) {
 
-            queueDataDir = options.valueOf(LOGCONFIG);
+            queueDataDir = options.valueOf(QUEUEDATADIR);
 
         }
 
