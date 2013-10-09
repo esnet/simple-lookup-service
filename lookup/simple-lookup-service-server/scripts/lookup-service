@@ -8,26 +8,26 @@
 # Source function library.
 . /etc/rc.d/init.d/functions
 
-#Service specific variables
-SHORT_NAME=lookup-service
-LONG_NAME="Lookup Service"
+SHORT_NAME=simple-lookup-service
+LONG_NAME="Simple Lookup Service"
+VERSION="0.1"
 
 #LS variables
-HOME_PREFIX=/etc/${SHORT_NAME}
-DIST_PREFIX=/opt/${SHORT_NAME}
-BINDIR=${DIST_PREFIX}/bin
-CONFDIR=${HOME_PREFIX}
+HOME_PREFIX=/etc/opt/$SHORT_NAME
+DIST_PREFIX=/opt/$SHORT_NAME
+BINDIR=$DIST_PREFIX/bin
+CONFDIR=$HOME_PREFIX
+RUNDIR=/var/run/$SHORT_NAME
+LOGDIR=/var/log/$SHORT_NAME
 QDATADIR=$DIST_PREFIX/data
-RUNDIR=/var/run/${SHORT_NAME}
-LOGDIR=/var/log/${SHORT_NAME}
-LOCK_FILE=/var/lock/subsys/${SHORT_NAME}
+LOCK_FILE=/var/lock/subsys/$SHORT_NAME
 USER=lookup
 GROUP=lookup
 STOP_TIMEOUT=10
 RESTART_DELAY=5
 PIDFILE=${RUNDIR}/${SHORT_NAME}.pid
-JARFILE=${DIST_PREFIX}/target/${SHORT_NAME}.one-jar.jar
-LOOKUPSERVICE_CMD="${BINDIR}/startServer.sh ${PIDFILE} ${JARFILE} -c ${CONFDIR}/lookup-service.yaml -l ${CONFDIR}/log4j.properties -d $QDATADIR > ${LOGDIR}/${SHORT_NAME}.out 2>&1 &"
+JARFILE=$DIST_PREFIX/target/$SHORT_NAME-server-$VERSION.one-jar.jar
+LOOKUPSERVICE_CMD="$BINDIR/startServer.sh $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.properties -d $QDATADIR > $LOGDIR/$SHORT_NAME.out 2>&1 &"
 
 #functions
 start(){
