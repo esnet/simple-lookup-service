@@ -1,13 +1,13 @@
 ---
 #Lookup Service settings
 lookupservice:
-    host: '198.128.204.191'
+    host: 'sowmya-dev-vm.es.net'
     port: 8090
     lease:
         max: 2592000
         default: 1800
         min: 7200
-    mode: 'replication'
+    mode: 'master'
     bootstrapservice: 'on'
 
 

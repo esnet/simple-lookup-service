@@ -1,26 +1,25 @@
 %define package_name simple-lookup-service
-%define mvn_project_list %{package_name}
+%define mvn_project_list %{package_name}-server 
 %define install_base /opt/%{package_name}
 %define config_base /etc/opt/%{package_name}
 %define log_dir /var/log/%{package_name}
 %define run_dir /var/run/%{package_name}
 %define data_dir /var/lib/%{package_name}
-%define relnum 3 
+%define relnum 1 
 
 Name:           %{package_name}
-Version:        0.1
+Version:        1.0
 Release:        %{relnum}
 Summary:        Lookup Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://code.google.com/p/esnet-perfsonar
-Source0:        lookup-service.tar.gz
+Source0:        simple-lookup-service.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  java-1.6.0-openjdk
-BuildRequires:  java-1.6.0-openjdk-devel
+BuildRequires:  java-openjdk >= 1.6.0
 BuildRequires:  sed 
 BuildArch:      noarch
-Requires:       java-1.6.0-openjdk
+Requires:       java-openjdk >= 1.6.0
 Requires:       chkconfig
 Requires:	mongo-10gen
 %description
@@ -33,7 +32,7 @@ via REST interface.
 /usr/sbin/useradd -g lookup -r -s /sbin/nologin -c "Lookup Service User" -d /tmp lookup 2> /dev/null || :
 
 %prep
-%setup -q -n lookup-service
+%setup -q -n simple-lookup-service
 
 %clean
 rm -rf %{buildroot}
@@ -55,15 +54,17 @@ mkdir -p %{buildroot}/%{config_base}
 mkdir -p %{buildroot}/etc/init.d
 
 #Copy jar files and scripts
-cp %{package_name}/target/*.jar %{buildroot}/%{install_base}/target/
-install -m 755 %{package_name}/bin/* %{buildroot}/%{install_base}/bin/
-install -m 755 %{package_name}/scripts/%{package_name} %{buildroot}/etc/init.d/%{package_name}
+cp %{_builddir}/%{package_name}/%{package_name}-server/target/*.jar %{buildroot}/%{install_base}/target/
+install -m 755 %(pwd)/bin/* %{buildroot}/%{install_base}/bin/
+install -m 755 %(pwd)/scripts/lookup-service %{buildroot}/etc/init.d/%{package_name}
 
 # Copy default config file
-cp %{package_name}/etc/lookupservice.yaml %{buildroot}/%{config_base}/lookup-service.yaml
+cp %(pwd)/etc/lookupservice.yaml %{buildroot}/%{config_base}/lookupservice.yaml
+cp %(pwd)/etc/subscriber.yaml %{buildroot}/%{config_base}/subscriber.yaml
+cp %(pwd)/etc/queueservice.yaml %{buildroot}/%{config_base}/queueservice.yaml
 
 #Update log locations
-sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{package_name}/etc/log4j.properties > %{buildroot}/%{config_base}/log4j.properties
+sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %(pwd)/etc/log4j.properties > %{buildroot}/%{config_base}/log4j.properties
 
 %post
 #Create directory for PID files
@@ -84,10 +85,10 @@ if [ "$1" = "2" ]; then
   unlink %{install_base}/target/%{package_name}.one-jar.jar
   unlink %{install_base}/target/%{package_name}.jar
 fi
-ln -s %{install_base}/target/%{package_name}-%{version}.one-jar.jar %{install_base}/target/%{package_name}.one-jar.jar
-chown lookup:lookup %{install_base}/target/%{package_name}.one-jar.jar
-ln -s %{install_base}/target/%{package_name}-%{version}.jar %{install_base}/target/%{package_name}.jar
-chown lookup:lookup %{install_base}/target/%{package_name}.jar
+ln -s %{install_base}/target/%{package_name}-server-%{version}.one-jar.jar %{install_base}/target/%{package_name}.one-jar.jar
+chown lookup:lookup %{install_base}/target/%{package_name}-server-%{version}.one-jar.jar
+ln -s %{install_base}/target/%{package_name}-server-%{version}.jar %{install_base}/target/%{package_name}.jar
+chown lookup:lookup %{install_base}/target/%{package_name}-server-%{version}.jar
 
 #Configure service to start when machine boots
 /sbin/chkconfig --add %{package_name}
@@ -103,6 +104,6 @@ chown lookup:lookup %{install_base}/target/%{package_name}.jar
 if [ $1 -eq 0 ]; then
     /sbin/chkconfig --del %{package_name}
     /sbin/service %{package_name} stop
-    unlink %{install_base}/target/%{package_name}.one-jar.jar
-    unlink %{install_base}/target/%{package_name}.jar
+    unlink %{install_base}/target/%{package_name}-server-%{version}.one-jar.jar
+    unlink %{install_base}/target/%{package_name}-server-%{version}.jar
 fi

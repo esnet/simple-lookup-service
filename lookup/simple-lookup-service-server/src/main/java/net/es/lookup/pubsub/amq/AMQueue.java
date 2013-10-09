@@ -47,7 +47,6 @@ public class AMQueue extends Queue {
         boolean isPersistent = configReader.isQueuePersistent();
 
         String url = protocol + "://" + host + ":" + port;
-
         ConnectionFactory factory = new ActiveMQConnectionFactory(user, password, url);
         try {
 
@@ -58,7 +57,8 @@ public class AMQueue extends Queue {
 
         } catch (JMSException e) {
             LOG.error("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Error creating connection for Queue. "+ e.getMessage());
-            throw new PubSubQueueException(e.getMessage());
+            LOG.error(e.getStackTrace());
+	    throw new PubSubQueueException(e.getMessage());
         }
         try {
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE); // false=NotTransacted

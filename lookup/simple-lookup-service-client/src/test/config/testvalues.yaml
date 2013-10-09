@@ -1,7 +1,7 @@
 ---
 # Host values for SLS instance
 lookupservice:
-    host: 'antg-test-vm.es.net'
+    host: 'localhost'
     port: 8090
 
 # Test values for specified service parameters
