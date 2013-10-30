@@ -10,6 +10,7 @@ import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONSubRequest;
 import net.es.lookup.protocol.json.JSONSubResponse;
+import net.es.lookup.pubsub.QueueServiceMapping;
 import net.es.lookup.pubsub.amq.AMQueueManager;
 import net.es.lookup.utils.QueueServiceConfigReader;
 import org.apache.log4j.Logger;
@@ -22,7 +23,7 @@ public class SubscribeService {
 
     private static Logger LOG = Logger.getLogger(SubscribeService.class);
 
-    public String subscribe(String message) {
+    public String subscribe(String serviceName, String message) {
 
         QueueServiceConfigReader queueServiceConfigReader = QueueServiceConfigReader.getInstance();
         String response;
@@ -46,7 +47,7 @@ public class SubscribeService {
             locator.add(queueServiceConfigReader.getUrl());
             res.add(ReservedKeys.RECORD_SUBSCRIBE_LOCATOR, locator);
 
-            AMQueueManager amqmanager = AMQueueManager.getInstance();
+            AMQueueManager amqmanager = (AMQueueManager) QueueServiceMapping.getQueueManager(serviceName);
             try {
                 List<String> qlist = amqmanager.getQueues(request);
                 res.add(ReservedKeys.RECORD_SUBSCRIBE_QUEUE, qlist);

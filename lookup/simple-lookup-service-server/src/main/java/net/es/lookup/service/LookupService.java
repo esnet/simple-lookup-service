@@ -203,9 +203,9 @@ public class LookupService {
 
         //define resources here
         String[] services = {
-                AccessRecordResource.class.getName(),
-                KeyResource.class.getName(),
                 RecordResource.class.getName(),
+                KeyResource.class.getName(),
+                RegisterQueryResource.class.getName(),
                 SubscribeResource.class.getName(),
                 BootStrapResource.class.getName()
         };

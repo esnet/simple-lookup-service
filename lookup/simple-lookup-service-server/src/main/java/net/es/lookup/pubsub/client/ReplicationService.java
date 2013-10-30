@@ -13,6 +13,7 @@ import net.es.lookup.common.exception.RecordException;
 import net.es.lookup.common.exception.internal.ConfigurationException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
+import net.es.lookup.database.DBMapping;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.queries.Query;
 import net.es.lookup.records.Record;
@@ -36,8 +37,8 @@ public class ReplicationService implements SubscriberListener {
     SubscriberConfigReader subscriberConfigReadercfg;
     private static Logger LOG = Logger.getLogger(ReplicationService.class);
 
-    public ReplicationService() throws LSClientException, ConfigurationException {
-        db  = ServiceDAOMongoDb.getInstance();
+    public ReplicationService(String serviceName) throws LSClientException, ConfigurationException {
+        db = DBMapping.getDb(serviceName);
         subscriberConfigReadercfg = SubscriberConfigReader.getInstance();
         servers = new ArrayList<SimpleLS>();
         queries = new ArrayList<List<Map<String, Object>>>();

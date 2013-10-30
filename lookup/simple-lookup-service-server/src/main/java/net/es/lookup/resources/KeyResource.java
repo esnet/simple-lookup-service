@@ -13,17 +13,18 @@ import javax.ws.rs.Produces;
  * net.es.lookup.service.LookupService class
  */
 
-@Path("/lookup/{record}/{recordid}/{key}")
+@Path("/{sls}/{record}/{recordid}/{key}")
 public class KeyResource {
 
     private AccessService accessService = new AccessService();
+    private String record_prefix = "lookup";
 
     @GET
     @Produces("application/json")
-    public String getHandler(@PathParam("record") String record, @PathParam("recordid") String recordid, @PathParam("key") String key) {
-
+    public String getHandler(@PathParam("sls") String path, @PathParam("record") String record, @PathParam("recordid") String recordid, @PathParam("key") String key) {
+        String dbname = path;
         String serviceuri = "lookup/"+ record+"/" + recordid;
-        return this.accessService.getKeyService(serviceuri, key);
+        return this.accessService.getKeyService(dbname, serviceuri, key);
 
     }
 

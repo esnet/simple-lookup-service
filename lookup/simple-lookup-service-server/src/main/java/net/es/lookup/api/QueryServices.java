@@ -4,9 +4,11 @@ import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.Service;
+import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
+import net.es.lookup.database.DBMapping;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import org.apache.log4j.Logger;
@@ -23,7 +25,7 @@ public class QueryServices {
 
 
     //constructs query and operator messages and calls the DB function
-    public String query(Message request, int maxResult, int skip) {
+    public String query(String dbname, Message request, int maxResult, int skip) {
 
         //TODO: Implement maxResult and skip
         LOG.info("Processing queryService...");
@@ -35,13 +37,19 @@ public class QueryServices {
 
         // Query DB
         try {
+            ServiceDAOMongoDb db = DBMapping.getDb(dbname);
 
-            List<Service> res = ServiceDAOMongoDb.getInstance().query(request, queryParameters, operators, maxResult, skip);
-            // Build response
-            response = JSONMessage.toString(res);
-            LOG.info("Query status: SUCCESS;");
-            LOG.debug("Response:" + response);
-            return response;
+            if(db != null){
+                List<Service> res = db.query(request, queryParameters, operators, maxResult, skip);
+                // Build response
+                response = JSONMessage.toString(res);
+                LOG.info("Query status: SUCCESS;");
+                LOG.debug("Response:" + response);
+                return response;
+            }else{
+                throw new InternalErrorException("Cannot access database");
+            }
+
 
         } catch (DatabaseException e) {
 

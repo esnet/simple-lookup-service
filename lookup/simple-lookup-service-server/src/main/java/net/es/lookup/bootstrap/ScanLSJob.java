@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@DisallowConcurrentExecution
 public class ScanLSJob implements Job {
     BootStrapConfigReader bootStrapConfigReader;
     List<Service> hostStatus = new ArrayList<Service>();
@@ -57,7 +56,7 @@ public class ScanLSJob implements Job {
                 try {
 
                     uri = new URI(hostlocator);
-                    LOG.error("net.es.lookup.bootstrap.ScanLS.execute: Bootstrap scanning host-"+ uri.getHost()+" port-"+uri.getPort());
+                    LOG.info("net.es.lookup.bootstrap.ScanLS.execute: Bootstrap scanning host-"+ uri.getHost()+" port-"+uri.getPort());
                     SimpleLS lsclient;
                     try {
                         lsclient = new SimpleLS(uri.getHost(), uri.getPort());

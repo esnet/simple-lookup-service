@@ -24,7 +24,6 @@ public class ServiceDAOMongoDb {
     private Mongo mongo;
     private DB db;
     private DBCollection coll;
-    private static ServiceDAOMongoDb instance = null;
 
     private static Map<String, String> operatorMapping = new HashMap();
     private static Map<String, String> listOperatorMapping = new HashMap();
@@ -37,37 +36,6 @@ public class ServiceDAOMongoDb {
         listOperatorMapping.put(ReservedValues.RECORD_OPERATOR_ALL, "$all");
 
     }
-
-    public static ServiceDAOMongoDb getInstance() {
-
-        return ServiceDAOMongoDb.instance;
-
-    }
-
-    // retrieves default - mongodb running on localhost and default port - 27017 and dbname- "lookupservice", collection name - "services"
-    //creates a new one if it cannot find one
-    public ServiceDAOMongoDb() throws DatabaseException {
-
-        LookupServiceConfigReader dcfg = LookupServiceConfigReader.getInstance();
-        this.dburl = dcfg.getDbUrl();
-        this.dbport = dcfg.getDbPort();
-        this.dbname = dcfg.getDbName();
-        this.collname = dcfg.getCollName();
-        init();
-
-    }
-
-
-    //uses default url and port - mongodb running on localhost and default port - 27017
-    //creates a new one if it cannot find one
-    public ServiceDAOMongoDb(String dbname, String collname) throws DatabaseException {
-
-        this.dbname = dbname;
-        this.collname = collname;
-        init();
-
-    }
-
 
     //retrieves the db and collection(table); creates a new one if it cannot find one
     public ServiceDAOMongoDb(String dburl, int dbport, String dbname, String collname) throws DatabaseException {
@@ -83,14 +51,14 @@ public class ServiceDAOMongoDb {
 
     private void init() throws DatabaseException {
 
-        if (ServiceDAOMongoDb.instance != null) {
+        if (DBMapping.containsKey(dbname)) {
 
             // An instance has been already created.
             throw new DatabaseException("Attempt to create a second instance of ServiceDAOMongoDb");
 
         }
 
-        ServiceDAOMongoDb.instance = this;
+        DBMapping.addDb(dbname, this);
 
         try {
 

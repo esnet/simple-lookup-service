@@ -1,7 +1,7 @@
 #Queue
 queue:
     service: 'on'
-    host: 'sowmya-dev-vm.es.net'
+    host: 'localhost'
     port: 61616
     protocol: 'tcp'
 

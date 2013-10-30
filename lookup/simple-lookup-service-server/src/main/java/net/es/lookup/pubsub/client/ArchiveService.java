@@ -13,6 +13,7 @@ import net.es.lookup.common.exception.RecordException;
 import net.es.lookup.common.exception.internal.ConfigurationException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
+import net.es.lookup.database.DBMapping;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.queries.Query;
 import net.es.lookup.records.Record;
@@ -33,11 +34,13 @@ public class ArchiveService implements SubscriberListener {
     private List<SimpleLS> servers;
     private List<List<Map<String, Object>>> queries;
     private List<Subscriber> subscribers;
-    private ServiceDAOMongoDb db = ServiceDAOMongoDb.getInstance();
+    private ServiceDAOMongoDb db;
     SubscriberConfigReader subscriberConfigReadercfg;
     private static Logger LOG = Logger.getLogger(ArchiveService.class);
 
-    public ArchiveService() throws LSClientException, ConfigurationException {
+    public ArchiveService(String serviceName) throws LSClientException, ConfigurationException {
+
+        db = DBMapping.getDb(serviceName);
 
         subscriberConfigReadercfg = SubscriberConfigReader.getInstance();
         servers = new ArrayList<SimpleLS>();

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import net.es.lookup.pubsub.QueueServiceMapping;
 import org.apache.log4j.Logger;
 
 /**
@@ -25,38 +26,23 @@ public class AMQueueManager implements QueueManager {
     private HashMap<String, List<String>> queryMap = new HashMap<String, List<String>>();   /* keeps track of query to queueid mapping  */
     private HashMap<String, List<Message>> normalizedQueryMap = new HashMap<String, List<Message>>();   /* keeps track of normalized query to original query mapping  */
 
-    private static AMQueueManager instance = null;
+    private String serviceName;
+
     private static Logger LOG = Logger.getLogger(AMQueueManager.class);
 
-    private AMQueueManager() {
 
-        setInstance(this);
+    public AMQueueManager(String serviceName) {
+
+        this.serviceName = serviceName;
+        QueueServiceMapping.addQueueManager(serviceName, this);
     }
 
-    public static synchronized void setInstance(AMQueueManager amQueueManager) {
 
-        if (instance != null) {
-            LOG.error("net.es.lookup.pubsub.amq.AMQueueManager.setInstance: Attempting to create second AMQueueManager. So throwing RuntimeException");
-            throw new RuntimeException("net.es.lookup.pubsub.amq.AMQueueManager.setInstance: Attempt to create second instance");
-        } else {
-            instance = amQueueManager;
-        }
+    public String getServiceName() {
+
+        return serviceName;
     }
 
-    public static AMQueueManager getInstance() {
-        if(instance ==null){
-            new AMQueueManager();
-        }
-        return instance;
-    }
-
-    public boolean isUp(){
-        if(instance != null){
-            return true;
-        }else{
-            return false;
-        }
-    }
 
     /**
      * This is the implementation of the getQueues method declared in the QueueManager interface.

@@ -9,13 +9,16 @@ import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.UnauthorizedException;
 import net.es.lookup.common.exception.internal.*;
+import net.es.lookup.database.DBMapping;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
+import net.es.lookup.pubsub.QueueServiceMapping;
 import net.es.lookup.pubsub.amq.AMQueuePump;
 import net.es.lookup.service.LookupService;
 import org.apache.log4j.Logger;
+import org.glassfish.grizzly.utils.StringFilter;
 
 import java.util.*;
 
@@ -27,7 +30,7 @@ public class RegisterService {
     private static Logger LOG = Logger.getLogger(RegisterService.class);
     private String params;
 
-    public String registerService(String message) {
+    public String registerService(String dbname, String message) {
 
         LOG.info(" Processing registerService.");
         LOG.info(" Received message: " + message);
@@ -89,36 +92,40 @@ public class RegisterService {
 
 
                 try {
+                    ServiceDAOMongoDb db = DBMapping.getDb(dbname);
+                    if(db != null){
+                        Message res = db.queryAndPublishService(request, query, operators);
+                        response = new JSONRegisterResponse(res.getMap());
+                        String responseString = null;
+                        try {
+                            responseString = JSONMessage.toString(response);
+                        } catch (DataFormatException e) {
 
-                    Message res = ServiceDAOMongoDb.getInstance().queryAndPublishService(request, query, operators);
-                    response = new JSONRegisterResponse(res.getMap());
-                    String responseString = JSONMessage.toString(response);
+                                LOG.fatal("Data formatting exception");
+                                LOG.info("Register status: FAILED due to Data formatting error; exiting");
+                                throw new InternalErrorException("Error in creating response. Data formatting exception at server.");
 
-                    List<Message> resList = new ArrayList<Message>();
-                    resList.add(res);
-                    try {
-                        AMQueuePump amQueuePump = AMQueuePump.getInstance();
-                        if (amQueuePump.isUp()){
-                            amQueuePump.fillQueues(resList);
+
                         }
-                    } catch (PubSubQueueException e) {
-                        LOG.error("Error sending Register Record  to Queue");
-                        LOG.info("Register: Caught Queue Exception");
-                    } catch (PubSubQueryException e) {
-                        LOG.error("Error sending Register Record  to Queue");
-                        LOG.info("Register: Caught Query Exception");
+
+                        try {
+                            sendToQueue(dbname, res);
+                        } catch (PubSubQueueException e) {
+                            LOG.error("Error sending Register Record  to Queue");
+                            LOG.info("Register: Caught Queue Exception");
+                        } catch (PubSubQueryException e) {
+                            LOG.error("Error sending Register Record  to Queue");
+                            LOG.info("Register: Caught Query Exception");
+                        }
+                        LOG.info("Register status: SUCCESS; exiting");
+                        LOG.debug("response:" + responseString);
+                        return responseString;
+                    }else{
+                        throw new InternalErrorException("Cannot access database");
                     }
-                    LOG.info("Register status: SUCCESS; exiting");
-                    LOG.debug("response:" + responseString);
-                    return responseString;
 
-                } catch (DataFormatException e) {
 
-                    LOG.fatal("Data formatting exception");
-                    LOG.info("Register status: FAILED due to Data formatting error; exiting");
-                    throw new InternalErrorException("Error in creating response. Data formatting exception at server.");
-
-                } catch (DuplicateEntryException e) {
+                }  catch (DuplicateEntryException e) {
 
                     LOG.error("FobiddenRequestException:" + e.getMessage());
                     LOG.info("Register status: FAILED due to Duplicate Entry; exiting");
@@ -159,6 +166,20 @@ public class RegisterService {
         }
 
         return "\n";
+
+    }
+
+
+
+    private void sendToQueue(String amqname, Message message) throws PubSubQueueException, PubSubQueryException {
+
+        AMQueuePump amQueuePump = (AMQueuePump) QueueServiceMapping.getQueuePump(amqname);
+        if(amQueuePump != null){
+            List<Message> sList = new ArrayList();
+            sList.add(message);
+
+            amQueuePump.fillQueues(sList);
+        }
 
     }
 

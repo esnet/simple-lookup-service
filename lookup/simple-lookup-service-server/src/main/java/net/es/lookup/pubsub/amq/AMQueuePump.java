@@ -4,6 +4,7 @@ import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.PubSubQueryException;
 import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.pubsub.QueuePump;
+import net.es.lookup.pubsub.QueueServiceMapping;
 import org.apache.log4j.Logger;
 
 import java.util.List;
@@ -17,14 +18,13 @@ import java.util.Map;
 public class AMQueuePump implements QueuePump {
 
     private static AMQueuePump instance = null;
-    private AMQueueManager amQueueManager;
-
+    private String serviceName;
     private static Logger LOG = Logger.getLogger(AMQueuePump.class);
 
 
-    private AMQueuePump() {
-        setInstance(this);
-        amQueueManager = AMQueueManager.getInstance();
+    public AMQueuePump(String serviceName) {
+        this.serviceName = serviceName;
+        QueueServiceMapping.addQueuePump(serviceName, this);
     }
 
 
@@ -38,25 +38,9 @@ public class AMQueuePump implements QueuePump {
     }
 
 
-    public static AMQueuePump getInstance(){
-        if(instance == null){
-            AMQueuePump amQueuePump = new AMQueuePump();
-        }
-        return instance;
-    }
-
-
-    public boolean isUp(){
-        if(instance != null){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-
     public void fillQueues(List<Message> messageList) throws PubSubQueueException, PubSubQueryException {
         LOG.info("net.es.lookup.pubsub.amq.AMQueuePump.fillQueues: Filling up queues with message");
+        AMQueueManager amQueueManager = (AMQueueManager) QueueServiceMapping.getQueueManager(serviceName);
         List<Message> queries = amQueueManager.getAllQueries();
 
         //optimized for queries with only 1 key-value pair

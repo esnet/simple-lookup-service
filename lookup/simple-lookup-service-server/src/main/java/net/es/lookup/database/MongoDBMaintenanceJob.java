@@ -7,8 +7,10 @@ import net.es.lookup.common.Service;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.PubSubQueryException;
 import net.es.lookup.common.exception.internal.PubSubQueueException;
+import net.es.lookup.pubsub.QueueServiceMapping;
 import net.es.lookup.pubsub.amq.AMQueuePump;
 import org.apache.log4j.Logger;
+import org.glassfish.grizzly.utils.StringFilter;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;
 import org.joda.time.Instant;
@@ -25,17 +27,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@DisallowConcurrentExecution
+
 public class MongoDBMaintenanceJob implements Job {
 
     private static Logger LOG = Logger.getLogger(MongoDBMaintenanceJob.class);
     private ServiceDAOMongoDb db;
     public static String PRUNE_THRESHOLD = "prune_threshold"; //parameter will be set during run time
-
+    public static final String DBNAME = "db_name"; //parameter will be set during run time
 
     public MongoDBMaintenanceJob() {
 
-        this.db = ServiceDAOMongoDb.getInstance();
         LOG.info("Initializing MongoDBPrune...");
 
     }
@@ -46,6 +47,10 @@ public class MongoDBMaintenanceJob implements Job {
         List<Service> result = null;
         LOG.info("Running MongoDBPrune...");
         JobDataMap data = context.getJobDetail().getJobDataMap();
+
+        String dbname = data.getString(DBNAME);
+        this.db = DBMapping.getDb(dbname);
+
         long prune_threshold = data.getLong(PRUNE_THRESHOLD);
         Instant now = new Instant();
         Instant pTime = now.minus(prune_threshold);
@@ -94,16 +99,24 @@ public class MongoDBMaintenanceJob implements Job {
         }
 
         try {
-            AMQueuePump amQueuePump = AMQueuePump.getInstance();
-            if (amQueuePump.isUp()){
-                amQueuePump.fillQueues(messages);
-            }
+            sendToQueue(dbname, messages);
         } catch (PubSubQueueException e) {
             LOG.error("Error sending Expired Record  to Queue");
             LOG.info("Expired Prune: Caught Queue Exception");
         } catch (PubSubQueryException e) {
             LOG.error("Error sending Expired Record  to Queue");
             LOG.info("Expired Prune: Caught Query Exception");
+        }
+
+    }
+
+
+    private void sendToQueue(String amqname, List<Message> messages) throws PubSubQueueException, PubSubQueryException {
+
+        AMQueuePump amQueuePump = (AMQueuePump) QueueServiceMapping.getQueuePump(amqname);
+        if(amQueuePump != null){
+
+            amQueuePump.fillQueues(messages);
         }
 
     }

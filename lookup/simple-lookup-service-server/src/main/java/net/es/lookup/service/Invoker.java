@@ -6,6 +6,7 @@ import joptsimple.OptionSpec;
 import net.es.lookup.bootstrap.ScanLSJob;
 import net.es.lookup.client.Subscriber;
 import net.es.lookup.common.exception.internal.DatabaseException;
+import net.es.lookup.database.DBMapping;
 import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.pubsub.client.ArchiveService;
@@ -13,11 +14,11 @@ import net.es.lookup.pubsub.amq.AMQueueManager;
 import net.es.lookup.pubsub.amq.AMQueuePump;
 import net.es.lookup.pubsub.client.ReplicationService;
 import net.es.lookup.utils.*;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
+import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.simpl.SimpleThreadPool;
+
+import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.quartz.JobBuilder.newJob;
@@ -115,7 +116,8 @@ public class Invoker {
 
         try {
 
-            Invoker.dao = new ServiceDAOMongoDb();
+            Invoker.dao = new ServiceDAOMongoDb(lcfg.getDbUrl(),lcfg.getDbPort(),"lookup",lcfg.getCollName());
+            ServiceDAOMongoDb cachedb = new ServiceDAOMongoDb(lcfg.getDbUrl(),lcfg.getDbPort(),"cache",lcfg.getCollName());
 
         } catch (DatabaseException e) {
 
@@ -135,8 +137,14 @@ public class Invoker {
         if (qcfg.getServiceState().equals(LookupServiceOptions.SERVICE_ON)) {
             queueservice = true;
             //starting queueservice
-            Invoker.amQueueManager = AMQueueManager.getInstance();
-            Invoker.amQueuePump = AMQueuePump.getInstance();
+          //  Invoker.amQueueManager = AMQueueManager.getInstance();
+          //  Invoker.amQueuePump = AMQueuePump.getInstance();
+            AMQueueManager lsamqManager = new AMQueueManager("lookup");
+            AMQueuePump lsamqPump = new AMQueuePump("lookup");
+
+            AMQueueManager cacheamqManager = new AMQueueManager("cache");
+            AMQueuePump cacheamqPump = new AMQueuePump("cache");
+
             Invoker.lookupService.setQueueurl(qcfg.getUrl());
 
         } else {
@@ -149,34 +157,55 @@ public class Invoker {
         Invoker.lookupService.startService();
 
         if (mode.equalsIgnoreCase(LookupServiceOptions.MODE_REPLICATION)) {
-            ReplicationService replicationService = new ReplicationService();
+            ReplicationService replicationService = new ReplicationService("cache");
             replicationService.start();
 
         } else if (mode.equalsIgnoreCase(LookupServiceOptions.MODE_ARCHIVE)) {
-            ArchiveService archiveService = new ArchiveService();
+            ArchiveService archiveService = new ArchiveService("cache");
             archiveService.start();
         }
+
+        System.out.println("Started service");
+
+        ClassLoader classLoader = Invoker.class.getClassLoader();
+        classLoader.loadClass("net.es.lookup.database.DBMapping");
+
         //DB Pruning  and Bootstrap
         try {
-
-            Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+            System.out.println("came here");
+            SchedulerFactory sf = new StdSchedulerFactory();
+            Scheduler scheduler = sf.getScheduler();
+            System.out.println("came here1");
             scheduler.start();
+            System.out.println("came here2");
 
-            // define the job and tie it to  mongoJob class
-            JobDetail job = newJob(MongoDBMaintenanceJob.class)
-                    .withIdentity("mongoJob", "DBMaintenance")
-                    .build();
-            job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
+            System.out.println("came here3"+DBMapping.containsKey("cache"));
 
-            // Trigger the job to run now, and then every dbpruneInterval seconds
-            Trigger trigger = newTrigger().withIdentity("DBTrigger", "DBMaintenance")
-                    .startNow()
-                    .withSchedule(simpleSchedule()
-                            .withIntervalInSeconds(dbpruneInterval)
-                            .repeatForever())
-                    .build();
+            List<String> dbnames = DBMapping.getKeys();
+            System.out.println("came here4");
+            System.out.println("Starting scheduler"+dbnames.size());
+            for(String dbname: dbnames){
+                System.out.println("DBPrune: "+dbname);
+                // define the job and tie it to  mongoJob class
+                JobDetail job = newJob(MongoDBMaintenanceJob.class)
+                        .withIdentity(dbname+"clean", "DBMaintenance")
+                        .build();
+                job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
+                job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, dbname);
 
-            scheduler.scheduleJob(job, trigger);
+                // Trigger the job to run now, and then every dbpruneInterval seconds
+                Trigger trigger = newTrigger().withIdentity(dbname+"DBTrigger", "DBMaintenance")
+                        .startNow()
+                        .withSchedule(simpleSchedule()
+                                .withIntervalInSeconds(dbpruneInterval)
+                                .repeatForever()
+                                .withMisfireHandlingInstructionIgnoreMisfires())
+                        .build();
+
+
+                scheduler.scheduleJob(job, trigger);
+            }
+
 
             //bootstrap job
             Scheduler bootstrapScheduler = StdSchedulerFactory.getDefaultScheduler();
@@ -190,14 +219,13 @@ public class Invoker {
                         .startNow()
                         .withSchedule(simpleSchedule()
                                 .repeatForever()
-                                .withIntervalInSeconds(180))
+                                .withIntervalInSeconds(1800))
                         .build();
 
                 bootstrapScheduler.scheduleJob(bootstrapJob,bootstrapTrigger);
             }
 
         } catch (SchedulerException se) {
-
             se.printStackTrace();
 
         }

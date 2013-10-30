@@ -2,18 +2,14 @@ package net.es.lookup.resources;
 
 import net.es.lookup.api.SubscribeService;
 
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-
-import javax.ws.rs.Produces;
-import javax.ws.rs.Consumes;
+import javax.ws.rs.*;
 
 
 /**
  * This class and other similar resource classes need to be explicitly loaded in the
  * net.es.lookup.service.LookupService class
  */
-@Path("/lookup/subscribe")
+@Path("/{sls}/subscribe")
 @Produces("text/plain")
 
 public class SubscribeResource {
@@ -23,9 +19,9 @@ public class SubscribeResource {
     @POST
     @Consumes("application/json")
     @Produces("application/json")
-    public String getHandler(String message) {
+    public String getHandler(@PathParam("sls") String path, String message) {
 
-    return qs.subscribe(message);
+    return qs.subscribe(path, message);
 
 
     }
