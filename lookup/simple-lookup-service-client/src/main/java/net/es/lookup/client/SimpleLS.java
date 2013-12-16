@@ -73,6 +73,12 @@ public class SimpleLS {
 
     }
 
+    public SimpleLS(URI url) throws LSClientException {
+
+        this(url.getHost(),url.getPort(), "GET");
+
+    }
+
 
     public int getTimeout() {
 

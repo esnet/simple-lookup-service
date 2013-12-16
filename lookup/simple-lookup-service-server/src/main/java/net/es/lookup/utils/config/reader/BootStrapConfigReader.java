@@ -1,4 +1,4 @@
-package net.es.lookup.utils;
+package net.es.lookup.utils.config.reader;
 
 import net.es.lookup.common.exception.internal.ConfigurationException;
 import org.apache.log4j.Logger;
@@ -22,7 +22,7 @@ public class BootStrapConfigReader {
 
     private int sourceCount;
 
-    private static Logger LOG = Logger.getLogger(ConfigHelper.class);
+    private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
 
     /**
      * Constructor - private because this is a Singleton
@@ -80,7 +80,7 @@ public class BootStrapConfigReader {
         if(configFile == null || configFile.isEmpty()){
             throw new ConfigurationException("Configuration file is not specified");
         }
-        ConfigHelper cfg = ConfigHelper.getInstance();
+        BaseConfigReader cfg = BaseConfigReader.getInstance();
         Map yamlMap = cfg.getConfiguration(configFile);
         assert yamlMap != null : "Could not load configuration file from " +
                 "file: ${basedir}/" + configFile;
@@ -94,7 +94,7 @@ public class BootStrapConfigReader {
                 sourceLocator.add(i, srcHost);
                 int priority = (Integer) ((Map) (sourcesList.get(i))).get("priority");
                 if(priority<0 || priority>100){
-                    throw new ConfigurationException("net.es.lookup.utils.BootStrapConfigReader: Priority values should be between 0 -100");
+                    throw new ConfigurationException("net.es.lookup.utils.config.reader.BootStrapConfigReader: Priority values should be between 0 -100");
                 }
                 sourcePriority.add(i, priority);
 

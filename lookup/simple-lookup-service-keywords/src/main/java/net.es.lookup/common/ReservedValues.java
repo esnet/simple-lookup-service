@@ -33,6 +33,9 @@ public class ReservedValues {
     public static final String SERVER_STATUS_ALIVE = "alive";
     public static final String SERVER_STATUS_UNREACHABLE = "unreachable";
 
+    public static final String CACHE_TYPE_REPLICATION = "replication";
+    public static final String CACHE_TYPE_ARCHIVE = "archive";
+
 
     public static final String RECORD_VALUE_TYPE_KEY_VALUE_PAIR = "key-value-pair";
 

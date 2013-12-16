@@ -8,7 +8,6 @@ import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.Service;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
-import net.es.lookup.utils.LookupServiceConfigReader;
 
 import java.net.UnknownHostException;
 import java.util.*;

@@ -1,11 +1,8 @@
-package net.es.lookup.utils;
+package net.es.lookup.utils.config.reader;
 
-import net.es.lookup.common.exception.internal.ConfigurationException;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,34 +15,39 @@ public class LookupServiceConfigReader {
     private static LookupServiceConfigReader instance;
     private static final String DEFAULT_FILE = "lookupservice.yaml";
     private static final String DEFAULT_PATH = "etc";
-    private static final String DEFAULT_MODE = "master";
     private static String configFile = DEFAULT_PATH + "/" + DEFAULT_FILE;
-
-    private Map<String, Object> lookupServiceMap = new HashMap<String, Object>();
-    private String host = "127.0.0.1";
-    private int port = 8085;
-    private Map<String, Object> leaseTimeMap = new HashMap<String, Object>();
-    private int maxlease;
-    private int minlease;
-    private int defaultlease;
-    private boolean bootstrapservice = false;
-
-
-    private String mode = DEFAULT_MODE;
-
     private static final int MINIMUM_INTERVAL = 1800;
     private static final int MINIMUM_THRESHOLD = 0;
 
+    //Lookup service fields
+    private String host = "127.0.0.1";
+    private int port = 8085;
 
-    private Map<String, Object> databaseMap = new HashMap<String, Object>();
+    //Lookup service Lease fields
+    private int maxlease;
+    private int minlease;
+    private int defaultlease;
+
+    //Bootstrap service
+    private boolean bootstrapservice = false;
+
+    //core service
+    private boolean coreservice = false;
+
+    //cache service
+
+    private boolean cacheservice=false;
+
+
+    //database
     private String dburl = "127.0.0.1";
     private int dbport = 27017;
     private String dbname = "LookupService";
     private String collname = "services";
     private int pruneInterval = MINIMUM_INTERVAL;
-    private int pruneThreshold = 0;
+    private int pruneThreshold = MINIMUM_THRESHOLD;
 
-    private static Logger LOG = Logger.getLogger(ConfigHelper.class);
+    private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
 
     /**
      * Constructor - private because this is a Singleton
@@ -131,29 +133,41 @@ public class LookupServiceConfigReader {
         return this.pruneThreshold;
     }
 
-    public String getMode() {
-
-        return mode;
+    public boolean isBootstrapserviceOn() {
+        return bootstrapservice;
     }
 
-    public boolean isBootstrapserviceOn() {
+    public boolean isCoreserviceOn() {
 
-        return bootstrapservice;
+        return coreservice;
+    }
+
+    public boolean isCacheserviceOn() {
+
+        return cacheservice;
     }
 
     private void setInfo(String configPath) {
 
-        ConfigHelper cfg = ConfigHelper.getInstance();
+        BaseConfigReader cfg = BaseConfigReader.getInstance();
         Map yamlMap = cfg.getConfiguration(configPath);
         assert yamlMap != null : "Could not load configuration file from " +
                 "file: ${basedir}/" + configPath;
 
 
         try {
-            lookupServiceMap = (HashMap) yamlMap.get("lookupservice");
+            HashMap<String, Object> lookupServiceMap = (HashMap) yamlMap.get("lookupservice");
             host = (String) lookupServiceMap.get("host");
             port = (Integer) lookupServiceMap.get("port");
-            mode = (String) lookupServiceMap.get("mode");
+
+            String core = (String) lookupServiceMap.get("coreservice");
+
+            if(core != null && core.equalsIgnoreCase("on")){
+                coreservice = true;
+            }else{
+                coreservice = false;
+            }
+
             String bootstrap = (String) lookupServiceMap.get("bootstrapservice");
 
             if(bootstrap != null && bootstrap.equalsIgnoreCase("on")){
@@ -161,12 +175,21 @@ public class LookupServiceConfigReader {
             }else{
                 bootstrapservice = false;
             }
-            leaseTimeMap = (HashMap) lookupServiceMap.get("lease");
+
+            String cs = (String) lookupServiceMap.get("cacheservice");
+
+            if(cs != null && cs.equalsIgnoreCase("on")){
+                cacheservice = true;
+            }else{
+                cacheservice = false;
+            }
+
+            HashMap<String, Object> leaseTimeMap = (HashMap) lookupServiceMap.get("lease");
             maxlease = (Integer) leaseTimeMap.get("max");
             minlease = (Integer) leaseTimeMap.get("min");
             defaultlease = (Integer) leaseTimeMap.get("default");
 
-            databaseMap = (HashMap) yamlMap.get("database");
+            HashMap<String, Object> databaseMap = (HashMap) yamlMap.get("database");
             dburl = (String) databaseMap.get("DBUrl");
             dbport = (Integer) databaseMap.get("DBPort");
             dbname = (String) databaseMap.get("DBName");
@@ -180,4 +203,6 @@ public class LookupServiceConfigReader {
 
 
     }
+
+
 }

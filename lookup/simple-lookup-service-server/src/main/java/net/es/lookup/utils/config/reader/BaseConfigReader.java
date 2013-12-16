@@ -1,4 +1,4 @@
-package net.es.lookup.utils;
+package net.es.lookup.utils.config.reader;
 
 import org.apache.log4j.Logger;
 import org.ho.yaml.Yaml;
@@ -10,16 +10,16 @@ import java.io.InputStream;
 import java.util.Map;
 
 
-public class ConfigHelper {
+public class BaseConfigReader {
 
-    private static ConfigHelper instance;
-    private static Logger LOG = Logger.getLogger(ConfigHelper.class);
+    private static BaseConfigReader instance;
+    private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
 
-    public static ConfigHelper getInstance() {
+    public static BaseConfigReader getInstance() {
 
         if (instance == null) {
 
-            instance = new ConfigHelper();
+            instance = new BaseConfigReader();
 
         }
 
@@ -27,7 +27,7 @@ public class ConfigHelper {
 
     }
 
-    private ConfigHelper() {
+    private BaseConfigReader() {
 
     }
 
@@ -51,7 +51,7 @@ public class ConfigHelper {
             } catch (FileNotFoundException e) {
 
                 //e.printStackTrace();
-                LOG.error(configFile + " not found\n. Config file required to start Lookup ServiceRecord");
+                LOG.error(configFile + " not found\n. Config file required to start Lookup Service Record");
                 System.exit(1);
 
             }
@@ -61,6 +61,7 @@ public class ConfigHelper {
         }
 
         return configuration;
+
 
     }
 

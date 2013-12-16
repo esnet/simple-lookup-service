@@ -1,5 +1,10 @@
-sources:
-    - host: 'sowmya-dev-vm.es.net'
-      port: 8090
-      queries:
-        - group-domains: ["es.net"]
+caches:
+    - name: "cache"
+      type: "replication"
+      sources:
+        - locator: "http://antg-test-vm.es.net:8090/lookup/records"
+          queries:
+            - type: "service"
+
+bootstrapserver: "http://localhost:8090/lookup/bootstrap"
+

@@ -5,7 +5,8 @@ import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.pubsub.Queue;
-import net.es.lookup.utils.QueueServiceConfigReader;
+import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
+import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.log4j.Logger;
@@ -38,15 +39,16 @@ public class AMQueue extends Queue {
         //TODO: Make ActiveMQ user, password options configurable
         String user = ActiveMQConnection.DEFAULT_USER;
         String password = ActiveMQConnection.DEFAULT_PASSWORD;
+        LookupServiceConfigReader lookupServiceConfigReader = LookupServiceConfigReader.getInstance();
         QueueServiceConfigReader configReader = QueueServiceConfigReader.getInstance();
 
-        String host = configReader.getHost();
-        int port = configReader.getPort();
+        String host = lookupServiceConfigReader.getHost();
+        int queueport = configReader.getPort();
         String protocol = configReader.getProtocol();
         long ttl = configReader.getTtl();
         boolean isPersistent = configReader.isQueuePersistent();
 
-        String url = protocol + "://" + host + ":" + port;
+        String url = configReader.getUrl();
         ConnectionFactory factory = new ActiveMQConnectionFactory(user, password, url);
         try {
 

@@ -1,4 +1,4 @@
-package net.es.lookup.utils;
+package net.es.lookup.utils.config.data;
 
 /**
  * Author: sowmya

@@ -9,7 +9,6 @@ import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.ParserException;
 import net.es.lookup.common.exception.QueryException;
-import net.es.lookup.common.exception.RecordException;
 import net.es.lookup.common.exception.internal.ConfigurationException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
@@ -17,10 +16,13 @@ import net.es.lookup.database.DBMapping;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.queries.Query;
 import net.es.lookup.records.Record;
-import net.es.lookup.utils.LookupServiceConfigReader;
-import net.es.lookup.utils.SubscriberConfigReader;
+import net.es.lookup.utils.config.data.Cache;
+import net.es.lookup.utils.config.data.SubscriberSource;
+import net.es.lookup.utils.config.reader.SubscriberConfigReader;
 import org.apache.log4j.Logger;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 /**
@@ -38,29 +40,43 @@ public class ArchiveService implements SubscriberListener {
     SubscriberConfigReader subscriberConfigReadercfg;
     private static Logger LOG = Logger.getLogger(ArchiveService.class);
 
-    public ArchiveService(String serviceName) throws LSClientException, ConfigurationException {
+    public ArchiveService(Cache cache) throws LSClientException, ConfigurationException {
 
-        db = DBMapping.getDb(serviceName);
+        if(cache==null){
+            System.out.println("Fatal error while creating ArchiveService. Exiting");
+            System.exit(0);
+        }
+        db = DBMapping.getDb(cache.getName());
 
         subscriberConfigReadercfg = SubscriberConfigReader.getInstance();
         servers = new ArrayList<SimpleLS>();
         queries = new ArrayList<List<Map<String, Object>>>();
         subscribers = new ArrayList<Subscriber>();
-        int count = subscriberConfigReadercfg.getSourceCount();
+        List<SubscriberSource> subscriberSourceList = cache.getSources();
+        int count = subscriberSourceList.size();
         LOG.info("net.es.lookup.pubsub.client.ArchiveService: Initializing " + count + " hosts");
+        List<Map<String, Object>> serverQueries = new LinkedList<Map<String, Object>>();
         for (int i = 0; i < count; i++) {
             try {
-                String host = subscriberConfigReadercfg.getSourceHost(i);
-                int port = subscriberConfigReadercfg.getSourcePort(i);
-                List<Map<String, Object>> serverQueries = subscriberConfigReadercfg.getQueries(i);
+                SubscriberSource subscriberSource = subscriberSourceList.get(i);
+                String url = subscriberSource.getAccessPoint();
+                URI uri = new URI(url);
+                String host = uri.getHost();
+                int port = uri.getPort();
+                List<Query> queryList = subscriberSource.getQueries();
+
+
+                for (Query query: queryList){
+                    Map<String, Object> queryMap = query.getMap();
+                    serverQueries.add(queryMap);
+                }
                 queries.add(i, serverQueries);
                 SimpleLS server = new SimpleLS(host, port);
                 servers.add(server);
 
-            } catch (ConfigurationException e) {
+            } catch (URISyntaxException e) {
                 LOG.error("net.es.lookup.pubsub.client.ArchiveService: Initializing " + count + " hosts");
-                throw new LSClientException("net.es.lookup.pubsub.client.ArchiveService: Error initializing subscribe hosts -" + e.getMessage());
-            }
+                throw new LSClientException("net.es.lookup.pubsub.client.ArchiveService: Error initializing subscribe hosts -" + e.getMessage());}
 
         }
 

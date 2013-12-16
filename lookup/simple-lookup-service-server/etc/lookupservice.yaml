@@ -7,9 +7,9 @@ lookupservice:
         max: 2592000
         default: 1800
         min: 7200
-    mode: 'master'
-    bootstrapservice: 'on'
-
+    coreservice: 'on'
+    bootstrap: 'on'
+    cacheservice: 'off'
 
 #Database settings  
 database:

@@ -1,7 +1,5 @@
 #Queue
 queue:
-    service: 'on'
-    host: 'localhost'
     port: 61616
     protocol: 'tcp'
 

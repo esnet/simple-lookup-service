@@ -1,7 +1,6 @@
 package net.es.lookup.bootstrap;
 
 import net.es.lookup.client.SimpleLS;
-import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.Service;
@@ -10,11 +9,10 @@ import net.es.lookup.common.exception.internal.ConfigurationException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.service.Invoker;
-import net.es.lookup.utils.BootStrapConfigReader;
+import net.es.lookup.utils.config.reader.BootStrapConfigReader;
 import org.apache.log4j.Logger;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;

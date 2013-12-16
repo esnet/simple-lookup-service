@@ -4,7 +4,8 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.es.lookup.bootstrap.ScanLSJob;
-import net.es.lookup.client.Subscriber;
+import net.es.lookup.common.ReservedKeys;
+import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.DBMapping;
 import net.es.lookup.database.MongoDBMaintenanceJob;
@@ -13,11 +14,16 @@ import net.es.lookup.pubsub.client.ArchiveService;
 import net.es.lookup.pubsub.amq.AMQueueManager;
 import net.es.lookup.pubsub.amq.AMQueuePump;
 import net.es.lookup.pubsub.client.ReplicationService;
-import net.es.lookup.utils.*;
+import net.es.lookup.utils.config.data.Cache;
+import net.es.lookup.utils.config.reader.BootStrapConfigReader;
+import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
+import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
+import net.es.lookup.utils.config.reader.SubscriberConfigReader;
+import net.es.lookup.utils.config.data.LookupServiceOptions;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
-import org.quartz.simpl.SimpleThreadPool;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -30,10 +36,13 @@ public class Invoker {
 
     private static int port = 8080;
     private static LookupService lookupService = null;
-    private static ServiceDAOMongoDb dao = null;
+    //private static ServiceDAOMongoDb dao = null;
     private static String host = "localhost";
     private static LookupServiceConfigReader lcfg;
-    private static String configPath="etc/";
+    private static SubscriberConfigReader sfg;
+    private static QueueServiceConfigReader qcfg;
+    private static BootStrapConfigReader bcfg;
+    private static String configPath = "etc/";
     private static String lookupservicecfg = "lookupservice.yaml";
     private static String queuecfg = "queueservice.yaml";
     private static String subscribecfg = "subscriber.yaml";
@@ -41,36 +50,16 @@ public class Invoker {
     private static String bootstrapoutput = "active-hosts.json";
     private static String logConfig = "./etc/log4j.properties";
     private static String queueDataDir = "../data";
-    private static AMQueueManager amQueueManager = null;
-    private static AMQueuePump amQueuePump = null;
 
-    private static boolean queueservice = false;
-    private static String mode;
+    private static boolean cacheservice = false;
     private static boolean bootstrapservice = false;
+
+    private static List<ReplicationService> replicationServiceList;
+    private static List<ArchiveService> archiveServiceList;
 
     public static String getConfigPath() {
 
         return configPath;
-    }
-
-    public static String getLookupservicecfg() {
-
-        return lookupservicecfg;
-    }
-
-    public static String getQueuecfg() {
-
-        return queuecfg;
-    }
-
-    public static String getSubscribecfg() {
-
-        return subscribecfg;
-    }
-
-    public static String getBootstrapcfg() {
-
-        return bootstrapcfg;
     }
 
     public static String getBootstrapoutput() {
@@ -98,26 +87,68 @@ public class Invoker {
 
 
         LookupServiceConfigReader.init(configPath + lookupservicecfg);
-        QueueServiceConfigReader.init(configPath+queuecfg);
-        SubscriberConfigReader.init(configPath+subscribecfg);
-        BootStrapConfigReader.init(configPath+bootstrapcfg);
+        QueueServiceConfigReader.init(configPath + queuecfg);
+
+
+        BootStrapConfigReader.init(configPath + bootstrapcfg);
 
 
         lcfg = LookupServiceConfigReader.getInstance();
+        qcfg = QueueServiceConfigReader.getInstance();
+        bcfg = BootStrapConfigReader.getInstance();
 
-        mode = lcfg.getMode();
         port = lcfg.getPort();
         host = lcfg.getHost();
         bootstrapservice = lcfg.isBootstrapserviceOn();
+
+        cacheservice = lcfg.isCacheserviceOn();
+
+
 
         int dbpruneInterval = lcfg.getPruneInterval();
         long prunethreshold = lcfg.getPruneThreshold();
         System.out.println("starting ServiceDAOMongoDb");
 
+        String dburl = lcfg.getDbUrl();
+        int dbport = lcfg.getDbPort();
+        String collname = lcfg.getCollName();
+
+        List<String> services = new LinkedList<String>();
+
+        // Start DB and Queue
         try {
 
-            Invoker.dao = new ServiceDAOMongoDb(lcfg.getDbUrl(),lcfg.getDbPort(),"lookup",lcfg.getCollName());
-            ServiceDAOMongoDb cachedb = new ServiceDAOMongoDb(lcfg.getDbUrl(),lcfg.getDbPort(),"cache",lcfg.getCollName());
+            if(lcfg.isCoreserviceOn()){
+                new ServiceDAOMongoDb(dburl, dbport, "lookup", collname);
+                new AMQueueManager("lookup");
+                new AMQueuePump("lookup");
+                services.add(LookupService.LOOKUP_SERVICE);
+            }
+
+            if(cacheservice){
+                SubscriberConfigReader.init(configPath + subscribecfg);
+                sfg = SubscriberConfigReader.getInstance();
+                replicationServiceList = new LinkedList<ReplicationService>();
+                archiveServiceList = new LinkedList<ArchiveService>();
+                List<Cache> caches = sfg.getCacheList();
+                for(Cache cache: caches){
+                    String name = cache.getName();
+                    new ServiceDAOMongoDb(dburl, dbport, name, collname);
+                    new AMQueueManager(name);
+                    new AMQueuePump(name);
+                    services.add(name);
+                    if (cache.getType().equals(ReservedValues.CACHE_TYPE_REPLICATION)){
+                        ReplicationService replicationService = new ReplicationService(cache);
+                        replicationService.start();
+                        replicationServiceList.add(replicationService);
+                    }else if(cache.getType().equals(ReservedValues.CACHE_TYPE_ARCHIVE)){
+                        ArchiveService archiveService = new ArchiveService(cache);
+                        archiveService.start();
+                        archiveServiceList.add(archiveService);
+                    }
+                }
+            }
+
 
         } catch (DatabaseException e) {
 
@@ -126,19 +157,16 @@ public class Invoker {
 
         }
 
-        System.out.println("starting Lookup Service");
-        // Create the REST service
-        Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
-        Invoker.lookupService.setDatadirectory(queueDataDir);
 
-        //Queue service
+
+/*        //Queue service
         QueueServiceConfigReader qcfg = QueueServiceConfigReader.getInstance();
 
-        if (qcfg.getServiceState().equals(LookupServiceOptions.SERVICE_ON)) {
+        if (lcfg.isQueueserviceOn()) {
             queueservice = true;
             //starting queueservice
-          //  Invoker.amQueueManager = AMQueueManager.getInstance();
-          //  Invoker.amQueuePump = AMQueuePump.getInstance();
+            //  Invoker.amQueueManager = AMQueueManager.getInstance();
+            //  Invoker.amQueuePump = AMQueuePump.getInstance();
             AMQueueManager lsamqManager = new AMQueueManager("lookup");
             AMQueuePump lsamqPump = new AMQueuePump("lookup");
 
@@ -151,50 +179,58 @@ public class Invoker {
             queueservice = false;
         }
 
-        Invoker.lookupService.setQueueServiceRequired(queueservice);
+        Invoker.lookupService.setQueueServiceRequired(queueservice);*/
 
+
+
+
+        if(lcfg.isBootstrapserviceOn()){
+            services.add(LookupService.BOOTSTRAP_SERVICE);
+        }
+        System.out.println("starting Lookup Service");
+
+        // Create the REST service
+        Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
+        Invoker.lookupService.setDatadirectory(queueDataDir);
+        Invoker.lookupService.setQueueurl(qcfg.getUrl());
         // Start the service
-        Invoker.lookupService.startService();
 
-        if (mode.equalsIgnoreCase(LookupServiceOptions.MODE_REPLICATION)) {
-            ReplicationService replicationService = new ReplicationService("cache");
-            replicationService.start();
+
+
+
+        Invoker.lookupService.startService(services);
+
+      /*  if (mode.equalsIgnoreCase(LookupServiceOptions.MODE_REPLICATION)) {
+
 
         } else if (mode.equalsIgnoreCase(LookupServiceOptions.MODE_ARCHIVE)) {
             ArchiveService archiveService = new ArchiveService("cache");
             archiveService.start();
-        }
+        }*/
 
         System.out.println("Started service");
 
-        ClassLoader classLoader = Invoker.class.getClassLoader();
-        classLoader.loadClass("net.es.lookup.database.DBMapping");
+       // ClassLoader classLoader = Invoker.class.getClassLoader();
+        //classLoader.loadClass("net.es.lookup.database.DBMapping");
 
         //DB Pruning  and Bootstrap
         try {
-            System.out.println("came here");
+
             SchedulerFactory sf = new StdSchedulerFactory();
             Scheduler scheduler = sf.getScheduler();
-            System.out.println("came here1");
             scheduler.start();
-            System.out.println("came here2");
-
-            System.out.println("came here3"+DBMapping.containsKey("cache"));
 
             List<String> dbnames = DBMapping.getKeys();
-            System.out.println("came here4");
-            System.out.println("Starting scheduler"+dbnames.size());
-            for(String dbname: dbnames){
-                System.out.println("DBPrune: "+dbname);
+            for (String dbname : dbnames) {
                 // define the job and tie it to  mongoJob class
                 JobDetail job = newJob(MongoDBMaintenanceJob.class)
-                        .withIdentity(dbname+"clean", "DBMaintenance")
+                        .withIdentity(dbname + "clean", "DBMaintenance")
                         .build();
                 job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
                 job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, dbname);
 
                 // Trigger the job to run now, and then every dbpruneInterval seconds
-                Trigger trigger = newTrigger().withIdentity(dbname+"DBTrigger", "DBMaintenance")
+                Trigger trigger = newTrigger().withIdentity(dbname + "DBTrigger", "DBMaintenance")
                         .startNow()
                         .withSchedule(simpleSchedule()
                                 .withIntervalInSeconds(dbpruneInterval)
@@ -205,29 +241,29 @@ public class Invoker {
 
                 scheduler.scheduleJob(job, trigger);
             }
-
-
-            //bootstrap job
-            Scheduler bootstrapScheduler = StdSchedulerFactory.getDefaultScheduler();
-            bootstrapScheduler.start();
-            if(bootstrapservice){
-                JobDetail bootstrapJob = newJob(ScanLSJob.class)
-                        .withIdentity("scanLS","bootstrap")
-                        .build();
-
-                Trigger bootstrapTrigger = newTrigger().withIdentity("scanLSTrigger","bootstrap")
-                        .startNow()
-                        .withSchedule(simpleSchedule()
-                                .repeatForever()
-                                .withIntervalInSeconds(1800))
-                        .build();
-
-                bootstrapScheduler.scheduleJob(bootstrapJob,bootstrapTrigger);
-            }
-
         } catch (SchedulerException se) {
             se.printStackTrace();
 
+        }
+
+
+        //bootstrap job
+
+        if (bootstrapservice) {
+            Scheduler bootstrapScheduler = StdSchedulerFactory.getDefaultScheduler();
+            bootstrapScheduler.start();
+            JobDetail bootstrapJob = newJob(ScanLSJob.class)
+                    .withIdentity("scanLS", "bootstrap")
+                    .build();
+
+            Trigger bootstrapTrigger = newTrigger().withIdentity("scanLSTrigger", "bootstrap")
+                    .startNow()
+                    .withSchedule(simpleSchedule()
+                            .repeatForever()
+                            .withIntervalInSeconds(1800))
+                    .build();
+
+            bootstrapScheduler.scheduleJob(bootstrapJob, bootstrapTrigger);
         }
 
 
@@ -275,7 +311,7 @@ public class Invoker {
         if (options.has(CONFIG)) {
 
             configPath = options.valueOf(CONFIG);
-            System.out.println("Config files Path:"+ configPath);
+            System.out.println("Config files Path:" + configPath);
 
         }
 

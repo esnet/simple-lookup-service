@@ -1,4 +1,4 @@
-package net.es.lookup.utils;
+package net.es.lookup.utils.config.reader;
 
 import org.apache.log4j.Logger;
 
@@ -17,22 +17,15 @@ public class QueueServiceConfigReader {
     private static final String DEFAULT_PATH = "etc";
     private static String configFile = DEFAULT_PATH + "/" + DEFAULT_FILE;
 
-    private Map<String, Object> queueServiceMap = new HashMap<String, Object>();
-    private String host = "127.0.0.1";
     private int port = 16617;
     private String protocol = "tcp";
-    private String serviceState;
 
-
-    private boolean serviceUp;
-    private String url;
-
-    private Map<String, Object> messageMap = new HashMap<String, Object>();
     private boolean persistent = false;
 
     private long ttl = 120000;
 
-    private static Logger LOG = Logger.getLogger(ConfigHelper.class);
+    private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
+    
 
     /**
      * Constructor - private because this is a Singleton
@@ -62,12 +55,6 @@ public class QueueServiceConfigReader {
         return QueueServiceConfigReader.instance;
     }
 
-
-    public String getHost() {
-
-        return this.host;
-    }
-
     public int getPort() {
 
         return this.port;
@@ -89,54 +76,27 @@ public class QueueServiceConfigReader {
         return persistent;
     }
 
-    public String getServiceState() {
-
-        return serviceState;
-    }
-
-    public boolean isServiceUp() {
-
-        return serviceUp;
-    }
-
-
-    public void setServiceState(String serviceState) {
-
-        this.serviceState = serviceState;
-    }
-
-    public String getUrl() {
-
+    public String getUrl(){
+        String host = LookupServiceConfigReader.getInstance().getHost();
+        String url = protocol + "://" + host + ":" + port;
         return url;
-    }
-
-    public void setUrl(String url) {
-
-        this.url = url;
     }
 
     private void setInfo(String configFile) {
 
-        ConfigHelper cfg = ConfigHelper.getInstance();
+        BaseConfigReader cfg = BaseConfigReader.getInstance();
         Map yamlMap = cfg.getConfiguration(configFile);
         assert yamlMap != null : "Could not load configuration file from " +
                 "file: ${basedir}/" + configFile;
 
 
         try {
-            queueServiceMap = (HashMap) yamlMap.get("queue");
-            host = (String) queueServiceMap.get("host");
+
+            HashMap<String, Object> queueServiceMap = (HashMap) yamlMap.get("queue");
+
             port = (Integer) queueServiceMap.get("port");
-            serviceState = (String) queueServiceMap.get("service");
-            url = protocol+"://"+host+":"+port;
 
-            if(serviceState.equals("on")){
-                serviceUp=true;
-            }else{
-                serviceUp=false;
-            }
-
-            messageMap = (HashMap) yamlMap.get("message");
+            HashMap<String, Object> messageMap = (HashMap) yamlMap.get("message");
             persistent = (Boolean) messageMap.get("persistent");
             ttl = ((Integer) messageMap.get("ttl")) * 1000;
 

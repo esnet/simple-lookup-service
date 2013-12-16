@@ -3,6 +3,7 @@ package net.es.lookup.service;
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.ClassNamesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
+import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.resources.*;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.apache.activemq.broker.BrokerService;
@@ -10,6 +11,8 @@ import org.apache.activemq.broker.BrokerService;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -30,6 +33,11 @@ public class LookupService {
     BrokerService broker = null;
     private String queueurl;
     private boolean queueServiceRequired;
+    private static final int MAX_SERVICES = 4;
+    public static final String LOOKUP_SERVICE = "lookup-service" ;
+    public static final String BOOTSTRAP_SERVICE = "bootstrap";
+    public static final String QUEUE_SERVICE = "queue-service";
+
 
     public int getPort() {
 
@@ -49,16 +57,6 @@ public class LookupService {
     public void setHost(String host) {
 
         this.host = host;
-    }
-
-    public boolean isQueueServiceRequired() {
-
-        return queueServiceRequired;
-    }
-
-    public void setQueueServiceRequired(boolean queueServiceRequired) {
-
-        this.queueServiceRequired = queueServiceRequired;
     }
 
     public String getQueueurl() {
@@ -136,17 +134,37 @@ public class LookupService {
     }
 
 
-    public void startService() {
+    public void startService(List<String> services) {
+
+        List<String> resources = new LinkedList<String>();
+        if(services.size()==0 || services.size() > MAX_SERVICES){
+            System.out.println("Too many or too little services");
+            System.exit(0);
+
+        }else{
+            for (String s: services){
+               if(s.equals(LOOKUP_SERVICE)){
+                resources.add(RecordResource.class.getName());
+                resources.add(KeyResource.class.getName());
+                resources.add(RegisterQueryResource.class.getName());
+                resources.add(SubscribeResource.class.getName());
+               }else if(s.equals(BOOTSTRAP_SERVICE)){
+                resources.add(BootStrapResource.class.getName());
+               }
+            }
+        }
+
+        Object[] rArray =  resources.toArray();
+        String[] resourceArray = new String[rArray.length];
+        for (int i=0;i<resourceArray.length;i++){
+            resourceArray[i] = (String) rArray[i];
+        }
 
         System.out.println("Starting HTTP server");
         try {
 
-            this.httpServer = this.startServer();
-            if(queueServiceRequired){
-                this.broker = this.startBroker();
-            }
-
-
+            this.httpServer = this.startServer(resourceArray);
+            this.broker = this.startBroker();
 
         } catch (IOException e) {
 
@@ -159,11 +177,10 @@ public class LookupService {
     }
 
 
-    protected HttpServer startServer() throws IOException {
+    protected HttpServer startServer(String[] serviceResources) throws IOException {
 
         System.out.println("Creating Resource...");
 
-        String[] serviceResources = getResourceNames();
         ResourceConfig rc = new ClassNamesResourceConfig(serviceResources);
         System.out.println();
         Set set = rc.getRootResourceClasses();
@@ -197,21 +214,6 @@ public class LookupService {
         br.setDataDirectory(datadirectory);
         br.start();
         return br;
-    }
-
-    private String[] getResourceNames() {
-
-        //define resources here
-        String[] services = {
-                RecordResource.class.getName(),
-                KeyResource.class.getName(),
-                RegisterQueryResource.class.getName(),
-                SubscribeResource.class.getName(),
-                BootStrapResource.class.getName()
-        };
-
-        return services;
-
     }
 
 }

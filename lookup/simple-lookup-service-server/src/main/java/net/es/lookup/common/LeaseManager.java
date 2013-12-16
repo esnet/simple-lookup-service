@@ -1,6 +1,6 @@
 package net.es.lookup.common;
 
-import net.es.lookup.utils.LookupServiceConfigReader;
+import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;

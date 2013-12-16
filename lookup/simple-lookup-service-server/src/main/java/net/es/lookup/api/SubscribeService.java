@@ -12,7 +12,7 @@ import net.es.lookup.protocol.json.JSONSubRequest;
 import net.es.lookup.protocol.json.JSONSubResponse;
 import net.es.lookup.pubsub.QueueServiceMapping;
 import net.es.lookup.pubsub.amq.AMQueueManager;
-import net.es.lookup.utils.QueueServiceConfigReader;
+import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -30,14 +30,10 @@ public class SubscribeService {
 
         LOG.info("net.es.lookup.api.SubscribeService.subscribe: Received request - " + message);
         JSONSubRequest request = new JSONSubRequest(message);
-        if (request.getStatus() == JSONSubRequest.INCORRECT_FORMAT) {
-            LOG.error("net.es.lookup.api.SubscribeService.subscribe: Incorrect JSON format ");
-            throw new BadRequestException("Error parsing request. Please check the key-value pairs.");
-        }
-        if (!queueServiceConfigReader.isServiceUp()) {
-            LOG.error("net.es.lookup.api.SubscribeService.subscribe: Subscribe Service is not supported.");
-            throw new NotSupportedException("Subscribe Service Not Supported");
-        }
+//        if (request.getStatus() == JSONSubRequest.INCORRECT_FORMAT) {
+//            LOG.error("net.es.lookup.api.SubscribeService.subscribe: Incorrect JSON format ");
+//            throw new BadRequestException("Error parsing request. Please check the key-value pairs.");
+//        }
         // Verify that request is valid and authorized
         if (this.isValid(request) && this.isAuthed(request)) {
             // Build response
