@@ -2,14 +2,14 @@
 #Lookup Service settings
 lookupservice:
     host: 'localhost'
-    port: 8090
+    port: 8095
     lease:
         max: 2592000
         default: 1800
         min: 7200
     coreservice: 'on'
-    bootstrap: 'on'
-    cacheservice: 'off'
+    bootstrapservice: 'on'
+    cacheservice: 'on'
 
 #Database settings  
 database:

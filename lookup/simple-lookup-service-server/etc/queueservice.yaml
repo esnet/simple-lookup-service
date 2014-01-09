@@ -1,6 +1,6 @@
 #Queue
 queue:
-    port: 61616
+    port: 61617
     protocol: 'tcp'
 
 #Messages

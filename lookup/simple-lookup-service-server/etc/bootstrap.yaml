@@ -2,13 +2,4 @@ hosts:
     - locator: "http://localhost:8090/lookup/records"
       priority: 100
 
-    - locator: "http://ps1.es.net:9095/lookup/records"
-      priority: 100
-
-    - locator: "http://antg.es.net:80/lookup/records"
-      priority: 100
-
-    - locator: "http://sowmya-dev-vm.es.net:8090/lookup/records"
-      priority: 100
-
 

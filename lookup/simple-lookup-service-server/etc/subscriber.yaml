@@ -2,7 +2,7 @@ caches:
     - name: "cache"
       type: "replication"
       sources:
-        - locator: "http://antg-test-vm.es.net:8090/lookup/records"
+        - locator: "http://localhost:8090/lookup/bootstrap"
           queries:
             - type: "service"
 

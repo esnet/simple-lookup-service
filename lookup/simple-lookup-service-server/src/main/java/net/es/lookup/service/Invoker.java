@@ -125,6 +125,26 @@ public class Invoker {
                 services.add(LookupService.LOOKUP_SERVICE);
             }
 
+            if(lcfg.isBootstrapserviceOn()){
+                services.add(LookupService.BOOTSTRAP_SERVICE);
+
+                Scheduler bootstrapScheduler = StdSchedulerFactory.getDefaultScheduler();
+                bootstrapScheduler.start();
+                JobDetail bootstrapJob = newJob(ScanLSJob.class)
+                        .withIdentity("scanLS", "bootstrap")
+                        .build();
+
+                Trigger bootstrapTrigger = newTrigger().withIdentity("scanLSTrigger", "bootstrap")
+                        .startNow()
+                        .withSchedule(simpleSchedule()
+                                .repeatForever()
+                                .withIntervalInSeconds(1800))
+                        .build();
+
+                bootstrapScheduler.scheduleJob(bootstrapJob, bootstrapTrigger);
+            }
+
+
             if(cacheservice){
                 SubscriberConfigReader.init(configPath + subscribecfg);
                 sfg = SubscriberConfigReader.getInstance();
@@ -157,63 +177,40 @@ public class Invoker {
 
         }
 
-
-
-/*        //Queue service
-        QueueServiceConfigReader qcfg = QueueServiceConfigReader.getInstance();
-
-        if (lcfg.isQueueserviceOn()) {
-            queueservice = true;
-            //starting queueservice
-            //  Invoker.amQueueManager = AMQueueManager.getInstance();
-            //  Invoker.amQueuePump = AMQueuePump.getInstance();
-            AMQueueManager lsamqManager = new AMQueueManager("lookup");
-            AMQueuePump lsamqPump = new AMQueuePump("lookup");
-
-            AMQueueManager cacheamqManager = new AMQueueManager("cache");
-            AMQueuePump cacheamqPump = new AMQueuePump("cache");
-
-            Invoker.lookupService.setQueueurl(qcfg.getUrl());
-
-        } else {
-            queueservice = false;
-        }
-
-        Invoker.lookupService.setQueueServiceRequired(queueservice);*/
-
-
-
-
-        if(lcfg.isBootstrapserviceOn()){
-            services.add(LookupService.BOOTSTRAP_SERVICE);
-        }
         System.out.println("starting Lookup Service");
-
         // Create the REST service
         Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
         Invoker.lookupService.setDatadirectory(queueDataDir);
         Invoker.lookupService.setQueueurl(qcfg.getUrl());
         // Start the service
 
-
-
-
         Invoker.lookupService.startService(services);
-
-      /*  if (mode.equalsIgnoreCase(LookupServiceOptions.MODE_REPLICATION)) {
-
-
-        } else if (mode.equalsIgnoreCase(LookupServiceOptions.MODE_ARCHIVE)) {
-            ArchiveService archiveService = new ArchiveService("cache");
-            archiveService.start();
-        }*/
 
         System.out.println("Started service");
 
-       // ClassLoader classLoader = Invoker.class.getClassLoader();
-        //classLoader.loadClass("net.es.lookup.database.DBMapping");
 
-        //DB Pruning  and Bootstrap
+        //Start subscriber
+        if(cacheservice){
+            SubscriberConfigReader.init(configPath + subscribecfg);
+            sfg = SubscriberConfigReader.getInstance();
+            replicationServiceList = new LinkedList<ReplicationService>();
+            archiveServiceList = new LinkedList<ArchiveService>();
+            List<Cache> caches = sfg.getCacheList();
+            for(Cache cache: caches){
+                String name = cache.getName();
+                if (cache.getType().equals(ReservedValues.CACHE_TYPE_REPLICATION)){
+                    ReplicationService replicationService = new ReplicationService(cache);
+                    replicationService.start();
+                    replicationServiceList.add(replicationService);
+                }else if(cache.getType().equals(ReservedValues.CACHE_TYPE_ARCHIVE)){
+                    ArchiveService archiveService = new ArchiveService(cache);
+                    archiveService.start();
+                    archiveServiceList.add(archiveService);
+                }
+            }
+        }
+
+        //DB Pruning
         try {
 
             SchedulerFactory sf = new StdSchedulerFactory();
@@ -245,27 +242,6 @@ public class Invoker {
             se.printStackTrace();
 
         }
-
-
-        //bootstrap job
-
-        if (bootstrapservice) {
-            Scheduler bootstrapScheduler = StdSchedulerFactory.getDefaultScheduler();
-            bootstrapScheduler.start();
-            JobDetail bootstrapJob = newJob(ScanLSJob.class)
-                    .withIdentity("scanLS", "bootstrap")
-                    .build();
-
-            Trigger bootstrapTrigger = newTrigger().withIdentity("scanLSTrigger", "bootstrap")
-                    .startNow()
-                    .withSchedule(simpleSchedule()
-                            .repeatForever()
-                            .withIntervalInSeconds(1800))
-                    .build();
-
-            bootstrapScheduler.scheduleJob(bootstrapJob, bootstrapTrigger);
-        }
-
 
         // Block forever
         Object blockMe = new Object();

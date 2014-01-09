@@ -96,7 +96,7 @@ public class ScanLSJob implements Job {
 
         try {
             String res = JSONMessage.toString(hostStatus, ReservedKeys.BOOTSTRAP_HOSTS);
-            LOG.error("net.es.lookup.bootstrap.ScanLS.execute: Bootstrap scanning results - "+res);
+            LOG.info("net.es.lookup.bootstrap.ScanLS.execute: Bootstrap scanning results - "+res);
             PrintWriter writer = new PrintWriter(filename);
             writer.println(res);
             writer.close();

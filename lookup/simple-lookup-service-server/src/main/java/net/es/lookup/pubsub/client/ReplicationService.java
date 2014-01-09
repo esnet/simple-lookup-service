@@ -1,5 +1,6 @@
 package net.es.lookup.pubsub.client;
 
+import net.es.lookup.bootstrap.ScanLSJob;
 import net.es.lookup.client.QueryClient;
 import net.es.lookup.client.SimpleLS;
 import net.es.lookup.client.Subscriber;
@@ -14,16 +15,27 @@ import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.DBMapping;
 import net.es.lookup.database.ServiceDAOMongoDb;
+import net.es.lookup.pubsub.client.failover.ConnectionFailure;
+import net.es.lookup.pubsub.client.failover.FailureRecovery;
 import net.es.lookup.queries.Query;
 import net.es.lookup.records.Record;
 import net.es.lookup.utils.config.data.Cache;
 import net.es.lookup.utils.config.data.SubscriberSource;
 import net.es.lookup.utils.config.reader.SubscriberConfigReader;
 import org.apache.log4j.Logger;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.impl.StdSchedulerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 /**
  * Author: sowmya
@@ -37,11 +49,12 @@ public class ReplicationService implements SubscriberListener {
     private List<Subscriber> subscribers;
     private ServiceDAOMongoDb db;
     SubscriberConfigReader subscriberConfigReadercfg;
+    FailureRecovery subscriberFailureRecovery;
     private static Logger LOG = Logger.getLogger(ReplicationService.class);
 
     public ReplicationService(Cache cache) throws LSClientException, ConfigurationException {
         if(cache==null){
-            System.out.println("Fatal error while creating ArchiveService. Exiting");
+            System.out.println("Fatal error while creating ReplicationService. Exiting");
             System.exit(0);
         }
         db = DBMapping.getDb(cache.getName());
@@ -52,7 +65,7 @@ public class ReplicationService implements SubscriberListener {
         subscribers = new ArrayList<Subscriber>();
         List<SubscriberSource> subscriberSourceList = cache.getSources();
         int count = subscriberSourceList.size();
-        LOG.info("net.es.lookup.pubsub.client.ArchiveService: Initializing " + count + " hosts");
+        LOG.info("net.es.lookup.pubsub.client.ReplicationService: Initializing " + count + " hosts");
         List<Map<String, Object>> serverQueries = new LinkedList<Map<String, Object>>();
         for (int i = 0; i < count; i++) {
             try {
@@ -73,10 +86,33 @@ public class ReplicationService implements SubscriberListener {
                 servers.add(server);
 
             } catch (URISyntaxException e) {
-                LOG.error("net.es.lookup.pubsub.client.ArchiveService: Initializing " + count + " hosts");
-                throw new LSClientException("net.es.lookup.pubsub.client.ArchiveService: Error initializing subscribe hosts -" + e.getMessage());}
+                LOG.error("net.es.lookup.pubsub.client.ReplicationService: Initializing " + count + " hosts");
+                throw new LSClientException("net.es.lookup.pubsub.client.ReplicationService: Error initializing subscribe hosts -" + e.getMessage());}
 
         }
+
+        subscriberFailureRecovery = new FailureRecovery();
+        Scheduler failureRecoveryScheduler = null;
+        try {
+            failureRecoveryScheduler = StdSchedulerFactory.getDefaultScheduler();
+            failureRecoveryScheduler.start();
+            JobDetail failureRecoveryJob = newJob(FailureRecovery.class)
+                    .withIdentity("fr", "failureRecovery")
+                    .build();
+
+            Trigger failureRecoveryTrigger = newTrigger().withIdentity("frTrigger", "failureRecovery")
+                    .startNow()
+                    .withSchedule(simpleSchedule()
+                            .repeatForever()
+                            .withIntervalInSeconds(FailureRecovery.getAggressivePingPeriod()))
+                    .build();
+
+            failureRecoveryScheduler.scheduleJob(failureRecoveryJob, failureRecoveryTrigger);
+        } catch (SchedulerException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+
 
         init();
     }
@@ -118,7 +154,11 @@ public class ReplicationService implements SubscriberListener {
                             }
                             Subscriber subscriber = new Subscriber(server, query);
                             subscriber.addListener(this);
-                            subscriber.startSubscription();
+                            try {
+                                subscriber.startSubscription();
+                            } catch (LSClientException e) {
+                                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                            }
                             subscribers.add(subscriber);
                         } catch (QueryException e) {
                             LOG.error("net.es.lookup.pubsub.client.ReplicationService.start: Error defining query");
@@ -144,7 +184,13 @@ public class ReplicationService implements SubscriberListener {
                 }
                 Subscriber subscriber = new Subscriber(server, query);
                 subscriber.addListener(this);
-                subscriber.startSubscription();
+                try {
+                    subscriber.startSubscription();
+                } catch (LSClientException e) {
+                    ConnectionFailure cf = new ConnectionFailure(subscriber);
+                    subscriberFailureRecovery.addFailedConnection(cf);
+
+                }
                 subscribers.add(subscriber);
 
             }
@@ -164,6 +210,7 @@ public class ReplicationService implements SubscriberListener {
         for (Subscriber subscriber : subscribers) {
             subscriber.removeListener(this);
             subscriber.stopSubscription();
+            subscriberFailureRecovery.removeFailedConnection(subscriber);
         }
         LOG.info("net.es.lookup.pubsub.client.ReplicationService.stop: Stopped "+ subscribers.size() +" subscriber connections");
 
