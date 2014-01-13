@@ -12,10 +12,10 @@
     </properties>
 
     <modules>
-        <module>simple-lookup-service-server</module>
         <module>simple-lookup-service-keywords</module>
         <module>simple-lookup-service-client</module>
         <module>simple-lookup-service-client-examples</module>
+        <module>simple-lookup-service-server</module>
     </modules>
     <build>
         <pluginManagement>
@@ -28,4 +28,13 @@
             </plugins>
         </pluginManagement>
     </build>
+    <repositories>
+        <repository>
+            <id>repo.fusesource.com</id>
+            <name>repo.fusesource.com</name>
+            <url>http://repo.fusesource.com/maven2-legacy/</url>
+            <layout>default</layout>
+        </repository>
+    </repositories>
+
 </project>
