@@ -190,7 +190,8 @@ public class Invoker {
                         .startNow()
                         .withSchedule(simpleSchedule()
                                 .repeatForever()
-                                .withIntervalInSeconds(180))
+                                .withIntervalInSeconds(180)
+                                .withMisfireHandlingInstructionIgnoreMisfires())
                         .build();
 
                 bootstrapScheduler.scheduleJob(bootstrapJob,bootstrapTrigger);

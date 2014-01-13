@@ -60,7 +60,7 @@
         <dependency>
             <artifactId>simple-lookup-service-keywords</artifactId>
             <groupId>net.es.lookup</groupId>
-            <version>0.1</version>
+            <version>1.0</version>
         </dependency>
         <!-- yaml configuration -->
         <dependency>
