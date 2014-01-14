@@ -14,6 +14,7 @@ import org.joda.time.DateTimeComparator;
 import org.joda.time.Instant;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.joda.time.DateTimeZone;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -21,6 +22,7 @@ import org.quartz.JobExecutionException;
 import org.quartz.JobDataMap;
 
 
+import javax.print.attribute.standard.DateTimeAtCompleted;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,8 +51,7 @@ public class MongoDBMaintenanceJob implements Job {
         long prune_threshold = data.getLong(PRUNE_THRESHOLD);
         Instant now = new Instant();
         Instant pTime = now.minus(prune_threshold);
-        DateTime pruneTime = pTime.toDateTime();
-
+        DateTime pruneTime = (pTime.toDateTime()).withZone(DateTimeZone.UTC);
         try {
 
             result = db.queryAll();
@@ -64,30 +65,44 @@ public class MongoDBMaintenanceJob implements Job {
         List<Message> messages = new ArrayList<Message>();
 
         if (result != null && result.size() > 0) {
-
+            System.out.println(result.size());
             for (int i = 0; i < result.size(); i++) {
-
+                System.out.println("Checking record: " + i);
                 Map m = result.get(i).getMap();
+
+                System.out.println("Checking pruneTime: "+pruneTime);
                 DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-                DateTime dt = fmt.parseDateTime((String) m.get(ReservedKeys.RECORD_EXPIRES));
-                DateTimeComparator dtc = DateTimeComparator.getInstance();
+                DateTime dt;
+                Object expires = m.get(ReservedKeys.RECORD_EXPIRES);
+                if(expires instanceof List){
+                    dt = fmt.parseDateTime((String) ((List) m.get(ReservedKeys.RECORD_EXPIRES)).get(0));
+                }else{
+                    dt = fmt.parseDateTime((String) m.get(ReservedKeys.RECORD_EXPIRES));
+                }
+                if(dt != null){
+                    System.out.println("Checking record expires: "+dt);
+                    DateTimeComparator dtc = DateTimeComparator.getInstance();
+                    System.out.println("Expires time check"+dtc.compare(dt, pruneTime));
+                    if (dtc.compare(dt, pruneTime) < 0) {
 
-                if (dtc.compare(dt, pruneTime) < 0) {
+                        String uri = (String) m.get(ReservedKeys.RECORD_URI);
 
-                    String uri = (String) m.get(ReservedKeys.RECORD_URI);
+                        try {
+                            Message tmp = db.deleteService(uri);
+                            tmp.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_EXPIRE);
+                            messages.add(tmp);
 
-                    try {
-                        Message tmp = db.deleteService(uri);
-                        tmp.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_EXPIRE);
-                        messages.add(tmp);
+                        } catch (Exception e) {
 
-                    } catch (Exception e) {
+                            LOG.error("Error pruning DB!!");
 
-                        LOG.error("Error pruning DB!!");
+                        }
 
                     }
-
+                }else{
+                    LOG.error("Error calculating expired time");
                 }
+
 
             }
 

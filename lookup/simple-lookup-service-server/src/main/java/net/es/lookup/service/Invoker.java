@@ -173,7 +173,8 @@ public class Invoker {
                     .startNow()
                     .withSchedule(simpleSchedule()
                             .withIntervalInSeconds(dbpruneInterval)
-                            .repeatForever())
+                            .repeatForever()
+                    .withMisfireHandlingInstructionIgnoreMisfires())
                     .build();
 
             scheduler.scheduleJob(job, trigger);
@@ -190,7 +191,7 @@ public class Invoker {
                         .startNow()
                         .withSchedule(simpleSchedule()
                                 .repeatForever()
-                                .withIntervalInSeconds(180)
+                                .withIntervalInSeconds(1800)
                                 .withMisfireHandlingInstructionIgnoreMisfires())
                         .build();
 
