@@ -67,7 +67,7 @@ public class LeaseManager {
         }
 
 
-        if (expires != null && expires != "") {
+        if (expires != null && !expires.isEmpty()) {
 
             Instant pTime = now.minus(lcfg.getPruneThreshold());
             DateTime pruneTime = pTime.toDateTime();
@@ -116,11 +116,10 @@ public class LeaseManager {
         Instant newExpires = now.plus(ttl * 1000); //this method requires milliseconds
         LOG.info("Lease granted. ttl value: " + ttl);
 
-        ArrayList<String> list = new ArrayList<String>();
-        list.add(this.fmt.print(newExpires));
-        message.add(ReservedKeys.RECORD_EXPIRES, list);
+        String convertedExpires = this.fmt.print(newExpires);
+        message.add(ReservedKeys.RECORD_EXPIRES, convertedExpires);
 
-        LOG.info("Lease granted. expires value: " + newExpires);
+        LOG.info("Lease granted. expires value: " + convertedExpires);
         return true;
 
     }
