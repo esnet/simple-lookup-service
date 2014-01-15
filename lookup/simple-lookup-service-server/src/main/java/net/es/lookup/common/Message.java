@@ -1,5 +1,7 @@
 package net.es.lookup.common;
 
+import sun.util.LocaleServiceProviderPool;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,15 +148,13 @@ public class Message {
             }
 
             if (o instanceof List<?>) {
-
+                returnVal = returnVal & true;
                 for (Object obj : (List) o) {
-
-                    if (obj instanceof String && !((String) obj).isEmpty()) {
+                    if (obj instanceof String) {
 
                         returnVal = returnVal & true;
 
-                    } else {
-
+                    } else{
                         returnVal = returnVal & false;
                         return returnVal;
 

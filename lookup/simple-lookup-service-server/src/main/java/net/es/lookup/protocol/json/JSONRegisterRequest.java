@@ -1,5 +1,6 @@
 package net.es.lookup.protocol.json;
 
+import com.sun.org.apache.xpath.internal.FoundIndex;
 import net.es.lookup.common.RegisterRequest;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
@@ -48,7 +49,16 @@ public class JSONRegisterRequest extends RegisterRequest {
                     tmpList.add((String) value);
                     this.add(key.toString(), tmpList);
                 } else if (value instanceof List) {
-                    JSONArray jsonArray = (JSONArray) value;
+
+                    JSONArray jsonArray = new JSONArray();
+
+                    for(Object o: (List)value){
+                        Object tmp = o;
+                        if(! (o instanceof String)){
+                            tmp = "";
+                        }
+                        jsonArray.add(tmp);
+                    }
                     this.add(key.toString(), jsonArray);
                 }
             }
