@@ -33,7 +33,7 @@ public class LookupService {
     BrokerService broker = null;
     private String queueurl;
     private boolean queueServiceRequired;
-    private static final int MAX_SERVICES = 4;
+    private static final int MAX_SERVICES = 10;
     public static final String LOOKUP_SERVICE = "lookup-service" ;
     public static final String BOOTSTRAP_SERVICE = "bootstrap";
     public static final String QUEUE_SERVICE = "queue-service";
@@ -142,16 +142,15 @@ public class LookupService {
             System.exit(0);
 
         }else{
-            for (String s: services){
-               if(s.equals(LOOKUP_SERVICE)){
-                resources.add(RecordResource.class.getName());
-                resources.add(KeyResource.class.getName());
-                resources.add(RegisterQueryResource.class.getName());
-                resources.add(SubscribeResource.class.getName());
-               }else if(s.equals(BOOTSTRAP_SERVICE)){
+
+            if(services.contains(BOOTSTRAP_SERVICE)){
                 resources.add(BootStrapResource.class.getName());
-               }
             }
+
+            resources.add(RecordResource.class.getName());
+            resources.add(KeyResource.class.getName());
+            resources.add(RegisterQueryResource.class.getName());
+            resources.add(SubscribeResource.class.getName());
         }
 
         Object[] rArray =  resources.toArray();
