@@ -188,28 +188,6 @@ public class Invoker {
 
         System.out.println("Started service");
 
-
-        //Start subscriber
-        if(cacheservice){
-            SubscriberConfigReader.init(configPath + subscribecfg);
-            sfg = SubscriberConfigReader.getInstance();
-            replicationServiceList = new LinkedList<ReplicationService>();
-            archiveServiceList = new LinkedList<ArchiveService>();
-            List<Cache> caches = sfg.getCacheList();
-            for(Cache cache: caches){
-                String name = cache.getName();
-                if (cache.getType().equals(ReservedValues.CACHE_TYPE_REPLICATION)){
-                    ReplicationService replicationService = new ReplicationService(cache);
-                    replicationService.start();
-                    replicationServiceList.add(replicationService);
-                }else if(cache.getType().equals(ReservedValues.CACHE_TYPE_ARCHIVE)){
-                    ArchiveService archiveService = new ArchiveService(cache);
-                    archiveService.start();
-                    archiveServiceList.add(archiveService);
-                }
-            }
-        }
-
         //DB Pruning
         try {
 
