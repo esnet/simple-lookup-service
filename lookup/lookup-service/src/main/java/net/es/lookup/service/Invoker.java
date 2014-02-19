@@ -98,6 +98,7 @@ public class Invoker {
                     .startNow()
                     .withSchedule(simpleSchedule()
                             .withIntervalInSeconds(dbpruneInterval)
+                            .withMisfireHandlingInstructionIgnoreMisfires()
                             .repeatForever())
                     .build();
 
