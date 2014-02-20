@@ -30,7 +30,6 @@ public class ReservedKeywords {
     public static final String RECORD_SERVICE_EVENTTYPE = "service-eventtype";
     public static final String RECORD_SERVICE_CONTACTNAME = "service-contactname";
     public static final String RECORD_SERVICE_CONTACTEMAIL = "service-contactemail";
-    public static final String RECORD_SERVICE_EVENTTYPE = "service-eventtype";
     public static final String RECORD_SERVICE_COMMUNITIES = "service-communities";
     public static final String RECORD_SERVICE_LATITUDE = "service-latitude";
     public static final String RECORD_SERVICE_LONGITUDE = "service-longitude";
