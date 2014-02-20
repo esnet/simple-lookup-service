@@ -194,11 +194,11 @@ public class AccessService {
 
                     if (request.getTTL() != null && !request.getTTL().isEmpty()) {
 
-                        serviceMap.put(ReservedKeys.RECORD_TTL, request.getTTL());
+                        serviceMap.put(ReservedKeywords.RECORD_TTL, request.getTTL());
 
                     } else {
 
-                        serviceMap.put(ReservedKeys.RECORD_TTL, new ArrayList());
+                        serviceMap.put(ReservedKeywords.RECORD_TTL, new ArrayList());
 
                     }
 
@@ -282,7 +282,7 @@ public class AccessService {
     }
 
 
-    public String deleteService(String dbname, String serviceid, String service) {
+    public String deleteService(String serviceid, String service) {
 
         LOG.info("Processing deleteService...");
         LOG.info("serviceid: " + serviceid);

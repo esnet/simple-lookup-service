@@ -16,8 +16,8 @@ Group:          Development/Libraries
 URL:            http://code.google.com/p/esnet-perfsonar
 Source0:        lookup-service.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  java-1.6.0-openjdk
-BuildRequires:  java-1.6.0-openjdk-devel
+#BuildRequires:  java-1.6.0-openjdk
+#BuildRequires:  java-1.6.0-openjdk-devel
 BuildRequires:  sed 
 BuildArch:      noarch
 Requires:       java-1.6.0-openjdk
@@ -39,7 +39,7 @@ via REST interface.
 rm -rf %{buildroot}
 
 %build
-mvn -DskipTests --projects %{mvn_project_list} clean package
+mvn -DskipTests -X --projects %{mvn_project_list} clean package
 
 %install
 #Clean out previous build
