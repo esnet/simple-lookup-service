@@ -196,10 +196,6 @@ public class AccessService {
 
                         serviceMap.put(ReservedKeywords.RECORD_TTL, request.getTTL());
 
-                    } else {
-
-                        serviceMap.put(ReservedKeywords.RECORD_TTL, new ArrayList());
-
                     }
 
                     Message newRequest = new Message(serviceMap);
