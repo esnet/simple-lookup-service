@@ -3,6 +3,7 @@ package net.es.lookup.service;
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.ClassNamesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
+import com.sun.net.httpserver.HttpServer;
 import net.es.lookup.resources.AccessRecordResource;
 import net.es.lookup.resources.KeyResource;
 import net.es.lookup.resources.RecordResource;

@@ -56,7 +56,7 @@ public class LeaseManager {
         //check if expires field is beyond pruning threshold. If yes, do not give lease. Record needs to be deleted.
         String expires = message.getExpires();
 
-        if (expires != null && expires != "") {
+        if (expires != null && !expires.isEmpty()) {
 
             Instant pTime = now.minus(lcfg.getPruneThreshold());
             DateTime pruneTime = pTime.toDateTime();
@@ -74,7 +74,7 @@ public class LeaseManager {
 
         }
 
-        if (requestedTTL != null && requestedTTL != "") {
+        if (requestedTTL != null && !requestedTTL.isEmpty()) {
 
             PeriodFormatter fmt = ISOPeriodFormat.standard();
 
