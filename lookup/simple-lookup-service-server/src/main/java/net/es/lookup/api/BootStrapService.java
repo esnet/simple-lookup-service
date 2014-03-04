@@ -1,4 +1,4 @@
-package net.es.lookup.api;
+/*package net.es.lookup.api;
 
 
 import net.es.lookup.common.exception.api.InternalErrorException;
@@ -12,11 +12,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 
-/**
+*//**
  * Author: sowmya
  * Date: 8/5/13
  * Time: 2:22 PM
- */
+ *//*
 public class BootStrapService {
 
     private static Logger LOG = Logger.getLogger(BootStrapService.class);
@@ -56,4 +56,4 @@ public class BootStrapService {
     }
 
 
-}
+}*/

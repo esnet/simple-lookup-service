@@ -3,7 +3,6 @@ package net.es.lookup.database;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
-import net.es.lookup.common.Service;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.PubSubQueryException;
 import net.es.lookup.common.exception.internal.PubSubQueueException;
@@ -44,7 +43,7 @@ public class MongoDBMaintenanceJob implements Job {
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
 
-        List<Service> result = null;
+        List<Message> result = null;
         LOG.info("Running MongoDBPrune...");
         JobDataMap data = context.getJobDetail().getJobDataMap();
 

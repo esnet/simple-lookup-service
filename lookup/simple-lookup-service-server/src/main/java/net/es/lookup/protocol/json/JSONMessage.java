@@ -1,7 +1,6 @@
 package net.es.lookup.protocol.json;
 
 import net.es.lookup.common.Message;
-import net.es.lookup.common.Service;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.sf.json.JSONException;
 import net.sf.json.util.JSONBuilder;
@@ -12,10 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This class provides  methods that convert
+ * the sLS records to the API's JSON message format.
+ */
 
 public class JSONMessage {
-
-    public static final String LIST_OBJECT = "results";
 
     public static String toString(Message message) throws DataFormatException {
 
@@ -29,8 +30,6 @@ public class JSONMessage {
             JSONBuilder tmp = stringer.object();
 
             for (Map.Entry<String, Object> entry : entries) {
-
-                //tmp = tmp.key(entry.getKey()).value(entry.getValue());
 
                 if (entry.getValue() instanceof String) {
 
@@ -70,14 +69,13 @@ public class JSONMessage {
     }
 
 
-    public static String toString(List<Service> services) throws DataFormatException {
+    public static String toString(List<Message> services) throws DataFormatException {
 
         JSONStringer stringer = new JSONStringer();
         JSONBuilder tmp = stringer;
 
         try {
 
-            //tmp = tmp.object().key(JSONMessage.LIST_OBJECT).array();
             tmp = tmp.array();
 
             for (Message service : services) {
@@ -115,7 +113,6 @@ public class JSONMessage {
 
             }
 
-            //tmp = tmp.endArray().endObject();
             tmp = tmp.endArray();
 
         } catch (JSONException e) {
@@ -130,7 +127,7 @@ public class JSONMessage {
 
 
 
-    public static String toString(List<Service> services, String listname) throws DataFormatException {
+    public static String toString(List<Message> services, String listname) throws DataFormatException {
 
         JSONStringer stringer = new JSONStringer();
         JSONBuilder tmp = stringer;
@@ -142,7 +139,6 @@ public class JSONMessage {
         try {
 
             tmp = tmp.object().key(listname).array();
-            //tmp = tmp.array();
 
             for (Message service : services) {
 
@@ -180,7 +176,6 @@ public class JSONMessage {
             }
 
             tmp = tmp.endArray().endObject();
-            //tmp = tmp.endArray();
 
         } catch (JSONException e) {
 

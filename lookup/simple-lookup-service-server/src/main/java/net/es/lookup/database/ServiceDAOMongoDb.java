@@ -5,7 +5,6 @@ import com.mongodb.*;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
-import net.es.lookup.common.Service;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 
@@ -88,7 +87,7 @@ public class ServiceDAOMongoDb {
         //check for duplicates
         try {
 
-            List<Service> dupEntries = this.query(message, queryRequest, operators);
+            List<Message> dupEntries = this.query(message, queryRequest, operators);
             //System.out.println("Duplicate Entries: "+dupEntries.size());
             if (dupEntries.size() > 0) {
 
@@ -194,17 +193,17 @@ public class ServiceDAOMongoDb {
 
     }
 
-    public List<Service> query(Message message, Message queryRequest, Message operators) throws DatabaseException {
+    public List<Message> query(Message message, Message queryRequest, Message operators) throws DatabaseException {
 
         return this.query(message, queryRequest, operators, 0, 0);
 
     }
 
-    public List<Service> query(Message message, Message queryRequest, Message operators, int maxResults, int skip) throws DatabaseException {
+    public List<Message> query(Message message, Message queryRequest, Message operators, int maxResults, int skip) throws DatabaseException {
 
         BasicDBObject query = buildQuery(queryRequest, operators);
 
-        ArrayList<Service> result = new ArrayList<Service>();
+        ArrayList<Message> result = new ArrayList<Message>();
 
         try {
 
@@ -212,7 +211,7 @@ public class ServiceDAOMongoDb {
 
             while (cur.hasNext()) {
 
-                Service tmpserv = new Service();
+                Message tmpserv = new Message();
                 DBObject tmp = cur.next();
                 Set<String> keys = tmp.keySet();
 
@@ -250,10 +249,10 @@ public class ServiceDAOMongoDb {
     }
 
 
-    public List<Service> queryAll() throws DatabaseException {
+    public List<Message> queryAll() throws DatabaseException {
 
         Message msg = new Message();
-        List<Service> result = query(msg, msg, msg);
+        List<Message> result = query(msg, msg, msg);
         return result;
 
     }
@@ -413,11 +412,11 @@ public class ServiceDAOMongoDb {
     }
 
 
-    public Service getServiceByURI(String URI) throws DatabaseException {
+    public Message getServiceByURI(String URI) throws DatabaseException {
 
         BasicDBObject query = new BasicDBObject();
         query.put(ReservedKeys.RECORD_URI, URI);
-        Service result = null;
+        Message result = null;
 
         try {
 
@@ -428,7 +427,7 @@ public class ServiceDAOMongoDb {
                 DBObject tmp = cur.next();
                 Map<String, Object> tmpMap = tmp.toMap();
                 tmpMap.remove("_id");
-                result = new Service(tmpMap);
+                result = new Message(tmpMap);
 
             }
 

@@ -1,9 +1,9 @@
+/*
 package net.es.lookup.bootstrap;
 
 import net.es.lookup.client.SimpleLS;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
-import net.es.lookup.common.Service;
 import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.internal.ConfigurationException;
 import net.es.lookup.common.exception.internal.DataFormatException;
@@ -27,7 +27,7 @@ import java.util.List;
 
 public class ScanLSJob implements Job {
     BootStrapConfigReader bootStrapConfigReader;
-    List<Service> hostStatus = new ArrayList<Service>();
+    List<Message> hostStatus = new ArrayList<Message>();
     private static Logger LOG = Logger.getLogger(ScanLSJob.class);
 
     public ScanLSJob() throws ConfigurationException {
@@ -39,7 +39,7 @@ public class ScanLSJob implements Job {
 
         for(int i=0; i<count; i++) {
             String status;
-            Service hostDetails = new Service();
+            Message hostDetails = new Message();
 
             String hostlocator;
             int priority;
@@ -106,4 +106,4 @@ public class ScanLSJob implements Job {
             LOG.error("net.es.lookup.bootstrap.ScanLS.execute: Bootstrap scanning error - "+e.getMessage());
         }
     }
-}
+}*/

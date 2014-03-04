@@ -25,7 +25,7 @@ public class LookupService {
 
     }
 
-    public Service getServiceByURI(String URI) {
+    public GetServiceResponse getServiceByURI(String URI) {
 
         return null;
 

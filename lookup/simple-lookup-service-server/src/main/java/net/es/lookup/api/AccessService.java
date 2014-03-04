@@ -36,7 +36,7 @@ public class AccessService {
         LOG.info(" serviceid: " + serviceid);
 
         JSONSubGetResponse response;
-        Service serviceRecord;
+        Message serviceRecord;
 
         try {
             ServiceDAOMongoDb db = DBMapping.getDb(dbname);
@@ -94,7 +94,7 @@ public class AccessService {
         LOG.info(" serviceid: " + serviceid);
 
         JSONSubGetResponse response;
-        Service serviceRecord;
+        Message serviceRecord;
 
         try {
             ServiceDAOMongoDb db = DBMapping.getDb(dbname);

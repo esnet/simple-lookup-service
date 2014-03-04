@@ -3,7 +3,7 @@
 pidfile=$1
 jarfile=$2
 shift 2
-vers="0.1"
+vers="1.0"
 shortname=lookup-service
 
 if [ -z "$pidfile" ]; then

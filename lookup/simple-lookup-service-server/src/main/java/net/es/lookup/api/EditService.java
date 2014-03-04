@@ -58,7 +58,7 @@ public class EditService {
                     LOG.error(("Error accessing database object"));
                     throw new InternalErrorException("Error accessing database");
                 }
-                Service serviceRecord = db.getServiceByURI(serviceid);
+                Message serviceRecord = db.getServiceByURI(serviceid);
 
                 if (serviceRecord != null) {
 

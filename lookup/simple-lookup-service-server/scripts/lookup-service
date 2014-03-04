@@ -10,7 +10,7 @@
 
 SHORT_NAME=simple-lookup-service
 LONG_NAME="Simple Lookup Service"
-VERSION="0.1"
+VERSION="1.0"
 
 #LS variables
 HOME_PREFIX=/etc/opt/$SHORT_NAME

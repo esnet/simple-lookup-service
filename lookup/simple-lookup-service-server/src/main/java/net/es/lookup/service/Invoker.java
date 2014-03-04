@@ -3,7 +3,7 @@ package net.es.lookup.service;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import net.es.lookup.bootstrap.ScanLSJob;
+//import net.es.lookup.bootstrap.ScanLSJob;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.internal.DatabaseException;
@@ -52,7 +52,7 @@ public class Invoker {
     private static String queueDataDir = "../data";
 
     private static boolean cacheservice = false;
-    private static boolean bootstrapservice = false;
+//    private static boolean bootstrapservice = false;
 
     private static List<ReplicationService> replicationServiceList;
     private static List<ArchiveService> archiveServiceList;
@@ -62,10 +62,10 @@ public class Invoker {
         return configPath;
     }
 
-    public static String getBootstrapoutput() {
-
-        return bootstrapoutput;
-    }
+//    public static String getBootstrapoutput() {
+//
+//        return bootstrapoutput;
+//    }
 
     public static String getLogConfig() {
 
@@ -99,7 +99,7 @@ public class Invoker {
 
         port = lcfg.getPort();
         host = lcfg.getHost();
-        bootstrapservice = lcfg.isBootstrapserviceOn();
+//        bootstrapservice = lcfg.isBootstrapserviceOn();
 
         cacheservice = lcfg.isCacheserviceOn();
 
@@ -125,7 +125,7 @@ public class Invoker {
                 services.add(LookupService.LOOKUP_SERVICE);
             }
 
-            if(lcfg.isBootstrapserviceOn()){
+/*            if(lcfg.isBootstrapserviceOn()){
                 services.add(LookupService.BOOTSTRAP_SERVICE);
 
                 Scheduler bootstrapScheduler = StdSchedulerFactory.getDefaultScheduler();
@@ -142,7 +142,7 @@ public class Invoker {
                         .build();
 
                 bootstrapScheduler.scheduleJob(bootstrapJob, bootstrapTrigger);
-            }
+            } */
 
 
             if(cacheservice){
@@ -181,6 +181,7 @@ public class Invoker {
         // Create the REST service
         Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
         Invoker.lookupService.setDatadirectory(queueDataDir);
+        System.out.println("Queue url:"+ qcfg.getUrl());
         Invoker.lookupService.setQueueurl(qcfg.getUrl());
         // Start the service
 
