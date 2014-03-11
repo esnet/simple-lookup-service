@@ -49,14 +49,14 @@ public class ServiceDAOMongoDb {
 
     private void init() throws DatabaseException {
 
-        if (DBMapping.containsKey(dbname)) {
+        if (DBPool.containsKey(dbname)) {
 
             // An instance has been already created.
             throw new DatabaseException("Attempt to create a second instance of ServiceDAOMongoDb");
 
         }
 
-        DBMapping.addDb(dbname, this);
+        DBPool.addDb(dbname, this);
 
         try {
 
@@ -380,16 +380,16 @@ public class ServiceDAOMongoDb {
         }
 
         BasicDBObject query = new BasicDBObject();
-        ArrayList queryOp = (ArrayList) operators.getOperator();
+        String queryOp = operators.getOperator();
         String op = null;
 
-        if (queryOp != null && !queryOp.isEmpty()) {
+        if (queryOp == null || queryOp.isEmpty()) {
 
-            op = (String) queryOp.get(0);        //uses only the first value from the list
+            op = ReservedValues.RECORD_OPERATOR_DEFAULT;        //uses only the first value from the list
 
         } else {
 
-            op = ReservedValues.RECORD_OPERATOR_DEFAULT;
+            op=queryOp;
 
         }
 

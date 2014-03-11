@@ -9,25 +9,25 @@ import java.util.List;
  * Date: 10/29/13
  * Time: 7:48 PM
  */
-public class DBMapping {
+public class DBPool {
     private static HashMap<String, ServiceDAOMongoDb> dbHashMap = new HashMap<String, ServiceDAOMongoDb>();
 
-    public static void addDb(String dbname, ServiceDAOMongoDb daoMongoDb){
+    protected final static void addDb(String dbname, ServiceDAOMongoDb daoMongoDb){
         dbHashMap.put(dbname, daoMongoDb);
     }
 
 
-    public static ServiceDAOMongoDb getDb(String dbname){
+    public final static ServiceDAOMongoDb getDb(String dbname){
         return dbHashMap.get(dbname);
     }
 
-    public static List<String> getKeys(){
+    public final static List<String> getKeys(){
 
         List<String> keylist = new ArrayList<String>(dbHashMap.keySet());
         return keylist;
     }
 
-    public static boolean containsKey(String key){
+    public final static boolean containsKey(String key){
         return dbHashMap.containsKey(key);
     }
 

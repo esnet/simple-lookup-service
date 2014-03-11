@@ -1,7 +1,6 @@
 package net.es.lookup.pubsub.client.failover;
 
 import net.es.lookup.client.Subscriber;
-import net.es.lookup.common.exception.LSClientException;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -22,32 +21,32 @@ public class FailureRecovery implements Job {
     private static final int REGULAR_PING_PERIOD=5*AGGRESSIVE_PING_PERIOD;
     private static final int MAX_RECONNECTION_ATTEMPTS=10;
 
-    private List<ConnectionFailure> failedConnections = null;
+    private List<FailedConnection> failedConnections = null;
 
     public FailureRecovery(){
-        failedConnections = new LinkedList<ConnectionFailure>();
+        failedConnections = new LinkedList<FailedConnection>();
     }
 
-    public FailureRecovery(List<ConnectionFailure> failedConnectionList){
+    public FailureRecovery(List<FailedConnection> failedConnectionList){
         failedConnections = failedConnectionList;
     }
 
-    public void addFailedConnection(ConnectionFailure connectionFailure){
-        failedConnections.add(connectionFailure);
+    public void addFailedConnection(FailedConnection failedConnection){
+        failedConnections.add(failedConnection);
     }
 
-    public ConnectionFailure removeFailedConnection(ConnectionFailure connectionFailure){
-        if(failedConnections.contains(connectionFailure)){
-            failedConnections.remove(connectionFailure);
-            return connectionFailure;
+    public FailedConnection removeFailedConnection(FailedConnection failedConnection){
+        if(failedConnections.contains(failedConnection)){
+            failedConnections.remove(failedConnection);
+            return failedConnection;
         }
 
         return null;
     }
 
-    public ConnectionFailure removeFailedConnection(Subscriber subscriber){
+    public FailedConnection removeFailedConnection(Subscriber subscriber){
         int index=-1;
-        for(ConnectionFailure cf: failedConnections){
+        for(FailedConnection cf: failedConnections){
             if(cf.getSubscriber().equals(subscriber)){
                 index = failedConnections.indexOf(cf);
             }
@@ -55,7 +54,7 @@ public class FailureRecovery implements Job {
         }
 
         if(index>=0){
-            ConnectionFailure cf = failedConnections.get(index);
+            FailedConnection cf = failedConnections.get(index);
             failedConnections.remove(index);
             return cf;
         }
@@ -89,20 +88,20 @@ public class FailureRecovery implements Job {
 
         List<Integer> connectionIndex = new LinkedList<Integer>();
 
-        for (ConnectionFailure connectionFailure: failedConnections){
+        for (FailedConnection failedConnection : failedConnections){
 
             //if time period is within the aggressive ping thresold
-            if((connectionFailure.getTimeOfInitialFailure()-now) <= THRESHOLD){
-                boolean res = connectionFailure.reconnect();
+            if((failedConnection.getTimeOfInitialFailure()-now) <= THRESHOLD){
+                boolean res = failedConnection.reconnect();
 
                 if(res){
-                    connectionIndex.add(failedConnections.indexOf(connectionFailure));
+                    connectionIndex.add(failedConnections.indexOf(failedConnection));
                 }
             }else{
-                if(connectionFailure.getTimeOfLastFailure() >= REGULAR_PING_PERIOD){
-                    boolean res = connectionFailure.reconnect();
+                if(failedConnection.getTimeOfLastFailure() >= REGULAR_PING_PERIOD){
+                    boolean res = failedConnection.reconnect();
                     if(res){
-                        connectionIndex.add(failedConnections.indexOf(connectionFailure));
+                        connectionIndex.add(failedConnections.indexOf(failedConnection));
                     }
                 }
             }

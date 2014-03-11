@@ -79,9 +79,9 @@ public class BaseTest {
             type = (String) testValues.get("type");
             key1 = (String) testValues.get("key-1");
             key2 = (String) testValues.get("key-2");
-            registrationData = (String) testValues.get("registration-data");
-            registrationDataMultiKey = (String) testValues.get("registration-data-complex");
-            registrationDataPartial = (String) testValues.get("registration-data-partial");
+            registrationData = (String) testValues.get("registration-elements");
+            registrationDataMultiKey = (String) testValues.get("registration-elements-complex");
+            registrationDataPartial = (String) testValues.get("registration-elements-partial");
             list = (List) testValues.get("list-of-string");
             typeList = (List) testValues.get("type-list");
             wcList = (List) testValues.get("wild-card-list");

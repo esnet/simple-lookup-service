@@ -1,5 +1,6 @@
 package net.es.lookup.client;
 
+import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.records.Record;
 
 /**
@@ -8,5 +9,5 @@ import net.es.lookup.records.Record;
  * Time: 4:49 PM
  */
 public interface SubscriberListener {
-    public void onRecord(Record record);
+    public void onRecord(Record record) throws LSClientException;
 }

@@ -2,23 +2,16 @@ package net.es.lookup.api;
 
 
 import net.es.lookup.common.*;
-import net.es.lookup.common.exception.api.BadRequestException;
-import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.common.exception.internal.PubSubQueryException;
-import net.es.lookup.common.exception.internal.PubSubQueueException;
-import net.es.lookup.database.DBMapping;
+import net.es.lookup.database.DBPool;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.*;
-import net.es.lookup.pubsub.amq.AMQueuePump;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -39,7 +32,7 @@ public class AccessService {
         Message serviceRecord;
 
         try {
-            ServiceDAOMongoDb db = DBMapping.getDb(dbname);
+            ServiceDAOMongoDb db = DBPool.getDb(dbname);
             if(db != null){
                 serviceRecord =db.getServiceByURI(serviceid);
 
@@ -97,7 +90,7 @@ public class AccessService {
         Message serviceRecord;
 
         try {
-            ServiceDAOMongoDb db = DBMapping.getDb(dbname);
+            ServiceDAOMongoDb db = DBPool.getDb(dbname);
             if(db!=null){
                 serviceRecord = db.getServiceByURI(serviceid);
 

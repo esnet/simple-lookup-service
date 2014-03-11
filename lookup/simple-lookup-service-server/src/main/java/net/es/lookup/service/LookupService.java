@@ -27,14 +27,14 @@ public class LookupService {
     private String host = "localhost";
 
 
-    private String datadirectory = "../data";
+    private String datadirectory = "../elements";
     private HttpServer httpServer = null;
     private static LookupService instance = null;
     BrokerService broker = null;
     private String queueurl;
     private boolean queueServiceRequired;
     private static final int MAX_SERVICES = 10;
-    public static final String LOOKUP_SERVICE = "lookup-service" ;
+    public static final String LOOKUP_SERVICE = "lookup" ;
     public static final String BOOTSTRAP_SERVICE = "bootstrap";
     public static final String QUEUE_SERVICE = "queue-service";
 
@@ -207,7 +207,6 @@ public class LookupService {
     protected BrokerService startBroker() throws Exception{
         System.out.println("Creating ActiveMQ Broker");
         BrokerService br = new BrokerService();
-
         String url = queueurl;
         br.addConnector(url);
         br.setDataDirectory(datadirectory);

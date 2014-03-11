@@ -9,7 +9,7 @@ import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.UnauthorizedException;
 import net.es.lookup.common.exception.internal.*;
-import net.es.lookup.database.DBMapping;
+import net.es.lookup.database.DBPool;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
@@ -18,7 +18,6 @@ import net.es.lookup.pubsub.QueueServiceMapping;
 import net.es.lookup.pubsub.amq.AMQueuePump;
 import net.es.lookup.service.LookupService;
 import org.apache.log4j.Logger;
-import org.glassfish.grizzly.utils.StringFilter;
 
 import java.util.*;
 
@@ -41,7 +40,7 @@ public class RegisterService {
 
             LOG.info("Register status: FAILED; exiting");
             LOG.error("Incorrect JSON Data Format");
-            throw new BadRequestException("Error parsing JSON data.");
+            throw new BadRequestException("Error parsing JSON elements.");
 
         }
 
@@ -54,10 +53,10 @@ public class RegisterService {
 
             if (gotLease) {
 
-                List<String> recordType = request.getRecordType();
+                String recordType = request.getRecordType();
 
                 // Generate a new URI for this service and add it to the service key/value pairs
-                String rType = recordType.get(0);
+                String rType = recordType;
 
                 String uri = this.newURI(rType);
                 request.add(ReservedKeys.RECORD_URI, uri);
@@ -92,7 +91,7 @@ public class RegisterService {
 
 
                 try {
-                    ServiceDAOMongoDb db = DBMapping.getDb(dbname);
+                    ServiceDAOMongoDb db = DBPool.getDb(dbname);
                     if(db != null){
                         Message res = db.queryAndPublishService(request, query, operators);
                         response = new JSONRegisterResponse(res.getMap());
@@ -201,15 +200,12 @@ public class RegisterService {
 
         if (res) {
 
-            List<String> recordType = request.getRecordType();
+            String recordType = request.getRecordType();
 
             if ((recordType == null) || recordType.isEmpty()) {
                 return false;
             }
 
-            if (recordType.size() > 1) {
-                return false;
-            }
 
         }
 

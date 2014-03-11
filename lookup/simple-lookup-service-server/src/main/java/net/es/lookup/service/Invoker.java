@@ -4,27 +4,29 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 //import net.es.lookup.bootstrap.ScanLSJob;
-import net.es.lookup.common.ReservedKeys;
-import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.database.DBMapping;
+import net.es.lookup.database.DBPool;
 import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.database.ServiceDAOMongoDb;
-import net.es.lookup.pubsub.client.ArchiveService;
+import net.es.lookup.pubsub.Publisher;
 import net.es.lookup.pubsub.amq.AMQueueManager;
 import net.es.lookup.pubsub.amq.AMQueuePump;
-import net.es.lookup.pubsub.client.ReplicationService;
-import net.es.lookup.utils.config.data.Cache;
+import net.es.lookup.pubsub.client.Cache;
+import net.es.lookup.utils.config.elements.CacheConfig;
+import net.es.lookup.utils.config.elements.PublisherConfig;
 import net.es.lookup.utils.config.reader.BootStrapConfigReader;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import net.es.lookup.utils.config.reader.SubscriberConfigReader;
-import net.es.lookup.utils.config.data.LookupServiceOptions;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.matchers.GroupMatcher;
 
+import java.net.URI;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static org.quartz.JobBuilder.newJob;
@@ -36,6 +38,7 @@ public class Invoker {
 
     private static int port = 8080;
     private static LookupService lookupService = null;
+    private static CacheService cacheService = null;
     //private static ServiceDAOMongoDb dao = null;
     private static String host = "localhost";
     private static LookupServiceConfigReader lcfg;
@@ -49,28 +52,10 @@ public class Invoker {
     private static String bootstrapcfg = "bootstrap.yaml";
     private static String bootstrapoutput = "active-hosts.json";
     private static String logConfig = "./etc/log4j.properties";
-    private static String queueDataDir = "../data";
+    private static String queueDataDir = "../elements";
 
-    private static boolean cacheservice = false;
+    private static boolean cacheServiceRequest = false;
 //    private static boolean bootstrapservice = false;
-
-    private static List<ReplicationService> replicationServiceList;
-    private static List<ArchiveService> archiveServiceList;
-
-    public static String getConfigPath() {
-
-        return configPath;
-    }
-
-//    public static String getBootstrapoutput() {
-//
-//        return bootstrapoutput;
-//    }
-
-    public static String getLogConfig() {
-
-        return logConfig;
-    }
 
     /**
      * Main program to start the Lookup ServiceRecord
@@ -85,10 +70,12 @@ public class Invoker {
         //set log config
         System.setProperty("log4j.configuration", "file:" + logConfig);
 
+        SchedulerFactory sf = new StdSchedulerFactory();
+        Scheduler scheduler = sf.getScheduler();
+        scheduler.start();
 
         LookupServiceConfigReader.init(configPath + lookupservicecfg);
         QueueServiceConfigReader.init(configPath + queuecfg);
-
 
         BootStrapConfigReader.init(configPath + bootstrapcfg);
 
@@ -101,9 +88,7 @@ public class Invoker {
         host = lcfg.getHost();
 //        bootstrapservice = lcfg.isBootstrapserviceOn();
 
-        cacheservice = lcfg.isCacheserviceOn();
-
-
+        cacheServiceRequest = lcfg.isCacheserviceOn();
 
         int dbpruneInterval = lcfg.getPruneInterval();
         long prunethreshold = lcfg.getPruneThreshold();
@@ -115,13 +100,13 @@ public class Invoker {
 
         List<String> services = new LinkedList<String>();
 
-        // Start DB and Queue
+        // Initialize services
         try {
 
-            if(lcfg.isCoreserviceOn()){
-                new ServiceDAOMongoDb(dburl, dbport, "lookup", collname);
-                new AMQueueManager("lookup");
-                new AMQueuePump("lookup");
+            if (lcfg.isCoreserviceOn()) {
+                new ServiceDAOMongoDb(dburl, dbport, LookupService.LOOKUP_SERVICE, collname);
+                new AMQueueManager(LookupService.LOOKUP_SERVICE);
+                new AMQueuePump(LookupService.LOOKUP_SERVICE);
                 services.add(LookupService.LOOKUP_SERVICE);
             }
 
@@ -144,29 +129,39 @@ public class Invoker {
                 bootstrapScheduler.scheduleJob(bootstrapJob, bootstrapTrigger);
             } */
 
-
-            if(cacheservice){
+            System.out.println(cacheServiceRequest);
+            if (cacheServiceRequest) {
                 SubscriberConfigReader.init(configPath + subscribecfg);
                 sfg = SubscriberConfigReader.getInstance();
-                replicationServiceList = new LinkedList<ReplicationService>();
-                archiveServiceList = new LinkedList<ArchiveService>();
-                List<Cache> caches = sfg.getCacheList();
-                for(Cache cache: caches){
-                    String name = cache.getName();
-                    new ServiceDAOMongoDb(dburl, dbport, name, collname);
-                    new AMQueueManager(name);
-                    new AMQueuePump(name);
-                    services.add(name);
-                    if (cache.getType().equals(ReservedValues.CACHE_TYPE_REPLICATION)){
-                        ReplicationService replicationService = new ReplicationService(cache);
-                        replicationService.start();
-                        replicationServiceList.add(replicationService);
-                    }else if(cache.getType().equals(ReservedValues.CACHE_TYPE_ARCHIVE)){
-                        ArchiveService archiveService = new ArchiveService(cache);
-                        archiveService.start();
-                        archiveServiceList.add(archiveService);
+
+                List<CacheConfig> cacheConfigList = sfg.getCacheList();
+
+                List<Cache> cacheList = new LinkedList<Cache>();
+                for(CacheConfig config: cacheConfigList){
+
+                    String name = config.getName();
+                    String type = config.getType();
+
+                    List<PublisherConfig> publisherConfigList = config.getPublishers();
+                    List<Publisher> publishers = new LinkedList<Publisher>();
+                    for(PublisherConfig publisherConfig: publisherConfigList){
+                        URI accesspoint = publisherConfig.getLocator();
+                        List<Map<String,Object>> queries = publisherConfig.getQueries();
+
+                        Publisher publisher = new Publisher(accesspoint,queries);
+                        publishers.add(publisher);
                     }
+
+                    Cache cache = new Cache(name,type,publishers);
+                    cacheList.add(cache);
+                    new ServiceDAOMongoDb(dburl, dbport, name, collname);
+                    services.add(name);
                 }
+
+
+
+                Invoker.cacheService = CacheService.initialize(cacheList,scheduler);
+                System.out.println("Cache service initialized: " + Invoker.cacheService.isInitialized());
             }
 
 
@@ -176,27 +171,29 @@ public class Invoker {
             System.exit(1);
 
         }
-
+        System.out.println(cacheServiceRequest);
         System.out.println("starting Lookup Service");
         // Create the REST service
         Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
         Invoker.lookupService.setDatadirectory(queueDataDir);
-        System.out.println("Queue url:"+ qcfg.getUrl());
+        System.out.println("Queue url:" + qcfg.getUrl());
         Invoker.lookupService.setQueueurl(qcfg.getUrl());
-        // Start the service
 
+        System.out.println(cacheServiceRequest);
+        if (cacheServiceRequest) {
+            System.out.println("Starting cache service");
+            Invoker.cacheService.startService();
+        }
+
+        // Start the service
         Invoker.lookupService.startService(services);
 
-        System.out.println("Started service");
 
         //DB Pruning
         try {
 
-            SchedulerFactory sf = new StdSchedulerFactory();
-            Scheduler scheduler = sf.getScheduler();
-            scheduler.start();
 
-            List<String> dbnames = DBMapping.getKeys();
+            List<String> dbnames = DBPool.getKeys();
             for (String dbname : dbnames) {
                 // define the job and tie it to  mongoJob class
                 JobDetail job = newJob(MongoDBMaintenanceJob.class)
@@ -206,7 +203,7 @@ public class Invoker {
                 job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, dbname);
 
                 // Trigger the job to run now, and then every dbpruneInterval seconds
-                Trigger trigger = newTrigger().withIdentity(dbname + "DBTrigger", "DBMaintenance")
+                Trigger trigger = newTrigger().withIdentity(dbname+"DBTrigger", "DBMaintenance")
                         .startNow()
                         .withSchedule(simpleSchedule()
                                 .withIntervalInSeconds(dbpruneInterval)
@@ -214,13 +211,24 @@ public class Invoker {
                                 .withMisfireHandlingInstructionIgnoreMisfires())
                         .build();
 
-
                 scheduler.scheduleJob(job, trigger);
             }
+
+
+            for(String group: scheduler.getJobGroupNames()) {
+                // enumerate each job in group
+                for(JobKey jobKey : scheduler.getJobKeys((GroupMatcher<JobKey>) GroupMatcher.groupEquals(group))) {
+                    System.out.println("Found job identified by: " + jobKey);
+                }
+            }
+
+
+
         } catch (SchedulerException se) {
             se.printStackTrace();
 
         }
+
 
         // Block forever
         Object blockMe = new Object();

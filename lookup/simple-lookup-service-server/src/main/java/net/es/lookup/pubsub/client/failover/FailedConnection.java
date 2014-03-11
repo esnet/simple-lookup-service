@@ -13,7 +13,8 @@ import java.util.Date;
  * Date: 12/18/13
  * Time: 10:45 PM
  */
-public class ConnectionFailure {
+public class
+        FailedConnection {
 
     private Subscriber subscriber;
     private long timeOfInitialFailure;
@@ -21,7 +22,7 @@ public class ConnectionFailure {
     private int reconnectionAttempts;
 
 
-    public ConnectionFailure(Subscriber subscriber){
+    public FailedConnection(Subscriber subscriber){
         this.subscriber = subscriber;
         long now = new Date().getTime();
         timeOfInitialFailure=now;
@@ -29,7 +30,7 @@ public class ConnectionFailure {
         reconnectionAttempts=0;
     }
 
-    public ConnectionFailure(){
+    public FailedConnection(){
         long now = new Date().getTime();
         timeOfInitialFailure=now;
         timeOfLastFailure=now;

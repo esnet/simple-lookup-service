@@ -88,7 +88,7 @@ public class RegistrationClient {
 
         if(record != null){
 
-            LOG.info("net.es.lookup.client.RegistrationClient: Parsing Record data");
+            LOG.info("net.es.lookup.client.RegistrationClient: Parsing Record elements");
             server.setData(JSONParser.toString(record));
 
             LOG.info("net.es.lookup.client.RegistrationClient: Setting request parameters");

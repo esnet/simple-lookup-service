@@ -9,7 +9,7 @@ import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.PubSubQueryException;
 import net.es.lookup.common.exception.internal.PubSubQueueException;
-import net.es.lookup.database.DBMapping;
+import net.es.lookup.database.DBPool;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.*;
 import net.es.lookup.pubsub.QueueServiceMapping;
@@ -53,7 +53,7 @@ public class EditService {
         if (this.isValid(request) && this.isAuthed(serviceid, request)) {
 
             try {
-                ServiceDAOMongoDb db = DBMapping.getDb(dbname);
+                ServiceDAOMongoDb db = DBPool.getDb(dbname);
                 if(db == null){
                     LOG.error(("Error accessing database object"));
                     throw new InternalErrorException("Error accessing database");
@@ -190,7 +190,7 @@ public class EditService {
         if (this.isValid(request) && this.isAuthed(serviceid, request)) {
 
             try {
-                ServiceDAOMongoDb db = DBMapping.getDb(dbname);
+                ServiceDAOMongoDb db = DBPool.getDb(dbname);
 
                 if(db == null){
                     LOG.error("Error accessing database");

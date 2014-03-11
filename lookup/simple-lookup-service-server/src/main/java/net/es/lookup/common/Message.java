@@ -63,44 +63,80 @@ public class Message {
 
     }
 
-    public List<String> getURI() {
+    public String getURI() {
 
-        return (List<String>) this.getMap().get(ReservedKeys.RECORD_URI);
+        Object val = this.getMap().get(ReservedKeys.RECORD_URI);
 
-    }
+        if(val instanceof String){
+            return (String)val;
+        }else if(val instanceof List){
+            return (String)((List) val).get(0);
+        }
 
-
-    public List<String> getTTL() {
-
-        return (List<String>) this.getMap().get(ReservedKeys.RECORD_TTL);
-
-    }
-
-
-    public List<String> getExpires() {
-
-        return (List<String>) this.getMap().get(ReservedKeys.RECORD_EXPIRES);
+        return null;
 
     }
 
 
-    public List<String> getRecordType() {
+    public String getTTL() {
 
-        return (List<String>) this.getMap().get(ReservedKeys.RECORD_TYPE);
+        Object val = this.getMap().get(ReservedKeys.RECORD_TTL);
+
+        if(val instanceof String){
+            return (String)val;
+        }else if(val instanceof List){
+            return (String)((List) val).get(0);
+        }
+
+        return null;
+
 
     }
 
 
-    public List<String> getClientUUID() {
+    public String getExpires() {
 
-        return (List<String>) this.getMap().get(ReservedKeys.RECORD_PRIVATEKEY);
+        Object val = this.getMap().get(ReservedKeys.RECORD_EXPIRES);
+
+        if(val instanceof String){
+            return (String)val;
+        }else if(val instanceof List){
+            return (String)((List) val).get(0);
+        }
+
+        return null;
+
 
     }
 
 
-    public List<String> getOperator() {
+    public String getRecordType() {
 
-        return (List<String>) this.getMap().get(ReservedKeys.RECORD_OPERATOR);
+        Object val = this.getMap().get(ReservedKeys.RECORD_TYPE);
+
+        if(val instanceof String){
+            return (String)val;
+        }else if(val instanceof List){
+            return (String)((List) val).get(0);
+        }
+
+        return null;
+
+
+    }
+
+
+    public String getOperator() {
+
+        Object val = this.getMap().get(ReservedKeys.RECORD_TYPE);
+
+        if(val instanceof String){
+            return (String)val;
+        }else if(val instanceof List){
+            return (String)((List) val).get(0);
+        }
+
+        return null;
 
     }
 
@@ -141,11 +177,6 @@ public class Message {
         for (String key : this.keyValues.keySet()) {
 
             Object o = this.keyValues.get(key);
-
-            if(o == null){
-                returnVal = returnVal & false;
-                return returnVal;
-            }
 
             if (o instanceof List<?>) {
                 returnVal = returnVal & true;

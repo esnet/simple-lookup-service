@@ -63,7 +63,7 @@ public class Record {
 
     }
 
-    //This only formats the record data. No validation is performed
+    //This only formats the record elements. No validation is performed
     protected void format() {
 
         if (this.keyValues.containsKey(ReservedKeys.RECORD_TYPE)) {

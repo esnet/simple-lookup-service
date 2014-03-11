@@ -39,4 +39,6 @@ public class ReservedValues {
 
     public static final String RECORD_VALUE_TYPE_KEY_VALUE_PAIR = "key-value-pair";
 
+    public static final String SERVICE_MODE_READONLY = "r";
+    public static final String SERVICE_MODE_READWRITE = "rw";
 }

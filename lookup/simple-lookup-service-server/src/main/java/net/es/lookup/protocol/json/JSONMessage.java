@@ -60,7 +60,7 @@ public class JSONMessage {
 
         } catch (JSONException e) {
 
-            throw new DataFormatException("Error in data format");
+            throw new DataFormatException("Error in elements format");
 
         }
 
@@ -117,7 +117,7 @@ public class JSONMessage {
 
         } catch (JSONException e) {
 
-            throw new DataFormatException("Error in data format");
+            throw new DataFormatException("Error in elements format");
 
         }
 
@@ -179,7 +179,7 @@ public class JSONMessage {
 
         } catch (JSONException e) {
 
-            throw new DataFormatException("Error in data format");
+            throw new DataFormatException("Error in elements format");
 
         }
 

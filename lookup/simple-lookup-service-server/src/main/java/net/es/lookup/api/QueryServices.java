@@ -3,11 +3,10 @@ package net.es.lookup.api;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
-import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.database.DBMapping;
+import net.es.lookup.database.DBPool;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import org.apache.log4j.Logger;
@@ -36,7 +35,7 @@ public class QueryServices {
 
         // Query DB
         try {
-            ServiceDAOMongoDb db = DBMapping.getDb(dbname);
+            ServiceDAOMongoDb db = DBPool.getDb(dbname);
 
             if(db != null){
                 List<Message> res = db.query(request, queryParameters, operators, maxResult, skip);
@@ -60,7 +59,7 @@ public class QueryServices {
 
             LOG.error("Data formatting exception");
             LOG.info("Query status: FAILED; exiting");
-            throw new InternalErrorException("Error formatting data");
+            throw new InternalErrorException("Error formatting elements");
 
         }
 
@@ -102,13 +101,12 @@ public class QueryServices {
 
         if (request.getOperator() != null) {
 
-            List mainOp = request.getOperator();
+            String mainOp = request.getOperator();
             operators.add(ReservedKeys.RECORD_OPERATOR, mainOp);
 
         } else {
 
-            List mainOp = new ArrayList();
-            mainOp.add(ReservedValues.RECORD_OPERATOR_DEFAULT);
+            String mainOp = ReservedValues.RECORD_OPERATOR_DEFAULT;
             operators.add(ReservedKeys.RECORD_OPERATOR, mainOp);
 
         }

@@ -2,9 +2,11 @@ package net.es.lookup.utils.config.reader;
 
 import net.es.lookup.bootstrap.BootStrapClient;
 import net.es.lookup.common.exception.internal.ConfigurationException;
+import net.es.lookup.pubsub.Publisher;
 import net.es.lookup.queries.Query;
-import net.es.lookup.utils.config.data.Cache;
-import net.es.lookup.utils.config.data.SubscriberSource;
+import net.es.lookup.pubsub.client.Cache;
+import net.es.lookup.utils.config.elements.CacheConfig;
+import net.es.lookup.utils.config.elements.PublisherConfig;
 import org.apache.log4j.Logger;
 
 import java.net.URI;
@@ -20,7 +22,7 @@ public class SubscriberConfigReader {
     private static final String PRIMARY_KEY = "caches";
     private static final String CACHE_NAME = "name";
     private static final String CACHE_TYPE = "type";
-    private static final String CACHE_SOURCE = "sources";
+    private static final String CACHE_SOURCE = "publishers";
     private static final String SOURCE_ACCESSPOINT = "locator";
     private static final String SOURCE_QUERIES = "queries";
     private static final String WILDCARD = "*";
@@ -30,7 +32,7 @@ public class SubscriberConfigReader {
     private static SubscriberConfigReader instance;
     private static String configFile = "";
 
-    private List<Cache> cacheList;
+    private List<CacheConfig> cacheList;
 
 
     private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
@@ -40,7 +42,7 @@ public class SubscriberConfigReader {
      */
     private SubscriberConfigReader() {
 
-        cacheList = new LinkedList<Cache>();
+        cacheList = new LinkedList<CacheConfig>();
 
 
     }
@@ -69,7 +71,7 @@ public class SubscriberConfigReader {
     /**
      * @return Returns the list of cache names
      */
-    public List<Cache> getCacheList() {
+    public List<CacheConfig> getCacheList() {
 
         return cacheList;
     }
@@ -107,8 +109,7 @@ public class SubscriberConfigReader {
 
                 String cType = (String) ((Map) (cList.get(i))).get(CACHE_TYPE);
 
-
-                List<SubscriberSource> sourceList = new LinkedList<SubscriberSource>();
+                List<PublisherConfig> sourceList = new LinkedList<PublisherConfig>();
 
                 List sList = (List) ((Map) (cList.get(i))).get(CACHE_SOURCE);
 
@@ -116,40 +117,41 @@ public class SubscriberConfigReader {
                     throw new ConfigurationException("Missing source information");
                 }
 
-                for (int j = 0; j < sList.size(); j++) {
-                    List<Query> queryList = new LinkedList<Query>();
 
-                    String accesspoint = (String) ((Map) (sList.get(i))).get(SOURCE_ACCESSPOINT);
-                    System.out.println(accesspoint);
+                for (int j = 0; j < sList.size(); j++) {
+
+                    List<Map<String,Object>> queryList = new LinkedList<Map<String,Object>>();
+
+                    String sAccessPoint = (String) ((Map) (sList.get(i))).get(SOURCE_ACCESSPOINT);
+
+
                     List<Object> cQueryList = (List) ((Map) (sList.get(i))).get(SOURCE_QUERIES);
 
                     for (int k = 0; k < cQueryList.size(); k++) {
                         Object tmp = cQueryList.get(k);
 
                         if (tmp instanceof Map) {
-                            Query query = new Query((Map) tmp);
-                            System.out.println(tmp.toString());
-                            queryList.add(query);
+                            queryList.add((Map)tmp);
                         } else if (tmp instanceof String && tmp.equals(WILDCARD)) {
-                            Query query = new Query();
+                            Map<String,Object> query = new HashMap<String,Object>();
                             queryList.add(query);
 
                         }
 
-
                     }
 
-                    if (accesspoint.equals(WILDCARD)) {
+                    if (sAccessPoint.equals(WILDCARD)) {
                         //get bootstrap list
                         BootStrapClient client = new BootStrapClient(bclientURI);
                         List<String> lsList = client.getAllUrls();
                         for(String s: lsList){
-                            SubscriberSource source = new SubscriberSource(s, queryList);
+                            URI accesspoint = new URI(s);
+                            PublisherConfig source = new PublisherConfig(accesspoint, queryList);
                             sourceList.add(source);
                         }
                     } else {
-
-                        SubscriberSource source = new SubscriberSource(accesspoint, queryList);
+                        URI accesspoint = new URI(sAccessPoint);
+                        PublisherConfig source = new PublisherConfig(accesspoint, queryList);
                         sourceList.add(source);
 
                     }
@@ -157,7 +159,7 @@ public class SubscriberConfigReader {
 
                 }
 
-                Cache cache = new Cache(cacheName, cType, sourceList);
+                CacheConfig cache = new CacheConfig(cacheName, cType, sourceList);
                 cacheList.add(cache);
             }
 

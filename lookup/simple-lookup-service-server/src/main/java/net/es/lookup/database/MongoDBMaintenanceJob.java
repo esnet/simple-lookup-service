@@ -9,13 +9,11 @@ import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.pubsub.QueueServiceMapping;
 import net.es.lookup.pubsub.amq.AMQueuePump;
 import org.apache.log4j.Logger;
-import org.glassfish.grizzly.utils.StringFilter;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;
 import org.joda.time.Instant;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -48,7 +46,7 @@ public class MongoDBMaintenanceJob implements Job {
         JobDataMap data = context.getJobDetail().getJobDataMap();
 
         String dbname = data.getString(DBNAME);
-        this.db = DBMapping.getDb(dbname);
+        this.db = DBPool.getDb(dbname);
 
         long prune_threshold = data.getLong(PRUNE_THRESHOLD);
         Instant now = new Instant();
@@ -72,13 +70,15 @@ public class MongoDBMaintenanceJob implements Job {
             for (int i = 0; i < result.size(); i++) {
 
                 Map m = result.get(i).getMap();
+
+                Message message = result.get(i);
                 DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-                DateTime dt = fmt.parseDateTime((String) m.get(ReservedKeys.RECORD_EXPIRES));
+                DateTime dt = fmt.parseDateTime(message.getExpires());
                 DateTimeComparator dtc = DateTimeComparator.getInstance();
 
                 if (dtc.compare(dt, pruneTime) < 0) {
 
-                    String uri = (String) m.get(ReservedKeys.RECORD_URI);
+                    String uri = message.getURI();
 
                     try {
                         Message tmp = db.deleteService(uri);

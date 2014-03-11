@@ -1,5 +1,6 @@
 package net.es.lookup.client;
 
+import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.ParserException;
 import net.es.lookup.common.exception.RecordException;
@@ -14,9 +15,7 @@ import org.apache.log4j.Logger;
 
 import javax.jms.*;
 import java.lang.ref.WeakReference;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 /**
  * Author: sowmya
@@ -27,8 +26,7 @@ public class Subscriber {
 
     private SimpleLS server;
     private Query query;
-    private String DEFAULT_SUBSCRIBE_REQUEST_URL = "/lookup/subscribe";
-    private String subscribeRequestUrl = DEFAULT_SUBSCRIBE_REQUEST_URL;
+    private String subscribeRequestUrl;
 
     private Connection conn;
     private String queueUrl;
@@ -43,11 +41,6 @@ public class Subscriber {
 
     private static Logger LOG = Logger.getLogger(Subscriber.class);
 
-    public Subscriber(SimpleLS server, Query query) throws LSClientException {
-
-        this(server, query, "");
-    }
-
     public Subscriber(SimpleLS server, Query query, String subscribeURL) throws LSClientException {
 
         this.server = server;
@@ -57,7 +50,7 @@ public class Subscriber {
         if (subscribeURL != null && !subscribeURL.isEmpty()) {
             this.subscribeRequestUrl = subscribeURL;
         } else {
-            this.subscribeRequestUrl = DEFAULT_SUBSCRIBE_REQUEST_URL;
+            throw new LSClientException("subscribe URL is not specified");
         }
         listeners = new LinkedList<WeakReference<SubscriberListener>>();
         LOG.info("net.es.lookup.client.Subscriber: Created Subscriber listener");
@@ -101,7 +94,7 @@ public class Subscriber {
             LOG.debug("net.es.lookup.client.Subscriber: Parsing query");
             String queryString = "";
             if (query != null) {
-                LOG.debug("net.es.lookup.client.Subscriber: Query is not null");
+
                 try {
                     queryString = JSONParser.toString(query);
                 } catch (ParserException e) {
@@ -263,6 +256,11 @@ public class Subscriber {
                 recordNotifier(r);
             } catch (JMSException e) {
                 LOG.error("net.es.lookup.client.Subscriber: Error in connection" + e.getMessage());
+                Map errorMessage = new HashMap<String,Object>();
+                errorMessage.put(ReservedKeys.ERROR_MESSAGE, e.getMessage());
+                errorMessage.put(ReservedKeys.SUBSCRIBER, this);
+                Record record = new Record(ReservedValues.RECORD_VALUE_TYPE_ERROR);
+                recordNotifier(record);
                 break;
             } catch (ParserException e) {
                 LOG.error("net.es.lookup.client.Subscriber: Parser error" + e.getMessage());
@@ -276,7 +274,7 @@ public class Subscriber {
         ListIterator<WeakReference<SubscriberListener>> listIterator = listeners.listIterator();
         while (listIterator.hasNext()) {
             try {
-                LOG.info("net.es.lookup.client.Subscriber: PNotifying listener");
+                LOG.info("net.es.lookup.client.Subscriber: Notifying listener");
                 //potential deadlock -  need to use weak reference
                 Record tmp = record.duplicate();
                 SubscriberListener listener = listIterator.next().get();

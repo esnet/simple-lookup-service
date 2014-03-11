@@ -34,10 +34,10 @@ public interface QueueManager {
     public boolean hasQueues(Message query) throws PubSubQueryException, PubSubQueueException;
 
     /**
-     * This method pushes data to queue
+     * This method pushes elements to queue
      *
-     * @param qid     The queue id to which data needs to be pushed to
-     * @param message The data to be pushed
+     * @param qid     The queue id to which elements needs to be pushed to
+     * @param message The elements to be pushed
      *
      * @return void
      */
