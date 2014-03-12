@@ -55,7 +55,7 @@ public class LeaseManager {
         String requestedTTL = "";
 
         if(requestedTTL != null && !requestedTTL.isEmpty()){
-            requestedTTL = message.getTTL().get(0);
+            requestedTTL = message.getTTL();
         }
 
         long ttl = 0;
@@ -63,7 +63,7 @@ public class LeaseManager {
         //check if expires field is beyond pruning threshold. If yes, do not give lease. Record needs to be deleted.
         String expires = "";
         if(message.getExpires() != null && !message.getExpires().isEmpty()){
-            expires = (String) message.getExpires().get(0);
+            expires = (String) message.getExpires();
         }
 
 
