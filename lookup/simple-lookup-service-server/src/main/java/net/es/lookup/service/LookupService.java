@@ -143,9 +143,9 @@ public class LookupService {
 
         }else{
 
-            if(services.contains(BOOTSTRAP_SERVICE)){
-                resources.add(BootStrapResource.class.getName());
-            }
+  //          if(services.contains(BOOTSTRAP_SERVICE)){
+  //              resources.add(BootStrapResource.class.getName());
+  //          }
 
             resources.add(RecordResource.class.getName());
             resources.add(KeyResource.class.getName());
