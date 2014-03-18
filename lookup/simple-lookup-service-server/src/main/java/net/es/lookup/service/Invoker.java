@@ -4,6 +4,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 //import net.es.lookup.bootstrap.ScanLSJob;
+import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.DBPool;
 import net.es.lookup.database.MongoDBMaintenanceJob;
@@ -128,8 +129,6 @@ public class Invoker {
 
                 bootstrapScheduler.scheduleJob(bootstrapJob, bootstrapTrigger);
             } */
-
-            System.out.println(cacheServiceRequest);
             if (cacheServiceRequest) {
                 SubscriberConfigReader.init(configPath + subscribecfg);
                 sfg = SubscriberConfigReader.getInstance();
@@ -152,18 +151,23 @@ public class Invoker {
                         publishers.add(publisher);
                     }
 
-                    Cache cache = new Cache(name,type,publishers);
-                    cacheList.add(cache);
-                    new ServiceDAOMongoDb(dburl, dbport, name, collname);
-                    services.add(name);
+                    try{
+                        Cache cache = new Cache(name,type,publishers);
+                        cacheList.add(cache);
+                        new ServiceDAOMongoDb(dburl, dbport, name, collname);
+                        services.add(name);
+
+                    }catch(LSClientException e){
+                        System.out.println("Error initializing cache: "+name+"; Type: "+type);
+                        continue;
+                    }
                 }
 
 
-
                 Invoker.cacheService = CacheService.initialize(cacheList,scheduler);
+
                 System.out.println("Cache service initialized: " + Invoker.cacheService.isInitialized());
             }
-
 
         } catch (DatabaseException e) {
 
@@ -171,18 +175,19 @@ public class Invoker {
             System.exit(1);
 
         }
-        System.out.println(cacheServiceRequest);
         System.out.println("starting Lookup Service");
         // Create the REST service
         Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
         Invoker.lookupService.setDatadirectory(queueDataDir);
-        System.out.println("Queue url:" + qcfg.getUrl());
+        System.out.println("Starting queue at Queue url:" + qcfg.getUrl());
         Invoker.lookupService.setQueueurl(qcfg.getUrl());
 
-        System.out.println(cacheServiceRequest);
-        if (cacheServiceRequest) {
+        if (cacheServiceRequest && Invoker.cacheService.isInitialized()) {
             System.out.println("Starting cache service");
             Invoker.cacheService.startService();
+        } else{
+            System.out.println("Error starting cache service");
+
         }
 
         // Start the service

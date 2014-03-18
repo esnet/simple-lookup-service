@@ -28,14 +28,17 @@ public class CacheService {
     private static Logger LOG = Logger.getLogger(CacheService.class);
     private static boolean initialized = false;
     private Scheduler scheduler;
-    private static final int FAILURE_RECOVERY_INTERVAL = 120;
+    private static final int FAILURE_RECOVERY_INTERVAL = 15;
 
     private CacheService(List<Cache> caches, Scheduler scheduler) throws LSClientException {
 
-        this.cacheList = caches;
-        initialized=true;
-        this.scheduler = scheduler;
-        LOG.debug("net.es.lookup.service.CacheService: Number of caches - "+ cacheList.size());
+        if(caches != null && !caches.isEmpty() && scheduler != null){
+            this.cacheList = caches;
+            initialized=true;
+            this.scheduler = scheduler;
+            LOG.debug("net.es.lookup.service.CacheService: Number of caches - "+ cacheList.size());
+        }
+
     }
 
     public static synchronized CacheService getInstance() {

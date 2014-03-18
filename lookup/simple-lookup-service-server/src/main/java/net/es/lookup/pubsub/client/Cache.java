@@ -112,11 +112,8 @@ public class Cache implements SubscriberListener {
                         Subscriber subscriber = new Subscriber(server, query, subscribeRelativeUrl);
                         subscriber.addListener(this);
                         connectedSubscribers.add(subscriber);
-
                     }
                 }
-
-
             } catch (QueryException e) {
                 LOG.error("net.es.lookup.pubsub.client.Cache: Error creating query from the given key-value pair");
                 throw new LSClientException("net.es.lookup.pubsub.client.CacheService: Error initializing subscribe hosts -" + e.getMessage());
@@ -200,9 +197,15 @@ public class Cache implements SubscriberListener {
     public void onRecord(Record record) throws LSClientException {
 
         LOG.info("net.es.lookup.pubsub.client.Cache.onRecord: Processing Received message");
+        LOG.debug("net.es.lookup.pubsub.client.Cache.onRecord"+record.getRecordType());
         if(record.getRecordType().equals(ReservedValues.RECORD_VALUE_TYPE_ERROR)){
             Subscriber subscriber = (Subscriber)record.getValue(ReservedKeys.SUBSCRIBER);
+            LOG.debug("net.es.lookup.pubsub.client.Cache.onRecord:"+record.getValue(ReservedKeys.ERROR_MESSAGE));
+            if(subscriber == null){
+                LOG.debug("net.es.lookup.pubsub.client.Cache.onRecord: Subscriber null");
+            }
             Subscriber toBeRemoved = null;
+            LOG.debug("net.es.lookup.pubsub.client.Cache.onRecord: About to find subscriber from the active connections list");
             for(Subscriber s: connectedSubscribers){
                 if(s.getQueue().equals(subscriber.getQueue()) && s.getSubscribeRequestUrl().equals(subscriber.getSubscribeRequestUrl())){
                     toBeRemoved = s;
@@ -210,15 +213,20 @@ public class Cache implements SubscriberListener {
             }
             if(toBeRemoved != null){
 
-            }
             boolean removedFromActiveList = this.connectedSubscribers.remove(toBeRemoved);
             if(removedFromActiveList){
                 subscriber.stopSubscription();
                 FailedConnection failedConnection = new FailedConnection(subscriber);
                 failureRecovery.addFailedConnection(failedConnection);
+                LOG.error("net.es.lookup.pubsub.client.Cache.onRecord: Tore down subscriber connection. Added subscriber to failed connection");
             }else{
                 throw new LSClientException("net.es.lookup.pubsub.client.Cache.onRecord: Failed to remove failedConnection from active list. Exiting");
             }
+
+            }else{
+                throw new LSClientException("net.es.lookup.pubsub.client.Cache.onRecord: Cannot find subscriber. Cannot run failure recovery on this subscriber");
+            }
+
 
         }
         try {

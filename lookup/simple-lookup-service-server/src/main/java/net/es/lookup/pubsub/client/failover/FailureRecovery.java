@@ -1,6 +1,7 @@
 package net.es.lookup.pubsub.client.failover;
 
 import net.es.lookup.client.Subscriber;
+import org.apache.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -22,6 +23,7 @@ public class FailureRecovery implements Job {
     private static final int MAX_RECONNECTION_ATTEMPTS=10;
 
     private List<FailedConnection> failedConnections = null;
+    private static Logger LOG = Logger.getLogger(FailureRecovery.class);
 
     public FailureRecovery(){
         failedConnections = new LinkedList<FailedConnection>();
@@ -88,6 +90,7 @@ public class FailureRecovery implements Job {
 
         List<Integer> connectionIndex = new LinkedList<Integer>();
 
+        LOG.debug("Executing failure recovery");
         for (FailedConnection failedConnection : failedConnections){
 
             //if time period is within the aggressive ping thresold
