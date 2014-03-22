@@ -85,4 +85,6 @@ public class ReservedKeys {
 
 
     public static final String SUBSCRIBER = "subscriber";
+    public static final String QUEUE_URL = "queue-url";
+    public static final String QUEUE = "queue" ;
 }

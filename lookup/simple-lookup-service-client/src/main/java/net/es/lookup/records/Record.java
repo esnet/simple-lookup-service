@@ -55,7 +55,7 @@ public class Record {
         }
 
         if (!this.validate()) {
-            throw new RecordException("Error creating record. Missing mandatory key: type");
+            throw new RecordException("Error creating record. Record is not formatted correctly");
         }
 
         this.format();

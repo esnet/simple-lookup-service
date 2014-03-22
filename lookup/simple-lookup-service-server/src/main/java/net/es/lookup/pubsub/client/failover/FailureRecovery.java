@@ -1,6 +1,7 @@
 package net.es.lookup.pubsub.client.failover;
 
 import net.es.lookup.client.Subscriber;
+import net.es.lookup.common.exception.LSClientException;
 import org.apache.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -15,11 +16,11 @@ import java.util.List;
  * Date: 12/19/13
  * Time: 9:45 PM
  */
-public class FailureRecovery implements Job {
+public class FailureRecovery{
 
     private static final int THRESHOLD = 900;
-    private static final int AGGRESSIVE_PING_PERIOD = 120;
-    private static final int REGULAR_PING_PERIOD=5*AGGRESSIVE_PING_PERIOD;
+    private static final int AGGRESSIVE_PING_PERIOD = 10;
+    private static final int REGULAR_PING_PERIOD=6*AGGRESSIVE_PING_PERIOD;
     private static final int MAX_RECONNECTION_ATTEMPTS=10;
 
     private List<FailedConnection> failedConnections = null;
@@ -31,6 +32,10 @@ public class FailureRecovery implements Job {
 
     public FailureRecovery(List<FailedConnection> failedConnectionList){
         failedConnections = failedConnectionList;
+    }
+
+    public int getFailedConnectionCount(){
+        return failedConnections.size();
     }
 
     public void addFailedConnection(FailedConnection failedConnection){
@@ -84,28 +89,36 @@ public class FailureRecovery implements Job {
         return THRESHOLD;
     }
 
-    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    public void execute()  {
         Date date = new Date();
         long now = date.getTime();
 
         List<Integer> connectionIndex = new LinkedList<Integer>();
 
-        LOG.debug("Executing failure recovery");
+        LOG.debug("net.es.lookup.pubsub.client.failover.FailureHandler.execute: Executing failure recovery. Attempting to connect: "+failedConnections.size()+"connections");
         for (FailedConnection failedConnection : failedConnections){
 
             //if time period is within the aggressive ping thresold
             if((failedConnection.getTimeOfInitialFailure()-now) <= THRESHOLD){
                 boolean res = failedConnection.reconnect();
-
+                LOG.debug("net.es.lookup.pubsub.client.failover.FailureHandler.execute: Trying to connect:"+failedConnection.getSubscriber().getQueueUrl());
                 if(res){
                     connectionIndex.add(failedConnections.indexOf(failedConnection));
                 }
             }else{
                 if(failedConnection.getTimeOfLastFailure() >= REGULAR_PING_PERIOD){
+                    LOG.debug("Adding to regular ping period:"+failedConnection.getSubscriber().getQueueUrl());
                     boolean res = failedConnection.reconnect();
                     if(res){
                         connectionIndex.add(failedConnections.indexOf(failedConnection));
                     }
+                }else if(failedConnection.getReconnectionAttempts() > FailedConnection.MAX_RECONNECTION_ATTEMPTS){
+                    try {
+                        failedConnection.getSubscriber().shutdown();
+                    } catch (LSClientException e) {
+                        LOG.error("net.es.lookup.pubsub.client.failover.FailureHandler.execute: Error shutting down Subscriber");
+                    }
+                    connectionIndex.add(failedConnections.indexOf(failedConnection));
                 }
             }
 

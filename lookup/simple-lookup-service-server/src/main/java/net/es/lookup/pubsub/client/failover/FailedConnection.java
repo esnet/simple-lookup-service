@@ -13,13 +13,14 @@ import java.util.Date;
  * Date: 12/18/13
  * Time: 10:45 PM
  */
-public class
-        FailedConnection {
+public class FailedConnection {
 
     private Subscriber subscriber;
     private long timeOfInitialFailure;
     private long timeOfLastFailure;
     private int reconnectionAttempts;
+
+    public static final int MAX_RECONNECTION_ATTEMPTS = 10;
 
 
     public FailedConnection(Subscriber subscriber){
@@ -80,6 +81,8 @@ public class
     public boolean reconnect(){
 
         try {
+            subscriber.initiateSubscription();
+
             subscriber.startSubscription();
             return true;
         } catch (LSClientException e) {

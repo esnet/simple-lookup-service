@@ -5,6 +5,7 @@ import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.pubsub.client.Cache;
 import java.util.List;
 
+import net.es.lookup.pubsub.client.failover.FailureHandler;
 import net.es.lookup.pubsub.client.failover.FailureRecovery;
 import org.apache.log4j.Logger;
 import org.quartz.JobDetail;
@@ -47,6 +48,10 @@ public class CacheService {
 
     }
 
+    public List<Cache>getCacheList(){
+        return cacheList;
+    }
+
     public static synchronized CacheService initialize(List<Cache> cacheList, Scheduler scheduler) throws LSClientException {
 
         if (instance != null) {
@@ -62,16 +67,15 @@ public class CacheService {
     }
 
     public void startService() {
+
         LOG.debug("net.es.lookup.service.CacheService: starting cache");
-        for (Cache cache : cacheList) {
             try {
-                FailureRecovery failureRecovery = cache.getFailureRecovery();
-                JobDetail job = newJob(FailureRecovery.class)
-                        .withIdentity(cache.getName() + "-failure-recovery", "FailureRecovery")
+                JobDetail job = newJob(FailureHandler.class)
+                        .withIdentity("failure-handler", "FailureHandler")
                         .build();
 
                 // Trigger the job to run now, and then every dbpruneInterval seconds
-                Trigger trigger = newTrigger().withIdentity(cache.getName() + "-failure-recovery-trigger", "DBMaintenance")
+                Trigger trigger = newTrigger().withIdentity("failure-handler-trigger", "FailureHandler")
                         .startNow()
                         .withSchedule(simpleSchedule()
                                 .withIntervalInSeconds(FAILURE_RECOVERY_INTERVAL)
@@ -80,13 +84,20 @@ public class CacheService {
                         .build();
 
                 this.scheduler.scheduleJob(job, trigger);
-                cache.start();
-            } catch (LSClientException e) {
-                LOG.error("net.es.lookup.service.CacheService: Error starting cache- " + cache.getName());
-            } catch (SchedulerException e) {
-                LOG.error("net.es.lookup.service.CacheService: Cannot start failure recovery for: " + cache.getName());
+
+                for(Cache cache: cacheList){
+                    try {
+                        cache.start();
+                    } catch (LSClientException e) {
+                        LOG.error("net.es.lookup.service.CacheService: Error starting cache- " + cache.getName());
+
+                    }
+                }
+
+           } catch (SchedulerException e) {
+                LOG.error("net.es.lookup.service.CacheService: Cannot start failure handler");
             }
-        }
+
     }
 
     public void stopService() {

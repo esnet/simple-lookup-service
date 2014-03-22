@@ -1,8 +1,8 @@
 #!/usr/bin/bash
 
 APP_NAME="Simple Lookup Service"
-VERSION="0.1"
-SHORTNAME=simple-lookup-service
+VERSION="1.0"
+SHORTNAME=lookup-service
 JAR_FILE=${SHORTNAME}-server-${VERSION}.one-jar.jar
 USER=lookup
 

@@ -88,6 +88,7 @@ public class Cache implements SubscriberListener {
         return connectedSubscribers;
     }
 
+
     private void initialize() throws LSClientException {
 
         int count = publishers.size();
@@ -104,10 +105,10 @@ public class Cache implements SubscriberListener {
                 int port = uri.getPort();
 
                 SimpleLS server = new SimpleLS(host, port);
-                List<Map<String,Object>> queryList=  source.getQueries();
+                List<Map<String, Object>> queryList = source.getQueries();
 
                 if (queryList != null && !queryList.isEmpty()) {
-                    for (Map<String,Object> queryMap : queryList) {
+                    for (Map<String, Object> queryMap : queryList) {
                         Query query = new Query(queryMap);
                         Subscriber subscriber = new Subscriber(server, query, subscribeRelativeUrl);
                         subscriber.addListener(this);
@@ -125,7 +126,7 @@ public class Cache implements SubscriberListener {
     /**
      * This methods starts the subscription connection. The cache for sLS will first do a pull request on the query to get the current
      * set of records and then will start subscription
-     * */
+     */
     public void start() throws LSClientException {
 
         LOG.info("net.es.lookup.pubsub.client.Cache.start: Starting the subscriber connections");
@@ -154,7 +155,7 @@ public class Cache implements SubscriberListener {
 
     /**
      * This method stops the subscription.
-     * */
+     */
 
     public void stop() throws LSClientException {
 
@@ -171,7 +172,7 @@ public class Cache implements SubscriberListener {
     /**
      * This method queries the publisher and retrieves the initial set of records
      * matching the query.
-     * */
+     */
     private void getRecords(Query query, SimpleLS server) throws LSClientException, QueryException, ParserException {
 
         QueryClient queryClient = new QueryClient(server);
@@ -192,49 +193,56 @@ public class Cache implements SubscriberListener {
 
     /**
      * Every subscriber listener is expected to implement the onRecord method. This method defines how to deal with incoming records
-     * */
+     */
 
     public void onRecord(Record record) throws LSClientException {
 
         LOG.info("net.es.lookup.pubsub.client.Cache.onRecord: Processing Received message");
-        LOG.debug("net.es.lookup.pubsub.client.Cache.onRecord"+record.getRecordType());
-        if(record.getRecordType().equals(ReservedValues.RECORD_VALUE_TYPE_ERROR)){
-            Subscriber subscriber = (Subscriber)record.getValue(ReservedKeys.SUBSCRIBER);
-            LOG.debug("net.es.lookup.pubsub.client.Cache.onRecord:"+record.getValue(ReservedKeys.ERROR_MESSAGE));
-            if(subscriber == null){
+        LOG.debug("net.es.lookup.pubsub.client.Cache.onRecord" + record.getRecordType());
+        if (record.getRecordType().equals(ReservedValues.RECORD_VALUE_TYPE_ERROR)) {
+            String subscriberUrl = (String) record.getValue(ReservedKeys.SUBSCRIBER);
+            String queue = (String) record.getValue(ReservedKeys.QUEUE);
+            String queueUrl = (String) record.getValue(ReservedKeys.QUEUE_URL);
+            LOG.debug("net.es.lookup.pubsub.client.Cache.onRecord:" + record.getValue(ReservedKeys.ERROR_MESSAGE));
+            if (subscriberUrl == null) {
                 LOG.debug("net.es.lookup.pubsub.client.Cache.onRecord: Subscriber null");
             }
             Subscriber toBeRemoved = null;
             LOG.debug("net.es.lookup.pubsub.client.Cache.onRecord: About to find subscriber from the active connections list");
-            for(Subscriber s: connectedSubscribers){
-                if(s.getQueue().equals(subscriber.getQueue()) && s.getSubscribeRequestUrl().equals(subscriber.getSubscribeRequestUrl())){
+            for (Subscriber s : connectedSubscribers) {
+                if (s.getSubscribeRequestUrl().equals(subscriberUrl) && s.getQueue().equals(queue) && s.getQueueUrl().equals(queueUrl)) {
                     toBeRemoved = s;
                 }
             }
-            if(toBeRemoved != null){
+            if (toBeRemoved != null) {
 
-            boolean removedFromActiveList = this.connectedSubscribers.remove(toBeRemoved);
-            if(removedFromActiveList){
-                subscriber.stopSubscription();
-                FailedConnection failedConnection = new FailedConnection(subscriber);
-                failureRecovery.addFailedConnection(failedConnection);
-                LOG.error("net.es.lookup.pubsub.client.Cache.onRecord: Tore down subscriber connection. Added subscriber to failed connection");
-            }else{
-                throw new LSClientException("net.es.lookup.pubsub.client.Cache.onRecord: Failed to remove failedConnection from active list. Exiting");
-            }
+                boolean removedFromActiveList = this.connectedSubscribers.remove(toBeRemoved);
+                if (removedFromActiveList) {
 
-            }else{
+                    toBeRemoved.stopSubscription();
+                    FailedConnection failedConnection = new FailedConnection(toBeRemoved);
+                   // toBeRemoved.addListener(this);
+                    failureRecovery.addFailedConnection(failedConnection);
+
+                    LOG.error("net.es.lookup.pubsub.client.Cache.onRecord: Tore down subscriber connection. Added subscriber to failed connection");
+                    LOG.debug("net.es.lookup.pubsub.client.Cache.onRecord: Number of failed connections: "+ failureRecovery.getFailedConnectionCount());
+                } else {
+                    throw new LSClientException("net.es.lookup.pubsub.client.Cache.onRecord: Failed to remove failedConnection from active list. Exiting");
+                }
+
+            } else {
                 throw new LSClientException("net.es.lookup.pubsub.client.Cache.onRecord: Cannot find subscriber. Cannot run failure recovery on this subscriber");
             }
 
 
-        }
-        try {
-            save(record);
-        } catch (DuplicateEntryException e) {
-            LOG.error("net.es.lookup.pubsub.client.Cache.onRecord: Error saving record" + e.getMessage());
-        } catch (DatabaseException e) {
-            LOG.error("net.es.lookup.pubsub.client.Cache.onRecord: Error saving record" + e.getMessage());
+        } else {
+            try {
+                save(record);
+            } catch (DuplicateEntryException e) {
+                LOG.error("net.es.lookup.pubsub.client.Cache.onRecord: Error saving record" + e.getMessage());
+            } catch (DatabaseException e) {
+                LOG.error("net.es.lookup.pubsub.client.Cache.onRecord: Error saving record" + e.getMessage());
+            }
         }
     }
 
@@ -248,6 +256,7 @@ public class Cache implements SubscriberListener {
      * @param record The record to be save or updated
      */
     private void save(Record record) throws DuplicateEntryException, DatabaseException {
+
         ServiceDAOMongoDb db = DBPool.getDb(this.name);
 
         //register and renew are dealt the same way in both archive and replication cache If it changes for other types of cache,
@@ -283,7 +292,7 @@ public class Cache implements SubscriberListener {
 
         }
 
-        if(this.type.equals(ReservedValues.CACHE_TYPE_ARCHIVE)){
+        if (this.type.equals(ReservedValues.CACHE_TYPE_ARCHIVE)) {
             if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_EXPIRE)) {
                 String recordUri = record.getURI();
                 Message message = new Message(record.getMap());
@@ -298,7 +307,7 @@ public class Cache implements SubscriberListener {
                 db.updateService(recordUri, message);
 
             }
-        }else if(this.type.equals(ReservedValues.CACHE_TYPE_REPLICATION)){
+        } else if (this.type.equals(ReservedValues.CACHE_TYPE_REPLICATION)) {
             if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_EXPIRE)) {
                 String recordUri = record.getURI();
                 Message message = new Message(record.getMap());
