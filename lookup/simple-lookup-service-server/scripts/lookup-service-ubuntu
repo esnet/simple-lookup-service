@@ -4,7 +4,6 @@
 #Service specific variables
 SHORT_NAME=lookup-service
 LONG_NAME="Simple Lookup Service"
-VERSION="1.0"
 
 #LS variables
 HOME_PREFIX=/etc/$SHORT_NAME
@@ -20,7 +19,7 @@ GROUP=lookup
 STOP_TIMEOUT=10
 RESTART_DELAY=5
 PIDFILE=$RUNDIR/$SHORT_NAME.pid
-JARFILE=$DIST_PREFIX/target/$SHORT_NAME-server-$VERSION.one-jar.jar
+JARFILE=$DIST_PREFIX/target/$SHORT_NAME-server.one-jar.jar
 LOOKUPSERVICE_CMD="$BINDIR/startServer.sh"
 LOOKUPSERVICE_CMD_OPTION=" $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.properties > $LOGDIR/$SHORT_NAME.out -d $QDATADIR 2>&1"
 
