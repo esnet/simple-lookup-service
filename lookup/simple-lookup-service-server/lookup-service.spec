@@ -1,5 +1,6 @@
 %define package_name lookup-service
-%define mvn_project_list %{package_name}-server 
+%define mvn_project_name simple-lookup-service
+%define mvn_project_list %{mvn_project_name}-keywords,%{mvn_project_name}-client,%{mvn_project_name}-server
 %define install_base /opt/%{package_name}
 %define config_base /etc/%{package_name}
 %define log_dir /var/log/%{package_name}
@@ -14,14 +15,14 @@ Summary:        Lookup Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://code.google.com/p/esnet-perfsonar
-Source0:        simple-lookup-service.tar.gz
+Source0:        %{mvn_project_name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  java-openjdk >= 1.6.0
 BuildRequires:  sed 
 BuildArch:      noarch
 Requires:       java-openjdk >= 1.6.0
 Requires:       chkconfig
-Requires:	mongo-10gen
+Requires:	    mongo-10gen-server
 %description
 Lookup Service is used to find registered services. 
 This package provides a server that allows clients to register and query services 
@@ -32,13 +33,13 @@ via REST interface.
 /usr/sbin/useradd -g lookup -r -s /sbin/nologin -c "Lookup Service User" -d /tmp lookup 2> /dev/null || :
 
 %prep
-%setup -q -n simple-lookup-service
+%setup -q -n  %{mvn_project_name}
 
 %clean
 rm -rf %{buildroot}
 
 %build
-mvn -DskipTests --projects %{mvn_project_list} clean package
+mvn --projects %{mvn_project_list} clean
 
 %install
 #Clean out previous build
@@ -54,7 +55,7 @@ mkdir -p %{buildroot}/%{config_base}
 mkdir -p %{buildroot}/etc/init.d
 
 #Copy jar files and scripts
-cp %{_builddir}/%{package_name}/%{package_name}-server/target/*.jar %{buildroot}/%{install_base}/target/
+cp %{_builddir}/%{package_name}/%{mvn_project_name}-server/target/*.jar %{buildroot}/%{install_base}/target/
 install -m 755 %(pwd)/bin/* %{buildroot}/%{install_base}/bin/
 install -m 755 %(pwd)/scripts/lookup-service %{buildroot}/etc/init.d/%{package_name}
 
@@ -87,8 +88,8 @@ if [ "$1" = "2" ]; then
 fi
 ln -s %{install_base}/target/%{package_name}-server-%{version}.one-jar.jar %{install_base}/target/%{package_name}.one-jar.jar
 chown lookup:lookup %{install_base}/target/%{package_name}-server-%{version}.one-jar.jar
-ln -s %{install_base}/target/%{package_name}-server-%{version}.jar %{install_base}/target/%{package_name}.jar
-chown lookup:lookup %{install_base}/target/%{package_name}-server-%{version}.jar
+#ln -s %{install_base}/target/%{mvn_project_name}-server-%{version}.jar %{install_base}/target/%{package_name}.jar
+#chown lookup:lookup %{install_base}/target/%{mvn_project_name}-server-%{version}.jar
 
 #Configure service to start when machine boots
 /sbin/chkconfig --add %{package_name}
@@ -104,6 +105,6 @@ chown lookup:lookup %{install_base}/target/%{package_name}-server-%{version}.jar
 if [ $1 -eq 0 ]; then
     /sbin/chkconfig --del %{package_name}
     /sbin/service %{package_name} stop
-    unlink %{install_base}/target/%{package_name}-server-%{version}.one-jar.jar
-    unlink %{install_base}/target/%{package_name}-server-%{version}.jar
+    unlink %{install_base}/target/%{package_name}.one-jar.jar
+    unlink %{install_base}/target/%{package_name}.jar
 fi
