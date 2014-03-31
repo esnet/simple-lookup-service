@@ -2,12 +2,12 @@
 
 . /lib/lsb/init-functions
 #Service specific variables
-SHORT_NAME=simple-lookup-service
+SHORT_NAME=lookup-service
 LONG_NAME="Simple Lookup Service"
 VERSION="1.0"
 
 #LS variables
-HOME_PREFIX=/etc/opt/$SHORT_NAME
+HOME_PREFIX=/etc/$SHORT_NAME
 DIST_PREFIX=/opt/$SHORT_NAME
 BINDIR=$DIST_PREFIX/bin
 QDATADIR=$DIST_PREFIX/data
