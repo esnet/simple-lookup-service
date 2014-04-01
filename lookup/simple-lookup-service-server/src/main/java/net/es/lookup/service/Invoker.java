@@ -15,7 +15,7 @@ import net.es.lookup.pubsub.amq.AMQueuePump;
 import net.es.lookup.pubsub.client.Cache;
 import net.es.lookup.utils.config.elements.CacheConfig;
 import net.es.lookup.utils.config.elements.PublisherConfig;
-import net.es.lookup.utils.config.reader.BootStrapConfigReader;
+//import net.es.lookup.utils.config.reader.BootStrapConfigReader;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import net.es.lookup.utils.config.reader.SubscriberConfigReader;
@@ -45,7 +45,7 @@ public class Invoker {
     private static LookupServiceConfigReader lcfg;
     private static SubscriberConfigReader sfg;
     private static QueueServiceConfigReader qcfg;
-    private static BootStrapConfigReader bcfg;
+ //   private static BootStrapConfigReader bcfg;
     private static String configPath = "etc/";
     private static String lookupservicecfg = "lookupservice.yaml";
     private static String queuecfg = "queueservice.yaml";
@@ -78,12 +78,12 @@ public class Invoker {
         LookupServiceConfigReader.init(configPath + lookupservicecfg);
         QueueServiceConfigReader.init(configPath + queuecfg);
 
-        BootStrapConfigReader.init(configPath + bootstrapcfg);
+      //  BootStrapConfigReader.init(configPath + bootstrapcfg);
 
 
         lcfg = LookupServiceConfigReader.getInstance();
         qcfg = QueueServiceConfigReader.getInstance();
-        bcfg = BootStrapConfigReader.getInstance();
+    //    bcfg = BootStrapConfigReader.getInstance();
 
         port = lcfg.getPort();
         host = lcfg.getHost();

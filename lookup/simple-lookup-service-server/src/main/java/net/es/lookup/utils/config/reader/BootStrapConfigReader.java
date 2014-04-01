@@ -1,3 +1,4 @@
+/*
 package net.es.lookup.utils.config.reader;
 
 import net.es.lookup.common.exception.internal.ConfigurationException;
@@ -7,11 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+*/
 /**
  * Author: sowmya
  * Date: 8/5/13
  * Time: 4:26 PM
- */
+ *//*
+
 public class BootStrapConfigReader {
 
     private static BootStrapConfigReader instance;
@@ -24,25 +27,31 @@ public class BootStrapConfigReader {
 
     private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
 
-    /**
+    */
+/**
      * Constructor - private because this is a Singleton
-     */
+     *//*
+
     private BootStrapConfigReader() {
 
     }
 
-    /*
+    */
+/*
    * set the config file
-   * */
+   * *//*
+
 
     public static void init(String cFile) {
 
         configFile = cFile;
     }
 
-    /**
+    */
+/**
      * @return the initialized LookupServiceConfigReader singleton instance
-     */
+     *//*
+
     public static BootStrapConfigReader getInstance() throws ConfigurationException {
 
         if (BootStrapConfigReader.instance == null) {
@@ -110,3 +119,4 @@ public class BootStrapConfigReader {
 
 
 }
+*/

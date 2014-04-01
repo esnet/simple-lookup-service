@@ -84,12 +84,10 @@ chown lookup:lookup %{data_dir}
 ##if update then delete old links
 if [ "$1" = "2" ]; then
   unlink %{install_base}/target/%{package_name}.one-jar.jar
-  unlink %{install_base}/target/%{package_name}.jar
 fi
 ln -s %{install_base}/target/%{package_name}-server-%{version}.one-jar.jar %{install_base}/target/%{package_name}.one-jar.jar
 chown lookup:lookup %{install_base}/target/%{package_name}-server-%{version}.one-jar.jar
 #ln -s %{install_base}/target/%{mvn_project_name}-server-%{version}.jar %{install_base}/target/%{package_name}.jar
-#chown lookup:lookup %{install_base}/target/%{mvn_project_name}-server-%{version}.jar
 
 #Configure service to start when machine boots
 /sbin/chkconfig --add %{package_name}
@@ -106,5 +104,4 @@ if [ $1 -eq 0 ]; then
     /sbin/chkconfig --del %{package_name}
     /sbin/service %{package_name} stop
     unlink %{install_base}/target/%{package_name}.one-jar.jar
-    unlink %{install_base}/target/%{package_name}.jar
 fi
