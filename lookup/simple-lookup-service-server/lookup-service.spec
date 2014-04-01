@@ -51,7 +51,6 @@ mvn -DskipTests --projects %{mvn_project_list} install
 #Create directory structure for build root
 mkdir -p %{buildroot}/%{install_base}/target
 mkdir -p %{buildroot}/%{install_base}/bin
-mkdir -p %{buildroot}/%{install_base}/data
 mkdir -p %{buildroot}/%{config_base}
 mkdir -p %{buildroot}/etc/init.d
 
@@ -81,9 +80,12 @@ chown lookup:lookup %{log_dir}
 mkdir -p %{data_dir}
 chown lookup:lookup %{data_dir}
 
+#Create queuedir
+mkdir -p %{install_base}/data
+chown lookup:lookup %{install_base}/data
 #Create symbolic links to latest version of jar files
 ##if update then delete old links
-if [ "$1" = "2" ]; then
+if [ $1 == 2 ]; then
   unlink %{install_base}/target/%{package_name}.one-jar.jar
 fi
 ln -s %{install_base}/target/%{mvn_project_name}-server-%{version}.one-jar.jar %{install_base}/target/%{package_name}-server.one-jar.jar
@@ -101,7 +103,7 @@ chown lookup:lookup %{install_base}/target/%{package_name}-server.one-jar.jar
 /etc/init.d/%{package_name}
 
 %preun
-if [ $1 -eq 0 ]; then
+if [ $1 == 0 ]; then
     /sbin/chkconfig --del %{package_name}
     /sbin/service %{package_name} stop
     unlink %{install_base}/target/%{package_name}-server.one-jar.jar
