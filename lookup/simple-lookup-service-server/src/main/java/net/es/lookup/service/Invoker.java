@@ -50,13 +50,10 @@ public class Invoker {
     private static String lookupservicecfg = "lookupservice.yaml";
     private static String queuecfg = "queueservice.yaml";
     private static String subscribecfg = "subscriber.yaml";
-    private static String bootstrapcfg = "bootstrap.yaml";
-    private static String bootstrapoutput = "active-hosts.json";
     private static String logConfig = "./etc/log4j.properties";
     private static String queueDataDir = "../elements";
 
     private static boolean cacheServiceRequest = false;
-//    private static boolean bootstrapservice = false;
 
     /**
      * Main program to start the Lookup ServiceRecord
@@ -78,17 +75,12 @@ public class Invoker {
         LookupServiceConfigReader.init(configPath + lookupservicecfg);
         QueueServiceConfigReader.init(configPath + queuecfg);
 
-      //  BootStrapConfigReader.init(configPath + bootstrapcfg);
-
 
         lcfg = LookupServiceConfigReader.getInstance();
         qcfg = QueueServiceConfigReader.getInstance();
-    //    bcfg = BootStrapConfigReader.getInstance();
 
         port = lcfg.getPort();
         host = lcfg.getHost();
-//        bootstrapservice = lcfg.isBootstrapserviceOn();
-
         cacheServiceRequest = lcfg.isCacheserviceOn();
 
         int dbpruneInterval = lcfg.getPruneInterval();
@@ -111,24 +103,7 @@ public class Invoker {
                 services.add(LookupService.LOOKUP_SERVICE);
             }
 
-/*            if(lcfg.isBootstrapserviceOn()){
-                services.add(LookupService.BOOTSTRAP_SERVICE);
 
-                Scheduler bootstrapScheduler = StdSchedulerFactory.getDefaultScheduler();
-                bootstrapScheduler.start();
-                JobDetail bootstrapJob = newJob(ScanLSJob.class)
-                        .withIdentity("scanLS", "bootstrap")
-                        .build();
-
-                Trigger bootstrapTrigger = newTrigger().withIdentity("scanLSTrigger", "bootstrap")
-                        .startNow()
-                        .withSchedule(simpleSchedule()
-                                .repeatForever()
-                                .withIntervalInSeconds(1800))
-                        .build();
-
-                bootstrapScheduler.scheduleJob(bootstrapJob, bootstrapTrigger);
-            } */
             if (cacheServiceRequest) {
                 SubscriberConfigReader.init(configPath + subscribecfg);
                 sfg = SubscriberConfigReader.getInstance();

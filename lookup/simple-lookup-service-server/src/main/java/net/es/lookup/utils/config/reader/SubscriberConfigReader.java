@@ -2,9 +2,6 @@ package net.es.lookup.utils.config.reader;
 
 import net.es.lookup.bootstrap.BootStrapClient;
 import net.es.lookup.common.exception.internal.ConfigurationException;
-import net.es.lookup.pubsub.Publisher;
-import net.es.lookup.queries.Query;
-import net.es.lookup.pubsub.client.Cache;
 import net.es.lookup.utils.config.elements.CacheConfig;
 import net.es.lookup.utils.config.elements.PublisherConfig;
 import org.apache.log4j.Logger;

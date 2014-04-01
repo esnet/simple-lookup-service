@@ -8,7 +8,6 @@ lookupservice:
         default: 1800
         min: 7200
     coreservice: 'on'
-    bootstrapservice: 'off'
     cacheservice: 'off'
 
 #Database settings  

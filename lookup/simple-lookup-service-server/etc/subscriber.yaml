@@ -1,10 +1,9 @@
+#All caches are read-only
 caches:
     - name: "cache"
       type: "replication"
-      sources:
-        - locator: "http://localhost:8090/lookup/bootstrap"
+      publishers:
+        - locator: "http://localhost:8090/lookup/subscribe"
           queries:
             - type: "service"
-
-bootstrapserver: "http://localhost:8090/lookup/bootstrap"
 

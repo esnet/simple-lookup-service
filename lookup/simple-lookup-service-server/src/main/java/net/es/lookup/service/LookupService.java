@@ -35,7 +35,6 @@ public class LookupService {
     private boolean queueServiceRequired;
     private static final int MAX_SERVICES = 10;
     public static final String LOOKUP_SERVICE = "lookup" ;
-    public static final String BOOTSTRAP_SERVICE = "bootstrap";
     public static final String QUEUE_SERVICE = "queue-service";
 
 
@@ -143,9 +142,6 @@ public class LookupService {
 
         }else{
 
-  //          if(services.contains(BOOTSTRAP_SERVICE)){
-  //              resources.add(BootStrapResource.class.getName());
-  //          }
 
             resources.add(RecordResource.class.getName());
             resources.add(KeyResource.class.getName());

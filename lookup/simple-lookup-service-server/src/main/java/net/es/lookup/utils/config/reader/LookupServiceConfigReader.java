@@ -28,8 +28,6 @@ public class LookupServiceConfigReader {
     private int minlease;
     private int defaultlease;
 
-    //Bootstrap service
-    private boolean bootstrapservice = false;
 
     //core service
     private boolean coreservice = false;
@@ -133,9 +131,6 @@ public class LookupServiceConfigReader {
         return this.pruneThreshold;
     }
 
-    public boolean isBootstrapserviceOn() {
-        return bootstrapservice;
-    }
 
     public boolean isCoreserviceOn() {
 
@@ -166,14 +161,6 @@ public class LookupServiceConfigReader {
                 coreservice = true;
             }else{
                 coreservice = false;
-            }
-
-            String bootstrap = (String) lookupServiceMap.get("bootstrapservice");
-
-            if(bootstrap != null && bootstrap.equalsIgnoreCase("on")){
-                bootstrapservice = true;
-            }else{
-                bootstrapservice = false;
             }
 
             String cs = (String) lookupServiceMap.get("cacheservice");
