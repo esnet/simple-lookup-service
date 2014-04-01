@@ -3,11 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.es.lookup</groupId>
     <artifactId>SIMPLELOOKUPSERVICE</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <packaging>pom</packaging>
     <name>Simple Lookup Service</name>
     <properties>
-        <lookup.version>1.0</lookup.version>
         <java.version>1.5</java.version>
     </properties>
 
