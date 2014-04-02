@@ -154,7 +154,7 @@ public class Invoker {
         System.out.println("Starting queue at Queue url:" + qcfg.getUrl());
         Invoker.lookupService.setQueueurl(qcfg.getUrl());
 
-        if (Invoker.cacheService.isInitialized()) {
+        if (cacheServiceRequest && Invoker.cacheService.isInitialized()) {
             System.out.println("Starting cache service");
             Invoker.cacheService.startService();
         } else{

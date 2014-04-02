@@ -55,17 +55,17 @@ mkdir -p %{buildroot}/%{config_base}
 mkdir -p %{buildroot}/etc/init.d
 
 #Copy jar files and scripts
-cp %{_builddir}/%{package_name}/%{mvn_project_name}-server/target/*.jar %{buildroot}/%{install_base}/target/
-install -m 755 %{_builddir}/%{package_name}/%{mvn_project_name}-server/bin/* %{buildroot}/%{install_base}/bin/
-install -m 755 %{_builddir}/%{package_name}/%{mvn_project_name}-server/scripts/lookup-service %{buildroot}/etc/init.d/%{package_name}
+cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/target/*.jar %{buildroot}/%{install_base}/target/
+install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/bin/* %{buildroot}/%{install_base}/bin/
+install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scripts/lookup-service %{buildroot}/etc/init.d/%{package_name}
 
 # Copy default config file
-cp %{_builddir}/%{package_name}/%{mvn_project_name}-server/etc/lookupservice.yaml %{buildroot}/%{config_base}/lookupservice.yaml
-cp %{_builddir}/%{package_name}/%{mvn_project_name}-server/etc/subscriber.yaml %{buildroot}/%{config_base}/subscriber.yaml
-cp %{_builddir}/%{package_name}/%{mvn_project_name}-server/etc/queueservice.yaml %{buildroot}/%{config_base}/queueservice.yaml
+cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/lookupservice.yaml %{buildroot}/%{config_base}/lookupservice.yaml
+cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/subscriber.yaml %{buildroot}/%{config_base}/subscriber.yaml
+cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/queueservice.yaml %{buildroot}/%{config_base}/queueservice.yaml
 
 #Update log locations
-sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{_builddir}/%{package_name}/%{mvn_project_name}-server/etc/log4j.properties > %{buildroot}/%{config_base}/log4j.properties
+sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/log4j.properties > %{buildroot}/%{config_base}/log4j.properties
 
 %post
 #Create directory for PID files
