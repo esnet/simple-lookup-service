@@ -86,6 +86,7 @@ chown lookup:lookup %{install_base}/data
 #Create symbolic links to latest version of jar files
 ##if update then delete old links
 if [ $1 == 2 ]; then
+  rm %{config_base}/lookup-service.yaml
   unlink %{install_base}/target/%{package_name}.one-jar.jar
 fi
 ln -s %{install_base}/target/%{mvn_project_name}-server-%{version}.one-jar.jar %{install_base}/target/%{package_name}-server.one-jar.jar
