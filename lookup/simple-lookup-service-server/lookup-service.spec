@@ -6,7 +6,7 @@
 %define log_dir /var/log/%{package_name}
 %define run_dir /var/run/%{package_name}
 %define data_dir /var/lib/%{package_name}
-%define relnum 1 
+%define relnum 5 
 
 Name:           %{package_name}
 Version:        1.1
@@ -86,10 +86,17 @@ chown lookup:lookup %{install_base}/data
 #Create symbolic links to latest version of jar files
 ##if update then delete old links
 if [ $1 == 2 ]; then
-  rm %{config_base}/lookup-service.yaml
-  unlink %{install_base}/target/%{package_name}.one-jar.jar
+  if [ -e %{config_base}/lookup-service.yaml ]; then
+     rm %{config_base}/lookup-service.yaml
+  fi
+  if [ -L %{install_base}/target/%{package_name}.one-jar.jar ]; then
+      unlink %{install_base}/target/%{package_name}.one-jar.jar
+  fi
+  if [ -L %{install_base}/target/%{package_name}-server.one-jar.jar ]; then
+     unlink %{install_base}/target/%{package_name}-server.one-jar.jar
+  fi
 fi
-ln -s %{install_base}/target/%{mvn_project_name}-server-%{version}.one-jar.jar %{install_base}/target/%{package_name}-server.one-jar.jar
+   ln -s %{install_base}/target/%{mvn_project_name}-server-%{version}.one-jar.jar %{install_base}/target/%{package_name}-server.one-jar.jar
 chown lookup:lookup %{install_base}/target/%{package_name}-server.one-jar.jar
 #ln -s %{install_base}/target/%{mvn_project_name}-server-%{version}.jar %{install_base}/target/%{package_name}.jar
 
@@ -107,5 +114,10 @@ chown lookup:lookup %{install_base}/target/%{package_name}-server.one-jar.jar
 if [ $1 == 0 ]; then
     /sbin/chkconfig --del %{package_name}
     /sbin/service %{package_name} stop
-    unlink %{install_base}/target/%{package_name}-server.one-jar.jar
+    if [ -L %{install_base}/target/%{package_name}-server.one-jar.jar ]; then
+        unlink %{install_base}/target/%{package_name}-server.one-jar.jar
+    fi
+    if [ -L %{install_base}/target/%{package_name}.one-jar.jar ]; then
+        unlink %{install_base}/target/%{package_name}.one-jar.jar
+    fi
 fi
