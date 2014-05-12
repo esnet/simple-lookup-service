@@ -197,7 +197,7 @@ public class Invoker {
 
             for(String group: scheduler.getJobGroupNames()) {
                 // enumerate each job in group
-                for(JobKey jobKey : scheduler.getJobKeys((GroupMatcher<JobKey>) GroupMatcher.groupEquals(group))) {
+                for(JobKey jobKey : scheduler.getJobKeys(GroupMatcher.<JobKey>groupEquals(group))) {
                     System.out.println("Found job identified by: " + jobKey);
                 }
             }

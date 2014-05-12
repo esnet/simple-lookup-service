@@ -78,7 +78,7 @@ public class QueueServiceConfigReader {
 
     public String getUrl(){
         String host = LookupServiceConfigReader.getInstance().getHost();
-        String url = protocol + "://" + host + ":" + port;
+        String url = protocol + "://" + host + ":" + port + "?jms.prefetchPolicy.all=1";
         return url;
     }
 
