@@ -1,14 +1,14 @@
 ---
 #Lookup Service settings
 lookupservice:
-    host: 'sowmya-dev-vm.es.net'
-    port: 8090
+    host: 'localhost'
+    port: 8091
     lease:
         max: 2592000
-        default: 1800
-        min: 7200
+        default: 7200
+        min: 1800
     coreservice: 'on'
-    cacheservice: 'off'
+    cacheservice: 'on'
 
 #Database settings  
 database:

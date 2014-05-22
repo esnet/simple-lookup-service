@@ -37,11 +37,10 @@ public interface QueueManager {
      * This method pushes elements to queue
      *
      * @param qid     The queue id to which elements needs to be pushed to
-     * @param message The elements to be pushed
-     *
+     * @param messages
      * @return void
      */
-    public void push(String qid, Message message) throws PubSubQueueException;
+    public void push(String qid, List<Message> messages) throws PubSubQueueException;
 
     /**
      * This method returns all the queries that the QueueManager is handling

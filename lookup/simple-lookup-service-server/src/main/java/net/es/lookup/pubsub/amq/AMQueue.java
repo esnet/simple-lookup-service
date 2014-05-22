@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 
 import javax.jms.*;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -100,12 +101,12 @@ public class AMQueue extends Queue {
     /**
      * This method pushes a single message to the Active MQ Queue.
      *
-     * @param message The message to be pushed to queue
+     * @param messages The message to be pushed to queue
      */
-    public void push(Message message) throws PubSubQueueException {
+    public void push(List<Message> messages) throws PubSubQueueException {
 
         try {
-            String strmsg = JSONMessage.toString(message);
+            String strmsg = JSONMessage.toString(messages);
             TextMessage txtmsg = session.createTextMessage(strmsg);
             LOG.debug("net.es.lookup.pubsub.amq.AMQueue.push: Received message to push - "+ strmsg);
             producer.send(txtmsg);

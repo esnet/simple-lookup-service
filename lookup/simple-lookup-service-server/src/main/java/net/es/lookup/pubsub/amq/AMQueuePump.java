@@ -7,6 +7,7 @@ import net.es.lookup.pubsub.QueuePump;
 import net.es.lookup.pubsub.QueueServiceMapping;
 import org.apache.log4j.Logger;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -46,19 +47,24 @@ public class AMQueuePump implements QueuePump {
         //optimized for queries with only 1 key-value pair
         for (Message query : queries){
             Map<String,Object> queryMap = query.getMap();
+            List<Message> messagesToSend = new LinkedList<Message>();
+
             for (String key: queryMap.keySet()){
                 for (Message message : messageList){
                     if (message.hasKey(key) && message.getKey(key).equals(queryMap.get(key))){
                         LOG.debug("net.es.lookup.pubsub.amq.AMQueuePump.fillQueues: Message "+message.getMap()+" mapped to query"+ query.getMap());
-                        List <String> qids = amQueueManager.getQueues(query);
+                        messagesToSend.add(message);
 
-                        for(String qid: qids){
-                            LOG.debug("net.es.lookup.pubsub.amq.AMQueuePump.fillQueues: Message "+message.getMap()+" mapped to queue"+ qid);
-                            if(qid != null && !qid.isEmpty()){
-                                    amQueueManager.push(qid,message);
-                            }
-                        }
+                    }
+                }
+            }
 
+            if(!messagesToSend.isEmpty()){
+                List <String> qids = amQueueManager.getQueues(query);
+
+                for(String qid: qids){
+                    if(qid != null && !qid.isEmpty()){
+                        amQueueManager.push(qid,messagesToSend);
                     }
                 }
             }

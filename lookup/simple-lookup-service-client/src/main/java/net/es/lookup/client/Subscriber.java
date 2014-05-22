@@ -127,7 +127,7 @@ public class Subscriber {
                     throw new LSClientException(e.getMessage());
                 }
                 String queUrl = record.getLocator().get(0);
-                this.queueUrl = queUrl+ "?jms.prefetchPolicy.all=1";
+                this.queueUrl = queUrl;
                 this.queue = record.getQueues().get(0);
             } else {
                 LOG.debug("net.es.lookup.client.Subscriber: Error in response:" + server.getErrorMessage());

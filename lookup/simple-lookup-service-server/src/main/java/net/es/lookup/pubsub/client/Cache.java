@@ -261,65 +261,97 @@ public class Cache implements SubscriberListener {
 
         //register and renew are dealt the same way in both archive and replication cache If it changes for other types of cache,
         //reorganize the code in this section
+
+        Message message = new Message(record.getMap());
+        Map<String, Object> keyValues = record.getMap();
+        Message operators = new Message();
+        Message query = new Message();
+
+        Iterator it = keyValues.entrySet().iterator();
+        LOG.info("net.es.lookup.pubsub.client.Cache.save: Constructing query based on message");
+        while (it.hasNext()) {
+
+            Map.Entry<String, Object> pairs = (Map.Entry) it.next();
+            operators.add(pairs.getKey(), ReservedValues.RECORD_OPERATOR_ALL);
+            query.add(pairs.getKey(), pairs.getValue());
+
+        }
+
         if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_REGISTER)) {
             LOG.info("net.es.lookup.pubsub.client.Cache.save: insert as new record");
-            Message message = new Message(record.getMap());
-            Map<String, Object> keyValues = record.getMap();
-            Message operators = new Message();
-            Message query = new Message();
-
-            Iterator it = keyValues.entrySet().iterator();
-            LOG.info("net.es.lookup.pubsub.client.Cache.save: Constructing query based on message");
-            while (it.hasNext()) {
-
-                Map.Entry<String, Object> pairs = (Map.Entry) it.next();
-                operators.add(pairs.getKey(), ReservedValues.RECORD_OPERATOR_ALL);
-                query.add(pairs.getKey(), pairs.getValue());
-
-            }
-            LOG.info("net.es.lookup.pubsub.client.Cache.save: Check and insert record");
 
             db.queryAndPublishService(message, query, operators);
 
             LOG.info("net.es.lookup.pubsub.client.Cache.save: Inserted record");
 
         } else if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_RENEW)) {
+
+
             String recordUri = record.getURI();
-            Message message = new Message(record.getMap());
+            Message renewMessage = new Message(record.getMap());
             LOG.info("net.es.lookup.pubsub.client.Cache.save: renew existing record");
 
-            db.updateService(recordUri, message);
+            try{
+                db.updateService(recordUri, renewMessage);
+            }catch (DatabaseException dbe){
+                db.queryAndPublishService(message, query, operators);
+            }
+
+            LOG.info("net.es.lookup.pubsub.client.Cache.save: Inserted renew record");
 
         }
 
         if (this.type.equals(ReservedValues.CACHE_TYPE_ARCHIVE)) {
             if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_EXPIRE)) {
                 String recordUri = record.getURI();
-                Message message = new Message(record.getMap());
+                Message expiredMessage = new Message(record.getMap());
                 LOG.info("net.es.lookup.pubsub.client.Cache.save: Archiving expired record");
 
-                db.updateService(recordUri, message);
+                try{
+                    db.updateService(recordUri, expiredMessage);
+                }catch (DatabaseException dbe){
+                    db.queryAndPublishService(message, query, operators);
+                }
+
+                LOG.info("net.es.lookup.pubsub.client.Cache.save: Inserted expired record");
+
 
             } else if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_DELETE)) {
                 String recordUri = record.getURI();
-                Message message = new Message(record.getMap());
+                Message deletedMessage = new Message(record.getMap());
                 LOG.info("net.es.lookup.pubsub.client.Cache.save: Archiving 'deleted' record");
-                db.updateService(recordUri, message);
 
+                try {
+                    db.updateService(recordUri, deletedMessage);
+                }catch(DatabaseException dbe){
+                    db.queryAndPublishService(message, query, operators);
+                }
+
+                LOG.info("net.es.lookup.pubsub.client.Cache.save: Inserted deleted record");
             }
         } else if (this.type.equals(ReservedValues.CACHE_TYPE_REPLICATION)) {
             if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_EXPIRE)) {
                 String recordUri = record.getURI();
-                Message message = new Message(record.getMap());
+                //Message expiredMessage = new Message(record.getMap());
                 LOG.info("net.es.lookup.pubsub.client.Cache.save: Cache type is replication. Deleting 'expired' record");
 
-                db.updateService(recordUri, message);
+                try{
+                    db.deleteService(recordUri);
+                }catch (DatabaseException dbe){
+                    LOG.debug("net.es.lookup.pubsub.client.Cache.save: Did not find record");
+                }
 
             } else if (record.getRecordState().equals(ReservedValues.RECORD_VALUE_STATE_DELETE)) {
                 String recordUri = record.getURI();
-                Message message = new Message(record.getMap());
+                //Message deletedMessage = new Message(record.getMap());
                 LOG.info("net.es.lookup.pubsub.client.Cache.save: Cache type is replication. Deleting 'deleted' record");
-                db.updateService(recordUri, message);
+
+                try{
+                    db.deleteService(recordUri);
+                }catch (DatabaseException dbe){
+                    LOG.debug("net.es.lookup.pubsub.client.Cache.save: Did not find record");
+                }
+
 
             }
         }

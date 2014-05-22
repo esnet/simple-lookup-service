@@ -111,14 +111,14 @@ public class AMQueueManager implements QueueManager {
      * This method simply checks if queue exists and pushes the message to the queue. If queue does
      * not exist, it throws a PubSubQueueException.
      */
-    public void push(String qid, Message message) throws PubSubQueueException {
+    public void push(String qid, List<Message> messages) throws PubSubQueueException {
 
-        LOG.info("net.es.lookup.pubsub.amq.AMQueueManager.push: Pushing Message" + message + " to Queue " + qid);
+        LOG.info("net.es.lookup.pubsub.amq.AMQueueManager.push: Pushing Message" + messages + " to Queue " + qid);
         AMQueue queue = queueMap.get(qid);
 
         if (queue != null) {
-            queue.push(message);
-            LOG.debug("net.es.lookup.pubsub.amq.AMQueueManager.push: Pushed Message" + message + " to Queue " + qid);
+            queue.push(messages);
+            LOG.debug("net.es.lookup.pubsub.amq.AMQueueManager.push: Pushed Message" + messages + " to Queue " + qid);
         } else {
             LOG.error("net.es.lookup.pubsub.amq.AMQueueManager.push: Error pushing message to Queue. Queue does not exist");
             throw new PubSubQueueException("Queue does not exist");

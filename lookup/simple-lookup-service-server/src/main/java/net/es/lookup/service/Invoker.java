@@ -3,6 +3,7 @@ package net.es.lookup.service;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import net.es.lookup.common.MemoryManager;
 import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.DBPool;
@@ -201,6 +202,20 @@ public class Invoker {
                     System.out.println("Found job identified by: " + jobKey);
                 }
             }
+
+            JobDetail gcInvoker = newJob(MemoryManager.class)
+                    .withIdentity("gc", "MemoryManagement")
+                    .build();
+
+            Trigger gcTrigger = newTrigger().withIdentity("gc trigger", "MemoryManagement")
+                    .startNow()
+                    .withSchedule(simpleSchedule()
+                            .withIntervalInSeconds(60)
+                            .repeatForever()
+                            .withMisfireHandlingInstructionIgnoreMisfires())
+                    .build();
+
+            scheduler.scheduleJob(gcInvoker, gcTrigger);
 
 
 
