@@ -3,7 +3,8 @@ caches:
     - name: "cache"
       type: "replication"
       publishers:
-        - locator: "http://localhost:8090/lookup/subscribe"
+        - locator: "http://ps-west.es.net:8090/lookup/subscribe"
           queries:
-            - type: "service"
+            - "*"
+bootstrapserver: "http://ps1.es.net:8095/lookup/bootstrap"
 
