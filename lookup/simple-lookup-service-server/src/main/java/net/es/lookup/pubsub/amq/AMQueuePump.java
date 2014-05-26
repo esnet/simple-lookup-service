@@ -6,6 +6,7 @@ import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.pubsub.QueuePump;
 import net.es.lookup.pubsub.QueueServiceMapping;
 import org.apache.log4j.Logger;
+import net.es.lookup.common.ReservedKeys;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -48,17 +49,21 @@ public class AMQueuePump implements QueuePump {
         for (Message query : queries){
             Map<String,Object> queryMap = query.getMap();
             List<Message> messagesToSend = new LinkedList<Message>();
-
-            for (String key: queryMap.keySet()){
+	    LOG.debug("net.es.lookup.pubsub.amq.AMQueuePump.fillQueues: Query"+ query.getMap());
                 for (Message message : messageList){
-                    if (message.hasKey(key) && message.getKey(key).equals(queryMap.get(key))){
-                        LOG.debug("net.es.lookup.pubsub.amq.AMQueuePump.fillQueues: Message "+message.getMap()+" mapped to query"+ query.getMap());
-                        messagesToSend.add(message);
-
-                    }
+                    if(queryMap.size()==1 && queryMap.containsKey(ReservedKeys.RECORD_OPERATOR_SUFFIX)){
+			messagesToSend.add(message);
+                    }else{
+                        for (String key: queryMap.keySet()){
+                            if (message.hasKey(key) && message.getKey(key).equals(queryMap.get(key))){
+                     		   LOG.debug("net.es.lookup.pubsub.amq.AMQueuePump.fillQueues: Message "+message.getMap()+" mapped to query"+ query.getMap());
+                        		messagesToSend.add(message);
+  
+                            }
+                        }
+		    }
                 }
-            }
-
+               
             if(!messagesToSend.isEmpty()){
                 List <String> qids = amQueueManager.getQueues(query);
 

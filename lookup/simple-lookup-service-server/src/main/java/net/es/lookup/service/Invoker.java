@@ -210,7 +210,7 @@ public class Invoker {
             Trigger gcTrigger = newTrigger().withIdentity("gc trigger", "MemoryManagement")
                     .startNow()
                     .withSchedule(simpleSchedule()
-                            .withIntervalInSeconds(60)
+                            .withIntervalInSeconds(600)
                             .repeatForever()
                             .withMisfireHandlingInstructionIgnoreMisfires())
                     .build();
