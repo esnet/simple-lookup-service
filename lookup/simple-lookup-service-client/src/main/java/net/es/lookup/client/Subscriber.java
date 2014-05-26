@@ -37,7 +37,7 @@ public class Subscriber {
     private MessageConsumer consumer;
 
     private Thread recordWaitThread;
-    private Subscriber instance=null;
+    private Subscriber instance = null;
 
     private List<WeakReference<SubscriberListener>> listeners;
 
@@ -146,7 +146,7 @@ public class Subscriber {
 
     public void startSubscription() throws LSClientException {
 
-        LOG.info("net.es.lookup.client.Subsciber: Starting Subscriber Connection");
+        LOG.info("net.es.lookup.client.Subscriber: Starting Subscriber Connection");
         String user = ActiveMQConnection.DEFAULT_USER;
         String password = ActiveMQConnection.DEFAULT_PASSWORD;
 
@@ -257,23 +257,25 @@ public class Subscriber {
             try {
                 LOG.debug("net.es.lookup.client.Subscriber: Waiting for records");
                 TextMessage textMessage = (TextMessage) consumer.receive();
-
-                Record r = JSONParser.toRecord(textMessage.getText());
+                System.out.println(textMessage);
+                List<Record> r = JSONParser.toRecords(textMessage.getText());
                 recordNotifier(r);
             } catch (JMSException e) {
                 LOG.error("net.es.lookup.client.Subscriber: Error in connection" + e.getMessage());
+                List<Record> records = new ArrayList<Record>();
                 ErrorRecord errorRecord = new ErrorRecord();
                 try {
                     errorRecord.setErrorMessage(e.getMessage());
                 } catch (RecordException e1) {
                     LOG.error("net.es.lookup.client.Subscriber: Unable to create error Record");
                 }
-                LOG.error("net.es.lookup.client.Subscriber: Subscriber instance"+instance);
-                LOG.error("net.es.lookup.client.Subscriber: type"+ errorRecord.getRecordType());
+                LOG.error("net.es.lookup.client.Subscriber: Subscriber instance" + instance);
+                LOG.error("net.es.lookup.client.Subscriber: type" + errorRecord.getRecordType());
                 errorRecord.add(ReservedKeys.SUBSCRIBER, instance.getSubscribeRequestUrl());
                 errorRecord.add(ReservedKeys.QUEUE_URL, instance.getQueueUrl());
                 errorRecord.add(ReservedKeys.QUEUE, instance.getQueue());
-                recordNotifier(errorRecord);
+                records.add(errorRecord);
+                recordNotifier(records);
                 break;
             } catch (ParserException e) {
                 LOG.error("net.es.lookup.client.Subscriber: Parser error" + e.getMessage());
@@ -282,31 +284,37 @@ public class Subscriber {
 
     }
 
-    private synchronized void recordNotifier(Record record) {
+    private synchronized void recordNotifier(List<Record> records) {
 
         ListIterator<WeakReference<SubscriberListener>> listIterator = listeners.listIterator();
         while (listIterator.hasNext()) {
-            try {
-                LOG.info("net.es.lookup.client.Subscriber: Notifying listener");
-                //potential deadlock -  need to use weak reference
-                LOG.debug(record.getMap().keySet().toString());
-                Record tmp = record.duplicate();
-                SubscriberListener listener = listIterator.next().get();
-                if (listener != null) {
 
-                    try {
-                        listener.onRecord(tmp);
-                    } catch (Exception e) {
-                        LOG.error("net.es.lookup.client.Subscriber: Exception = " + e.getMessage());
+            LOG.info("net.es.lookup.client.Subscriber: Notifying listener");
+            //potential deadlock -  need to use weak reference
+            LOG.debug("Received records" + records.size());
+            SubscriberListener listener = listIterator.next().get();
+            for (Record record : records) {
+                try {
+                    Record tmp = record.duplicate();
+
+                    if (listener != null) {
+
+                        try {
+                            listener.onRecord(tmp);
+                        } catch (Exception e) {
+                            LOG.error("net.es.lookup.client.Subscriber: Exception = " + e.getMessage());
+                        }
+                    } else {
+                        listIterator.remove();
                     }
-                } else {
-                    listIterator.remove();
+
+                } catch (RecordException e) {
+                    LOG.error("net.es.lookup.client.Subscriber: Record Exception = " + e.getMessage());
+
                 }
-
-            } catch (RecordException e) {
-                LOG.error("net.es.lookup.client.Subscriber: Record Exception = " + e.getMessage());
-
             }
+
+
         }
 
     }
@@ -336,6 +344,7 @@ public class Subscriber {
     * This is for permanent shutdown of subscriber
     * */
     public void shutdown() throws LSClientException {
+
         LOG.info("net.es.lookup.client.Subscriber: Stopping connection");
         if (conn != null) {
             try {
