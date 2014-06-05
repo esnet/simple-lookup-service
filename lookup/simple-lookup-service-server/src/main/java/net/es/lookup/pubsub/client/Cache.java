@@ -96,11 +96,11 @@ public class Cache implements SubscriberListener {
         List<Map<String, Object>> serverQueries = new LinkedList<Map<String, Object>>();
         for (int i = 0; i < count; i++) {
             try {
+
                 Publisher source = publishers.get(i);
                 URI uri = source.getAccesspoint();
 
                 String subscribeRelativeUrl = uri.getPath();
-
                 String host = uri.getHost();
                 int port = uri.getPort();
 
@@ -130,6 +130,11 @@ public class Cache implements SubscriberListener {
     public void start() throws LSClientException {
 
         LOG.info("net.es.lookup.pubsub.client.Cache.start: Starting the subscriber connections");
+        try {
+            emptyCache();
+        } catch (DatabaseException e) {
+            LOG.error("net.es.lookup.pubsub.client.Cache.start: Error emptying cache - " + e.getMessage());
+        }
         int index = 0;
         for (Subscriber subscriber : connectedSubscribers) {
 
@@ -389,5 +394,17 @@ public class Cache implements SubscriberListener {
 
         LOG.info("net.es.lookup.pubsub.client.CacheService.forceSave: Inserted record");
     }
+
+    /**
+     * This method empties the contents of the cache.
+     */
+    private void emptyCache() throws DatabaseException {
+
+        LOG.info("net.es.lookup.pubsub.client.CacheService.emptyCache: Emptying cache");
+        ServiceDAOMongoDb db = DBPool.getDb(this.name);
+        db.deleteAll();
+        LOG.info("net.es.lookup.pubsub.client.CacheService.emptyCache: Emptied cache");
+    }
+
 
 }

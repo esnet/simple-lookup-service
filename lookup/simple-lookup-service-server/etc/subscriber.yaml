@@ -1,10 +1,12 @@
 #All caches are read-only
 caches:
     - name: "cache"
-      type: "replication"
+      type: "archive"
       publishers:
         - locator: "http://ps-west.es.net:8090/lookup/subscribe"
+          queries: 
+              - "*"
+        - locator: "http://ps-east.es.net:8090/lookup/subscribe"
           queries:
-            - "*"
-bootstrapserver: "http://ps1.es.net:8095/lookup/bootstrap"
-
+              - "*"
+bootstrapserver: "http://ps1.es.net:8096/lookup/activehosts.json"

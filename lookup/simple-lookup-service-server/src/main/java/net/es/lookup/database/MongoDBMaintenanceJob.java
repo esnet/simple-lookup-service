@@ -87,7 +87,7 @@ public class MongoDBMaintenanceJob implements Job {
 
                     } catch (Exception e) {
 
-                        LOG.error("Error pruning DB!!");
+                        LOG.error("Error pruning DB!!"+e.getMessage());
 
                     }
 

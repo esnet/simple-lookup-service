@@ -442,4 +442,29 @@ public class ServiceDAOMongoDb {
     }
 
 
+   //deletes all the content in the DB
+    public void deleteAll() throws DatabaseException {
+
+        try {
+
+            WriteResult wrt = coll.remove(new BasicDBObject());
+
+            CommandResult cmdres = wrt.getLastError();
+
+            if (!cmdres.ok()) {
+
+                throw new DatabaseException(cmdres.getErrorMessage());
+
+            }
+
+        } catch (MongoException e) {
+
+            throw new DatabaseException(e.getMessage());
+
+        }
+
+    }
+
+
+
 }

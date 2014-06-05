@@ -110,6 +110,7 @@ public class SubscriberConfigReader {
 
                 List sList = (List) ((Map) (cList.get(i))).get(CACHE_SOURCE);
 
+
                 if (sList.isEmpty()) {
                     throw new ConfigurationException("Missing source information");
                 }
@@ -119,10 +120,10 @@ public class SubscriberConfigReader {
 
                     List<Map<String,Object>> queryList = new LinkedList<Map<String,Object>>();
 
-                    String sAccessPoint = (String) ((Map) (sList.get(i))).get(SOURCE_ACCESSPOINT);
+                    String sAccessPoint = (String) ((Map) (sList.get(j))).get(SOURCE_ACCESSPOINT);
 
 
-                    List<Object> cQueryList = (List) ((Map) (sList.get(i))).get(SOURCE_QUERIES);
+                    List<Object> cQueryList = (List) ((Map) (sList.get(j))).get(SOURCE_QUERIES);
 
                     for (int k = 0; k < cQueryList.size(); k++) {
                         Object tmp = cQueryList.get(k);

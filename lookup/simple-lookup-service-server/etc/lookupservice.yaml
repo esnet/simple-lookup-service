@@ -1,14 +1,14 @@
 ---
 #Lookup Service settings
 lookupservice:
-    host: 'sowmya-dev-vm.es.net'
+    host: 'localhost'
     port: 8090
     lease:
         max: 2592000
-        default: 300
+        default: 1800
         min: 1800
     coreservice: 'on'
-    cacheservice: 'off'
+    cacheservice: 'on'
 
 #Database settings  
 database:
@@ -18,6 +18,6 @@ database:
     DBCollName: 'services'
     username: 'lookup'
     password: 'abc123'
-    pruneInterval: 600 
-    pruneThreshold: 300
+    pruneInterval: 120
+    pruneThreshold: 600
 

@@ -124,6 +124,7 @@ public class Invoker {
                         publishers.add(publisher);
                     }
 
+
                     try{
                         Cache cache = new Cache(name,type,publishers);
                         cacheList.add(cache);
