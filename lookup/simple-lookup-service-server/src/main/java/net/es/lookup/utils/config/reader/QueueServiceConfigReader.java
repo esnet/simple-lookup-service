@@ -20,6 +20,8 @@ public class QueueServiceConfigReader {
     private int port = 16617;
     private String protocol = "tcp";
 
+    private boolean serviceOn = false;
+
     private boolean persistent = false;
 
     private long ttl = 120000;
@@ -95,7 +97,12 @@ public class QueueServiceConfigReader {
             HashMap<String, Object> queueServiceMap = (HashMap) yamlMap.get("queue");
 
             port = (Integer) queueServiceMap.get("port");
-
+            String service = (String) queueServiceMap.get("queueservice");
+            if(service.equals("on")){
+                serviceOn = true;
+            }else{
+                serviceOn=false;
+            }
             HashMap<String, Object> messageMap = (HashMap) yamlMap.get("message");
             persistent = (Boolean) messageMap.get("persistent");
             ttl = ((Integer) messageMap.get("ttl")) * 1000;
@@ -108,4 +115,8 @@ public class QueueServiceConfigReader {
 
     }
 
+    public boolean isServiceOn() {
+
+        return serviceOn;
+    }
 }

@@ -1,5 +1,6 @@
 #Queue
 queue:
+    queueservice: 'off'
     port: 61616
     protocol: 'tcp'
 

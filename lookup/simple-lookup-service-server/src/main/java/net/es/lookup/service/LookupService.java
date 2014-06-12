@@ -31,6 +31,7 @@ public class LookupService {
     private HttpServer httpServer = null;
     private static LookupService instance = null;
     BrokerService broker = null;
+    private boolean queueservice = false;
     private String queueurl;
     private boolean queueServiceRequired;
     private static final int MAX_SERVICES = 10;
@@ -132,6 +133,15 @@ public class LookupService {
 
     }
 
+    public LookupService(String host, int port, boolean queueServiceRequired) {
+
+        this.host = host;
+        this.port = port;
+        this.queueServiceRequired = queueServiceRequired;
+        init();
+
+    }
+
 
     public void startService(List<String> services) {
 
@@ -159,7 +169,10 @@ public class LookupService {
         try {
 
             this.httpServer = this.startServer(resourceArray);
-            this.broker = this.startBroker();
+            if(this.queueServiceRequired){
+                this.broker = this.startBroker();
+            }
+
 
         } catch (IOException e) {
 
@@ -210,4 +223,8 @@ public class LookupService {
         return br;
     }
 
+    public boolean isQueueservice() {
+
+        return queueservice;
+    }
 }

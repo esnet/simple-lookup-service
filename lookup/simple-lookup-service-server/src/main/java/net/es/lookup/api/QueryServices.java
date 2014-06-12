@@ -4,6 +4,7 @@ import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.api.InternalErrorException;
+import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.DBPool;
@@ -45,7 +46,7 @@ public class QueryServices {
                 LOG.debug("Response:" + response);
                 return response;
             }else{
-                throw new InternalErrorException("Cannot access database");
+                throw new NotFoundException("Cannot access database");
             }
 
 

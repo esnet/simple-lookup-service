@@ -96,8 +96,12 @@ public class Invoker {
 
             if (lcfg.isCoreserviceOn()) {
                 new ServiceDAOMongoDb(dburl, dbport, LookupService.LOOKUP_SERVICE, collname);
-                new AMQueueManager(LookupService.LOOKUP_SERVICE);
-                new AMQueuePump(LookupService.LOOKUP_SERVICE);
+
+                if(qcfg.isServiceOn()){
+                    new AMQueueManager(LookupService.LOOKUP_SERVICE);
+                    new AMQueuePump(LookupService.LOOKUP_SERVICE);
+                }
+
                 services.add(LookupService.LOOKUP_SERVICE);
             }
 
@@ -151,10 +155,14 @@ public class Invoker {
         }
         System.out.println("starting Lookup Service");
         // Create the REST service
-        Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
-        Invoker.lookupService.setDatadirectory(queueDataDir);
-        System.out.println("Starting queue at Queue url:" + qcfg.getUrl());
-        Invoker.lookupService.setQueueurl(qcfg.getUrl());
+        Invoker.lookupService = new LookupService(Invoker.host, Invoker.port, qcfg.isServiceOn());
+
+        if(qcfg.isServiceOn()){
+            Invoker.lookupService.setDatadirectory(queueDataDir);
+            System.out.println("Starting queue at Queue url:" + qcfg.getUrl());
+            Invoker.lookupService.setQueueurl(qcfg.getUrl());
+        }
+
 
         if (cacheServiceRequest && Invoker.cacheService.isInitialized()) {
             System.out.println("Starting cache service");

@@ -66,7 +66,7 @@ public class AMQueueManager implements QueueManager {
 
             } else {
 
-                System.out.println(queryMap.toString());
+                //System.out.println(queryMap.toString());
                 AMQueue queue = new AMQueue();
                 String qid = queue.getQid();
                 LOG.debug("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Created queue with id " + qid);

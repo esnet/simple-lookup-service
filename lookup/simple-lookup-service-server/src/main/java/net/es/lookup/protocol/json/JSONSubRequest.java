@@ -13,7 +13,7 @@ public class JSONSubRequest extends SubRequest {
     public JSONSubRequest(String message) {
 
         super();
-        System.out.println(message);
+        //System.out.println(message);
         //if message is not empty, then parse
         if (message != null && !message.isEmpty()) {
 

@@ -37,7 +37,7 @@ public class JSONMessage {
 
                 } else {
 
-                    System.out.println(entry.getValue());
+                    //System.out.println(entry.getValue());
 
                     List<String> tmpvalues = (List) entry.getValue();
                     Iterator<String> it = tmpvalues.iterator();
