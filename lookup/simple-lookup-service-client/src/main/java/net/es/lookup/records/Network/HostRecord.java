@@ -21,9 +21,9 @@ public class HostRecord extends Record {
         super(ReservedValues.RECORD_VALUE_TYPE_HOST);
     }
 
-    public String getHostName() {
+    public List<String> getHostName() {
 
-        return (String) this.getValue(ReservedKeys.RECORD_HOST_NAME);
+        return (List<String>) this.getValue(ReservedKeys.RECORD_HOST_NAME);
     }
 
     public void setHostName(String hostName) throws RecordException {
