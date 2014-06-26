@@ -61,7 +61,7 @@ public class HostRecord extends Record {
         return Integer.decode((String) this.getValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCOUNT));
     }
 
-    public void setHosProcessorCount(int processorCount) {
+    public void setHostProcessorCount(int processorCount) {
 
         this.add(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCOUNT, Integer.toString(processorCount));
     }

@@ -82,7 +82,7 @@ public class RecordTest extends BaseTest {
             Assert.assertTrue(rec.getOSVersion() != null && !rec.getOSVersion().contains(null) && !rec.getOSVersion().isEmpty());
 
             System.out.println("Testing hardware getters and setters");
-            rec.setHosProcessorCount(anInt);
+            rec.setHostProcessorCount(anInt);
             rec.setHostMemory(anInt);
             rec.setHostProcessorCore(anInt);
             rec.setHostProcessorSpeed(anInt);
