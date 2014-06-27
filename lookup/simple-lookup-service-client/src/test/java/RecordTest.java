@@ -107,10 +107,12 @@ public class RecordTest extends BaseTest {
 
             System.out.println("Testing host getters and setters");
             rec.setDomains(stringList);
+            rec.setCommunities(stringList);
             rec.setAdministrators(stringList);
             rec.setInterfaces(stringList);
             rec.setHostName(stringList);
             Assert.assertTrue(rec.getDomains() != null && !rec.getDomains().contains(null) && !rec.getDomains().isEmpty());
+            Assert.assertTrue(rec.getCommunities() != null && !rec.getCommunities().contains(null) && !rec.getCommunities().isEmpty());
             Assert.assertTrue(rec.getAdministrators() != null && !rec.getAdministrators().contains(null) && !rec.getAdministrators().isEmpty());
             Assert.assertTrue(rec.getInterfaces() != null && !rec.getInterfaces().contains(null) && !rec.getInterfaces().isEmpty());
             Assert.assertTrue(rec.getHostName() != null && !rec.getHostName().contains(null) && !rec.getHostName().isEmpty());
@@ -236,6 +238,7 @@ public class RecordTest extends BaseTest {
             rec.setServiceType(str);
             rec.setAdministrators(stringList);
             rec.setDomains(stringList);
+            rec.setCommunities(stringList);
             rec.setServiceLocator(stringList);
             Assert.assertTrue(rec.getHost() != null && !rec.getHost().isEmpty());
             Assert.assertTrue(rec.getServiceName() != null && !rec.getServiceName().isEmpty());
@@ -243,6 +246,7 @@ public class RecordTest extends BaseTest {
             Assert.assertTrue(rec.getServiceType() != null && !rec.getServiceType().isEmpty());
             Assert.assertTrue(rec.getAdministrators() != null && !rec.getAdministrators().contains(null) && !rec.getAdministrators().isEmpty());
             Assert.assertTrue(rec.getDomains() != null && !rec.getDomains().contains(null) && !rec.getDomains().isEmpty());
+            Assert.assertTrue(rec.getCommunities() != null && !rec.getCommunities().contains(null) && !rec.getCommunities().isEmpty());
             Assert.assertTrue(rec.getServiceLocator() != null && !rec.getServiceLocator().contains(null) && !rec.getServiceLocator().isEmpty());
 
             System.out.println("Testing setters with bad country and latitude/longitude values (should fail)");

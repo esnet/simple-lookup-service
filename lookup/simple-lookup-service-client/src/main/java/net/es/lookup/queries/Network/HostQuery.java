@@ -338,6 +338,20 @@ public class HostQuery extends Query {
         }
     }
 
+    public List<String> getCommunities() {
+
+        return (List<String>) this.getValue(ReservedKeys.RECORD_GROUP_COMMUNITIES);
+    }
+
+    public void setCommunities(List<String> communities) throws QueryException {
+
+        if (communities != null && !communities.isEmpty()) {
+            this.add(ReservedKeys.RECORD_GROUP_COMMUNITIES, communities);
+        } else {
+            throw new QueryException(ReservedKeys.RECORD_GROUP_COMMUNITIES + " is empty");
+        }
+    }
+
     public List<String> getSiteName() {
 
         return (List<String>) this.getValue(ReservedKeys.RECORD_LOCATION_SITENAME);

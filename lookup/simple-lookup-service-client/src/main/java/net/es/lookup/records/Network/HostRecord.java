@@ -343,6 +343,20 @@ public class HostRecord extends Record {
         }
     }
 
+    public List<String> getCommunities() {
+
+        return (List<String>) this.getValue(ReservedKeys.RECORD_GROUP_COMMUNITIES);
+    }
+
+    public void setCommunities(List<String> communities) throws RecordException {
+
+        if (communities != null && !communities.isEmpty()) {
+            this.add(ReservedKeys.RECORD_GROUP_COMMUNITIES, communities);
+        } else {
+            throw new RecordException(ReservedKeys.RECORD_GROUP_COMMUNITIES + " is empty");
+        }
+    }
+
     public String getSiteName() {
         try {
             return ((List<String>) this.getValue(ReservedKeys.RECORD_LOCATION_SITENAME)).get(0);

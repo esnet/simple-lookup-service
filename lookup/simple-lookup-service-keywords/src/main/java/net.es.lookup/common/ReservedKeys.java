@@ -33,6 +33,7 @@ public class ReservedKeys {
 
     //group keys
     public static final String RECORD_GROUP_DOMAINS = "group-domains" ;
+    public static final String RECORD_GROUP_COMMUNITIES = "group-communities";
 
     //location keys
     public static final String RECORD_LOCATION_SITENAME = "location-sitename";
