@@ -109,11 +109,11 @@ public class RecordTest extends BaseTest {
             rec.setDomains(stringList);
             rec.setAdministrators(stringList);
             rec.setInterfaces(stringList);
-            rec.setHostName(str);
+            rec.setHostName(stringList);
             Assert.assertTrue(rec.getDomains() != null && !rec.getDomains().contains(null) && !rec.getDomains().isEmpty());
             Assert.assertTrue(rec.getAdministrators() != null && !rec.getAdministrators().contains(null) && !rec.getAdministrators().isEmpty());
             Assert.assertTrue(rec.getInterfaces() != null && !rec.getInterfaces().contains(null) && !rec.getInterfaces().isEmpty());
-            Assert.assertTrue(rec.getHostName() != null && !rec.getHostName().isEmpty());
+            Assert.assertTrue(rec.getHostName() != null && !rec.getHostName().contains(null) && !rec.getHostName().isEmpty());
 
             System.out.println("Testing setters with bad country and latitude/longitude values (should fail)");
             try {
