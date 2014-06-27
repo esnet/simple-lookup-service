@@ -242,19 +242,25 @@ public class HostRecord extends Record {
         }
     }
 
-    public String getRegion() {
+    public String getState() {
 
-        return (String) this.getValue(ReservedKeys.RECORD_LOCATION_REGION);
+        return (String) this.getValue(ReservedKeys.RECORD_LOCATION_STATE);
     }
 
-    public void setRegion(String region) throws RecordException {
+    @Deprecated
+    public String getRegion() { return getState(); }
 
-        if (region != null && !region.isEmpty()) {
-            this.add(ReservedKeys.RECORD_LOCATION_REGION, region);
+    public void setState(String state) throws RecordException {
+
+        if (state != null && !state.isEmpty()) {
+            this.add(ReservedKeys.RECORD_LOCATION_STATE, state);
         } else {
-            throw new RecordException(ReservedKeys.RECORD_LOCATION_REGION + " is empty");
+            throw new RecordException(ReservedKeys.RECORD_LOCATION_STATE + " is empty");
         }
     }
+
+    @Deprecated
+    public void setRegion(String state) throws RecordException { setState(state); }
 
     public String getCountry() {
 

@@ -129,14 +129,14 @@ public class QueryTest extends BaseTest {
             query.setCity(stringList);
             query.setSiteName(stringList);
             query.setZipcode(stringList);
-            query.setRegion(stringList);
+            query.setState(stringList);
             query.setCountry(countryList);
             query.setLatitude(doubleList);
             query.setLongitude(doubleList);
             Assert.assertTrue(!query.getCity().contains(null) && !query.getCity().isEmpty());
             Assert.assertTrue(!query.getSiteName().contains(null) && !query.getSiteName().isEmpty());
             Assert.assertTrue(!query.getZipcode().contains(null) && !query.getZipcode().isEmpty());
-            Assert.assertTrue(!query.getRegion().contains(null) && !query.getRegion().isEmpty());
+            Assert.assertTrue(!query.getState().contains(null) && !query.getState().isEmpty());
             Assert.assertTrue(!query.getCountry().contains(null) && !query.getCountry().isEmpty());
             Assert.assertTrue(!query.getLatitude().contains(null) && !query.getLatitude().isEmpty());
             Assert.assertTrue(!query.getLongitude().contains(null) && !query.getLongitude().isEmpty());
@@ -286,7 +286,7 @@ public class QueryTest extends BaseTest {
             query.setCity(stringList);
             query.setSiteName(stringList);
             query.setZipcode(stringList);
-            query.setRegion(stringList);
+            query.setState(stringList);
             query.setCountry(countryList);
             query.setServiceLocator(stringList);
             query.setLatitude(doubleList);
@@ -294,7 +294,7 @@ public class QueryTest extends BaseTest {
             Assert.assertTrue(!query.getCity().contains(null) && !query.getCity().isEmpty());
             Assert.assertTrue(!query.getSiteName().contains(null) && !query.getSiteName().isEmpty());
             Assert.assertTrue(!query.getZipcode().contains(null) && !query.getZipcode().isEmpty());
-            Assert.assertTrue(!query.getRegion().contains(null) && !query.getRegion().isEmpty());
+            Assert.assertTrue(!query.getState().contains(null) && !query.getState().isEmpty());
             Assert.assertTrue(!query.getCountry().contains(null) && !query.getCountry().isEmpty());
             Assert.assertTrue(!query.getServiceLocator().contains(null) && !query.getServiceLocator().isEmpty());
             Assert.assertTrue(!query.getLatitude().contains(null) && !query.getLatitude().isEmpty());
@@ -344,7 +344,7 @@ public class QueryTest extends BaseTest {
             query.setDomains(stringList);
             query.setSiteName(stringList);
             query.setCity(stringList);
-            query.setRegion(stringList);
+            query.setState(stringList);
             query.setCountry(countryList);
             query.setZipcode(stringList);
             query.setLatitude(doubleList);
@@ -352,7 +352,7 @@ public class QueryTest extends BaseTest {
             Assert.assertTrue(!query.getDomains().contains(null) && !query.getDomains().isEmpty());
             Assert.assertTrue(!query.getSiteName().contains(null) && !query.getSiteName().isEmpty());
             Assert.assertTrue(!query.getCity().contains(null) && !query.getCity().isEmpty());
-            Assert.assertTrue(!query.getRegion().contains(null) && !query.getRegion().isEmpty());
+            Assert.assertTrue(!query.getState().contains(null) && !query.getState().isEmpty());
             Assert.assertTrue(!query.getCountry().contains(null) && !query.getCountry().isEmpty());
             Assert.assertTrue(!query.getZipcode().contains(null) && !query.getZipcode().isEmpty());
             Assert.assertTrue(!query.getLatitude().contains(null) && !query.getLatitude().isEmpty());

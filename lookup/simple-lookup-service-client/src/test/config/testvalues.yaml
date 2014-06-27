@@ -44,7 +44,7 @@ records:
         host-name: *S
         host-net-tcp-congestionalgorithm: *S
         location-zipcode: *S
-        location-region: *S
+        location-state: *S
         location-country: *C
         group-domains: *LOS
         service-administrators: *LOS
@@ -79,7 +79,7 @@ records:
         service-type: *S
         location-sitename: *S
         location-zipcode: *S
-        location-region: *S
+        location-state: *S
         location-country: *C
         service-administrators: *LOS
         group-domains: *LOS
@@ -91,7 +91,7 @@ records:
         location-city: *S
         person-name: *S
         person-organization: *S
-        location-region: *S
+        location-state: *S
         location-sitename: *S
         location-zipcode: *S
         location-country: *C
@@ -109,7 +109,7 @@ queries:
         host-name: *LOS
         host-net-tcp-congestionalgorithm: *LOS
         location-zipcode: *LOS
-        location-region: *LOS
+        location-state: *LOS
         location-country: *LOC
         group-domains: *LOS
         service-administrators: *LOS
@@ -129,7 +129,7 @@ queries:
         service-type: *LOS
         location-sitename: *LOS
         location-zipcode: *LOS
-        location-region: *LOS
+        location-state: *LOS
         location-country: *LOC
         service-administrators: *LOS
         group-domains: *LOS
@@ -138,7 +138,7 @@ queries:
         location-city: *LOS
         person-name: *LOS
         person-organization: *LOS
-        location-region: *LOS
+        location-state: *LOS
         location-sitename: *LOS
         location-zipcode: *LOS
         location-country: *LOC

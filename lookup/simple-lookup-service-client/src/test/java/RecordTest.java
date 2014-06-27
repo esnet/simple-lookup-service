@@ -61,14 +61,14 @@ public class RecordTest extends BaseTest {
             rec.setCity(str);
             rec.setSiteName(str);
             rec.setZipcode(str);
-            rec.setRegion(str);
+            rec.setState(str);
             rec.setCountry(country);
             rec.setLatitude(anInt);
             rec.setLongitude(anInt);
             Assert.assertTrue(rec.getCity() != null && !rec.getCity().isEmpty());
             Assert.assertTrue(rec.getSiteName() != null && !rec.getSiteName().isEmpty());
             Assert.assertTrue(rec.getZipcode() != null && !rec.getZipcode().isEmpty());
-            Assert.assertTrue(rec.getRegion() != null && !rec.getRegion().isEmpty());
+            Assert.assertTrue(rec.getState() != null && !rec.getState().isEmpty());
             Assert.assertTrue(rec.getCountry() != null && !rec.getCountry().isEmpty());
             Assert.assertTrue(rec.getLatitude() >= Double.parseDouble((String) testValues.get("latitude-lower-bound")) && rec.getLatitude() <= Double.parseDouble((String) testValues.get("latitude-upper-bound")));
             Assert.assertTrue(rec.getLongitude() >= Double.parseDouble((String) testValues.get("longitude-lower-bound")) && rec.getLongitude() <= Double.parseDouble((String) testValues.get("longitude-upper-bound")));
@@ -217,14 +217,14 @@ public class RecordTest extends BaseTest {
             rec.setCity(str);
             rec.setSiteName(str);
             rec.setZipcode(str);
-            rec.setRegion(str);
+            rec.setState(str);
             rec.setCountry(country);
             rec.setLatitude(anInt);
             rec.setLongitude(anInt);
             Assert.assertTrue(rec.getCity() != null && !rec.getCity().isEmpty());
             Assert.assertTrue(rec.getSiteName() != null && !rec.getSiteName().isEmpty());
             Assert.assertTrue(rec.getZipcode() != null && !rec.getZipcode().isEmpty());
-            Assert.assertTrue(rec.getRegion() != null && !rec.getRegion().isEmpty());
+            Assert.assertTrue(rec.getState() != null && !rec.getState().isEmpty());
             Assert.assertTrue(rec.getCountry() != null && !rec.getCountry().isEmpty());
             Assert.assertTrue(rec.getLatitude() >= Double.parseDouble((String) testValues.get("latitude-lower-bound")) && rec.getLatitude() <= Double.parseDouble((String) testValues.get("latitude-upper-bound")));
             Assert.assertTrue(rec.getLongitude() >= Double.parseDouble((String) testValues.get("longitude-lower-bound")) && rec.getLongitude() <= Double.parseDouble((String) testValues.get("longitude-upper-bound")));
@@ -293,7 +293,7 @@ public class RecordTest extends BaseTest {
 
             System.out.println("Testing location getters and setters");
             rec.setCity(str);
-            rec.setRegion(str);
+            rec.setState(str);
             rec.setSiteName(str);
             rec.setZipcode(str);
             rec.setCountry(country);
@@ -301,7 +301,7 @@ public class RecordTest extends BaseTest {
             rec.setLatitude(anInt);
             rec.setLongitude(anInt);
             Assert.assertTrue(rec.getCity() != null && !rec.getCity().isEmpty());
-            Assert.assertTrue(rec.getRegion() != null && !rec.getRegion().isEmpty());
+            Assert.assertTrue(rec.getState() != null && !rec.getState().isEmpty());
             Assert.assertTrue(rec.getSiteName() != null && !rec.getSiteName().isEmpty());
             Assert.assertTrue(rec.getZipcode() != null && !rec.getZipcode().isEmpty());
             Assert.assertTrue(rec.getCountry() != null && !rec.getCountry().isEmpty());

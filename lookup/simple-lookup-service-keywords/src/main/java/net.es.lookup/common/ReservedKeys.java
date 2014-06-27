@@ -37,7 +37,7 @@ public class ReservedKeys {
     //location keys
     public static final String RECORD_LOCATION_SITENAME = "location-sitename";
     public static final String RECORD_LOCATION_CITY = "location-city";
-    public static final String RECORD_LOCATION_REGION = "location-region";
+    public static final String RECORD_LOCATION_STATE = "location-state";
     public static final String RECORD_LOCATION_COUNTRY = "location-country";
     public static final String RECORD_LOCATION_ZIPCODE = "location-zipcode";
     public static final String RECORD_LOCATION_LATITUDE = "location-latitude";

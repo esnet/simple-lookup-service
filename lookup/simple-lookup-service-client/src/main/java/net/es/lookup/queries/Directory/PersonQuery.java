@@ -136,19 +136,25 @@ public class PersonQuery extends Query {
         }
     }
 
-    public List<String> getRegion() {
+    public List<String> getState() {
 
-        return (List<String>) this.getValue(ReservedKeys.RECORD_LOCATION_REGION);
+        return (List<String>) this.getValue(ReservedKeys.RECORD_LOCATION_STATE);
     }
 
-    public void setRegion(List<String> region) throws QueryException {
+    @Deprecated
+    public List<String> getRegion() { return getState(); }
 
-        if (region != null && !region.isEmpty()) {
-            this.add(ReservedKeys.RECORD_LOCATION_REGION, region);
+    public void setState(List<String> state) throws QueryException {
+
+        if (state != null && !state.isEmpty()) {
+            this.add(ReservedKeys.RECORD_LOCATION_STATE, state);
         } else {
-            throw new QueryException(ReservedKeys.RECORD_LOCATION_REGION + " is empty");
+            throw new QueryException(ReservedKeys.RECORD_LOCATION_STATE + " is empty");
         }
     }
+
+    @Deprecated
+    public void setRegion(List<String> state) throws QueryException { setState(state); }
 
     public List<String> getCountry() {
 
