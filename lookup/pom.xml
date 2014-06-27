@@ -26,7 +26,23 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-file</artifactId>
+            </extension>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+            </extension>
+        </extensions>
     </build>
+    <distributionManagement>
+        <repository>
+            <id>esnet</id>
+            <url>scp://downloads.es.net/var/www/html/maven</url>
+        </repository>
+    </distributionManagement>
     <repositories>
     </repositories>
 
