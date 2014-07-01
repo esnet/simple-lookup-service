@@ -23,16 +23,22 @@ public class InterfaceRecord extends Record {
 
 
     public String getInterfaceName() {
-
-        return (String) this.getValue(ReservedKeys.RECORD_SERVICE_NAME);
+        try {
+            return (((List<String>) this.getValue(ReservedKeys.RECORD_INTERFACE_NAME)).get(0));
+        }
+        catch (NullPointerException e) {
+            return null;
+        }
     }
-    //TODO: should the reserved key for this be: interface-name?
+
     public void setInterfaceName(String interfaceName) throws RecordException {
 
         if(interfaceName !=null && !(interfaceName.isEmpty())){
-            this.add(ReservedKeys.RECORD_SERVICE_NAME, interfaceName);
+            List<String> l = new LinkedList<String>();
+            l.add(interfaceName);
+            this.add(ReservedKeys.RECORD_INTERFACE_NAME, l);
         }else{
-            throw new RecordException(ReservedKeys.RECORD_SERVICE_NAME+" is empty");
+            throw new RecordException(ReservedKeys.RECORD_INTERFACE_NAME+" is empty");
         }
 
     }
@@ -41,10 +47,18 @@ public class InterfaceRecord extends Record {
 
         List<InetAddress> addresses = new LinkedList<InetAddress>();
         for (String a : (List<String>) this.getValue(ReservedKeys.RECORD_INTERFACE_ADDRESSES)) {
-            a = a.substring(0, a.lastIndexOf("/"));
+            // The string representation of an InetAddress can include a "/" followed
+            // by an IPv4/IPv6 literal.  If we see this, strip it off.
+            try {
+                a = a.substring(0, a.lastIndexOf('/'));
+            }
+            catch (StringIndexOutOfBoundsException e) {
+                // It's OK if there was no slash, it was just an IP literal
+            }
             try {
                 addresses.add(InetAddress.getByName(a));
-            } catch (UnknownHostException e) {
+            }
+            catch (UnknownHostException e) {
 
                 throw new RecordException(ReservedKeys.RECORD_INTERFACE_ADDRESSES + " could not be converted back to InetAddress");
             }
@@ -69,49 +83,38 @@ public class InterfaceRecord extends Record {
         }
     }
 
-    public String getSubnet() throws RecordException {
-
-        return (String)this.getValue(ReservedKeys.RECORD_INTERFACE_SUBNET);
-    }
-
-    public void setSubnet(InetAddress address, int mask) throws RecordException {
-
-        if(address != null){
-            String subnet = address.getHostAddress()+"/"+mask;
-            this.add(ReservedKeys.RECORD_INTERFACE_SUBNET, subnet);
+    public int getCapacity() {
+        try {
+            return Integer.decode(((List<String>) this.getValue(ReservedKeys.RECORD_INTERFACE_CAPACITY)).get(0));
         }
-    }
-
-    public void setSubnet(String subnet) throws RecordException {
-
-        if(subnet != null && !subnet.isEmpty()){
-            Pattern subnetPattern = Pattern.compile("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\/\\d{1,3})");
-            if(subnetPattern.matcher(subnet).find()){
-                this.add(ReservedKeys.RECORD_INTERFACE_SUBNET, subnet);
-            }else{
-                throw new RecordException(ReservedKeys.RECORD_INTERFACE_SUBNET + " is not of the format: xxx.xxx.xxx.xxx/yy");
-            }
-
-        }else{
-            throw new RecordException(ReservedKeys.RECORD_INTERFACE_SUBNET + "s empty");
+        catch (NullPointerException e) {
+            return 0;
+        }
+        catch (NumberFormatException e) {
+            return 0;
         }
     }
 
     public void setCapacity(int capacity){
-        this.add(ReservedKeys.RECORD_INTERFACE_CAPACITY, Integer.toString(capacity));
-    }
-
-    public int getCapacity(){
-        return Integer.decode((String) this.getValue(ReservedKeys.RECORD_INTERFACE_CAPACITY));
+        List<String> l = new LinkedList<String>();
+        l.add(Integer.toString(capacity));
+        this.add(ReservedKeys.RECORD_INTERFACE_CAPACITY, l);
     }
 
     public String getMacAddress(){
-        return (String) this.getValue(ReservedKeys.RECORD_INTERFACE_MACADDRESS);
+        try {
+            return (((List<String>) this.getValue(ReservedKeys.RECORD_INTERFACE_MACADDRESS)).get(0));
+        }
+        catch (NullPointerException e) {
+            return null;
+        }
     }
 
     public void setMacAddress(String macAddress) throws RecordException {
         if(macAddress != null && !macAddress.isEmpty()){
-            this.add(ReservedKeys.RECORD_INTERFACE_MACADDRESS, macAddress);
+            List<String> l = new LinkedList<String>();
+            l.add(macAddress);
+            this.add(ReservedKeys.RECORD_INTERFACE_MACADDRESS, l);
         }  else{
             throw new RecordException(ReservedKeys.RECORD_INTERFACE_MACADDRESS + " is empty");
         }
@@ -132,14 +135,23 @@ public class InterfaceRecord extends Record {
     }
 
     public int getMtu() {
-
-        return Integer.decode((String) this.getValue(ReservedKeys.RECORD_INTERFACE_MTU));
+        try {
+            return Integer.decode(((List<String>) this.getValue(ReservedKeys.RECORD_INTERFACE_MTU)).get(0));
+        }
+        catch (NullPointerException e) {
+            return 0;
+        }
+        catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     public void setMtu(int mtu) throws RecordException {
 
         if (mtu > 0) {
-            this.add(ReservedKeys.RECORD_INTERFACE_MTU, Integer.toString(mtu));
+            List<String> l = new LinkedList<String>();
+            l.add(Integer.toString(mtu));
+            this.add(ReservedKeys.RECORD_INTERFACE_MTU, l);
         } else {
             throw new RecordException(ReservedKeys.RECORD_INTERFACE_MTU + " must be a positive integer.");
         }

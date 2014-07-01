@@ -53,6 +53,7 @@ public class ReservedKeys {
     public static final String RECORD_SERVICE_HOST = "service-host";
 
     //interface keys
+    public static final String RECORD_INTERFACE_NAME = "interface-name";
     public static final String RECORD_INTERFACE_ADDRESSES = "interface-addresses";
     public static final String RECORD_INTERFACE_SUBNET = "interface-subnet" ;
     public static final String RECORD_INTERFACE_CAPACITY = "interface-capacity" ;

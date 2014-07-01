@@ -34,15 +34,15 @@ public class InterfaceQuery extends Query {
 
     public List<String> getInterfaceName() {
 
-        return (List<String>) this.getValue(ReservedKeys.RECORD_SERVICE_NAME);
+        return (List<String>) this.getValue(ReservedKeys.RECORD_INTERFACE_NAME);
     }
 
     public void setInterfaceName(List<String> interfaceName) throws QueryException {
 
         if (interfaceName != null && !interfaceName.isEmpty()) {
-            this.add(ReservedKeys.RECORD_SERVICE_NAME, interfaceName);
+            this.add(ReservedKeys.RECORD_INTERFACE_NAME, interfaceName);
         } else {
-            throw new QueryException(ReservedKeys.RECORD_SERVICE_NAME + " is empty");
+            throw new QueryException(ReservedKeys.RECORD_INTERFACE_NAME + " is empty");
         }
     }
 
@@ -64,7 +64,14 @@ public class InterfaceQuery extends Query {
 
         List<InetAddress> addresses = new LinkedList<InetAddress>();
         for (String a : (List<String>) this.getValue(ReservedKeys.RECORD_INTERFACE_ADDRESSES)) {
-            a = a.substring(0, a.lastIndexOf("/"));
+            // The string representation of an InetAddress can include a "/" followed
+            // by an IPv4/IPv6 literal.  If we see this, strip it off.
+            try {
+                a = a.substring(0, a.lastIndexOf('/'));
+            }
+            catch (StringIndexOutOfBoundsException e) {
+                // It's OK if there was no slash, it was just an IP literal
+            }
             try {
                 addresses.add(InetAddress.getByName(a));
             } catch (UnknownHostException e) {
@@ -85,50 +92,6 @@ public class InterfaceQuery extends Query {
             this.add(ReservedKeys.RECORD_INTERFACE_ADDRESSES, addressList);
         } else {
             throw new QueryException(ReservedKeys.RECORD_INTERFACE_ADDRESSES + " is empty");
-        }
-    }
-
-    public List<InetAddress> getSubnet() throws QueryException {
-
-        List<InetAddress> addresses = new LinkedList<InetAddress>();
-        for (String a : (List<String>) this.getValue(ReservedKeys.RECORD_INTERFACE_ADDRESSES)) {
-            a = a.substring(0, a.lastIndexOf("/"));
-            try {
-                addresses.add(InetAddress.getByName(a));
-            } catch (UnknownHostException e) {
-
-                throw new QueryException(ReservedKeys.RECORD_INTERFACE_ADDRESSES + " could not be converted back to InetAddress");
-            }
-        }
-        return addresses;
-    }
-
-    public void setSubnet(InetAddress address, List<Integer> mask) throws QueryException {
-
-        if (address != null && mask != null && !mask.isEmpty()) {
-            List<String> subnets = new LinkedList<String>();
-            for (int m : mask) {
-                subnets.add(address.getHostAddress() + "/" + m);
-            }
-            this.add(ReservedKeys.RECORD_INTERFACE_SUBNET, subnets);
-        } else {
-            throw new QueryException(ReservedKeys.RECORD_INTERFACE_SUBNET + " is empty");
-        }
-    }
-
-    public void setSubnet(List<String> subnet) throws QueryException {
-
-        if (subnet != null && !subnet.isEmpty()) {
-            Pattern subnetPattern = Pattern.compile("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\/\\d{1,3})");
-            for (String s : subnet) {
-                if (subnetPattern.matcher(s).find()) {
-                } else {
-                    throw new QueryException(ReservedKeys.RECORD_INTERFACE_SUBNET + " is not of the format: xxx.xxx.xxx.xxx/yy");
-                }
-            }
-            this.add(ReservedKeys.RECORD_INTERFACE_SUBNET, subnet);
-        } else {
-            throw new QueryException(ReservedKeys.RECORD_INTERFACE_SUBNET + "s empty");
         }
     }
 

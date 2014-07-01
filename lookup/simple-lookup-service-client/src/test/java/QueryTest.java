@@ -224,15 +224,12 @@ public class QueryTest extends BaseTest {
             System.out.println("Testing interface getters and setters");
             query.setInterfaceName(stringList);
             query.setMacAddress(stringList);
-            query.setSubnet(subnetList);
-            query.setSubnet(address, integerList);
             query.setAddresses(addressList);
             query.setDomains(stringList);
             query.setCapacity(integerList);
             query.setMtu(integerList);
             Assert.assertTrue(!query.getInterfaceName().contains(null) && !query.getInterfaceName().isEmpty());
             Assert.assertTrue(!query.getMacAddress().contains(null) && !query.getMacAddress().isEmpty());
-            Assert.assertTrue(!query.getSubnet().contains(null) && !query.getSubnet().isEmpty());
             Assert.assertTrue(!query.getAddresses().contains(null) && !query.getAddresses().isEmpty());
             Assert.assertTrue(!query.getDomains().contains(null) && !query.getDomains().isEmpty());
             Assert.assertTrue(!query.getCapacity().contains(null) && !query.getCapacity().isEmpty());
