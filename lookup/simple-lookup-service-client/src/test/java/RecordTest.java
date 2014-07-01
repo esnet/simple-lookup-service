@@ -171,9 +171,7 @@ public class RecordTest extends BaseTest {
         try {
             rec.setInterfaceName(str);
             rec.setMacAddress(str);
-            rec.setSubnet("000.000.000.000/00");
             if (address != null) {
-                rec.setSubnet(address, 1);
                 rec.setAddresses(addressList);
             }
             rec.setDomains(stringList);
@@ -181,7 +179,6 @@ public class RecordTest extends BaseTest {
             rec.setMtu(anInt);
             Assert.assertTrue(rec.getInterfaceName() != null && !rec.getInterfaceName().isEmpty());
             Assert.assertTrue(rec.getMacAddress() != null && !rec.getMacAddress().isEmpty());
-            Assert.assertTrue(rec.getSubnet() != null && !rec.getSubnet().isEmpty());
             Assert.assertTrue(rec.getAddresses() != null && !rec.getAddresses().contains(null) && !rec.getAddresses().isEmpty());
             Assert.assertTrue(rec.getDomains() != null && !rec.getDomains().contains(null) && !rec.getDomains().isEmpty());
             Assert.assertTrue(rec.getCapacity() == anInt);
