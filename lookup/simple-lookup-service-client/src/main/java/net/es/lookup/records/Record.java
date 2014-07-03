@@ -3,6 +3,7 @@ package net.es.lookup.records;
 import net.es.lookup.common.ReservedKeys;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -112,6 +113,42 @@ public class Record {
 
         this.keyValues.put(key, value);
 
+    }
+
+    /**
+     * Return a single string stored in a record value.
+     *
+     * Many record values contain only a single data item, even though the JSON representation
+     * is a list of strings.  This method makes retrieving these items easier.
+     * @param key
+     * @return string value, null if an error
+     */
+    public final String getStringFromListValue(String key) {
+        try {
+            return ((List<String>) this.getValue(key)).get(0);
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Store a single string value into a record value.
+     *
+     * Essentially the dual of getStringFromListValue, this function accepts a single
+     * String object and stores it in a List<String> as a value in a record element.
+     * @param key
+     * @param value
+     * @throws RecordException
+     */
+    public final void addStringAsListValue(String key, String value) throws RecordException {
+        if (value != null && !value.isEmpty()) {
+            List<String> l = new LinkedList<String>();
+            l.add(value);
+            this.add(key, l);
+        }else{
+            throw new RecordException(key + " is empty");
+        }
     }
 
     public String getURI() {

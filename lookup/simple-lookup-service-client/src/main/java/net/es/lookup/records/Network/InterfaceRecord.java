@@ -23,24 +23,11 @@ public class InterfaceRecord extends Record {
 
 
     public String getInterfaceName() {
-        try {
-            return (((List<String>) this.getValue(ReservedKeys.RECORD_INTERFACE_NAME)).get(0));
-        }
-        catch (NullPointerException e) {
-            return null;
-        }
+        return getStringFromListValue(ReservedKeys.RECORD_INTERFACE_NAME);
     }
 
     public void setInterfaceName(String interfaceName) throws RecordException {
-
-        if(interfaceName !=null && !(interfaceName.isEmpty())){
-            List<String> l = new LinkedList<String>();
-            l.add(interfaceName);
-            this.add(ReservedKeys.RECORD_INTERFACE_NAME, l);
-        }else{
-            throw new RecordException(ReservedKeys.RECORD_INTERFACE_NAME+" is empty");
-        }
-
+        addStringAsListValue(ReservedKeys.RECORD_INTERFACE_NAME, interfaceName);
     }
 
     public List<InetAddress> getAddresses() throws RecordException {
@@ -85,7 +72,7 @@ public class InterfaceRecord extends Record {
 
     public int getCapacity() {
         try {
-            return Integer.decode(((List<String>) this.getValue(ReservedKeys.RECORD_INTERFACE_CAPACITY)).get(0));
+            return Integer.decode(getStringFromListValue(ReservedKeys.RECORD_INTERFACE_CAPACITY));
         }
         catch (NullPointerException e) {
             return 0;
@@ -95,39 +82,24 @@ public class InterfaceRecord extends Record {
         }
     }
 
-    public void setCapacity(int capacity){
-        List<String> l = new LinkedList<String>();
-        l.add(Integer.toString(capacity));
-        this.add(ReservedKeys.RECORD_INTERFACE_CAPACITY, l);
+    public void setCapacity(int capacity) throws RecordException {
+        addStringAsListValue(ReservedKeys.RECORD_INTERFACE_CAPACITY, Integer.toString(capacity));
     }
 
     public String getMacAddress(){
-        try {
-            return (((List<String>) this.getValue(ReservedKeys.RECORD_INTERFACE_MACADDRESS)).get(0));
-        }
-        catch (NullPointerException e) {
-            return null;
-        }
+        return getStringFromListValue(ReservedKeys.RECORD_INTERFACE_MACADDRESS);
     }
 
     public void setMacAddress(String macAddress) throws RecordException {
-        if(macAddress != null && !macAddress.isEmpty()){
-            List<String> l = new LinkedList<String>();
-            l.add(macAddress);
-            this.add(ReservedKeys.RECORD_INTERFACE_MACADDRESS, l);
-        }  else{
-            throw new RecordException(ReservedKeys.RECORD_INTERFACE_MACADDRESS + " is empty");
-        }
+        addStringAsListValue(ReservedKeys.RECORD_INTERFACE_MACADDRESS, macAddress);
     }
 
     public List<String> getDomains() {
-
         return (List<String>) this.getValue(ReservedKeys.RECORD_GROUP_DOMAINS);
     }
 
     public void setDomains(List<String> domains) throws RecordException {
-
-        if(domains !=null && !(domains.isEmpty())){
+        if (domains !=null && !(domains.isEmpty())) {
             this.add(ReservedKeys.RECORD_GROUP_DOMAINS, domains);
         }else{
             throw new RecordException(ReservedKeys.RECORD_GROUP_DOMAINS+" is empty");
@@ -136,7 +108,7 @@ public class InterfaceRecord extends Record {
 
     public int getMtu() {
         try {
-            return Integer.decode(((List<String>) this.getValue(ReservedKeys.RECORD_INTERFACE_MTU)).get(0));
+            return Integer.decode(getStringFromListValue(ReservedKeys.RECORD_INTERFACE_MTU));
         }
         catch (NullPointerException e) {
             return 0;
@@ -147,11 +119,8 @@ public class InterfaceRecord extends Record {
     }
 
     public void setMtu(int mtu) throws RecordException {
-
         if (mtu > 0) {
-            List<String> l = new LinkedList<String>();
-            l.add(Integer.toString(mtu));
-            this.add(ReservedKeys.RECORD_INTERFACE_MTU, l);
+            addStringAsListValue(ReservedKeys.RECORD_INTERFACE_MTU, Integer.toString(mtu));
         } else {
             throw new RecordException(ReservedKeys.RECORD_INTERFACE_MTU + " must be a positive integer.");
         }

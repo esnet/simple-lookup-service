@@ -56,21 +56,16 @@ public class HostRecord extends Record {
         try {
             // This grabs the first word of the hardware memory, which is usually of the form
             // "7869.51171875 MB".
-            String s = ((List<String>) this.getValue(ReservedKeys.RECORD_HOST_HARDWARE_MEMORY)).get(0);
+            String s = getStringFromListValue(ReservedKeys.RECORD_HOST_HARDWARE_MEMORY);
             return Double.parseDouble(s.split(" ")[0]);
-        }
-        catch (NullPointerException e) {
-            return 0;
         }
         catch (NumberFormatException e) {
             return 0;
         }
     }
 
-    public void setHostMemory(double hostHardwareMemory) {
-        List<String> l = new LinkedList<String>();
-        l.add(String.format("%s MB", Double.toString(hostHardwareMemory)));
-        this.add(ReservedKeys.RECORD_HOST_HARDWARE_MEMORY, l);
+    public void setHostMemory(double hostHardwareMemory) throws RecordException {
+        addStringAsListValue(ReservedKeys.RECORD_HOST_HARDWARE_MEMORY, String.format("%s MB", Double.toString(hostHardwareMemory)));
     }
 
     /**
@@ -80,21 +75,16 @@ public class HostRecord extends Record {
     public double getHostProcessorSpeed() {
         try {
             // Break apart a string of the form "2500.002 MHz" and return the numeric part.
-            String s = ((List<String>) this.getValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORSPEED)).get(0);
+            String s = (getStringFromListValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORSPEED));
             return Double.parseDouble(s.split(" ")[0]);
-        }
-        catch (NullPointerException e) {
-            return 0;
         }
         catch (NumberFormatException e) {
             return 0;
         }
     }
 
-    public void setHostProcessorSpeed(double processorSpeed) {
-        List<String> l = new LinkedList<String>();
-        l.add(String.format("%s MHz", Double.toString(processorSpeed)));
-        this.add(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORSPEED, l);
+    public void setHostProcessorSpeed(double processorSpeed) throws RecordException {
+        addStringAsListValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORSPEED, String.format("%s MHz", Double.toString(processorSpeed)));
     }
 
     /**
@@ -103,20 +93,15 @@ public class HostRecord extends Record {
      */
     public int getHostProcessorCount() {
         try {
-            return Integer.decode(((List<String>) this.getValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCOUNT)).get(0));
-        }
-        catch (NullPointerException e) {
-            return 0;
+            return Integer.decode(getStringFromListValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCOUNT));
         }
         catch (NumberFormatException e) {
             return 0;
         }
     }
 
-    public void setHostProcessorCount(int processorCount) {
-        List<String> l = new LinkedList<String>();
-        l.add(Integer.toString(processorCount));
-        this.add(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCOUNT, l);
+    public void setHostProcessorCount(int processorCount) throws RecordException {
+        addStringAsListValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCOUNT, Integer.toString(processorCount));
     }
 
     /**
@@ -125,20 +110,15 @@ public class HostRecord extends Record {
      */
     public int getHostProcessorCore() {
         try {
-            return Integer.decode(((List<String>) this.getValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCORE)).get(0));
-        }
-        catch (NullPointerException e) {
-            return 0;
+            return Integer.decode(getStringFromListValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCORE));
         }
         catch (NumberFormatException e) {
             return 0;
         }
     }
 
-    public void setHostProcessorCore(int processorCore) {
-        List<String> l = new LinkedList<String>();
-        l.add(Integer.toString(processorCore));
-        this.add(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCORE, l);
+    public void setHostProcessorCore(int processorCore) throws RecordException{
+        addStringAsListValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCORE, Integer.toString(processorCore));
     }
 
     public List<String> getOSName() {
@@ -184,24 +164,11 @@ public class HostRecord extends Record {
     }
 
     public String getTcpCongestionAlgorithm() {
-        try {
-            String s = ((List<String>) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_CONGESTIONALGORITHM)).get(0);
-            return s;
-        }
-        catch (NullPointerException e) {
-            return null;
-        }
+        return getStringFromListValue(ReservedKeys.RECORD_HOST_NET_TCP_CONGESTIONALGORITHM);
     }
 
     public void setTcpCongestionAlgorithm(String congestionAlgorithm) throws RecordException {
-        if (congestionAlgorithm == null || congestionAlgorithm.isEmpty()) {
-            throw new RecordException(ReservedKeys.RECORD_HOST_NET_TCP_CONGESTIONALGORITHM + " is empty");
-        } else {
-            List<String> l = new LinkedList<String>();
-            l.add(congestionAlgorithm);
-            this.add(ReservedKeys.RECORD_HOST_NET_TCP_CONGESTIONALGORITHM, l);
-        }
-
+        addStringAsListValue(ReservedKeys.RECORD_HOST_NET_TCP_CONGESTIONALGORITHM, congestionAlgorithm);
     }
 
     /**
@@ -210,21 +177,16 @@ public class HostRecord extends Record {
      */
     public int getSendTcpMaxBuffer() {
         try {
-            String s = ((List<String>) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_SEND)).get(0);
+            String s = getStringFromListValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_SEND);
             return Integer.decode(s.split(" ")[0]);
-        }
-        catch (NullPointerException e) {
-            return 0;
         }
         catch (NumberFormatException e) {
             return 0;
         }
     }
 
-    public void setSendTcpMaxBuffer(int maxbuf) {
-        List<String> l = new LinkedList<String>();
-        l.add(String.format("%s bytes", Integer.toString(maxbuf)));
-        this.add(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_SEND, l);
+    public void setSendTcpMaxBuffer(int maxbuf) throws RecordException {
+        addStringAsListValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_SEND, String.format("%s bytes", Integer.toString(maxbuf)));
     }
 
     /**
@@ -233,21 +195,16 @@ public class HostRecord extends Record {
      */
     public int getReceiveTcpMaxBuffer() {
         try {
-            String s = ((List<String>) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_RECV)).get(0);
+            String s = (getStringFromListValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_RECV));
             return Integer.decode(s.split(" ")[0]);
-        }
-        catch (NullPointerException e) {
-            return 0;
         }
         catch (NumberFormatException e) {
             return 0;
         }
     }
 
-    public void setReceiveTcpMaxBuffer(int maxbuf) {
-        List<String> l = new LinkedList<String>();
-        l.add(String.format("%s bytes", Integer.toString(maxbuf)));
-        this.add(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_RECV, l);
+    public void setReceiveTcpMaxBuffer(int maxbuf) throws RecordException {
+        addStringAsListValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBUFFER_RECV, String.format("%s bytes", Integer.toString(maxbuf)));
     }
 
     /**
@@ -256,21 +213,16 @@ public class HostRecord extends Record {
      */
     public int getSendTcpAutotuneMaxBuffer() {
         try {
-            String s = ((List<String>) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_SEND)).get(0);
+            String s = getStringFromListValue(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_SEND);
             return Integer.decode(s.split(" ")[0]);
-        }
-        catch (NullPointerException e) {
-            return 0;
         }
         catch (NumberFormatException e) {
             return 0;
         }
     }
 
-    public void setSendTcpAutotuneMaxBuffer(int autotune) {
-        List<String> l = new LinkedList<String>();
-        l.add(String.format("%s bytes", Integer.toString(autotune)));
-        this.add(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_SEND, l);
+    public void setSendTcpAutotuneMaxBuffer(int autotune) throws RecordException{
+        addStringAsListValue(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_SEND, String.format("%s bytes", Integer.toString(autotune)));
     }
 
     /**
@@ -279,40 +231,30 @@ public class HostRecord extends Record {
      */
     public int getReceiveTcpAutotuneMaxBuffer() {
         try {
-            String s = ((List<String>) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_RECV)).get(0);
+            String s = getStringFromListValue(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_RECV);
             return Integer.decode(s.split(" ")[0]);
-        }
-        catch (NullPointerException e) {
-            return 0;
         }
         catch (NumberFormatException e) {
             return 0;
         }
     }
 
-    public void setReceiveTcpAutotuneMaxBuffer(int autotune) {
-        List<String> l = new LinkedList<String>();
-        l.add(String.format("%s bytes", Integer.toString(autotune)));
-        this.add(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_RECV, l);
+    public void setReceiveTcpAutotuneMaxBuffer(int autotune) throws RecordException {
+        addStringAsListValue(ReservedKeys.RECORD_HOST_NET_TCP_AUTOTUNEMAXBUFFER_RECV, String.format("%s bytes", Integer.toString(autotune)));
     }
 
 
     public int getTcpMaxBackLog() {
         try {
-            return Integer.decode(((List<String>) this.getValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBACKLOG)).get(0));
-        }
-        catch (NullPointerException e) {
-            return 0;
+            return Integer.decode(getStringFromListValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBACKLOG));
         }
         catch (NumberFormatException e) {
             return 0;
         }
     }
 
-    public void setgetTcpMaxBackLog(int maxbacklog) {
-        List<String> l = new LinkedList<String>();
-        l.add(Integer.toString(maxbacklog));
-        this.add(ReservedKeys.RECORD_HOST_NET_TCP_MAXBACKLOG, l);
+    public void setgetTcpMaxBackLog(int maxbacklog) throws RecordException {
+        addStringAsListValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBACKLOG, Integer.toString(maxbacklog));
     }
 
     public List<String> getInterfaces() {
@@ -358,108 +300,49 @@ public class HostRecord extends Record {
     }
 
     public String getSiteName() {
-        try {
-            return ((List<String>) this.getValue(ReservedKeys.RECORD_LOCATION_SITENAME)).get(0);
-        }
-        catch (Exception e) {
-            return null;
-        }
+        return getStringFromListValue(ReservedKeys.RECORD_LOCATION_SITENAME);
     }
 
     public void setSiteName(String siteName) throws RecordException {
-        if (siteName != null && !siteName.isEmpty()) {
-            List<String> l = new LinkedList<String>();
-            l.add(siteName);
-            this.add(ReservedKeys.RECORD_LOCATION_SITENAME, l);
-        } else {
-            throw new RecordException(ReservedKeys.RECORD_LOCATION_SITENAME + " is empty");
-        }
+        addStringAsListValue(ReservedKeys.RECORD_LOCATION_SITENAME, siteName);
     }
 
     public String getCity() {
-        try {
-            return ((List<String>) this.getValue(ReservedKeys.RECORD_LOCATION_CITY)).get(0);
-        }
-        catch (Exception e) {
-            return null;
-        }
+        return getStringFromListValue(ReservedKeys.RECORD_LOCATION_CITY);
     }
 
     public void setCity(String city) throws RecordException {
-
-        if (city != null && !city.isEmpty()) {
-            List<String> l = new LinkedList<String>();
-            l.add(city);
-            this.add(ReservedKeys.RECORD_LOCATION_CITY, l);
-        } else {
-            throw new RecordException(ReservedKeys.RECORD_LOCATION_CITY + " is empty");
-        }
+        addStringAsListValue(ReservedKeys.RECORD_LOCATION_CITY, city);
     }
 
     public String getState() {
-        try {
-            return ((List<String>) this.getValue(ReservedKeys.RECORD_LOCATION_STATE)).get(0);
-        }
-        catch (Exception e) {
-            return null;
-        }
+        return getStringFromListValue(ReservedKeys.RECORD_LOCATION_STATE);
     }
 
     @Deprecated
     public String getRegion() { return getState(); }
 
     public void setState(String state) throws RecordException {
-
-        if (state != null && !state.isEmpty()) {
-            List<String> l = new LinkedList<String>();
-            l.add(state);
-            this.add(ReservedKeys.RECORD_LOCATION_STATE, l);
-        } else {
-            throw new RecordException(ReservedKeys.RECORD_LOCATION_STATE + " is empty");
-        }
+        addStringAsListValue(ReservedKeys.RECORD_LOCATION_STATE, state);
     }
 
     @Deprecated
     public void setRegion(String state) throws RecordException { setState(state); }
 
     public String getCountry() {
-        try {
-            return ((List<String>) this.getValue(ReservedKeys.RECORD_LOCATION_COUNTRY)).get(0);
-        }
-        catch (Exception e) {
-            return null;
-        }
+        return getStringFromListValue(ReservedKeys.RECORD_LOCATION_COUNTRY);
     }
 
     public void setCountry(String country) throws RecordException {
-
-        if (country != null && !country.isEmpty() && DataValidator.isValidCountry(country)) {
-            List<String> l = new LinkedList<String>();
-            l.add(country);
-            this.add(ReservedKeys.RECORD_LOCATION_COUNTRY, l);
-        } else {
-            throw new RecordException(ReservedKeys.RECORD_LOCATION_COUNTRY + " is invalid");
-        }
+        addStringAsListValue(ReservedKeys.RECORD_LOCATION_COUNTRY, country);
     }
 
     public String getZipcode() {
-        try {
-            return ((List<String>) this.getValue(ReservedKeys.RECORD_LOCATION_ZIPCODE)).get(0);
-        }
-        catch (Exception e) {
-            return null;
-        }
+        return getStringFromListValue(ReservedKeys.RECORD_LOCATION_ZIPCODE);
     }
 
     public void setZipcode(String zipcode) throws RecordException {
-
-        if (zipcode != null && !zipcode.isEmpty()) {
-            List<String> l = new LinkedList<String>();
-            l.add(zipcode);
-            this.add(ReservedKeys.RECORD_LOCATION_ZIPCODE, l);
-        } else {
-            throw new RecordException(ReservedKeys.RECORD_LOCATION_ZIPCODE + " is empty");
-        }
+        addStringAsListValue(ReservedKeys.RECORD_LOCATION_ZIPCODE, zipcode);
     }
 
     /**
@@ -468,7 +351,10 @@ public class HostRecord extends Record {
      */
     public double getLatitude() {
         try {
-            return Double.parseDouble(((List<String>) this.getValue(ReservedKeys.RECORD_LOCATION_LATITUDE)).get(0));
+            return Double.parseDouble(getStringFromListValue(ReservedKeys.RECORD_LOCATION_LATITUDE));
+        }
+        catch (NumberFormatException e) {
+            return Double.NaN;
         }
         catch (NullPointerException e) {
             return Double.NaN;
@@ -476,11 +362,8 @@ public class HostRecord extends Record {
     }
 
     public void setLatitude(double latitude) throws RecordException {
-
         if (DataValidator.isValidLatitude(latitude)) {
-            List<String> l = new LinkedList<String>();
-            l.add(Double.toString(latitude));
-            this.add(ReservedKeys.RECORD_LOCATION_LATITUDE, l);
+            addStringAsListValue(ReservedKeys.RECORD_LOCATION_LATITUDE, Double.toString(latitude));
         } else {
             throw new RecordException(ReservedKeys.RECORD_LOCATION_LATITUDE + " is out of range (-90,90)");
         }
@@ -492,7 +375,9 @@ public class HostRecord extends Record {
      */
     public double getLongitude() {
         try {
-            return Double.parseDouble(((List<String>) this.getValue(ReservedKeys.RECORD_LOCATION_LONGITUDE)).get(0));
+            return Double.parseDouble(getStringFromListValue(ReservedKeys.RECORD_LOCATION_LONGITUDE));
+        } catch (NumberFormatException e) {
+            return Double.NaN;
         }
         catch (NullPointerException e) {
             return Double.NaN;
@@ -500,11 +385,8 @@ public class HostRecord extends Record {
     }
 
     public void setLongitude(double longitude) throws RecordException {
-
         if (DataValidator.isValidLongitude(longitude)) {
-            List<String> l = new LinkedList<String>();
-            l.add(Double.toString(longitude));
-            this.add(ReservedKeys.RECORD_LOCATION_LONGITUDE, l);
+            addStringAsListValue(ReservedKeys.RECORD_LOCATION_LONGITUDE, Double.toString(longitude));
         } else {
             throw new RecordException(ReservedKeys.RECORD_LOCATION_LONGITUDE + " is out of range (-180,180)");
         }
