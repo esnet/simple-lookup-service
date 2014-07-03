@@ -121,46 +121,28 @@ public class HostRecord extends Record {
         addStringAsListValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCORE, Integer.toString(processorCore));
     }
 
-    public List<String> getOSName() {
-
-        return (List<String>) this.getValue(ReservedKeys.RECORD_HOST_OS_NAME);
+    public String getOSName() {
+        return getStringFromListValue(ReservedKeys.RECORD_HOST_OS_NAME);
     }
 
-    public void setOSName(List<String> osName) throws RecordException {
-
-        if (osName == null || osName.isEmpty()) {
-            throw new RecordException(ReservedKeys.RECORD_HOST_OS_NAME + " is empty");
-        } else {
-            this.add(ReservedKeys.RECORD_HOST_OS_NAME, osName);
-        }
+    public void setOSName(String osName) throws RecordException {
+        addStringAsListValue(ReservedKeys.RECORD_HOST_OS_NAME, osName);
     }
 
-    public List<String> getOSVersion() {
-
-        return (List<String>) this.getValue(ReservedKeys.RECORD_HOST_OS_VERSION);
+    public String getOSVersion() {
+        return getStringFromListValue(ReservedKeys.RECORD_HOST_OS_VERSION);
     }
 
-    public void setOSVersion(List<String> osVersion) throws RecordException {
-
-        if (osVersion == null || osVersion.isEmpty()) {
-            throw new RecordException(ReservedKeys.RECORD_HOST_OS_VERSION + " is empty");
-        } else {
-            this.add(ReservedKeys.RECORD_HOST_OS_VERSION, osVersion);
-        }
+    public void setOSVersion(String osVersion) throws RecordException {
+        addStringAsListValue(ReservedKeys.RECORD_HOST_OS_VERSION, osVersion);
     }
 
-    public List<String> getOSKernel() {
-
-        return (List<String>) this.getValue(ReservedKeys.RECORD_HOST_OS_KERNEL);
+    public String getOSKernel() {
+        return getStringFromListValue(ReservedKeys.RECORD_HOST_OS_KERNEL);
     }
 
-    public void setOSKernel(List<String> osKernel) throws RecordException {
-
-        if (osKernel == null || osKernel.isEmpty()) {
-            throw new RecordException(ReservedKeys.RECORD_HOST_OS_KERNEL + " is empty");
-        } else {
-            this.add(ReservedKeys.RECORD_HOST_OS_KERNEL, osKernel);
-        }
+    public void setOSKernel(String osKernel) throws RecordException {
+        addStringAsListValue(ReservedKeys.RECORD_HOST_OS_KERNEL, osKernel);
     }
 
     public String getTcpCongestionAlgorithm() {
