@@ -43,7 +43,8 @@ public class AMQueue extends Queue {
         LookupServiceConfigReader lookupServiceConfigReader = LookupServiceConfigReader.getInstance();
         QueueServiceConfigReader configReader = QueueServiceConfigReader.getInstance();
 
-        String host = lookupServiceConfigReader.getHost();
+        //String host = lookupServiceConfigReader.getHost();
+        String host = configReader.getHost();
         int queueport = configReader.getPort();
         String protocol = configReader.getProtocol();
         long ttl = configReader.getTtl();

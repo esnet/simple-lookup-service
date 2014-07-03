@@ -40,40 +40,44 @@ public class AMQueuePump implements QueuePump {
     }
 
 
-    public void fillQueues(List<Message> messageList) throws PubSubQueueException, PubSubQueryException {
+    public void fillQueues(List<Message> messageList) throws PubSubQueryException {
         LOG.info("net.es.lookup.pubsub.amq.AMQueuePump.fillQueues: Filling up queues with message");
         AMQueueManager amQueueManager = (AMQueueManager) QueueServiceMapping.getQueueManager(serviceName);
         List<Message> queries = amQueueManager.getAllQueries();
 
-        //optimized for queries with only 1 key-value pair
-        for (Message query : queries){
-            Map<String,Object> queryMap = query.getMap();
-            List<Message> messagesToSend = new LinkedList<Message>();
-	    LOG.debug("net.es.lookup.pubsub.amq.AMQueuePump.fillQueues: Query"+ query.getMap());
+        if(!queries.isEmpty()){
+            //optimized for queries with only 1 key-value pair
+            for (Message query : queries){
+                Map<String,Object> queryMap = query.getMap();
+                List<Message> messagesToSend = new LinkedList<Message>();
+                LOG.debug("net.es.lookup.pubsub.amq.AMQueuePump.fillQueues: Query"+ query.getMap());
                 for (Message message : messageList){
                     if(queryMap.size()==1 && queryMap.containsKey(ReservedKeys.RECORD_OPERATOR_SUFFIX)){
-			messagesToSend.add(message);
+                        messagesToSend.add(message);
                     }else{
                         for (String key: queryMap.keySet()){
                             if (message.hasKey(key) && message.getKey(key).equals(queryMap.get(key))){
-                     		   LOG.debug("net.es.lookup.pubsub.amq.AMQueuePump.fillQueues: Message "+message.getMap()+" mapped to query"+ query.getMap());
-                        		messagesToSend.add(message);
-  
+                                LOG.debug("net.es.lookup.pubsub.amq.AMQueuePump.fillQueues: Message "+message.getMap()+" mapped to query"+ query.getMap());
+                                messagesToSend.add(message);
+
                             }
                         }
-		    }
+                    }
                 }
-               
-            if(!messagesToSend.isEmpty()){
-                List <String> qids = amQueueManager.getQueues(query);
 
-                for(String qid: qids){
-                    if(qid != null && !qid.isEmpty()){
-                        amQueueManager.push(qid,messagesToSend);
+                if(!messagesToSend.isEmpty()){
+                    List <String> qids = amQueueManager.getQueues(query);
+
+                    for(String qid: qids){
+                        if(qid != null && !qid.isEmpty()){
+                            amQueueManager.push(qid,messagesToSend);
+                        }
                     }
                 }
             }
         }
+
+
 
     }
 

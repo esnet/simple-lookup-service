@@ -53,9 +53,7 @@ public class SubscribeService {
                 return response;
             } catch (PubSubQueryException e) {
                 throw new InternalErrorException(e.getMessage());
-            } catch (PubSubQueueException e) {
-                throw new InternalErrorException(e.getMessage());
-            } catch (DataFormatException e) {
+            }  catch (DataFormatException e) {
                 throw new InternalErrorException(e.getMessage());
             }
 

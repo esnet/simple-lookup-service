@@ -17,7 +17,8 @@ public class QueueServiceConfigReader {
     private static final String DEFAULT_PATH = "etc";
     private static String configFile = DEFAULT_PATH + "/" + DEFAULT_FILE;
 
-    private int port = 16617;
+    private int port = 61617;
+    private String host = "localhost";
     private String protocol = "tcp";
 
     private boolean serviceOn = false;
@@ -57,6 +58,11 @@ public class QueueServiceConfigReader {
         return QueueServiceConfigReader.instance;
     }
 
+    public String getHost() {
+
+        return this.host;
+    }
+
     public int getPort() {
 
         return this.port;
@@ -79,7 +85,7 @@ public class QueueServiceConfigReader {
     }
 
     public String getUrl(){
-        String host = LookupServiceConfigReader.getInstance().getHost();
+
         String url = protocol + "://" + host + ":" + port;
         return url;
     }
@@ -95,7 +101,7 @@ public class QueueServiceConfigReader {
         try {
 
             HashMap<String, Object> queueServiceMap = (HashMap) yamlMap.get("queue");
-
+            host = (String) queueServiceMap.get("host");
             port = (Integer) queueServiceMap.get("port");
             String service = (String) queueServiceMap.get("queueservice");
             if(service.equals("on")){

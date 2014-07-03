@@ -169,9 +169,9 @@ public class LookupService {
         try {
 
             this.httpServer = this.startServer(resourceArray);
-            if(this.queueServiceRequired){
-                this.broker = this.startBroker();
-            }
+            //if(this.queueServiceRequired){
+              //  this.broker = this.startBroker();
+            //}
 
 
         } catch (IOException e) {

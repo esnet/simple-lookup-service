@@ -1,10 +1,11 @@
 #Queue
 queue:
-    queueservice: 'off'
+    queueservice: 'on'
+    host: 'antg.es.net'
     port: 61616
     protocol: 'tcp'
 
 #Messages
 message:
-    persistent: true
+    persistent: false
     ttl: 120

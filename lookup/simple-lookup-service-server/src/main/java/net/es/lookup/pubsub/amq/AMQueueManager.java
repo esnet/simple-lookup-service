@@ -49,7 +49,7 @@ public class AMQueueManager implements QueueManager {
      * The method normalizes the query and searches if queue exists for the query. If queue exists,
      * the queue id is returned. Else, a queue is created and the id is returned.
      */
-    public List<String> getQueues(Message query) throws PubSubQueryException, PubSubQueueException {
+    public List<String> getQueues(Message query) throws PubSubQueryException {
 
         LOG.info("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Creating/Retrieving Queues");
         List<String> res = new ArrayList<String>();
@@ -67,22 +67,28 @@ public class AMQueueManager implements QueueManager {
             } else {
 
                 //System.out.println(queryMap.toString());
-                AMQueue queue = new AMQueue();
-                String qid = queue.getQid();
-                LOG.debug("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Created queue with id " + qid);
+                AMQueue queue = null;
+                try {
+                    queue = new AMQueue();
+                    String qid = queue.getQid();
+                    LOG.debug("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Created queue with id " + qid);
 
 
-                //add queue to queueMap
-                queueMap.put(qid, queue);
+                    //add queue to queueMap
+                    queueMap.put(qid, queue);
 
-                //add to queryMap
-                res.add(qid);
-                queryMap.put(normalizedQuery, res);
+                    //add to queryMap
+                    res.add(qid);
+                    queryMap.put(normalizedQuery, res);
 
-                //add to normalized query
-                List<Message> queryList = new ArrayList<Message>();
-                queryList.add(query);
-                normalizedQueryMap.put(normalizedQuery, queryList);
+                    //add to normalized query
+                    List<Message> queryList = new ArrayList<Message>();
+                    queryList.add(query);
+                    normalizedQueryMap.put(normalizedQuery, queryList);
+                } catch (PubSubQueueException e) {
+                    LOG.debug("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Error creating queue " +e.getMessage());
+                }
+
             }
 
         }
@@ -111,17 +117,21 @@ public class AMQueueManager implements QueueManager {
      * This method simply checks if queue exists and pushes the message to the queue. If queue does
      * not exist, it throws a PubSubQueueException.
      */
-    public void push(String qid, List<Message> messages) throws PubSubQueueException {
+    public void push(String qid, List<Message> messages){
 
         LOG.info("net.es.lookup.pubsub.amq.AMQueueManager.push: Pushing Message" + messages + " to Queue " + qid);
         AMQueue queue = queueMap.get(qid);
 
         if (queue != null) {
-            queue.push(messages);
+            try {
+                queue.push(messages);
+            } catch (PubSubQueueException e) {
+                LOG.error("net.es.lookup.pubsub.amq.AMQueueManager.push: Error pushing message to Queue. Queue does not exist");
+                cleanUp(qid);
+            }
             LOG.debug("net.es.lookup.pubsub.amq.AMQueueManager.push: Pushed Message" + messages + " to Queue " + qid);
         } else {
             LOG.error("net.es.lookup.pubsub.amq.AMQueueManager.push: Error pushing message to Queue. Queue does not exist");
-            throw new PubSubQueueException("Queue does not exist");
         }
 
     }
@@ -134,6 +144,24 @@ public class AMQueueManager implements QueueManager {
         }
         LOG.debug("net.es.lookup.pubsub.amq.AMQueueManager.getAllQueries: Retrieved Queries - "+ queryList.size());
         return queryList;
+    }
+
+    private void cleanUp(String qid){
+        String query=null;
+        for(String s: queryMap.keySet()){
+            List<String> qids = queryMap.get(s);
+            for(String q: qids){
+                if(q.equals(qid)){
+                    query = s;
+                }
+            }
+        }
+        if(query != null){
+            queryMap.remove(query);
+        }
+
+        queueMap.remove(qid);
+
     }
 
 }

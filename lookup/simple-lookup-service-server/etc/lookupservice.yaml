@@ -2,13 +2,13 @@
 #Lookup Service settings
 lookupservice:
     host: 'localhost'
-    port: 8090
+    port: 8070
     lease:
         max: 2592000
-        default: 1800
+        default: 7200
         min: 1800
     coreservice: 'on'
-    cacheservice: 'off'
+    cacheservice: 'on'
 
 #Database settings  
 database:
@@ -18,6 +18,6 @@ database:
     DBCollName: 'services'
     username: 'lookup'
     password: 'abc123'
-    pruneInterval: 120
+    pruneInterval: 14400
     pruneThreshold: 600
 
