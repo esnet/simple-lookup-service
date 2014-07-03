@@ -218,57 +218,40 @@ public class Record {
     }
 
 
-    //validates the type of value
+    /**
+     * Do some simple validation on records
+     * @return true if valid, false if not
+     */
     public boolean validate() {
 
-        boolean returnVal = true;
-
+        // First make sure that we have a values array and it's not empty.
         if (keyValues == null || keyValues.isEmpty()) {
             return false;
         }
+
+        // There must be a record type value, although we don't check the actual type.
         if (!keyValues.containsKey(ReservedKeys.RECORD_TYPE)) {
             return false;
         }
 
+        // Iterate over all of the values and check their types/
         for (String key : this.keyValues.keySet()) {
-
             Object o = this.keyValues.get(key);
 
+            // Each value must be either a string or a list containing strings.
             if (o instanceof String) {
-
-                returnVal = returnVal & true;
-
             } else if (o instanceof List<?>) {
-
                 for (Object obj : (List) o) {
-
                     if (obj instanceof String) {
-
-                        returnVal = returnVal & true;
-
                     } else {
-
-                        returnVal = returnVal & false;
-                        return returnVal;
-
+                        return false;
                     }
-
                 }
-
-                returnVal = returnVal & true;
-
             } else {
-
-                returnVal = returnVal & false;
-                return returnVal;
-
+                return false;
             }
-
         }
-
-
-        return returnVal;
-
+        return true;
     }
 
 }
