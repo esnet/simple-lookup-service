@@ -60,7 +60,10 @@ public class HostRecord extends Record {
             return Double.parseDouble(s.split(" ")[0]);
         }
         catch (NumberFormatException e) {
-            return 0;
+            return 0.0;
+        }
+        catch (NullPointerException e) {
+            return 0.0;
         }
     }
 
@@ -79,7 +82,10 @@ public class HostRecord extends Record {
             return Double.parseDouble(s.split(" ")[0]);
         }
         catch (NumberFormatException e) {
-            return 0;
+            return 0.0;
+        }
+        catch (NullPointerException e) {
+            return 0.0;
         }
     }
 
@@ -98,6 +104,9 @@ public class HostRecord extends Record {
         catch (NumberFormatException e) {
             return 0;
         }
+        catch (NullPointerException e) {
+            return 0;
+        }
     }
 
     public void setHostProcessorCount(int processorCount) throws RecordException {
@@ -113,6 +122,9 @@ public class HostRecord extends Record {
             return Integer.decode(getStringFromListValue(ReservedKeys.RECORD_HOST_HARDWARE_PROCESSORCORE));
         }
         catch (NumberFormatException e) {
+            return 0;
+        }
+        catch (NullPointerException e) {
             return 0;
         }
     }
@@ -165,6 +177,9 @@ public class HostRecord extends Record {
         catch (NumberFormatException e) {
             return 0;
         }
+        catch (NullPointerException e) {
+            return 0;
+        }
     }
 
     public void setSendTcpMaxBuffer(int maxbuf) throws RecordException {
@@ -181,6 +196,9 @@ public class HostRecord extends Record {
             return Integer.decode(s.split(" ")[0]);
         }
         catch (NumberFormatException e) {
+            return 0;
+        }
+        catch (NullPointerException e) {
             return 0;
         }
     }
@@ -201,6 +219,9 @@ public class HostRecord extends Record {
         catch (NumberFormatException e) {
             return 0;
         }
+        catch (NullPointerException e) {
+            return 0;
+        }
     }
 
     public void setSendTcpAutotuneMaxBuffer(int autotune) throws RecordException{
@@ -219,6 +240,9 @@ public class HostRecord extends Record {
         catch (NumberFormatException e) {
             return 0;
         }
+        catch (NullPointerException e) {
+            return 0;
+        }
     }
 
     public void setReceiveTcpAutotuneMaxBuffer(int autotune) throws RecordException {
@@ -231,6 +255,9 @@ public class HostRecord extends Record {
             return Integer.decode(getStringFromListValue(ReservedKeys.RECORD_HOST_NET_TCP_MAXBACKLOG));
         }
         catch (NumberFormatException e) {
+            return 0;
+        }
+        catch (NullPointerException e) {
             return 0;
         }
     }
