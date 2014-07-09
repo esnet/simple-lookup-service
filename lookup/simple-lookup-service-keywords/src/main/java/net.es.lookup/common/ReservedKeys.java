@@ -51,6 +51,7 @@ public class ReservedKeys {
     public static final String RECORD_SERVICE_LOCATOR = "service-locator";
     public static final String RECORD_SERVICE_ADMINISTRATORS = "service-administrators" ;
     public static final String RECORD_SERVICE_HOST = "service-host";
+    public static final String RECORD_SERVICE_EVENTTYPES = "psservice-eventtypes";
 
     //interface keys
     public static final String RECORD_INTERFACE_NAME = "interface-name";
