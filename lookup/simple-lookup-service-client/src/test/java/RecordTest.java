@@ -73,10 +73,10 @@ public class RecordTest extends BaseTest {
             Assert.assertTrue(rec.getLatitude() >= Double.parseDouble((String) testValues.get("latitude-lower-bound")) && rec.getLatitude() <= Double.parseDouble((String) testValues.get("latitude-upper-bound")));
             Assert.assertTrue(rec.getLongitude() >= Double.parseDouble((String) testValues.get("longitude-lower-bound")) && rec.getLongitude() <= Double.parseDouble((String) testValues.get("longitude-upper-bound")));
 
-            System.out.println("Testing OS getters and setters"+stringList);
-            rec.setOSKernel(stringList);
-            rec.setOSName(stringList);
-            rec.setOSVersion(stringList);
+            System.out.println("Testing OS getters and setters");
+            rec.setOSKernel(str);
+            rec.setOSName(str);
+            rec.setOSVersion(str);
             Assert.assertTrue(rec.getOSKernel() != null && !rec.getOSKernel().contains(null) && !rec.getOSKernel().isEmpty());
             Assert.assertTrue(rec.getOSName() != null && !rec.getOSName().contains(null) && !rec.getOSName().isEmpty());
             Assert.assertTrue(rec.getOSVersion() != null && !rec.getOSVersion().contains(null) && !rec.getOSVersion().isEmpty());
@@ -231,15 +231,13 @@ public class RecordTest extends BaseTest {
             System.out.println("Testing service getters and setters");
             rec.setHost(str);
             rec.setServiceName(str);
-            rec.setServiceVersion(str);
             rec.setServiceType(str);
             rec.setAdministrators(stringList);
             rec.setDomains(stringList);
             rec.setCommunities(stringList);
-            rec.setServiceLocator(stringList);
+            rec.setServiceLocator(str);
             Assert.assertTrue(rec.getHost() != null && !rec.getHost().isEmpty());
             Assert.assertTrue(rec.getServiceName() != null && !rec.getServiceName().isEmpty());
-            Assert.assertTrue(rec.getServiceVersion() != null && !rec.getServiceVersion().isEmpty());
             Assert.assertTrue(rec.getServiceType() != null && !rec.getServiceType().isEmpty());
             Assert.assertTrue(rec.getAdministrators() != null && !rec.getAdministrators().contains(null) && !rec.getAdministrators().isEmpty());
             Assert.assertTrue(rec.getDomains() != null && !rec.getDomains().contains(null) && !rec.getDomains().isEmpty());
