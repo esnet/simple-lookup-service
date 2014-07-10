@@ -1,0 +1,64 @@
+{
+   "host-hardware-processorcore" : [
+      "2"
+   ],
+   "host-net-tcp-maxbuffer-recv" : [
+      "33554432 bytes"
+   ],
+   "host-hardware-memory" : [
+      "15901.25 MB"
+   ],
+   "location-city" : [
+      "Dakar"
+   ],
+   "host-os-version" : [
+      "6.5 (Final)"
+   ],
+   "group-communities" : [
+      "GÉANT",
+      "pS-NPToolkit-3.4-RC2"
+   ],
+   "host-os-kernel" : [
+      "2.6.32-431.20.3.el6.aufs.web100.x86_64"
+   ],
+   "service-name" : [
+      "Test-if-sLS-working"
+   ],
+   "host-net-tcp-maxbacklog" : [
+      "30000"
+   ],
+   "location-sitename" : [
+      "DANTE remote office"
+   ],
+   "host-net-tcp-autotunemaxbuffer-recv" : [
+      "16777216 bytes"
+   ],
+   "location-longitude" : [
+      "-17.494365"
+   ],
+   "location-latitude" : [
+      "14.7325"
+   ],
+   "host-os-name" : [
+      "CentOS"
+   ],
+   "host-net-tcp-autotunemaxbuffer-send" : [
+      "16217 bytes"
+   ],
+   "host-net-tcp-maxbuffer-send" : [
+      "33554432 bytes"
+   ],
+   "location-country" : [
+      "SN"
+   ],
+   "pshost-toolkitversion" : [
+      "3.4-RC2"
+   ],
+   "host-net-tcp-congestionalgorithm" : [
+      "reno"
+   ],
+   "type" : [
+      "interface"
+   ]
+}
+
