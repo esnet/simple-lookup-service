@@ -11,7 +11,6 @@ import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.log4j.Logger;
 
-
 import javax.jms.*;
 import java.util.List;
 import java.util.UUID;
@@ -52,6 +51,7 @@ public class AMQueue extends Queue {
 
         String url = configReader.getUrl();
         ConnectionFactory factory = new ActiveMQConnectionFactory(user, password, url);
+
         try {
 
             connection = factory.createConnection();

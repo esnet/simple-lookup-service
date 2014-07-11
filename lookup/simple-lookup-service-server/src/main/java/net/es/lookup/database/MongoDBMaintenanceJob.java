@@ -98,6 +98,8 @@ public class MongoDBMaintenanceJob implements Job {
         }
 
         try {
+            LOG.info("net.es.lookup.database.MongoDBMaintenance"+messages.size());
+            int size = messages.size();
             sendToQueue(dbname, messages);
         } catch (PubSubQueueException e) {
             LOG.error("Error sending Expired Record  to Queue");
@@ -113,9 +115,31 @@ public class MongoDBMaintenanceJob implements Job {
     private void sendToQueue(String amqname, List<Message> messages) throws PubSubQueueException, PubSubQueryException {
 
         AMQueuePump amQueuePump = (AMQueuePump) QueueServiceMapping.getQueuePump(amqname);
+        int batchSize = AMQueuePump.BATCH_SIZE;
+
+
         if(amQueuePump != null){
 
-            amQueuePump.fillQueues(messages);
+            int messageIndex = batchSize;
+
+            List<Message> batchedMessages = new ArrayList<Message>(batchSize);
+            int count =0;
+            for(Message message: messages){
+                if(count<batchSize){
+                    batchedMessages.add(message);
+                }else{
+                    count =0;
+                    amQueuePump.fillQueues(batchedMessages);
+                    batchedMessages = new ArrayList<Message>(batchSize);
+
+                }
+            }
+
+            if(batchedMessages.size()>0){
+                amQueuePump.fillQueues(batchedMessages);
+            }
+
+
         }
 
     }

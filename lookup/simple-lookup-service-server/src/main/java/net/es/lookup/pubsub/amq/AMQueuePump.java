@@ -1,12 +1,11 @@
 package net.es.lookup.pubsub.amq;
 
 import net.es.lookup.common.Message;
+import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.exception.internal.PubSubQueryException;
-import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.pubsub.QueuePump;
 import net.es.lookup.pubsub.QueueServiceMapping;
 import org.apache.log4j.Logger;
-import net.es.lookup.common.ReservedKeys;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -22,6 +21,8 @@ public class AMQueuePump implements QueuePump {
     private static AMQueuePump instance = null;
     private String serviceName;
     private static Logger LOG = Logger.getLogger(AMQueuePump.class);
+
+    public static final int BATCH_SIZE= 1000;
 
 
     public AMQueuePump(String serviceName) {
