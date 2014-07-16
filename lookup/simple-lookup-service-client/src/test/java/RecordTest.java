@@ -235,7 +235,7 @@ public class RecordTest extends BaseTest {
             rec.setAdministrators(stringList);
             rec.setDomains(stringList);
             rec.setCommunities(stringList);
-            rec.setServiceLocator(str);
+            rec.setServiceLocator(stringList);
             Assert.assertTrue(rec.getHost() != null && !rec.getHost().isEmpty());
             Assert.assertTrue(rec.getServiceName() != null && !rec.getServiceName().isEmpty());
             Assert.assertTrue(rec.getServiceType() != null && !rec.getServiceType().isEmpty());

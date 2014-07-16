@@ -38,12 +38,17 @@ public class ServiceRecord extends Record {
         addStringAsListValue(ReservedKeys.RECORD_SERVICE_TYPE, serviceType);
     }
 
-    public String getServiceLocator() {
-        return getStringFromListValue(ReservedKeys.RECORD_SERVICE_LOCATOR);
+    public List<String> getServiceLocator() {
+        return (List<String>) this.getValue(ReservedKeys.RECORD_SERVICE_LOCATOR);
     }
 
-    public void setServiceLocator(String serviceLocator) throws RecordException {
-        addStringAsListValue(ReservedKeys.RECORD_SERVICE_LOCATOR, serviceLocator);
+    public void setServiceLocator(List<String> serviceLocator) throws RecordException {
+        if (serviceLocator != null && !serviceLocator.isEmpty()) {
+            this.add(ReservedKeys.RECORD_SERVICE_LOCATOR, serviceLocator);
+        }
+        else {
+            throw new RecordException(ReservedKeys.RECORD_SERVICE_LOCATOR + " is empty");
+        }
     }
 
     public String getEventTypes() {
