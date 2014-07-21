@@ -86,7 +86,7 @@ public class QueueServiceConfigReader {
 
     public String getUrl(){
 
-        String url = protocol + "://" + host + ":" + port;
+        String url = protocol + "://" + host + ":" + port+"?wireFormat.maxInactivityDuration=600000";
         return url;
     }
 

@@ -28,6 +28,8 @@ public class AMQueue extends Queue {
     private MessageProducer producer;
     private String qid = "";
     private static Logger LOG = Logger.getLogger(AMQueue.class);
+    private final int BATCH_SIZE=500;
+    private final long DELAY=200;
 
     /**
      * The constructor
@@ -100,23 +102,60 @@ public class AMQueue extends Queue {
     }
 
     /**
-     * This method pushes a single message to the Active MQ Queue.
+     * This method pushes messages to the Active MQ Queue. Messages are rate controlled using BATCH_SIZE
      *
      * @param messages The message to be pushed to queue
      */
-    public void push(List<Message> messages) throws PubSubQueueException {
+    public synchronized void push(List<Message> messages) throws PubSubQueueException {
 
+        if(messages.size()<=BATCH_SIZE){
+            try {
+                String strmsg = JSONMessage.toString(messages);
+                send(strmsg);
+            } catch (DataFormatException e) {
+                LOG.error("net.es.lookup.pubsub.amq.AMQueue.push: Error pushing message to queue - DataFormatException mapped to PubSubQueueException" + e.getMessage());
+                throw new PubSubQueueException(e.getMessage());
+            }
+        }else{
+            int startIndex = 0;
+            int endIndex=BATCH_SIZE;
+            while(startIndex<messages.size()){
+                List<Message> batchedMessages = messages.subList(startIndex, endIndex);
+                try {
+                    String strmsg = JSONMessage.toString(batchedMessages);
+                    send(strmsg);
+                    Thread.sleep(DELAY);
+                } catch (DataFormatException e) {
+                    LOG.error("net.es.lookup.pubsub.amq.AMQueue.push: Error pushing message to queue - DataFormatException mapped to PubSubQueueException" + e.getMessage());
+                    throw new PubSubQueueException(e.getMessage());
+                } catch (InterruptedException e) {
+                    LOG.error("net.es.lookup.pubsub.amq.AMQueue.push: Error delaying between messages - InterruptedException mapped to PubSubQueueException" + e.getMessage());
+                    throw new PubSubQueueException(e.getMessage());
+                }
+
+                startIndex += BATCH_SIZE;
+                if(startIndex+BATCH_SIZE<messages.size()){
+                    endIndex = startIndex+BATCH_SIZE;
+                }else{
+                    endIndex = messages.size();
+                }
+            }
+        }
+    }
+
+    /**
+     * This method sends a single message to the Active MQ Queue.
+     *
+     * @param message The message to be pushed to queue
+     */
+    private synchronized void send(String message) throws PubSubQueueException {
         try {
-            String strmsg = JSONMessage.toString(messages);
-            TextMessage txtmsg = session.createTextMessage(strmsg);
-            LOG.debug("net.es.lookup.pubsub.amq.AMQueue.push: Received message to push - "+ strmsg);
+            TextMessage txtmsg = session.createTextMessage(message);
+            LOG.debug("net.es.lookup.pubsub.amq.AMQueue.send: Received message to push - "+ message);
             producer.send(txtmsg);
-            LOG.info("net.es.lookup.pubsub.amq.AMQueue.push: Pushed message to Queue - "+ txtmsg);
-        } catch (DataFormatException e) {
-            LOG.error("net.es.lookup.pubsub.amq.AMQueue.push: Error pushing message to queue - DataFormatException mapped to PubSubQueueException"+ e.getMessage());
-            throw new PubSubQueueException(e.getMessage());
+            LOG.info("net.es.lookup.pubsub.amq.AMQueue.send: Pushed message to Queue - "+ txtmsg);
         } catch (JMSException e) {
-            LOG.error("net.es.lookup.pubsub.amq.AMQueue.push: Error pushing message to queue - JMSException mapped to PubSubQueueException "+ e.getMessage());
+            LOG.error("net.es.lookup.pubsub.amq.AMQueue.send: Error pushing message to queue - JMSException mapped to PubSubQueueException "+ e.getMessage());
             throw new PubSubQueueException(e.getMessage());
         }
     }

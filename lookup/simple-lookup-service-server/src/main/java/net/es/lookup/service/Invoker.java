@@ -6,7 +6,6 @@ import joptsimple.OptionSpec;
 import net.es.lookup.common.MemoryManager;
 import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.database.DBPool;
 import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.pubsub.Publisher;
@@ -20,10 +19,8 @@ import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import net.es.lookup.utils.config.reader.SubscriberConfigReader;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
-import org.quartz.impl.matchers.GroupMatcher;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +94,7 @@ public class Invoker {
             if (lcfg.isCoreserviceOn()) {
                 new ServiceDAOMongoDb(dburl, dbport, LookupService.LOOKUP_SERVICE, collname);
 
-                if(qcfg.isServiceOn()){
+                if (qcfg.isServiceOn()) {
                     new AMQueueManager(LookupService.LOOKUP_SERVICE);
                     new AMQueuePump(LookupService.LOOKUP_SERVICE);
                 }
@@ -113,36 +110,36 @@ public class Invoker {
                 List<CacheConfig> cacheConfigList = sfg.getCacheList();
 
                 List<Cache> cacheList = new LinkedList<Cache>();
-                for(CacheConfig config: cacheConfigList){
+                for (CacheConfig config : cacheConfigList) {
 
                     String name = config.getName();
                     String type = config.getType();
 
                     List<PublisherConfig> publisherConfigList = config.getPublishers();
                     List<Publisher> publishers = new LinkedList<Publisher>();
-                    for(PublisherConfig publisherConfig: publisherConfigList){
+                    for (PublisherConfig publisherConfig : publisherConfigList) {
                         URI accesspoint = publisherConfig.getLocator();
-                        List<Map<String,Object>> queries = publisherConfig.getQueries();
+                        List<Map<String, Object>> queries = publisherConfig.getQueries();
 
-                        Publisher publisher = new Publisher(accesspoint,queries);
+                        Publisher publisher = new Publisher(accesspoint, queries);
                         publishers.add(publisher);
                     }
 
 
-                    try{
-                        Cache cache = new Cache(name,type,publishers);
+                    try {
+                        Cache cache = new Cache(name, type, publishers);
                         cacheList.add(cache);
                         new ServiceDAOMongoDb(dburl, dbport, name, collname);
                         services.add(name);
 
-                    }catch(LSClientException e){
-                        System.out.println("Error initializing cache: "+name+"; Type: "+type);
+                    } catch (LSClientException e) {
+                        System.out.println("Error initializing cache: " + name + "; Type: " + type);
                         continue;
                     }
                 }
 
 
-                Invoker.cacheService = CacheService.initialize(cacheList,scheduler);
+                Invoker.cacheService = CacheService.initialize(cacheList, scheduler);
 
                 System.out.println("Cache service initialized: " + Invoker.cacheService.isInitialized());
             }
@@ -157,7 +154,7 @@ public class Invoker {
         // Create the REST service
         Invoker.lookupService = new LookupService(Invoker.host, Invoker.port, qcfg.isServiceOn());
 
-        if(qcfg.isServiceOn()){
+        if (qcfg.isServiceOn()) {
             Invoker.lookupService.setDatadirectory(queueDataDir);
             System.out.println("Starting queue at Queue url:" + qcfg.getUrl());
             Invoker.lookupService.setQueueurl(qcfg.getUrl());
@@ -167,8 +164,8 @@ public class Invoker {
         if (cacheServiceRequest && Invoker.cacheService.isInitialized()) {
             System.out.println("Starting cache service");
             Invoker.cacheService.startService();
-        } else{
-            if(cacheServiceRequest){
+        } else {
+            if (cacheServiceRequest) {
                 System.out.println("Error starting cache service");
             }
 
@@ -179,38 +176,27 @@ public class Invoker {
         Invoker.lookupService.startService(services);
 
 
-        //DB Pruning
+        //DB Pruning only for core LS. Not for caches
         try {
+            String dbname = LookupService.LOOKUP_SERVICE;
+            // define the job and tie it to  mongoJob class
+            JobDetail job = newJob(MongoDBMaintenanceJob.class)
+                    .withIdentity(dbname + "clean", "DBMaintenance")
+                    .build();
+            job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
+            job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, dbname);
 
+            // Trigger the job to run now, and then every dbpruneInterval seconds
+            Trigger trigger = newTrigger().withIdentity(dbname + "DBTrigger", "DBMaintenance")
+                    .startNow()
+                    .withSchedule(simpleSchedule()
+                            .withIntervalInSeconds(dbpruneInterval)
+                            .repeatForever()
+                            .withMisfireHandlingInstructionIgnoreMisfires())
+                    .build();
 
-            List<String> dbnames = DBPool.getKeys();
-            for (String dbname : dbnames) {
-                // define the job and tie it to  mongoJob class
-                JobDetail job = newJob(MongoDBMaintenanceJob.class)
-                        .withIdentity(dbname + "clean", "DBMaintenance")
-                        .build();
-                job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
-                job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, dbname);
+            scheduler.scheduleJob(job, trigger);
 
-                // Trigger the job to run now, and then every dbpruneInterval seconds
-                Trigger trigger = newTrigger().withIdentity(dbname+"DBTrigger", "DBMaintenance")
-                        .startNow()
-                        .withSchedule(simpleSchedule()
-                                .withIntervalInSeconds(dbpruneInterval)
-                                .repeatForever()
-                                .withMisfireHandlingInstructionIgnoreMisfires())
-                        .build();
-
-                scheduler.scheduleJob(job, trigger);
-            }
-
-
-            for(String group: scheduler.getJobGroupNames()) {
-                // enumerate each job in group
-                for(JobKey jobKey : scheduler.getJobKeys(GroupMatcher.<JobKey>groupEquals(group))) {
-                    System.out.println("Found job identified by: " + jobKey);
-                }
-            }
 
             JobDetail gcInvoker = newJob(MemoryManager.class)
                     .withIdentity("gc", "MemoryManagement")
@@ -227,12 +213,10 @@ public class Invoker {
             scheduler.scheduleJob(gcInvoker, gcTrigger);
 
 
-
         } catch (SchedulerException se) {
             se.printStackTrace();
 
         }
-
 
         // Block forever
         Object blockMe = new Object();
