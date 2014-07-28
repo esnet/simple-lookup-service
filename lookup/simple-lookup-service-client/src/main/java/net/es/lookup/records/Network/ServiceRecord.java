@@ -38,6 +38,14 @@ public class ServiceRecord extends Record {
         addStringAsListValue(ReservedKeys.RECORD_SERVICE_TYPE, serviceType);
     }
 
+    public String getServiceVersion() {
+        return getStringFromListValue(ReservedKeys.RECORD_SERVICE_VERSION);
+    }
+
+    public void setServiceVersion(String serviceVersion) throws RecordException {
+        addStringAsListValue(ReservedKeys.RECORD_SERVICE_VERSION, serviceVersion);
+    }
+
     public List<String> getServiceLocator() {
         return (List<String>) this.getValue(ReservedKeys.RECORD_SERVICE_LOCATOR);
     }
