@@ -4,6 +4,7 @@ import net.es.lookup.common.ReservedValues;
 import net.es.lookup.records.Directory.PersonRecord;
 import net.es.lookup.records.Network.HostRecord;
 import net.es.lookup.records.Network.InterfaceRecord;
+import net.es.lookup.records.Network.PSMetadataRecord;
 import net.es.lookup.records.Network.ServiceRecord;
 import net.es.lookup.records.PubSub.SubscribeRecord;
 
@@ -26,6 +27,8 @@ public class RecordFactory {
            return new PersonRecord();
        } else if(type.equalsIgnoreCase(ReservedValues.RECORD_VALUE_TYPE_SUBSCRIBE)){
            return new SubscribeRecord();
+       } else if(type.equalsIgnoreCase(ReservedValues.RECORD_VALUE_TYPE_PSMETADATA)){
+           return new PSMetadataRecord();
        }else{
            return new Record(type);
        }

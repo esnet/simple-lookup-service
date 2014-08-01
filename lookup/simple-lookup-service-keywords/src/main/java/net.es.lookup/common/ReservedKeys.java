@@ -86,6 +86,14 @@ public class ReservedKeys {
 
     public static final String BOOTSTRAP_HOSTS = "hosts";
 
+    // PSMetadata keys (for esmond / perfSONAR)
+    public static final String RECORD_PSMETADATA_DST_ADDRESS = "psmetadata-dst-address";
+    public static final String RECORD_PSMETADATA_EVENTTYPES = "psmetadata-event-types";
+    public static final String RECORD_PSMETADATA_MA_LOCATOR = "psmetadata-ma-locator";
+    public static final String RECORD_PSMETADATA_MEASUREMENT_AGENT = "psmetadata-measurement-agent";
+    public static final String RECORD_PSMETADATA_SRC_ADDRESS = "psmetadata-src-address";
+    public static final String RECORD_PSMETADATA_TOOL_NAME = "psmetadata-tool-name";
+    public static final String RECORD_PSMETADATA_URI = "psmetadata-uri";
 
     public static final String SUBSCRIBER = "subscriber";
     public static final String QUEUE_URL = "queue-url";
