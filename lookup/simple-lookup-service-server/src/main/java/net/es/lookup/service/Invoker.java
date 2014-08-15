@@ -4,6 +4,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.es.lookup.common.MemoryManager;
+import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.MongoDBMaintenanceJob;
@@ -17,6 +18,7 @@ import net.es.lookup.utils.config.elements.PublisherConfig;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import net.es.lookup.utils.config.reader.SubscriberConfigReader;
+import net.es.lookup.utils.log.StdOutErrLog;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
@@ -48,7 +50,15 @@ public class Invoker {
     private static String logConfig = "./etc/log4j.properties";
     private static String queueDataDir = "../elements";
 
+    private static String dataDir="data/";
+
+
     private static boolean cacheServiceRequest = false;
+
+    public static String getDataDir() {
+
+        return dataDir;
+    }
 
     /**
      * Main program to start the Lookup ServiceRecord
@@ -62,7 +72,7 @@ public class Invoker {
         parseArgs(args);
         //set log config
         System.setProperty("log4j.configuration", "file:" + logConfig);
-
+        StdOutErrLog.redirectStdOutErrToLog();
         SchedulerFactory sf = new StdSchedulerFactory();
         Scheduler scheduler = sf.getScheduler();
         scheduler.start();
@@ -87,7 +97,7 @@ public class Invoker {
         String collname = lcfg.getCollName();
 
         List<String> services = new LinkedList<String>();
-
+        List<Cache> cacheList = new LinkedList<Cache>();
         // Initialize services
         try {
 
@@ -109,7 +119,7 @@ public class Invoker {
 
                 List<CacheConfig> cacheConfigList = sfg.getCacheList();
 
-                List<Cache> cacheList = new LinkedList<Cache>();
+
                 for (CacheConfig config : cacheConfigList) {
 
                     String name = config.getName();
@@ -156,7 +166,6 @@ public class Invoker {
 
         if (qcfg.isServiceOn()) {
             Invoker.lookupService.setDatadirectory(queueDataDir);
-            System.out.println("Starting queue at Queue url:" + qcfg.getUrl());
             Invoker.lookupService.setQueueurl(qcfg.getUrl());
         }
 
@@ -175,27 +184,56 @@ public class Invoker {
         // Start the service
         Invoker.lookupService.startService(services);
 
-
-        //DB Pruning only for core LS. Not for caches
         try {
-            String dbname = LookupService.LOOKUP_SERVICE;
-            // define the job and tie it to  mongoJob class
-            JobDetail job = newJob(MongoDBMaintenanceJob.class)
-                    .withIdentity(dbname + "clean", "DBMaintenance")
-                    .build();
-            job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
-            job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, dbname);
+            //DB Pruning for core LS
+            if (lcfg.isCoreserviceOn()) {
+                JobDetail job = newJob(MongoDBMaintenanceJob.class)
+                        .withIdentity(LookupService.LOOKUP_SERVICE + "clean", "DBMaintenance")
+                        .build();
+                job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
+                job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, LookupService.LOOKUP_SERVICE);
 
-            // Trigger the job to run now, and then every dbpruneInterval seconds
-            Trigger trigger = newTrigger().withIdentity(dbname + "DBTrigger", "DBMaintenance")
-                    .startNow()
-                    .withSchedule(simpleSchedule()
-                            .withIntervalInSeconds(dbpruneInterval)
-                            .repeatForever()
-                            .withMisfireHandlingInstructionIgnoreMisfires())
-                    .build();
+                // Trigger the job to run now, and then every dbpruneInterval seconds
+                Trigger trigger = newTrigger().withIdentity(LookupService.LOOKUP_SERVICE + "DBTrigger", "DBMaintenance")
+                        .startNow()
+                        .withSchedule(simpleSchedule()
+                                .withIntervalInSeconds(dbpruneInterval)
+                                .repeatForever()
+                                .withMisfireHandlingInstructionIgnoreMisfires())
+                        .build();
 
-            scheduler.scheduleJob(job, trigger);
+                scheduler.scheduleJob(job, trigger);
+            }
+
+            if(cacheServiceRequest){
+                for(Cache cache: cacheList ){
+                    if(cache.getType().equals(ReservedValues.CACHE_TYPE_REPLICATION)){
+                        String dbname = cache.getName();
+                        // define the job and tie it to  mongoJob class
+                        JobDetail job = newJob(MongoDBMaintenanceJob.class)
+                                .withIdentity(dbname + "clean", "DBMaintenance")
+                                .build();
+                        job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
+                        job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, dbname);
+
+                        // Trigger the job to run now, and then every dbpruneInterval seconds
+                        Trigger trigger = newTrigger().withIdentity(dbname + "DBTrigger", "DBMaintenance")
+                                .startNow()
+                                .withSchedule(simpleSchedule()
+                                        .withIntervalInSeconds(dbpruneInterval)
+                                        .repeatForever()
+                                        .withMisfireHandlingInstructionIgnoreMisfires())
+                                .build();
+
+                        scheduler.scheduleJob(job, trigger);
+                    }
+
+
+                }
+            }
+
+
+
 
 
             JobDetail gcInvoker = newJob(MemoryManager.class)
@@ -236,7 +274,8 @@ public class Invoker {
         OptionSpec<String> HOST = parser.accepts("h", "host").withRequiredArg().ofType(String.class);
         OptionSpec<String> CONFIG = parser.accepts("c", "configPath").withRequiredArg().ofType(String.class);
         OptionSpec<String> LOGCONFIG = parser.accepts("l", "logConfig").withRequiredArg().ofType(String.class);
-        OptionSpec<String> QUEUEDATADIR = parser.accepts("d", "queueDataDir").withRequiredArg().ofType(String.class);
+        OptionSpec<String> QUEUEDATADIR = parser.accepts("q", "queueDataDir").withRequiredArg().ofType(String.class);
+        OptionSpec<String> DATADIR = parser.accepts("d", "dataDir").withRequiredArg().ofType(String.class);
         OptionSet options = parser.parse(args);
 
         // check for help
@@ -276,6 +315,12 @@ public class Invoker {
         if (options.has(QUEUEDATADIR)) {
 
             queueDataDir = options.valueOf(QUEUEDATADIR);
+
+        }
+
+        if (options.has(DATADIR)) {
+
+            dataDir = options.valueOf(DATADIR);
 
         }
 

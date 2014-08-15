@@ -71,6 +71,7 @@ sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{_builddir}/%{mv
 #Create directory for PID files
 mkdir -p %{run_dir}
 chown lookup:lookup %{run_dir}
+chmod 700 %{run_dir}
 
 #Create directory for logs
 mkdir -p %{log_dir}

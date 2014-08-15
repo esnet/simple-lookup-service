@@ -22,9 +22,10 @@ import net.es.lookup.records.Record;
 import org.apache.log4j.Logger;
 
 import java.net.URI;
-import java.util.*;
-
-import static org.quartz.JobBuilder.newJob;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Author: sowmya

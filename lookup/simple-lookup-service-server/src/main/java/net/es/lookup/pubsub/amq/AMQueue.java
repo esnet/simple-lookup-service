@@ -36,8 +36,17 @@ public class AMQueue extends Queue {
      * 1) creates a queue - starts a connection, creates the producer
      * 2) Generates queueId which used as topic. Subscriber uses this qid to subscribe to queues
      */
-    public AMQueue() throws PubSubQueueException {
 
+    public AMQueue() throws PubSubQueueException {
+        qid = UUID.randomUUID().toString();
+        init();
+    }
+    public AMQueue(String qid) throws PubSubQueueException {
+        this.qid = qid;
+       init();
+    }
+
+    private void init() throws PubSubQueueException {
         //TODO: Make ActiveMQ user, password options configurable
         String user = ActiveMQConnection.DEFAULT_USER;
         String password = ActiveMQConnection.DEFAULT_PASSWORD;
@@ -64,11 +73,11 @@ public class AMQueue extends Queue {
         } catch (JMSException e) {
             LOG.error("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Error creating connection for Queue. "+ e.getMessage());
             LOG.error(e.getStackTrace());
-	    throw new PubSubQueueException(e.getMessage());
+            throw new PubSubQueueException(e.getMessage());
         }
         try {
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE); // false=NotTransacted
-            qid = UUID.randomUUID().toString();
+
             topic = session.createTopic(qid);
             producer = session.createProducer(topic);
             producer.setTimeToLive(ttl);
@@ -88,6 +97,7 @@ public class AMQueue extends Queue {
         }
 
         LOG.info("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Queue Creation Successful!");
+
     }
 
     /**
