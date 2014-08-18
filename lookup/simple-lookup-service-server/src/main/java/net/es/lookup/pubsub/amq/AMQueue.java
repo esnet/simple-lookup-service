@@ -13,7 +13,6 @@ import org.apache.log4j.Logger;
 
 import javax.jms.*;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * User: sowmya
@@ -38,15 +37,7 @@ public class AMQueue extends Queue {
      */
 
     public AMQueue() throws PubSubQueueException {
-        qid = UUID.randomUUID().toString();
-        init();
-    }
-    public AMQueue(String qid) throws PubSubQueueException {
-        this.qid = qid;
-       init();
-    }
 
-    private void init() throws PubSubQueueException {
         //TODO: Make ActiveMQ user, password options configurable
         String user = ActiveMQConnection.DEFAULT_USER;
         String password = ActiveMQConnection.DEFAULT_PASSWORD;
