@@ -8,11 +8,12 @@ import net.es.lookup.pubsub.Queue;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import org.apache.activemq.ActiveMQConnection;
+import org.apache.activemq.pool.PooledConnectionFactory;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.log4j.Logger;
-
 import javax.jms.*;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * User: sowmya
@@ -36,7 +37,7 @@ public class AMQueue extends Queue {
      * 2) Generates queueId which used as topic. Subscriber uses this qid to subscribe to queues
      */
 
-    public AMQueue() throws PubSubQueueException {
+    public AMQueue(String qid) throws PubSubQueueException {
 
         //TODO: Make ActiveMQ user, password options configurable
         String user = ActiveMQConnection.DEFAULT_USER;
@@ -50,9 +51,11 @@ public class AMQueue extends Queue {
         String protocol = configReader.getProtocol();
         long ttl = configReader.getTtl();
         boolean isPersistent = configReader.isQueuePersistent();
-
+        //qid = UUID.randomUUID().toString();
+        this.qid = qid;
         String url = configReader.getUrl();
         ConnectionFactory factory = new ActiveMQConnectionFactory(user, password, url);
+        //ConnectionFactory factory = new PooledConnectionFactory(url);
 
         try {
 

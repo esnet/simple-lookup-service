@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 /**
  * This class implements the QueueManager interface. This implementation has a 1 to 1 mapping between query and queue.
  * <p/>
@@ -68,8 +70,11 @@ public class AMQueueManager implements QueueManager {
                 //System.out.println(queryMap.toString());
                 AMQueue queue = null;
                 try {
-                    queue = new AMQueue(normalizedQuery);
-                    String qid = queue.getQid();
+                    MessageDigest md = MessageDigest.getInstance("MD5");
+            	    byte[] querybyte = normalizedQuery.getBytes();
+            	    byte[] queueId = md.digest(querybyte);
+                   String qid = queueId.toString();
+                    queue = new AMQueue(qid);
                     LOG.debug("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Created queue with id " + qid);
 
 
@@ -85,6 +90,8 @@ public class AMQueueManager implements QueueManager {
                     queryList.add(query);
                     normalizedQueryMap.put(normalizedQuery, queryList);
                 } catch (PubSubQueueException e) {
+                    LOG.error("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Error creating queue " + e.getMessage());
+                }catch(NoSuchAlgorithmException e){
                     LOG.error("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Error creating queue " + e.getMessage());
                 }
 

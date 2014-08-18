@@ -6,7 +6,7 @@
 %define log_dir /var/log/%{package_name}
 %define run_dir /var/run/%{package_name}
 %define data_dir /var/lib/%{package_name}
-%define relnum 6 
+%define relnum 11 
 
 Name:           %{package_name}
 Version:        1.1
@@ -97,7 +97,7 @@ if [ $1 == 2 ]; then
      unlink %{install_base}/target/%{package_name}-server.one-jar.jar
   fi
 fi
-   ln -s %{install_base}/target/%{mvn_project_name}-server-%{version}.one-jar.jar %{install_base}/target/%{package_name}-server.one-jar.jar
+   ln -s %{install_base}/target/%{mvn_project_name}-server-%{version}-SNAPSHOT.one-jar.jar %{install_base}/target/%{package_name}-server.one-jar.jar
 chown lookup:lookup %{install_base}/target/%{package_name}-server.one-jar.jar
 #ln -s %{install_base}/target/%{mvn_project_name}-server-%{version}.jar %{install_base}/target/%{package_name}.jar
 

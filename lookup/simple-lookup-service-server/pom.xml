@@ -96,6 +96,12 @@
             <version>4.2.1</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+        	<groupId>commons-pool</groupId>
+        		<artifactId>commons-pool</artifactId>
+        			<version>1.4</version>
+        			</dependency>
+
 
         <!-- command-line parsing -->
         <dependency>
