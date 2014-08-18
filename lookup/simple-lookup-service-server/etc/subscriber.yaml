@@ -3,7 +3,7 @@ caches:
     - name: "cache"
       type: "replication"
       publishers:
-        - locator: "http://localhost:8090/lookup/subscribe"
+        - locator: "http://sowmya-dev-vm.es.net:8090/lookup/subscribe"
           queries: 
               - type: "client-test"
               - type: "host"

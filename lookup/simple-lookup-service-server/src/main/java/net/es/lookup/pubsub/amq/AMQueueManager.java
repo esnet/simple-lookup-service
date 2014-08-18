@@ -6,15 +6,11 @@ import net.es.lookup.common.exception.internal.PubSubQueryException;
 import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.pubsub.QueueManager;
 import net.es.lookup.pubsub.QueueServiceMapping;
-import net.es.lookup.service.Invoker;
 import org.apache.log4j.Logger;
-import org.ho.yaml.Yaml;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class implements the QueueManager interface. This implementation has a 1 to 1 mapping between query and queue.
@@ -33,49 +29,11 @@ public class AMQueueManager implements QueueManager {
 
     private static Logger LOG = Logger.getLogger(AMQueueManager.class);
 
-    private String queueFile;
-
-
-
 
     public AMQueueManager(String serviceName) {
 
         this.serviceName = serviceName;
         QueueServiceMapping.addQueueManager(serviceName, this);
-        queueFile = Invoker.getDataDir()+"active-queues-"+serviceName;
-
-        try {
-            File qFileHandle = new File(queueFile);
-            InputStream yamlFile = new FileInputStream(qFileHandle);
-
-            Map queueQueryMapping = (Map) Yaml.load(yamlFile);
-            if(queueQueryMapping != null && !queueQueryMapping.isEmpty()){
-                for (Object query: queueQueryMapping.keySet()){
-                    List<String> qids = (List<String>) queueQueryMapping.get(query);
-
-                    for(String qid: qids){
-                        if(!queueMap.containsKey(qid)){
-                            AMQueue amQueue = new AMQueue(qid);
-                            queueMap.put(qid, amQueue);
-                            queryMap.put((String)query,qids);
-                        }
-                    }
-
-
-
-                }
-            }
-
-            yamlFile.close();
-        } catch (FileNotFoundException e) {
-            LOG.info("Cannot find active-queues file. Starting LS the first time??");
-        } catch (IOException e) {
-            LOG.error("Error closing file");
-        } catch (PubSubQueueException e) {
-            LOG.error("Error creating queue");
-        }
-
-
     }
 
 
@@ -101,11 +59,7 @@ public class AMQueueManager implements QueueManager {
         if (!normalizedQuery.isEmpty()) {
 
             if (queryMap.containsKey(normalizedQuery)) {
-                if(!normalizedQueryMap.containsKey(normalizedQuery)){
-                    List<Message> queryList = new ArrayList<Message>();
-                    queryList.add(query);
-                    normalizedQueryMap.put(normalizedQuery, queryList);
-                }
+
                 res = queryMap.get(normalizedQuery);
                 LOG.debug("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Queue exists. ");
 
@@ -114,7 +68,7 @@ public class AMQueueManager implements QueueManager {
                 //System.out.println(queryMap.toString());
                 AMQueue queue = null;
                 try {
-                    queue = new AMQueue();
+                    queue = new AMQueue(normalizedQuery);
                     String qid = queue.getQid();
                     LOG.debug("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Created queue with id " + qid);
 
@@ -130,20 +84,8 @@ public class AMQueueManager implements QueueManager {
                     List<Message> queryList = new ArrayList<Message>();
                     queryList.add(query);
                     normalizedQueryMap.put(normalizedQuery, queryList);
-
-                   byte[] outputBytes = Yaml.dump(queryMap).getBytes();
-
-                    FileOutputStream fileOutputStream = new FileOutputStream(new File(queueFile));
-
-                    fileOutputStream.write(outputBytes);
-
-
                 } catch (PubSubQueueException e) {
                     LOG.error("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Error creating queue " + e.getMessage());
-                } catch (FileNotFoundException e) {
-                    LOG.error("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Error writing queue to file " + e.getMessage());
-                } catch (IOException e) {
-                    LOG.error("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Error writing queue to file " + e.getMessage());
                 }
 
             }
