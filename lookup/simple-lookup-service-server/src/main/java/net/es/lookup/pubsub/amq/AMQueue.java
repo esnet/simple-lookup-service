@@ -5,7 +5,6 @@ import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.pubsub.Queue;
-import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -21,6 +20,7 @@ import java.util.List;
  */
 public class AMQueue extends Queue {
 
+    private String activemqUrl;
     private Connection connection;
     private Session session;
     private Topic topic;
@@ -29,6 +29,10 @@ public class AMQueue extends Queue {
     private static Logger LOG = Logger.getLogger(AMQueue.class);
     private final int BATCH_SIZE=500;
     private final long DELAY=200;
+    ConnectionFactory activemqFactory;
+
+    long messageTtl;
+    boolean isPersistent;
 
     /**
      * The constructor
@@ -41,54 +45,13 @@ public class AMQueue extends Queue {
         //TODO: Make ActiveMQ user, password options configurable
         String user = ActiveMQConnection.DEFAULT_USER;
         String password = ActiveMQConnection.DEFAULT_PASSWORD;
-        LookupServiceConfigReader lookupServiceConfigReader = LookupServiceConfigReader.getInstance();
         QueueServiceConfigReader configReader = QueueServiceConfigReader.getInstance();
 
-        //String host = lookupServiceConfigReader.getHost();
-        String host = configReader.getHost();
-        int queueport = configReader.getPort();
-        String protocol = configReader.getProtocol();
-        long ttl = configReader.getTtl();
-        boolean isPersistent = configReader.isQueuePersistent();
-        //qid = UUID.randomUUID().toString();
+        messageTtl = configReader.getTtl();
+        isPersistent = configReader.isQueuePersistent();
         this.qid = qid;
-        String url = configReader.getUrl();
-        ConnectionFactory factory = new ActiveMQConnectionFactory(user, password, url);
-        //ConnectionFactory factory = new PooledConnectionFactory(url);
-
-        try {
-
-            connection = factory.createConnection();
-
-            connection.start();
-            LOG.debug("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Created connection for queue ");
-
-        } catch (JMSException e) {
-            LOG.error("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Error creating connection for Queue. "+ e.getMessage());
-            LOG.error(e.getStackTrace());
-            throw new PubSubQueueException(e.getMessage());
-        }
-        try {
-            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE); // false=NotTransacted
-            topic = session.createTopic(qid);
-            producer = session.createProducer(topic);
-            producer.setTimeToLive(ttl);
-
-
-            LOG.debug("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Created ActiveMQ session, topic and producer for Queue");
-
-            if (isPersistent) {
-                producer.setDeliveryMode(DeliveryMode.PERSISTENT);
-            } else {
-                producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-            }
-
-
-        } catch (JMSException e) {
-            LOG.error("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Error creating session/producer for Queue. "+ e.getMessage());
-            throw new PubSubQueueException(e.getMessage());
-        }
-
+        activemqUrl = configReader.getUrl();
+        activemqFactory = new ActiveMQConnectionFactory(user, password, activemqUrl);
         LOG.info("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Queue Creation Successful!");
 
     }
@@ -110,6 +73,38 @@ public class AMQueue extends Queue {
      * @param messages The message to be pushed to queue
      */
     public synchronized void push(List<Message> messages) throws PubSubQueueException {
+        try {
+
+            connection = activemqFactory.createConnection();
+
+            connection.start();
+            LOG.debug("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Created connection for queue ");
+
+        } catch (JMSException e) {
+            LOG.error("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Error creating connection for Queue. "+ e.getMessage());
+            LOG.error(e.getStackTrace());
+            throw new PubSubQueueException(e.getMessage());
+        }
+        try {
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE); // false=NotTransacted
+            topic = session.createTopic(qid);
+            producer = session.createProducer(topic);
+            producer.setTimeToLive(messageTtl);
+
+
+            LOG.debug("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Created ActiveMQ session, topic and producer for Queue");
+
+            if (isPersistent) {
+                producer.setDeliveryMode(DeliveryMode.PERSISTENT);
+            } else {
+                producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+            }
+
+
+        } catch (JMSException e) {
+            LOG.error("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Error creating session/producer for Queue. "+ e.getMessage());
+            throw new PubSubQueueException(e.getMessage());
+        }
 
         if(messages.size()<=BATCH_SIZE){
             try {
@@ -144,6 +139,8 @@ public class AMQueue extends Queue {
                 }
             }
         }
+
+        close();
     }
 
     /**
