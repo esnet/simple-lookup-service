@@ -27,16 +27,31 @@ public class CacheHeartBeat implements Job {
         CacheService cacheService = CacheService.getInstance();
         List<Cache> cacheList = cacheService.getCacheList();
         LOG.debug("net.es.lookup.service.CacheService: Cache Heartbeat");
+        boolean restartRequired = false;
         for (Cache cache : cacheList) {
             List<Subscriber> subscribers = cache.getSubscribers();
             for(Subscriber subscriber: subscribers){
                 try {
                     SubscribeRecord record = subscriber.heartbeat();
+
                     if(record.getQueueState().equals(ReservedValues.RECORD_SUBSRIBER_QUEUE_STATE_NEW)){
-                        cache.restart();
+                        LOG.error("Queue is new so restart required");
+                        restartRequired=true;
+                        break;
+
+                    }else{
+                        LOG.error("No restart required");
                     }
                 } catch (LSClientException e) {
                     LOG.error("Heartbeat message Failed"+ e.getMessage());
+                }
+            }
+
+            if(restartRequired){
+                try {
+                    cache.restart();
+                } catch (LSClientException e) {
+                    LOG.error("Cache restart failed"+ e.getMessage());
                 }
             }
             FailureRecovery failureRecovery = cache.getFailureRecovery();
