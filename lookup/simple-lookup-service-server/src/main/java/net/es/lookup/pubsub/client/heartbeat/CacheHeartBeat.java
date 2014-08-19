@@ -1,9 +1,11 @@
 package net.es.lookup.pubsub.client.heartbeat;
 
 import net.es.lookup.client.Subscriber;
+import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.pubsub.client.Cache;
 import net.es.lookup.pubsub.client.failover.FailureRecovery;
+import net.es.lookup.records.PubSub.SubscribeRecord;
 import net.es.lookup.service.CacheService;
 import org.apache.log4j.Logger;
 import org.quartz.Job;
@@ -29,7 +31,10 @@ public class CacheHeartBeat implements Job {
             List<Subscriber> subscribers = cache.getSubscribers();
             for(Subscriber subscriber: subscribers){
                 try {
-                    subscriber.heartbeat();
+                    SubscribeRecord record = subscriber.heartbeat();
+                    if(record.getQueueState().equals(ReservedValues.RECORD_SUBSRIBER_QUEUE_STATE_NEW)){
+
+                    }
                 } catch (LSClientException e) {
                     LOG.error("Heartbeat message Failed"+ e.getMessage());
                 }

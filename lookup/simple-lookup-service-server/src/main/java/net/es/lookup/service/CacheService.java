@@ -27,7 +27,7 @@ public class CacheService {
     private static Logger LOG = Logger.getLogger(CacheService.class);
     private static boolean initialized = false;
     private Scheduler scheduler;
-    private static final int FAILURE_RECOVERY_INTERVAL = 600;
+    private static final int FAILURE_RECOVERY_INTERVAL = 15;
 
     private CacheService(List<Cache> caches, Scheduler scheduler) throws LSClientException {
 

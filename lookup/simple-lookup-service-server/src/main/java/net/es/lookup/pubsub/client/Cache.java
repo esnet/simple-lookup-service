@@ -176,6 +176,17 @@ public class Cache implements SubscriberListener {
     }
 
     /**
+     * This method stops the subscription.
+     */
+
+    public void restart() throws LSClientException {
+
+        stop();
+        start();
+
+    }
+
+    /**
      * This method queries the publisher and retrieves the initial set of records
      * matching the query.
      */

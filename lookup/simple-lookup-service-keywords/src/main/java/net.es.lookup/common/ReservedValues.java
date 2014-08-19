@@ -42,4 +42,6 @@ public class ReservedValues {
 
     public static final String SERVICE_MODE_READONLY = "r";
     public static final String SERVICE_MODE_READWRITE = "rw";
+    public static final Object RECORD_SUBSRIBER_QUEUE_STATE_NEW = "new";
+    public static final Object RECORD_SUBSRIBER_QUEUE_STATE_EXISTING = "existing";
 }

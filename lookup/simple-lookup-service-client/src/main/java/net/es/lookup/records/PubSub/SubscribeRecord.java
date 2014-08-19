@@ -39,5 +39,13 @@ public class SubscribeRecord extends Record {
         this.add(ReservedKeys.RECORD_SUBSCRIBE_QUEUE, queues);
     }
 
+    public String getQueueState(){
+        return (String) this.getMap().get(ReservedKeys.RECORD_SUBSCRIBE_QUEUE_STATE);
+    }
+
+    public void setQueueState(String queueState){
+        this.add(ReservedKeys.RECORD_SUBSCRIBE_QUEUE_STATE, queueState);
+    }
+
 
 }

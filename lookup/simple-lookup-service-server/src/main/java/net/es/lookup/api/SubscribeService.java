@@ -1,9 +1,9 @@
 package net.es.lookup.api;
 
 import net.es.lookup.common.ReservedKeys;
+import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
-import net.es.lookup.common.exception.api.NotSupportedException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.PubSubQueryException;
 import net.es.lookup.common.exception.internal.PubSubQueueException;
@@ -45,6 +45,11 @@ public class SubscribeService {
 
             AMQueueManager amqmanager = (AMQueueManager) QueueServiceMapping.getQueueManager(serviceName);
             try {
+                if(amqmanager.hasQueues(request)){
+                    res.add(ReservedKeys.RECORD_SUBSCRIBE_QUEUE_STATE, ReservedValues.RECORD_SUBSRIBER_QUEUE_STATE_EXISTING);
+                }else{
+                    res.add(ReservedKeys.RECORD_SUBSCRIBE_QUEUE_STATE, ReservedValues.RECORD_SUBSRIBER_QUEUE_STATE_NEW);
+                }
                 List<String> qlist = amqmanager.getQueues(request);
                 res.add(ReservedKeys.RECORD_SUBSCRIBE_QUEUE, qlist);
                 LOG.info("net.es.lookup.api.SubscribeService.subscribe: Returning queues - " + res);
@@ -54,6 +59,9 @@ public class SubscribeService {
             } catch (PubSubQueryException e) {
                 throw new InternalErrorException(e.getMessage());
             }  catch (DataFormatException e) {
+                throw new InternalErrorException(e.getMessage());
+            } catch (PubSubQueueException e) {
+                LOG.error("net.es.lookup.api.SubscribeService.subscribe: Error retrieving queues ");
                 throw new InternalErrorException(e.getMessage());
             }
 
