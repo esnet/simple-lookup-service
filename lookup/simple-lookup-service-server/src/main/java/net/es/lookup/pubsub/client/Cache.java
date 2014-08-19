@@ -408,4 +408,8 @@ public class Cache implements SubscriberListener {
     }
 
 
+    public List<Publisher> getPublishers() {
+
+        return publishers;
+    }
 }

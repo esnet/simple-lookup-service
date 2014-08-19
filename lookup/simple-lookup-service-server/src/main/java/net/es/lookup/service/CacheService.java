@@ -1,17 +1,15 @@
 package net.es.lookup.service;
 
 import net.es.lookup.common.exception.LSClientException;
-import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.pubsub.client.Cache;
-import java.util.List;
-
-import net.es.lookup.pubsub.client.failover.FailureHandler;
-import net.es.lookup.pubsub.client.failover.FailureRecovery;
+import net.es.lookup.pubsub.client.heartbeat.CacheHeartBeat;
 import org.apache.log4j.Logger;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
+
+import java.util.List;
 
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
@@ -29,7 +27,7 @@ public class CacheService {
     private static Logger LOG = Logger.getLogger(CacheService.class);
     private static boolean initialized = false;
     private Scheduler scheduler;
-    private static final int FAILURE_RECOVERY_INTERVAL = 15;
+    private static final int FAILURE_RECOVERY_INTERVAL = 600;
 
     private CacheService(List<Cache> caches, Scheduler scheduler) throws LSClientException {
 
@@ -70,12 +68,12 @@ public class CacheService {
 
         LOG.debug("net.es.lookup.service.CacheService: starting cache");
             try {
-                JobDetail job = newJob(FailureHandler.class)
-                        .withIdentity("failure-handler", "FailureHandler")
+                JobDetail job = newJob(CacheHeartBeat.class)
+                        .withIdentity("failure-handler", "CacheHeartBeat")
                         .build();
 
                 // Trigger the job to run now, and then every dbpruneInterval seconds
-                Trigger trigger = newTrigger().withIdentity("failure-handler-trigger", "FailureHandler")
+                Trigger trigger = newTrigger().withIdentity("failure-handler-trigger", "CacheHeartBeat")
                         .startNow()
                         .withSchedule(simpleSchedule()
                                 .withIntervalInSeconds(FAILURE_RECOVERY_INTERVAL)

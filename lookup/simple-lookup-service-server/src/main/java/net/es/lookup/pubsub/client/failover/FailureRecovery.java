@@ -3,9 +3,6 @@ package net.es.lookup.pubsub.client.failover;
 import net.es.lookup.client.Subscriber;
 import net.es.lookup.common.exception.LSClientException;
 import org.apache.log4j.Logger;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -102,13 +99,13 @@ public class FailureRecovery {
 
         List<Integer> connectionIndex = new LinkedList<Integer>();
 
-        LOG.debug("net.es.lookup.pubsub.client.failover.FailureHandler.execute: Executing failure recovery. Attempting to connect: " + failedConnections.size() + "connections");
+        LOG.debug("net.es.lookup.pubsub.client.heartbeat.CacheHeartBeat.execute: Executing failure recovery. Attempting to connect: " + failedConnections.size() + "connections");
         for (FailedConnection failedConnection : failedConnections) {
 
             //if time period is within the aggressive ping thresold
             if ((failedConnection.getTimeOfInitialFailure() - now) <= THRESHOLD) {
                 boolean res = failedConnection.reconnect();
-                LOG.debug("net.es.lookup.pubsub.client.failover.FailureHandler.execute: Trying to connect:" + failedConnection.getSubscriber().getQueueUrl());
+                LOG.debug("net.es.lookup.pubsub.client.heartbeat.CacheHeartBeat.execute: Trying to connect:" + failedConnection.getSubscriber().getQueueUrl());
                 if (res) {
                     connectionIndex.add(failedConnections.indexOf(failedConnection));
                 }
@@ -117,7 +114,7 @@ public class FailureRecovery {
                     try {
                         failedConnection.getSubscriber().shutdown();
                     } catch (LSClientException e) {
-                        LOG.error("net.es.lookup.pubsub.client.failover.FailureHandler.execute: Error shutting down Subscriber");
+                        LOG.error("net.es.lookup.pubsub.client.heartbeat.CacheHeartBeat.execute: Error shutting down Subscriber");
                     }
                     connectionIndex.add(failedConnections.indexOf(failedConnection));
                 }

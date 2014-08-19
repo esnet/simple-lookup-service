@@ -8,12 +8,11 @@ import net.es.lookup.pubsub.Queue;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import org.apache.activemq.ActiveMQConnection;
-import org.apache.activemq.pool.PooledConnectionFactory;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.log4j.Logger;
+
 import javax.jms.*;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * User: sowmya
@@ -71,10 +70,10 @@ public class AMQueue extends Queue {
         }
         try {
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE); // false=NotTransacted
-
             topic = session.createTopic(qid);
             producer = session.createProducer(topic);
             producer.setTimeToLive(ttl);
+
 
             LOG.debug("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Created ActiveMQ session, topic and producer for Queue");
 
@@ -154,6 +153,7 @@ public class AMQueue extends Queue {
      */
     private synchronized void send(String message) throws PubSubQueueException {
         try {
+
             TextMessage txtmsg = session.createTextMessage(message);
             LOG.debug("net.es.lookup.pubsub.amq.AMQueue.send: Received message to push - "+ message);
             producer.send(txtmsg);
