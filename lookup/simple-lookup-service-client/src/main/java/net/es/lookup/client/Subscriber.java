@@ -94,6 +94,21 @@ public class Subscriber {
     * */
     public void initiateSubscription() throws LSClientException {
 
+       SubscribeRecord record = heartbeat();
+                String queUrl = record.getLocator().get(0);
+                this.queueUrl = queUrl;
+                this.queue = record.getQueues().get(0);
+
+        LOG.info("net.es.lookup.client.Subscriber: Initialized Subscriber");
+
+
+    }
+
+    /*
+* This method contacts the subscribe URL and gets the queue URL and queue name.
+* */
+    public SubscribeRecord heartbeat() throws LSClientException {
+
         if (server != null && server.getStatus().equals(ReservedValues.SERVER_STATUS_ALIVE)) {
             LOG.info("net.es.lookup.client.Subscriber: Initiating subscription");
             LOG.debug("net.es.lookup.client.Subscriber: Parsing query");
@@ -109,7 +124,7 @@ public class Subscriber {
 
             LOG.debug("net.es.lookup.client.Subscriber: Query=" + queryString);
 
-            LOG.debug("net.es.lookup.client.Subscriber: Setting server config");
+            LOG.debug("net.es.lookup.client.Subscriber.heartbeat: Setting server config");
             server.setRelativeUrl(subscribeRequestUrl);
             server.setConnectionType("POST");
             server.setData(queryString);
@@ -126,21 +141,17 @@ public class Subscriber {
                     LOG.error("net.es.lookup.client.Subscriber: Error Parsing response");
                     throw new LSClientException(e.getMessage());
                 }
-                String queUrl = record.getLocator().get(0);
-                this.queueUrl = queUrl;
-                this.queue = record.getQueues().get(0);
+                LOG.info("Sent Heartbeat message");
+                return record;
             } else {
-                LOG.debug("net.es.lookup.client.Subscriber: Error in response:" + server.getErrorMessage());
-                throw new LSClientException("Error in response. Response code: " + server.getResponseCode() + ". Error Message: " + server.getErrorMessage());
+                LOG.debug("net.es.lookup.client.Subscriber.heartbeat: Error in response:" + server.getErrorMessage());
+                throw new LSClientException("Heartbeat Error in response. Response code: " + server.getResponseCode() + ". Error Message: " + server.getErrorMessage());
             }
 
         } else {
-            LOG.debug("net.es.lookup.client.Subscriber: Error initializing server");
-            throw new LSClientException("Server Initialization Error");
+            LOG.debug("net.es.lookup.client.Subscriber.heartbeat: Error initializing server");
+            throw new LSClientException("Subscriber heartbeat: Server Initialization Error");
         }
-
-        LOG.info("net.es.lookup.client.Subscriber: Initialized Subscriber");
-
 
     }
 

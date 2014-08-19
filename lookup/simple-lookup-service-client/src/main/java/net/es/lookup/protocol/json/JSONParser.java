@@ -93,7 +93,7 @@ public class JSONParser {
                     tmp.endArray();
 
 
-                } else {
+                } else if(entry.getValue() instanceof List) {
 
                     List<String> tmpvalues = (List) entry.getValue();
                     Iterator<String> it = tmpvalues.iterator();
