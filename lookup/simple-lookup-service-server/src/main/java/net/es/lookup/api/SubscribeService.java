@@ -43,10 +43,11 @@ public class SubscribeService {
 
             AMQueueManager amqmanager = (AMQueueManager) QueueServiceMapping.getQueueManager(serviceName);
             try {
-                String timestamp = amqmanager.getQueueCreationTime(request);
-                res.add(ReservedKeys.RECORD_SUBSCRIBE_QUEUE_TIMESTAMP, timestamp);
+
                 List<String> qlist = amqmanager.getQueues(request);
                 res.add(ReservedKeys.RECORD_SUBSCRIBE_QUEUE, qlist);
+                String timestamp = amqmanager.getQueueCreationTime(request);
+                res.add(ReservedKeys.RECORD_SUBSCRIBE_QUEUE_TIMESTAMP, timestamp);
                 LOG.info("net.es.lookup.api.SubscribeService.subscribe: Returning queues - " + res);
                 response = JSONMessage.toString(res);
                 LOG.info("net.es.lookup.api.SubscribeService.subscribe: Returning queues - " + response);
