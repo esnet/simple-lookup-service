@@ -33,7 +33,7 @@ public class CacheHeartBeat implements Job {
                 try {
                     SubscribeRecord record = subscriber.heartbeat();
                     if(record.getQueueState().equals(ReservedValues.RECORD_SUBSRIBER_QUEUE_STATE_NEW)){
-
+                        cache.restart();
                     }
                 } catch (LSClientException e) {
                     LOG.error("Heartbeat message Failed"+ e.getMessage());
