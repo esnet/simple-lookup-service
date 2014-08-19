@@ -20,6 +20,7 @@ import net.es.lookup.pubsub.client.failover.FailureRecovery;
 import net.es.lookup.queries.Query;
 import net.es.lookup.records.Record;
 import org.apache.log4j.Logger;
+import org.joda.time.Instant;
 
 import java.net.URI;
 import java.util.Iterator;
@@ -43,6 +44,8 @@ public class Cache implements SubscriberListener {
 
     private List<Subscriber> connectedSubscribers;
     private List<SubscriberListener> subscriberListeners;
+
+    private Instant lastCacheRestartTime;
 
     //private List<FailedConnection> failedConnectionList;
 
@@ -116,6 +119,8 @@ public class Cache implements SubscriberListener {
                         connectedSubscribers.add(subscriber);
                     }
                 }
+
+
             } catch (QueryException e) {
                 LOG.error("net.es.lookup.pubsub.client.Cache: Error creating query from the given key-value pair");
                 throw new LSClientException("net.es.lookup.pubsub.client.CacheService: Error initializing subscribe hosts -" + e.getMessage());
@@ -151,6 +156,7 @@ public class Cache implements SubscriberListener {
             }
 
             subscriber.startSubscription();
+            lastCacheRestartTime = new Instant();
 
         }
 
@@ -422,5 +428,10 @@ public class Cache implements SubscriberListener {
     public List<Publisher> getPublishers() {
 
         return publishers;
+    }
+
+    public Instant getLastRestartedTimeStamp() {
+
+        return lastCacheRestartTime;
     }
 }

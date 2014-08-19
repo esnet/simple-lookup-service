@@ -3,6 +3,7 @@ package net.es.lookup.records.PubSub;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.records.Record;
+import org.joda.time.Instant;
 
 import java.util.List;
 
@@ -48,4 +49,11 @@ public class SubscribeRecord extends Record {
     }
 
 
+    public Instant getQueueCreationTime() {
+
+        String time = (String) this.getMap().get(ReservedKeys.RECORD_SUBSCRIBE_QUEUE_TIMESTAMP);
+        Instant ntime = new Instant(time);
+        return ntime;
+
+    }
 }

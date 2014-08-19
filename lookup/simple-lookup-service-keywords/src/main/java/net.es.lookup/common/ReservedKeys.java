@@ -99,6 +99,7 @@ public class ReservedKeys {
     public static final String QUEUE_URL = "queue-url";
     public static final String QUEUE = "queue" ;
     public static final String RECORD_SUBSCRIBE_QUEUE_STATE = "queue-state";
+    public static final String RECORD_SUBSCRIBE_QUEUE_TIMESTAMP = "queue-timestamp";
 
     //cache
 

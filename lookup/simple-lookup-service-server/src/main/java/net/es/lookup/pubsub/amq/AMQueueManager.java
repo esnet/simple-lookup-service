@@ -7,13 +7,15 @@ import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.pubsub.QueueManager;
 import net.es.lookup.pubsub.QueueServiceMapping;
 import org.apache.log4j.Logger;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import org.joda.time.Instant;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 /**
  * This class implements the QueueManager interface. This implementation has a 1 to 1 mapping between query and queue.
  * <p/>
@@ -25,6 +27,8 @@ public class AMQueueManager implements QueueManager {
 
     private HashMap<String, AMQueue> queueMap = new HashMap<String, AMQueue>();            /* keeps track of queueid to queue mapping */
     private HashMap<String, List<String>> queryMap = new HashMap<String, List<String>>();   /* keeps track of query to queueid mapping  */
+    private HashMap<String, String> queryTimeMap = new HashMap<String, String>();
+
     private HashMap<String, List<Message>> normalizedQueryMap = new HashMap<String, List<Message>>();   /* FUTURE USE: keeps track of normalized query to original query mapping  */
 
     private String serviceName;
@@ -75,6 +79,7 @@ public class AMQueueManager implements QueueManager {
             	    byte[] queueId = md.digest(querybyte);
                    String qid = queueId.toString();
                     queue = new AMQueue(qid);
+
                     LOG.debug("net.es.lookup.pubsub.amq.AMQueueManager.getQueues: Created queue with id " + qid);
 
 
@@ -84,7 +89,10 @@ public class AMQueueManager implements QueueManager {
                     //add to queryMap
                     res.add(qid);
                     queryMap.put(normalizedQuery, res);
-
+                    Instant now = new Instant();
+                    DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateTime();
+                    String timestamp = dateTimeFormatter.print(now);
+                    queryTimeMap.put(normalizedQuery, timestamp);
                     //add to normalized query
                     List<Message> queryList = new ArrayList<Message>();
                     queryList.add(query);
@@ -150,6 +158,12 @@ public class AMQueueManager implements QueueManager {
         }
         LOG.debug("net.es.lookup.pubsub.amq.AMQueueManager.getAllQueries: Retrieved Queries - "+ queryList.size());
         return queryList;
+    }
+
+
+    public String getQueueCreationTime(Message query) throws PubSubQueryException {
+        String nQuery = QueryNormalizer.normalize(query);
+        return queryTimeMap.get(nQuery);
     }
 
     private void cleanUp(String qid){

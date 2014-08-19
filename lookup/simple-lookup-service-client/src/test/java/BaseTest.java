@@ -195,9 +195,9 @@ public class BaseTest {
                 try {
 
                     SimpleLS deleteLS = new SimpleLS(host, port, "DELETE");
-                    deleteLS.setRelativeUrl(action);
-                    deleteLS.connect();
-                    deleteLS.send();
+                    //deleteLS.setRelativeUrl(action);
+                    //deleteLS.connect();
+                    //deleteLS.send();
                 } catch (LSClientException e) {
 
                     System.out.println("An exception occurred while trying to delete the test record: " + id);
