@@ -34,12 +34,15 @@ public class CacheHeartBeat implements Job {
             for(Subscriber subscriber: subscribers){
                 try {
                     SubscribeRecord record = subscriber.heartbeat();
-                    Instant timestamp = record.getQueueCreationTime();
+                    Instant queueCreationTime = record.getQueueCreationTime();
+
+
 
                     Instant cacheRestart = cache.getLastRestartedTimeStamp();
-
-                    if(timestamp.isAfter(cacheRestart.plus(5000))){
+                    System.out.println("Is "+cacheRestart.toString()+" after "+queueCreationTime.toString()+"?");
+                    if(cacheRestart.isBefore(queueCreationTime.plus(120000))){
                         cache.restart();
+
                         break;
                     }else{
                         LOG.error("No restart required");

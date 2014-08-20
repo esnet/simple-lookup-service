@@ -9,3 +9,4 @@ caches:
               - type: "host"
               - type: "interface"
 bootstrapserver: "http://ps1.es.net:8096/lookup/activehosts.json"
+reconnectInterval: 1800

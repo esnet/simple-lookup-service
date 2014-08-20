@@ -24,12 +24,15 @@ public class SubscriberConfigReader {
     private static final String SOURCE_QUERIES = "queries";
     private static final String WILDCARD = "*";
     private static final String BOOTSTRAPSERVER = "bootstrapserver";
+    private static final String RECONNECTINTERVAL = "reconnectInterval";
 
 
     private static SubscriberConfigReader instance;
     private static String configFile = "";
 
     private List<CacheConfig> cacheList;
+
+    private int reconnectInterval;
 
 
     private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
@@ -99,6 +102,8 @@ public class SubscriberConfigReader {
             }
             String bclientlocator = (String)yamlMap.get(BOOTSTRAPSERVER);
             URI bclientURI = new URI(bclientlocator);
+
+            reconnectInterval = (Integer)yamlMap.get(RECONNECTINTERVAL);
 
             for (int i = 0; i < cList.size(); i++) {
 
@@ -171,4 +176,8 @@ public class SubscriberConfigReader {
     }
 
 
+    public int getReconnectInterval() {
+
+        return reconnectInterval;
+    }
 }

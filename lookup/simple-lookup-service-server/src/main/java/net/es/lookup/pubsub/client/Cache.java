@@ -72,7 +72,7 @@ public class Cache implements SubscriberListener {
         subscriberListeners = new LinkedList<SubscriberListener>();
         failureRecovery = new FailureRecovery();
 
-        initialize();
+
 
     }
 
@@ -134,7 +134,7 @@ public class Cache implements SubscriberListener {
      * set of records and then will start subscription
      */
     public void start() throws LSClientException {
-
+        initialize();
         LOG.info("net.es.lookup.pubsub.client.Cache.start: Starting the subscriber connections");
         try {
             emptyCache();
@@ -173,9 +173,13 @@ public class Cache implements SubscriberListener {
 
         LOG.info("net.es.lookup.pubsub.client.Cache.stop: Stopping " + connectedSubscribers.size() + " subscriber connections");
         for (Subscriber subscriber : connectedSubscribers) {
+
             subscriber.removeListener(this);
-            subscriber.stopSubscription();
+            subscriber.shutdown();
+
         }
+
+        connectedSubscribers.clear();
 
         LOG.info("net.es.lookup.pubsub.client.Cache.stop: Stopped " + connectedSubscribers.size() + " subscriber connections");
 
@@ -188,6 +192,11 @@ public class Cache implements SubscriberListener {
     public void restart() throws LSClientException {
 
         stop();
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            LOG.error("Sleep interrupted after cache stop");
+        }
         start();
 
     }

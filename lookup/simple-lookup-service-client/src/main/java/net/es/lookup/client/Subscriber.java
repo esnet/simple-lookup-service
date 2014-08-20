@@ -338,11 +338,11 @@ public class Subscriber {
         LOG.info("net.es.lookup.client.Subscriber: Stopping connection");
         if (conn != null) {
             try {
-
+                conn.close();
                 recordWaitThread = null;
                 //listeners = null;
-                consumer.close();
-                conn.close();
+
+
             } catch (JMSException e) {
                 LOG.error("net.es.lookup.client.Subscriber: Connection Exception = " + e.getMessage());
                 throw new LSClientException(e.getMessage());

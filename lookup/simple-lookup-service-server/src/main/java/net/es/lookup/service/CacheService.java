@@ -1,8 +1,10 @@
 package net.es.lookup.service;
 
 import net.es.lookup.common.exception.LSClientException;
+import net.es.lookup.common.exception.internal.ConfigurationException;
 import net.es.lookup.pubsub.client.Cache;
 import net.es.lookup.pubsub.client.heartbeat.CacheHeartBeat;
+import net.es.lookup.utils.config.reader.SubscriberConfigReader;
 import org.apache.log4j.Logger;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -27,7 +29,7 @@ public class CacheService {
     private static Logger LOG = Logger.getLogger(CacheService.class);
     private static boolean initialized = false;
     private Scheduler scheduler;
-    private static final int FAILURE_RECOVERY_INTERVAL = 15;
+    private static int FAILURE_RECOVERY_INTERVAL = 1200;
 
     private CacheService(List<Cache> caches, Scheduler scheduler) throws LSClientException {
 
@@ -36,6 +38,13 @@ public class CacheService {
             initialized=true;
             this.scheduler = scheduler;
             LOG.debug("net.es.lookup.service.CacheService: Number of caches - "+ cacheList.size());
+
+        }
+
+        try {
+            FAILURE_RECOVERY_INTERVAL = SubscriberConfigReader.getInstance().getReconnectInterval();
+        } catch (ConfigurationException e) {
+            LOG.error("Error retrieving reconnectInterval from Subscriber config. Using default value of 1200");
         }
 
     }
