@@ -1,6 +1,9 @@
 package net.es.lookup.api;
 
-import net.es.lookup.common.*;
+import net.es.lookup.common.LeaseManager;
+import net.es.lookup.common.Message;
+import net.es.lookup.common.ReservedKeys;
+import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
@@ -12,12 +15,12 @@ import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.database.DBPool;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.*;
+import net.es.lookup.pubsub.QueueDataGenerator;
 import net.es.lookup.pubsub.QueueServiceMapping;
-import net.es.lookup.pubsub.amq.AMQueuePump;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -86,17 +89,22 @@ public class EditService {
                         newRequest.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_RENEW);
                         Message res = db.updateService(serviceid, newRequest);
 
-                        try {
-                            sendToQueue(dbname, res);
-                        } catch (PubSubQueueException e) {
-                            LOG.error("Error sending Renew Record  to Queue");
-                            LOG.info("Renew: Caught Queue Exception");
-                        } catch (PubSubQueryException e) {
-                            LOG.error("Error sending Renew Record  to Queue");
-                            LOG.info("Renew: Caught Query Exception");
-                        }
+
 
                         response = new JSONRenewResponse(res.getMap());
+
+                        //Push message to queue
+                        QueueDataGenerator queueDataGenerator = QueueServiceMapping.getQueueDataGenerator(dbname);
+                        LinkedList resList = new LinkedList();
+                        resList.add(res);
+                        try {
+                            queueDataGenerator.fillQueues(resList);
+                        } catch (PubSubQueueException e) {
+                            LOG.error("Error pushing register message to queue:" + e.getMessage());
+                        } catch (PubSubQueryException e) {
+                            LOG.error("Error retrieving query to push register message to queue:" + e.getMessage());
+                        }
+
 
                         try {
                             return JSONMessage.toString(response);
@@ -207,18 +215,21 @@ public class EditService {
                 } else {
                     //update state
                     serviceRecord.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_DELETE);
+
+                    //Push to Queue
+                    QueueDataGenerator queueDataGenerator = QueueServiceMapping.getQueueDataGenerator(dbname);
+                    LinkedList resList = new LinkedList();
+                    resList.add(serviceRecord);
+                    try {
+                        queueDataGenerator.fillQueues(resList);
+                    } catch (PubSubQueueException e) {
+                        LOG.error("Error pushing register message to queue:" + e.getMessage());
+                    } catch (PubSubQueryException e) {
+                        LOG.error("Error retrieving query to push register message to queue:" + e.getMessage());
+                    }
+
                     response = new JSONDeleteResponse(serviceRecord.getMap());
 
-
-                    try {
-                        sendToQueue(dbname, response);
-                    } catch (PubSubQueueException e) {
-                        LOG.error("Error sending Delete Record  to Queue");
-                        LOG.info("Delete: Caught Queue Exception");
-                    } catch (PubSubQueryException e) {
-                        LOG.error("Error sending Delete Record  to Queue");
-                        LOG.info("Delete: Caught Query Exception");
-                    }
 
                     try {
 
@@ -264,18 +275,6 @@ public class EditService {
 
     }
 
-
-    private void sendToQueue(String amqname, Message message) throws PubSubQueueException, PubSubQueryException {
-
-        AMQueuePump amQueuePump = (AMQueuePump) QueueServiceMapping.getQueuePump(amqname);
-        if(amQueuePump != null){
-            List<Message> sList = new ArrayList();
-            sList.add(message);
-
-            amQueuePump.fillQueues(sList);
-        }
-
-    }
 
 
     private boolean isAuthed(String serviceid, JSONRenewRequest request) {

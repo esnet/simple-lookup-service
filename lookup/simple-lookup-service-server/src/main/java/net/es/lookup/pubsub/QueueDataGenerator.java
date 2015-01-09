@@ -16,7 +16,7 @@ import java.util.List;
  * Time: 1:33 PM
  *
  */
-public interface QueuePump {
+public interface QueueDataGenerator {
     /**
      * This method assigns the records to queues.
      *
@@ -24,6 +24,14 @@ public interface QueuePump {
      * @return void
      */
     public void fillQueues(List<Message> messageList) throws PubSubQueueException, PubSubQueryException;
+
+
+    /**
+     * Push messages in temporary queue to the message exchange
+     *
+     */
+    public void pushToQueue();
+
 
 
 }

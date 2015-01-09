@@ -1,21 +1,10 @@
 package net.es.lookup.service;
 
 import net.es.lookup.common.exception.LSClientException;
-import net.es.lookup.common.exception.internal.ConfigurationException;
 import net.es.lookup.pubsub.client.Cache;
-import net.es.lookup.pubsub.client.heartbeat.CacheHeartBeat;
-import net.es.lookup.utils.config.reader.SubscriberConfigReader;
 import org.apache.log4j.Logger;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
 
 import java.util.List;
-
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
-import static org.quartz.TriggerBuilder.newTrigger;
 
 /**
  * Author: sowmya
@@ -28,25 +17,15 @@ public class CacheService {
     private static CacheService instance = null;
     private static Logger LOG = Logger.getLogger(CacheService.class);
     private static boolean initialized = false;
-    private Scheduler scheduler;
-    private static int FAILURE_RECOVERY_INTERVAL = 1200;
 
-    private CacheService(List<Cache> caches, Scheduler scheduler) throws LSClientException {
+    private CacheService(List<Cache> caches) throws LSClientException {
 
-        if(caches != null && !caches.isEmpty() && scheduler != null){
+        if (caches != null && !caches.isEmpty()) {
             this.cacheList = caches;
-            initialized=true;
-            this.scheduler = scheduler;
-            LOG.debug("net.es.lookup.service.CacheService: Number of caches - "+ cacheList.size());
+            initialized = true;
+            LOG.debug("net.es.lookup.service.CacheService: Number of caches - " + cacheList.size());
 
         }
-
-        try {
-            FAILURE_RECOVERY_INTERVAL = SubscriberConfigReader.getInstance().getReconnectInterval();
-        } catch (ConfigurationException e) {
-            LOG.error("Error retrieving reconnectInterval from Subscriber config. Using default value of 1200");
-        }
-
     }
 
     public static synchronized CacheService getInstance() {
@@ -55,55 +34,39 @@ public class CacheService {
 
     }
 
-    public List<Cache>getCacheList(){
+    public List<Cache> getCacheList() {
+
         return cacheList;
     }
 
-    public static synchronized CacheService initialize(List<Cache> cacheList, Scheduler scheduler) throws LSClientException {
+    public static synchronized CacheService initialize(List<Cache> cacheList) throws LSClientException {
 
         if (instance != null) {
             throw new RuntimeException("Attempt to create second instance");
         } else {
-            instance = new CacheService(cacheList, scheduler);
+            instance = new CacheService(cacheList);
         }
         return instance;
     }
 
-    public boolean isInitialized(){
+    public boolean isInitialized() {
+
         return initialized;
     }
 
     public void startService() {
 
         LOG.debug("net.es.lookup.service.CacheService: starting cache");
+
+
+        for (Cache cache : cacheList) {
             try {
-                JobDetail job = newJob(CacheHeartBeat.class)
-                        .withIdentity("failure-handler", "CacheHeartBeat")
-                        .build();
+                cache.start();
+            } catch (LSClientException e) {
+                LOG.error("net.es.lookup.service.CacheService: Error starting cache- " + cache.getName());
 
-                // Trigger the job to run now, and then every dbpruneInterval seconds
-                Trigger trigger = newTrigger().withIdentity("failure-handler-trigger", "CacheHeartBeat")
-                        .startNow()
-                        .withSchedule(simpleSchedule()
-                                .withIntervalInSeconds(FAILURE_RECOVERY_INTERVAL)
-                                .repeatForever()
-                                .withMisfireHandlingInstructionIgnoreMisfires())
-                        .build();
-
-                this.scheduler.scheduleJob(job, trigger);
-
-                for(Cache cache: cacheList){
-                    try {
-                        cache.start();
-                    } catch (LSClientException e) {
-                        LOG.error("net.es.lookup.service.CacheService: Error starting cache- " + cache.getName());
-
-                    }
-                }
-
-           } catch (SchedulerException e) {
-                LOG.error("net.es.lookup.service.CacheService: Cannot start failure handler");
             }
+        }
 
     }
 

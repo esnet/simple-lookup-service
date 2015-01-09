@@ -3,7 +3,6 @@ package net.es.lookup.pubsub.client.heartbeat;
 import net.es.lookup.client.Subscriber;
 import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.pubsub.client.Cache;
-import net.es.lookup.pubsub.client.failover.FailureRecovery;
 import net.es.lookup.records.PubSub.SubscribeRecord;
 import net.es.lookup.service.CacheService;
 import org.apache.log4j.Logger;
@@ -35,9 +34,6 @@ public class CacheHeartBeat implements Job {
                 try {
                     SubscribeRecord record = subscriber.heartbeat();
                     Instant queueCreationTime = record.getQueueCreationTime();
-
-
-
                     Instant cacheRestart = cache.getLastRestartedTimeStamp();
                     System.out.println("Is "+cacheRestart.toString()+" after "+queueCreationTime.toString()+"?");
                     if(cacheRestart.isBefore(queueCreationTime.plus(120000))){
@@ -51,8 +47,6 @@ public class CacheHeartBeat implements Job {
                     LOG.error("Heartbeat message Failed"+ e.getMessage());
                 }
             }
-            FailureRecovery failureRecovery = cache.getFailureRecovery();
-            failureRecovery.execute();
         }
         }
     }

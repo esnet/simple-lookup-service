@@ -10,8 +10,9 @@ import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.pubsub.Publisher;
+import net.es.lookup.pubsub.amq.AMQueueDataGenerator;
 import net.es.lookup.pubsub.amq.AMQueueManager;
-import net.es.lookup.pubsub.amq.AMQueuePump;
+import net.es.lookup.pubsub.amq.PublisherJob;
 import net.es.lookup.pubsub.client.Cache;
 import net.es.lookup.utils.config.elements.CacheConfig;
 import net.es.lookup.utils.config.elements.PublisherConfig;
@@ -106,7 +107,7 @@ public class Invoker {
 
                 if (qcfg.isServiceOn()) {
                     new AMQueueManager(LookupService.LOOKUP_SERVICE);
-                    new AMQueuePump(LookupService.LOOKUP_SERVICE);
+                    new AMQueueDataGenerator(LookupService.LOOKUP_SERVICE);
                 }
 
                 services.add(LookupService.LOOKUP_SERVICE);
@@ -149,7 +150,7 @@ public class Invoker {
                 }
 
 
-                Invoker.cacheService = CacheService.initialize(cacheList, scheduler);
+                Invoker.cacheService = CacheService.initialize(cacheList);
 
                 System.out.println("Cache service initialized: " + Invoker.cacheService.isInitialized());
             }
@@ -205,6 +206,24 @@ public class Invoker {
                 scheduler.scheduleJob(job, trigger);
             }
 
+            //DB Pruning for core LS
+            if (qcfg.isServiceOn()) {
+                JobDetail job = newJob(PublisherJob.class)
+                        .withIdentity("PublisherJob", "Publisher")
+                        .build();
+
+                // Trigger the job to run now, and then every dbpruneInterval seconds
+                Trigger trigger = newTrigger().withIdentity(LookupService.LOOKUP_SERVICE + "PublisherTrigger", "Publisher")
+                        .startNow()
+                        .withSchedule(simpleSchedule()
+                                .withIntervalInSeconds(120)
+                                .repeatForever()
+                                .withMisfireHandlingInstructionIgnoreMisfires())
+                        .build();
+
+                scheduler.scheduleJob(job, trigger);
+            }
+
             if(cacheServiceRequest){
                 for(Cache cache: cacheList ){
                     if(cache.getType().equals(ReservedValues.CACHE_TYPE_REPLICATION)){
@@ -231,10 +250,6 @@ public class Invoker {
 
                 }
             }
-
-
-
-
 
             JobDetail gcInvoker = newJob(MemoryManager.class)
                     .withIdentity("gc", "MemoryManagement")

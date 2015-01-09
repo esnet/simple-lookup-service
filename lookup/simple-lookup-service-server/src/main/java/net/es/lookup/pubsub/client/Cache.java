@@ -15,8 +15,6 @@ import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.DBPool;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.pubsub.Publisher;
-import net.es.lookup.pubsub.client.failover.FailedConnection;
-import net.es.lookup.pubsub.client.failover.FailureRecovery;
 import net.es.lookup.queries.Query;
 import net.es.lookup.records.Record;
 import org.apache.log4j.Logger;
@@ -47,18 +45,6 @@ public class Cache implements SubscriberListener {
 
     private Instant lastCacheRestartTime;
 
-    //private List<FailedConnection> failedConnectionList;
-
-
-    private FailureRecovery failureRecovery;
-
-
-    public FailureRecovery getFailureRecovery() {
-
-        return failureRecovery;
-    }
-
-    //FailureRecovery subscriberFailureRecovery;
     private static Logger LOG = Logger.getLogger(Cache.class);
 
 
@@ -70,10 +56,6 @@ public class Cache implements SubscriberListener {
 
         connectedSubscribers = new LinkedList<Subscriber>();
         subscriberListeners = new LinkedList<SubscriberListener>();
-        failureRecovery = new FailureRecovery();
-
-
-
     }
 
 
@@ -252,12 +234,6 @@ public class Cache implements SubscriberListener {
                 if (removedFromActiveList) {
 
                     toBeRemoved.stopSubscription();
-                    FailedConnection failedConnection = new FailedConnection(toBeRemoved);
-                   // toBeRemoved.addListener(this);
-                    failureRecovery.addFailedConnection(failedConnection);
-
-                    LOG.error("net.es.lookup.pubsub.client.Cache.onRecord: Tore down subscriber connection. Added subscriber to failed connection");
-                    LOG.debug("net.es.lookup.pubsub.client.Cache.onRecord: Number of failed connections: "+ failureRecovery.getFailedConnectionCount());
                 } else {
                     throw new LSClientException("net.es.lookup.pubsub.client.Cache.onRecord: Failed to remove failedConnection from active list. Exiting");
                 }

@@ -14,8 +14,8 @@ import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
+import net.es.lookup.pubsub.QueueDataGenerator;
 import net.es.lookup.pubsub.QueueServiceMapping;
-import net.es.lookup.pubsub.amq.AMQueuePump;
 import net.es.lookup.service.LookupService;
 import org.apache.log4j.Logger;
 
@@ -107,15 +107,17 @@ public class RegisterService {
 
                         }
 
+                        QueueDataGenerator queueDataGenerator = QueueServiceMapping.getQueueDataGenerator(dbname);
+                        LinkedList resList = new LinkedList();
+                        resList.add(res);
                         try {
-                            sendToQueue(dbname, res);
+                            queueDataGenerator.fillQueues(resList);
                         } catch (PubSubQueueException e) {
-                            LOG.error("Error sending Register Record  to Queue");
-                            LOG.info("Register: Caught Queue Exception");
+                            LOG.error("Error pushing register message to queue:" + e.getMessage());
                         } catch (PubSubQueryException e) {
-                            LOG.error("Error sending Register Record  to Queue");
-                            LOG.info("Register: Caught Query Exception");
+                            LOG.error("Error retrieving query to push register message to queue:" + e.getMessage());
                         }
+
                         LOG.info("Register status: SUCCESS; exiting");
                         LOG.debug("response:" + responseString);
                         return responseString;
@@ -167,21 +169,6 @@ public class RegisterService {
         return "\n";
 
     }
-
-
-
-    private void sendToQueue(String amqname, Message message) throws PubSubQueueException, PubSubQueryException {
-
-        AMQueuePump amQueuePump = (AMQueuePump) QueueServiceMapping.getQueuePump(amqname);
-        if(amQueuePump != null){
-            List<Message> sList = new ArrayList();
-            sList.add(message);
-
-            amQueuePump.fillQueues(sList);
-        }
-
-    }
-
 
     private boolean isAuthed(JSONRegisterRequest request) {
 

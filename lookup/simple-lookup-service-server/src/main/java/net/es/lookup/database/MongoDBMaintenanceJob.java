@@ -4,10 +4,6 @@ import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.common.exception.internal.PubSubQueryException;
-import net.es.lookup.common.exception.internal.PubSubQueueException;
-import net.es.lookup.pubsub.QueueServiceMapping;
-import net.es.lookup.pubsub.amq.AMQueuePump;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;
@@ -114,7 +110,7 @@ public class MongoDBMaintenanceJob implements Job {
 
    /** private void sendToQueue(String amqname, List<Message> messages) throws PubSubQueueException, PubSubQueryException {
 
-        AMQueuePump amQueuePump = (AMQueuePump) QueueServiceMapping.getQueuePump(amqname);
+        AMQueuePump amQueuePump = (AMQueuePump) QueueServiceMapping.getQueueDataGenerator(amqname);
         int batchSize = AMQueuePump.BATCH_SIZE;
 
 
