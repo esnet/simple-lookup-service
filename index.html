@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Simple-lookup-service : sLS code">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Simple-lookup-service</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/esnet/simple-lookup-service">View on GitHub</a>
+
+          <h1 id="project_title">Simple-lookup-service</h1>
+          <h2 id="project_tagline">sLS code</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/esnet/simple-lookup-service/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/esnet/simple-lookup-service/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p>This page gives an overview of simple lookup service</p>
+
+<h1>
+<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h1>
+
+<p>The Simple Lookup Service(sLS) is a REST/JSON based lookup service written in Java.</p>
+
+<p>It registers collections of key-value pairs referred as "records". The records will remain in the lookup service for a stipulated amount of time, known as "lease" time. Clients can renew the lease before it expires. If a client does not renew the lease, the record is automatically removed from the loookup service. A client can also explicitly delete a record.</p>
+
+<p>In addition, a lookup service may also subscribe to another lookup service. When a lookup service subscribes to another lookup service, from that point onwards, the former will automatically receive new record registrations or updates to existing records from the latter.</p>
+
+<p>The Simple Lookup Service can be deployed as a single centralized node or in a distributed fashion.</p>
+
+<h1>
+<a id="motivation" class="anchor" href="#motivation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Motivation</h1>
+
+<p>The sLS project was started as a replacement for the XML based perfSONAR Lookup Service.The perfSONAR community developed and deployed a lookup service that registers all perfSONAR services, and some other non-perfSONAR services (Eg: OSCARS friendly names). Over the past few years, as the perfSONAR community steadily grew, it increased the number of toolkit deployments. This, in turn, increased the number of services registering with the LS and the number of queries to the LS. The perfSONAR LS deployment found it difficult to deal with this increase in load. This resulted in some serious performance and reliability issues. A redesign effort was initiated to address these issues.</p>
+
+<h1>
+<a id="requirements-and-scope" class="anchor" href="#requirements-and-scope" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements and Scope</h1>
+
+<p>Since, sLS was meant to be a replacement for the perfSONAR LS, the requirements for sLS were driven by the needs of the perfSONAR community. As a result, although the requirements themselves are generic enough, some of the numbers in the requirements specification was determined by the needs of the perfSONAR community.</p>
+
+<p>The requirements can be summarized as follows:</p>
+
+<ul>
+<li>Scalability - The lookup service should support be able to support at least 10,000 service records without significant performance degradation. The maximum limit is 100,000.</li>
+<li>Query Time - The average time to respond to a query should be 1 second. The maximum time bound on the lookup service should be 5 seconds.</li>
+<li>Registration Time - The maximum time that it should take a service to be registered and become globally visible is 1 hour.</li>
+<li>Availability - The LS can be deployed in a manner which will provide 99.9% uptime.</li>
+<li>Security - The LS should allow records to contain authentication and/or authorization credentials that can be consumed by the querying client. It is NOT a requirement that the lookup service be responsible for verifying or enforcing security credentials.</li>
+<li>Queries - The lookup service should be able to apply a set of filters and return records that match these filters.
+Additionally, the sLS also addresses the following key issues:</li>
+<li>generic API</li>
+<li>easy to use</li>
+<li>stability</li>
+</ul>
+
+<h1>
+<a id="design-overview" class="anchor" href="#design-overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Design Overview</h1>
+
+<h2>
+<a id="data-representation" class="anchor" href="#data-representation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data Representation</h2>
+
+<p>As described in the "Overview" section, the data is represented as "records". Records are nothing but a collection of key-value pairs. The keys are strings and values are list of one or more strings. A sample record may look like this:</p>
+
+<pre><code>{   "type": "service",
+    "service-type": ["service-accesspoint": ["http://somehost.some.domain:port/service/bwctl"]("bwctl"],),
+    "uri": "lookup/service/uniquerecordid"
+    "expires": "2013-05-06T23:10:14.577Z"
+}
+</code></pre>
+
+<p>Simple Lookup Service defines a set of records. Since, sLS is designed to be very general, it can therefore register any type of record, including user-defined ones. </p>
+
+<p>Details about the predefined records and guidelines to define new record types can be found in the <a href="Records">Records document</a>.</p>
+
+<h2>
+<a id="api" class="anchor" href="#api" aria-hidden="true"><span class="octicon octicon-link"></span></a>API</h2>
+
+<p>Most of the web services are based on either SOAP/XML or REST/JSON. Each technology has its own set of advantages and disadvantages. REST/JSON based APIs are usually simple and easy to use. Also, it is easy and intuitive to express key-value pairs in JSON. Hence, REST/JSON was the obvious choice for sLS.</p>
+
+<p>The API itself can be divided into 3 main sections:</p>
+
+<ol>
+<li>Record Management - Register/edit a service using simple HTTP calls(POST, DELETE, GET). Example:</li>
+</ol>
+
+<pre><code>curl -v -H "Content-Type: application/json" -X POST -d '{"type":[Ping Responder"]("service"],"service-locator":["somehost.es.net"],"service-name":["ESnet),"service-type":[ "ping"]}' http://somehost.some.domain:8090/lookup/records
+</code></pre>
+
+<ol>
+<li>Query - Query the lookup service for records using HTTP GET Example:</li>
+</ol>
+
+<pre><code>curl -v -H "Content-Type: application/js" -X GET http://somehost.some.domain:8090/lookup/records/?type=service
+</code></pre>
+
+<ol>
+<li>Subscribe - Get new registrations and updates to records on a separate channel.
+To learn more about the API, please refer to <a href="APISpec">APISpec</a>
+</li>
+</ol>
+
+<h2>
+<a id="backend-database" class="anchor" href="#backend-database" aria-hidden="true"><span class="octicon octicon-link"></span></a>Backend Database</h2>
+
+<p>The sLS data is represented as simple key-value pairs and the API is in JSON. Our approach was to keep the coupling between the data and the database loose and at the same time optimize performance by choosing a database that can inherently support key-value pairs and thus avoid translating data from one format to another. Since, MongoDB met the requirements, we decided to use MongoDB as the backend database for sLS.</p>
+
+<h1>
+<a id="architecture" class="anchor" href="#architecture" aria-hidden="true"><span class="octicon octicon-link"></span></a>Architecture</h1>
+
+<p>The Simple Lookup Service(sLS) node is the basic building block of sLS architecture. As shown in figure 1. the sLS node consists of API and the database. Depending on the architecture, this sLS node may be configured as one of the following:</p>
+
+<ul>
+<li>core/source node - this node is the source of truth. This is where clients will register/edit records. The sLS architecture will contain <em>one</em> or more nodes of this type.</li>
+<li>cache node - As the name suggests, this node will cache data from core/source node and helps in optimizing query performance. This node does not accept registrations or edits to the records.The sLS architecture may contain <em>zero</em> or more nodes of this type.</li>
+<li>archive node - This node keeps track of all the records in the lookup service (including deleted and expired ones).</li>
+<li>back-up node - For a reliable and highly available service, each of the core node should have a back-up node. When the core node goes down, the back-up node will become the source node.</li>
+</ul>
+
+<p>For more details, please refer to <a href="DesignDocuments">this page</a></p>
+
+<h1>
+<a id="clients" class="anchor" href="#clients" aria-hidden="true"><span class="octicon octicon-link"></span></a>Clients</h1>
+
+<p>The Simple Lookup Service is simple and easy to use that it can be used directly by command line clients like curl. In addition, we intend to provide client libraries in Perl, Python and Java. Developers can use these client libraries to develop web applications or use with third party software to interact with sLS. </p>
+
+<p>Details about the clients can be found in the <a href="ClientAPI">ClientAPI doc</a>.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Simple-lookup-service maintained by <a href="https://github.com/esnet">esnet</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
