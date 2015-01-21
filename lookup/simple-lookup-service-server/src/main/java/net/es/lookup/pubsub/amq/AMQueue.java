@@ -54,25 +54,6 @@ public class AMQueue extends Queue {
         activemqFactory = new ActiveMQConnectionFactory(user, password, activemqUrl);
         LOG.info("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Queue Creation Successful!");
 
-    }
-
-    /**
-     * This method returns the queueid associated with the queue.
-     *
-     * @return String - returns the queueid as a string
-     */
-    public String getQid() {
-
-        return qid;
-
-    }
-
-    /**
-     * This method pushes messages to the Active MQ Queue. Messages are rate controlled using BATCH_SIZE
-     *
-     * @param messages The message to be pushed to queue
-     */
-    public synchronized void push(List<Message> messages) throws PubSubQueueException {
         try {
 
             connection = activemqFactory.createConnection();
@@ -105,6 +86,27 @@ public class AMQueue extends Queue {
             LOG.error("net.es.lookup.pubsub.amq.AMQueue.AMQueue: Error creating session/producer for Queue. "+ e.getMessage());
             throw new PubSubQueueException(e.getMessage());
         }
+
+
+    }
+
+    /**
+     * This method returns the queueid associated with the queue.
+     *
+     * @return String - returns the queueid as a string
+     */
+    public String getQid() {
+
+        return qid;
+
+    }
+
+    /**
+     * This method pushes messages to the Active MQ Queue. Messages are rate controlled using BATCH_SIZE
+     *
+     * @param messages The message to be pushed to queue
+     */
+    public synchronized void push(List<Message> messages) throws PubSubQueueException {
 
         if(messages.size()<=BATCH_SIZE){
             try {
