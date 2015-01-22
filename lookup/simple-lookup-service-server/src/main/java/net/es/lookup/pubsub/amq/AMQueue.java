@@ -141,8 +141,6 @@ public class AMQueue extends Queue {
                 }
             }
         }
-
-        close();
     }
 
     /**
