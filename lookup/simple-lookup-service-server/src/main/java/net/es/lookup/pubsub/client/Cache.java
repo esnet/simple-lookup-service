@@ -5,7 +5,6 @@ import net.es.lookup.client.SimpleLS;
 import net.es.lookup.client.Subscriber;
 import net.es.lookup.client.SubscriberListener;
 import net.es.lookup.common.Message;
-import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.ParserException;
@@ -15,16 +14,26 @@ import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.DBPool;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.pubsub.Publisher;
+import net.es.lookup.pubsub.client.heartbeat.CacheHeartBeat;
 import net.es.lookup.queries.Query;
 import net.es.lookup.records.Record;
 import org.apache.log4j.Logger;
 import org.joda.time.Instant;
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
 
 import java.net.URI;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import net.es.lookup.common.ReservedKeys;
+import net.es.lookup.common.ReservedValues;
+
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 /**
  * Author: sowmya
@@ -56,6 +65,7 @@ public class Cache implements SubscriberListener {
 
         connectedSubscribers = new LinkedList<Subscriber>();
         subscriberListeners = new LinkedList<SubscriberListener>();
+        lastCacheRestartTime = new Instant();
     }
 
 
@@ -101,6 +111,31 @@ public class Cache implements SubscriberListener {
                         connectedSubscribers.add(subscriber);
                     }
                 }
+                try {
+
+                    SchedulerFactory sf = new StdSchedulerFactory();
+                    Scheduler scheduler = sf.getScheduler();
+                    scheduler.start();
+                    JobDetail job = newJob(CacheHeartBeat.class)
+                            .withIdentity(name + "heartbeat", "Heartbeat")
+                            .build();
+
+                    // Trigger the job to run now, and then every 600 seconds
+                    Trigger trigger = newTrigger().withIdentity(name + "HeartbeatTrigger", "Heartbeat")
+                            .startNow()
+                            .withSchedule(simpleSchedule()
+                                    .withIntervalInSeconds(600)
+                                    .repeatForever()
+                                    .withMisfireHandlingInstructionIgnoreMisfires())
+                            .build();
+
+                    scheduler.scheduleJob(job, trigger);
+
+                }catch (SchedulerException se) {
+                    se.printStackTrace();
+
+                }
+
 
 
             } catch (QueryException e) {

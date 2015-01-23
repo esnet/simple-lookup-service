@@ -35,7 +35,7 @@ public class CacheHeartBeat implements Job {
                     SubscribeRecord record = subscriber.heartbeat();
                     Instant queueCreationTime = record.getQueueCreationTime();
                     Instant cacheRestart = cache.getLastRestartedTimeStamp();
-                    System.out.println("Is "+cacheRestart.toString()+" after "+queueCreationTime.toString()+"?");
+                    //System.out.println("Is "+cacheRestart.toString()+" after "+queueCreationTime.toString()+"?");
                     if(cacheRestart.isBefore(queueCreationTime.plus(120000))){
                         cache.restart();
 

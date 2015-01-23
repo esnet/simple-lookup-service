@@ -1,5 +1,6 @@
 package net.es.lookup.service;
 
+
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -32,6 +33,7 @@ import static java.util.Arrays.asList;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
+
 
 
 public class Invoker {
@@ -216,7 +218,7 @@ public class Invoker {
                 Trigger trigger = newTrigger().withIdentity(LookupService.LOOKUP_SERVICE + "PublisherTrigger", "Publisher")
                         .startNow()
                         .withSchedule(simpleSchedule()
-                                .withIntervalInSeconds(120)
+                                .withIntervalInSeconds(qcfg.getPushInterval())
                                 .repeatForever()
                                 .withMisfireHandlingInstructionIgnoreMisfires())
                         .build();

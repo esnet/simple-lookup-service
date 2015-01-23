@@ -5,6 +5,7 @@ import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.exception.internal.PubSubQueryException;
 import net.es.lookup.pubsub.QueueDataGenerator;
 import net.es.lookup.pubsub.QueueServiceMapping;
+import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import org.apache.log4j.Logger;
 
 import java.util.LinkedList;
@@ -30,7 +31,8 @@ public class AMQueueDataGenerator implements QueueDataGenerator {
     private static Logger LOG = Logger.getLogger(AMQueueDataGenerator.class);
     private Queue<Message> recordQueue;
 
-    public static final int BATCH_SIZE = 25;
+    private int BATCH_SIZE;
+    QueueServiceConfigReader configReader;
 
 
     public AMQueueDataGenerator(String serviceName) {
@@ -38,6 +40,8 @@ public class AMQueueDataGenerator implements QueueDataGenerator {
         this.serviceName = serviceName;
         QueueServiceMapping.addQueueDataGenerator(serviceName, this);
         recordQueue = new ConcurrentLinkedQueue<Message>();
+        configReader = QueueServiceConfigReader.getInstance();
+        BATCH_SIZE = configReader.getBatchSize();
     }
 
 

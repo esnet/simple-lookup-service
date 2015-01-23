@@ -27,6 +27,9 @@ public class QueueServiceConfigReader {
 
     private long ttl = 120000;
 
+    private int batchSize=10;
+    private int pushInterval = 120;
+
     private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
     
 
@@ -90,6 +93,16 @@ public class QueueServiceConfigReader {
         return url;
     }
 
+    public int getBatchSize() {
+
+        return batchSize;
+    }
+
+    public int getPushInterval() {
+
+        return pushInterval;
+    }
+
     private void setInfo(String configFile) {
 
         BaseConfigReader cfg = BaseConfigReader.getInstance();
@@ -109,9 +122,14 @@ public class QueueServiceConfigReader {
             }else{
                 serviceOn=false;
             }
+            batchSize = (Integer) queueServiceMap.get("batch_size");
+            pushInterval = (Integer) queueServiceMap.get("push_interval");
+
             HashMap<String, Object> messageMap = (HashMap) yamlMap.get("message");
             persistent = (Boolean) messageMap.get("persistent");
             ttl = ((Integer) messageMap.get("ttl")) * 1000;
+
+
 
         } catch (Exception e) {
             LOG.error("Error parsing config file; Please check config parameters" + e.toString());

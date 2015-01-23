@@ -5,8 +5,6 @@ caches:
       publishers:
         - locator: "http://localhost:8090/lookup/subscribe"
           queries: 
-              - type: "client-test"
-              - type: "host"
-              - type: "interface"
+              - "*"
 bootstrapserver: "http://ps1.es.net:8096/lookup/activehosts.json"
 reconnectInterval: 1800

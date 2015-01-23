@@ -150,6 +150,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                   <killAfter>-1</killAfter>
                     <mainClass>net.es.lookup.service.Invoker</mainClass>
                 </configuration>
             </plugin>

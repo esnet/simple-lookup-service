@@ -1,9 +1,11 @@
 #Queue
 queue:
     queueservice: 'on'
-    host: 'localhost'
+    host: 'antg-test-vm.es.net'
     port: 61616
     protocol: 'tcp'
+    batch_size: 500
+    push_interval: 90
 
 #Messages
 message:
