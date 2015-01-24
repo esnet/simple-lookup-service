@@ -53,6 +53,7 @@ public class Cache implements SubscriberListener {
     private List<SubscriberListener> subscriberListeners;
 
     private Instant lastCacheRestartTime;
+    private int HEARTBEAT_INTERVAL=600;
 
     private static Logger LOG = Logger.getLogger(Cache.class);
 
@@ -66,6 +67,31 @@ public class Cache implements SubscriberListener {
         connectedSubscribers = new LinkedList<Subscriber>();
         subscriberListeners = new LinkedList<SubscriberListener>();
         lastCacheRestartTime = new Instant();
+
+        try {
+
+            SchedulerFactory sf = new StdSchedulerFactory();
+            Scheduler scheduler = sf.getScheduler();
+            scheduler.start();
+            JobDetail job = newJob(CacheHeartBeat.class)
+                    .withIdentity(name + "heartbeat", "Heartbeat")
+                    .build();
+
+            // Trigger the job to run now, and then every 600 seconds
+            Trigger trigger = newTrigger().withIdentity(name + "HeartbeatTrigger", "Heartbeat")
+                    .startNow()
+                    .withSchedule(simpleSchedule()
+                            .withIntervalInSeconds(HEARTBEAT_INTERVAL)
+                            .repeatForever()
+                            .withMisfireHandlingInstructionIgnoreMisfires())
+                    .build();
+
+            scheduler.scheduleJob(job, trigger);
+
+        }catch (SchedulerException se) {
+            se.printStackTrace();
+
+        }
     }
 
 
@@ -111,32 +137,6 @@ public class Cache implements SubscriberListener {
                         connectedSubscribers.add(subscriber);
                     }
                 }
-                try {
-
-                    SchedulerFactory sf = new StdSchedulerFactory();
-                    Scheduler scheduler = sf.getScheduler();
-                    scheduler.start();
-                    JobDetail job = newJob(CacheHeartBeat.class)
-                            .withIdentity(name + "heartbeat", "Heartbeat")
-                            .build();
-
-                    // Trigger the job to run now, and then every 600 seconds
-                    Trigger trigger = newTrigger().withIdentity(name + "HeartbeatTrigger", "Heartbeat")
-                            .startNow()
-                            .withSchedule(simpleSchedule()
-                                    .withIntervalInSeconds(600)
-                                    .repeatForever()
-                                    .withMisfireHandlingInstructionIgnoreMisfires())
-                            .build();
-
-                    scheduler.scheduleJob(job, trigger);
-
-                }catch (SchedulerException se) {
-                    se.printStackTrace();
-
-                }
-
-
 
             } catch (QueryException e) {
                 LOG.error("net.es.lookup.pubsub.client.Cache: Error creating query from the given key-value pair");
