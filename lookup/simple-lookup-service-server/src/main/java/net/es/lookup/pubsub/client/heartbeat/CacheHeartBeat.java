@@ -26,7 +26,7 @@ public class CacheHeartBeat implements Job {
 
         CacheService cacheService = CacheService.getInstance();
         List<Cache> cacheList = cacheService.getCacheList();
-        LOG.debug("net.es.lookup.service.CacheService: Cache Heartbeat");
+        LOG.debug("net.es.lookup.service.CacheHeartBeat: Cache Heartbeat");
         boolean restartRequired = false;
         for (Cache cache : cacheList) {
             List<Subscriber> subscribers = cache.getSubscribers();
@@ -36,15 +36,19 @@ public class CacheHeartBeat implements Job {
                     Instant queueCreationTime = record.getQueueCreationTime();
                     Instant cacheRestart = cache.getLastRestartedTimeStamp();
                     //System.out.println("Is "+cacheRestart.toString()+" after "+queueCreationTime.toString()+"?");
+
+                    LOG.debug("net.es.lookup.serviceCacheHeartBeat: Last cache restart: "+cacheRestart.toString());
+                    LOG.debug("net.es.lookup.serviceCacheHeartBeat: Queue creation time: "+queueCreationTime.toString());
                     if(cacheRestart.isBefore(queueCreationTime.plus(120000))){
+                        LOG.debug("net.es.lookup.serviceCacheHeartBeat: Restarting cache");
                         cache.restart();
 
                         break;
                     }else{
-                        LOG.error("No restart required");
+                        LOG.debug("net.es.lookup.serviceCacheHeartBeat: No restart required");
                     }
                 } catch (LSClientException e) {
-                    LOG.error("Heartbeat message Failed"+ e.getMessage());
+                    LOG.debug("net.es.lookup.serviceCacheHeartBeat: HeartBeat Message Failed"+e.getMessage());
                 }
             }
         }

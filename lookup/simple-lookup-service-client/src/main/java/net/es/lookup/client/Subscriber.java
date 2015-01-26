@@ -290,6 +290,8 @@ public class Subscriber {
                 break;
             } catch (ParserException e) {
                 LOG.error("net.es.lookup.client.Subscriber: Parser error" + e.getMessage());
+            } catch (NullPointerException e) {
+                LOG.warn("net.es.lookup.client.Subscriber: Null message" + e.getMessage());
             }
         }
 

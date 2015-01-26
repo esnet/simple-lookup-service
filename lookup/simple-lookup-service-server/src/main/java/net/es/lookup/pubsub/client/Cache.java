@@ -134,6 +134,7 @@ public class Cache implements SubscriberListener {
                         Query query = new Query(queryMap);
                         Subscriber subscriber = new Subscriber(server, query, subscribeRelativeUrl);
                         subscriber.addListener(this);
+
                         connectedSubscribers.add(subscriber);
                     }
                 }
@@ -190,8 +191,7 @@ public class Cache implements SubscriberListener {
 
         LOG.info("net.es.lookup.pubsub.client.Cache.stop: Stopping " + connectedSubscribers.size() + " subscriber connections");
         for (Subscriber subscriber : connectedSubscribers) {
-
-            subscriber.removeListener(this);
+            //subscriber.removeListener(this);
             subscriber.shutdown();
 
         }
