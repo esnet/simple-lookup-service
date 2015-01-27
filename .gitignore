@@ -1,0 +1,6 @@
+/docs/_build
+target
+*.log
+*.out
+.idea/
+*.iml
