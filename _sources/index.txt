@@ -1,0 +1,31 @@
+.. simple-lookup-service documentation master file, created by
+   sphinx-quickstart on Mon Jan 26 14:53:44 2015.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+sLS
+===
+
+The Simple Lookup Service(sLS) is a REST/JSON based lookup service written in Java.
+
+It registers collections of key-value pairs referred as "records". The records will remain in the lookup service for a stipulated amount of time, known as "lease" time. Clients can renew the lease before it expires. If a client does not renew the lease, the record is automatically removed from the loookup service. A client can also explicitly delete a record.
+
+In addition, a lookup service may also subscribe to another lookup service. When a lookup service subscribes to another lookup service, from that point onwards, the former will automatically receive new record registrations or updates to existing records from the latter.
+
+The Simple Lookup Service can be deployed as a single centralized node or in a distributed fashion.
+
+License: FreeBSD License
+
+Contents:
+---------------
+
+.. toctree::
+   :maxdepth: 2
+
+
+Indices and tables
+------------------
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

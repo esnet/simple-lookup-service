@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>sLS &mdash; sLS 0.1 documentation</title>
+    <title>Search &mdash; sLS 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -25,16 +25,24 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/searchtools.js"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="_static/bootstrap-3.1.0/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="sLS 0.1 documentation" href="#" />
+    <link rel="top" title="sLS 0.1 documentation" href="index.html" />
+  <script type="text/javascript">
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
+  
+  <script type="text/javascript" id="searchindexloader"></script>
+  
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+
 
   </head>
   <body>
@@ -48,7 +56,7 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="index.html">
           <!-- LOGO: logo-esnet-ball-sm.png _static/logo-esnet-ball-sm.png --><img src="_static/logo-esnet-ball-sm.png">
           sLS</a>
       </div>
@@ -61,7 +69,7 @@
      id="dLabelGlobalToc"
      data-toggle="dropdown"
      data-target="#"
-     href="#">Section <b class="caret"></b></a>
+     href="index.html">Section <b class="caret"></b></a>
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul class="simple">
@@ -87,13 +95,6 @@
           </ul>
           
             
-<form class="navbar-form navbar-right" action="search.html" method="get">
- <div class="form-group">
-  <input type="text" name="q" class="form-control" placeholder="Search" />
- </div>
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
           
         </div>
     </div>
@@ -104,30 +105,35 @@
       <div class="col-md-1"></div>
     <div class="col-md-9">
       
-  <div class="section" id="sls">
-<h1>sLS<a class="headerlink" href="#sls" title="Permalink to this headline">¶</a></h1>
-<p>The Simple Lookup Service(sLS) is a REST/JSON based lookup service written in Java.</p>
-<p>It registers collections of key-value pairs referred as &#8220;records&#8221;. The records will remain in the lookup service for a stipulated amount of time, known as &#8220;lease&#8221; time. Clients can renew the lease before it expires. If a client does not renew the lease, the record is automatically removed from the loookup service. A client can also explicitly delete a record.</p>
-<p>In addition, a lookup service may also subscribe to another lookup service. When a lookup service subscribes to another lookup service, from that point onwards, the former will automatically receive new record registrations or updates to existing records from the latter.</p>
-<p>The Simple Lookup Service can be deployed as a single centralized node or in a distributed fashion.</p>
-<p>License: FreeBSD License</p>
-<div class="section" id="contents">
-<h2>Contents:<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-<ul class="simple">
-</ul>
-</div>
-</div>
-<div class="section" id="indices-and-tables">
-<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
-<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
-<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
-</ul>
-</div>
-</div>
+  <h1 id="search-documentation">Search</h1>
+  <div id="fallback" class="admonition warning">
+  <script type="text/javascript">$('#fallback').hide();</script>
+  <p>
+    Please activate JavaScript to enable the search
+    functionality.
+  </p>
+  </div>
+  <p>
+    From here you can search these documents. Enter your search
+    words into the box below and click "search". Note that the search
+    function will automatically search for all of the words. Pages
+    containing fewer words won't appear in the result list.
+  </p>
 
+  
+  <form class="form-inline" action="" method="get">
+    <div class="form-group">
+      <input type="text" class="form-control" name="q" value="" />
+    </div>
+    <input type="submit" class="btn btn-default" value="search" />
+    <span id="search-progress" style="padding-left: 10px"></span>
+  </form>  
+  
+  
+  
+  <div id="search-results">
+  
+  </div>
 
     </div>
       
@@ -145,10 +151,6 @@
         
         <br/>
         
-<div id="sourcelink">
-  <a href="_sources/index.txt"
-     rel="nofollow">Source</a>
-</div>
         
         </p>
         <p>
