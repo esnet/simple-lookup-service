@@ -18,6 +18,7 @@ The Simple Lookup Service can be deployed as a single centralized node or in a d
 License: `The BSD 3-Clause License <http://opensource.org/licenses/BSD-3-Clause>`_
 
 For more details: `sLS wiki <http://github.com/esnet/simple-lookup-service/wiki>`_
+==================================================================================
 
 
 .. toctree::
