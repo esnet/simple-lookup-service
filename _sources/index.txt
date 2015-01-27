@@ -3,9 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-***
-sLS
-***
+
+Simple Lookup Service (sLS)
+---------------------------
 
 The Simple Lookup Service(sLS) is a REST/JSON based lookup service written in Java.
 
@@ -15,22 +15,12 @@ In addition, a lookup service may also subscribe to another lookup service. When
 
 The Simple Lookup Service can be deployed as a single centralized node or in a distributed fashion.
 
-License: FreeBSD License
+License: `The BSD 3-Clause License <http://opensource.org/licenses/BSD-3-Clause>`_
 
-Contents:
----------
+For more details: `sLS wiki <http://github.com/esnet/simple-lookup-service/wiki>`_
+
 
 .. toctree::
    :maxdepth: 2
    
-   installation
-   design
-   api
 
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>sLS &mdash; simple-lookup-service 0.1 documentation</title>
+    <title>Simple Lookup Service (sLS) &mdash; simple-lookup-service 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -31,7 +31,6 @@
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="top" title="simple-lookup-service 0.1 documentation" href="#" />
-    <link rel="next" title="Installation" href="installation.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -65,10 +64,7 @@
      href="#">Section <b class="caret"></b></a>
   <ul class="dropdown-menu globaltoc"
       role="menu"
-      aria-labelledby="dLabelGlobalToc"><ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="design.html">Design</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+      aria-labelledby="dLabelGlobalToc"><ul class="simple">
 </ul>
 </ul>
 </li>
@@ -77,14 +73,6 @@
             
               
                 
-  <li>
-    <a href="installation.html" title="Next Chapter: Installation">
-      <span class="hidden-sm">
-        Installation
-      </span>
-      <span class="glyphicon glyphicon-chevron-right"></span>
-    </a>
-  </li>
               
             
             <li class="divider-vertical"></li>
@@ -92,7 +80,7 @@
                 <li><a href="genindex.html">Index</a></li>
                 <li><a href="https://www.es.net">ESnet</a></li>
             
-            <li><a href="https://github.com/esnet/sLS"><img src="_static/esnet/icon-github.png" height="20" width="20"></a></li>
+            <li><a href="https://github.com/esnet/simple-lookup-service"><img src="_static/esnet/icon-github.png" height="20" width="20"></a></li>
             
             
             
@@ -122,29 +110,16 @@
       <div class="col-md-1"></div>
     <div class="col-md-9">
       
-  <div class="section" id="sls">
-<h1>sLS<a class="headerlink" href="#sls" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="simple-lookup-service-sls">
+<h1>Simple Lookup Service (sLS)<a class="headerlink" href="#simple-lookup-service-sls" title="Permalink to this headline">¶</a></h1>
 <p>The Simple Lookup Service(sLS) is a REST/JSON based lookup service written in Java.</p>
 <p>It registers collections of key-value pairs referred as &#8220;records&#8221;. The records will remain in the lookup service for a stipulated amount of time, known as &#8220;lease&#8221; time. Clients can renew the lease before it expires. If a client does not renew the lease, the record is automatically removed from the loookup service. A client can also explicitly delete a record.</p>
 <p>In addition, a lookup service may also subscribe to another lookup service. When a lookup service subscribes to another lookup service, from that point onwards, the former will automatically receive new record registrations or updates to existing records from the latter.</p>
 <p>The Simple Lookup Service can be deployed as a single centralized node or in a distributed fashion.</p>
-<p>License: FreeBSD License</p>
-<div class="section" id="contents">
-<h2>Contents:<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<p>License: <a class="reference external" href="http://opensource.org/licenses/BSD-3-Clause">The BSD 3-Clause License</a></p>
+<p>For more details: <a class="reference external" href="http://github.com/esnet/simple-lookup-service/wiki">sLS wiki</a></p>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="design.html">Design</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
-</ul>
-</div>
-</div>
-<div class="section" id="indices-and-tables">
-<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
-<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
-<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
 </ul>
 </div>
 </div>
