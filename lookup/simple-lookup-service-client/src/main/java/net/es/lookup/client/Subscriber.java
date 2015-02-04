@@ -94,10 +94,10 @@ public class Subscriber {
     * */
     public void initiateSubscription() throws LSClientException {
 
-       SubscribeRecord record = heartbeat();
-                String queUrl = record.getLocator().get(0);
-                this.queueUrl = queUrl;
-                this.queue = record.getQueues().get(0);
+        SubscribeRecord record = heartbeat();
+        String queUrl = record.getLocator().get(0);
+        this.queueUrl = queUrl;
+        this.queue = record.getQueues().get(0);
 
         LOG.info("net.es.lookup.client.Subscriber: Initialized Subscriber");
 
@@ -340,6 +340,7 @@ public class Subscriber {
         LOG.info("net.es.lookup.client.Subscriber: Stopping connection");
         if (conn != null) {
             try {
+
                 conn.close();
                 recordWaitThread = null;
                 //listeners = null;

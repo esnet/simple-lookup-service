@@ -49,6 +49,7 @@ public class Cache implements SubscriberListener {
     private String type;
     private List<Publisher> publishers;
 
+    private List<Subscriber> actualSubscribers;
     private List<Subscriber> connectedSubscribers;
     private List<SubscriberListener> subscriberListeners;
 
@@ -64,6 +65,7 @@ public class Cache implements SubscriberListener {
         this.type = type;
         this.publishers = publishers;
 
+        actualSubscribers = new LinkedList<Subscriber>();
         connectedSubscribers = new LinkedList<Subscriber>();
         subscriberListeners = new LinkedList<SubscriberListener>();
         lastCacheRestartTime = new Instant();
@@ -107,7 +109,7 @@ public class Cache implements SubscriberListener {
 
     public List<Subscriber> getSubscribers() {
 
-        return connectedSubscribers;
+        return actualSubscribers;
     }
 
 
@@ -133,11 +135,28 @@ public class Cache implements SubscriberListener {
                     for (Map<String, Object> queryMap : queryList) {
                         Query query = new Query(queryMap);
                         Subscriber subscriber = new Subscriber(server, query, subscribeRelativeUrl);
-                        subscriber.addListener(this);
 
-                        connectedSubscribers.add(subscriber);
+                        boolean duplicateQueue = false;
+                        for (Subscriber s: connectedSubscribers){
+                            //if queue and the queue message exchange are same, it implies same socket. Causes issue as 2 connections for same socket are being opened
+                            if(s.getQueueUrl().equals(subscriber.getQueueUrl()) && s.getQueue().equals(subscriber.getQueue())){
+                                duplicateQueue=true;
+                            }
+                        }
+
+                        if(!duplicateQueue){
+                            subscriber.addListener(this);
+                            connectedSubscribers.add(subscriber);
+                        }
+
+                        //we want heartbeat to run irrespective
+                        actualSubscribers.add(subscriber);
+
                     }
                 }
+
+                LOG.info("net.es.lookup.pubsub.client.Cache: Number of actual subscribers(includes duplicates): "+ actualSubscribers.size());
+                LOG.info("net.es.lookup.pubsub.client.Cache: Number of connected subscribers"+connectedSubscribers.size());
 
             } catch (QueryException e) {
                 LOG.error("net.es.lookup.pubsub.client.Cache: Error creating query from the given key-value pair");
@@ -160,7 +179,7 @@ public class Cache implements SubscriberListener {
             LOG.error("net.es.lookup.pubsub.client.Cache.start: Error emptying cache - " + e.getMessage());
         }
         int index = 0;
-        for (Subscriber subscriber : connectedSubscribers) {
+        for (Subscriber subscriber : actualSubscribers) {
 
             Query query = subscriber.getQuery();
             SimpleLS server = subscriber.getServer();
@@ -173,10 +192,16 @@ public class Cache implements SubscriberListener {
                 LOG.error("net.es.lookup.pubsub.client.Cache.start: Error creating initial query - " + e.getMessage());
             }
 
-            subscriber.startSubscription();
-            lastCacheRestartTime = new Instant();
+
+
 
         }
+
+        for(Subscriber subscriber: connectedSubscribers){
+            subscriber.startSubscription();
+        }
+
+        lastCacheRestartTime = new Instant();
 
         LOG.info("net.es.lookup.pubsub.client.Cache.start: Created and initialized " + connectedSubscribers.size() + " subscriber connections");
 
@@ -197,6 +222,7 @@ public class Cache implements SubscriberListener {
         }
 
         connectedSubscribers.clear();
+        actualSubscribers.clear();
 
         LOG.info("net.es.lookup.pubsub.client.Cache.stop: Stopped " + connectedSubscribers.size() + " subscriber connections");
 
