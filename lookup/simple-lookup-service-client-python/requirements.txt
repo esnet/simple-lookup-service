@@ -1,0 +1,6 @@
+IPy==0.81
+YURL==0.13
+isodate==0.5.1
+futures==2.2.0
+requests==2.5.1
+voluptuous==0.8.7
