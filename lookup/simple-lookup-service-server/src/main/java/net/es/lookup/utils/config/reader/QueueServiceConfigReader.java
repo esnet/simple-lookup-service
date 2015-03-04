@@ -2,7 +2,9 @@ package net.es.lookup.utils.config.reader;
 
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,7 +20,7 @@ public class QueueServiceConfigReader {
     private static String configFile = DEFAULT_PATH + "/" + DEFAULT_FILE;
 
     private int port = 61617;
-    private String host = "localhost";
+    private List<String> host;
     private String protocol = "tcp";
 
     private boolean serviceOn = false;
@@ -37,6 +39,8 @@ public class QueueServiceConfigReader {
      * Constructor - private because this is a Singleton
      */
     private QueueServiceConfigReader() {
+
+        host = new ArrayList<String>();
 
     }
 
@@ -61,7 +65,7 @@ public class QueueServiceConfigReader {
         return QueueServiceConfigReader.instance;
     }
 
-    public String getHost() {
+    public List<String> getHost() {
 
         return this.host;
     }
@@ -89,7 +93,14 @@ public class QueueServiceConfigReader {
 
     public String getUrl(){
 
-        String url = protocol + "://" + host + ":" + port+"?wireFormat.maxInactivityDuration=600000";
+        String url=""; //= protocol + "://" + host + ":" + port+"?wireFormat.maxInactivityDuration=600000";
+        url = "failover:(";
+        for(String h:host){
+            url += protocol + "://"+ host + ":" + port+"?wireFormat.maxInactivityDuration=600000,";
+
+        }
+        url += "?randomize=false";
+
         return url;
     }
 
@@ -114,7 +125,7 @@ public class QueueServiceConfigReader {
         try {
 
             HashMap<String, Object> queueServiceMap = (HashMap) yamlMap.get("queue");
-            host = (String) queueServiceMap.get("host");
+            host = (List<String>) queueServiceMap.get("host");
             port = (Integer) queueServiceMap.get("port");
             String service = (String) queueServiceMap.get("queueservice");
             if(service.equals("on")){
