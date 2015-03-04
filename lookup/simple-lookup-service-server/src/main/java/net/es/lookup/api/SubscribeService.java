@@ -39,6 +39,7 @@ public class SubscribeService {
             JSONSubResponse res = new JSONSubResponse();
             List<String> locator = new ArrayList<String>();
             locator.add(queueServiceConfigReader.getUrl());
+            LOG.info("net.es.lookup.api.SubscribeService.subscribe: locator"+locator);
             res.add(ReservedKeys.RECORD_SUBSCRIBE_LOCATOR, locator);
 
             AMQueueManager amqmanager = (AMQueueManager) QueueServiceMapping.getQueueManager(serviceName);
