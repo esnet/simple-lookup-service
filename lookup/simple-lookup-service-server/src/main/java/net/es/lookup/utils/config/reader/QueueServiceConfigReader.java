@@ -96,11 +96,12 @@ public class QueueServiceConfigReader {
         String url=""; //= protocol + "://" + host + ":" + port+"?wireFormat.maxInactivityDuration=600000";
         url = "failover:(";
         for(String h:host){
-            url += protocol + "://"+ host + ":" + port+"?wireFormat.maxInactivityDuration=600000,";
+            url += protocol + "://"+ h + ":" + port+"?wireFormat.maxInactivityDuration=600000,";
 
         }
-        url += "?randomize=false";
 
+        url += "?randomize=false";
+        System.out.println(url);
         return url;
     }
 
