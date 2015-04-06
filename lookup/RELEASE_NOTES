@@ -1,0 +1,12 @@
+Release: 2.0-2
+
+The simple-lookup-service is a "lease-based" key-value database with a REST/JSON API. Entries are called "records"
+Records registered in the database have a lease time and need to renew the lease before the specified time elapses.
+Records that do not renew get deleted automatically.
+
+## MAJOR FEATURE - This release has a major design enhancement. The sLS now supports caches using a pub-sub model.
+Please refer to the http://github.com/esnet/simple-lookup-service for design documentation.
+
+## Bug fix
+The previous release was choosing ipv4 connections and was not listening to ipv6. This release fixes that.
+

@@ -33,7 +33,7 @@ def query(query="", hosts=_ls_hosts):
     except:
         pass
     records = []
-    urls = [(host["locator"] + "?" + query) for host in _ls_hosts]
+    urls = [(host["locator"] + "?" + query) for host in hosts]
     if _concurrency_enabled:
         with concurrent.futures.ThreadPoolExecutor(max_workers=_MAX_CONCURRENT_REQUESTS) as pool:
             for response in pool.map(get_url, urls):
