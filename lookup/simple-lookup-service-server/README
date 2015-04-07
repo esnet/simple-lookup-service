@@ -23,7 +23,7 @@ If you are installing from source, then you will need
 	1. maven
 	
 MongoDB installation:
-Download Mongo DB and install it. It�s official site: http://www.mongodb.org/downloads
+Download Mongo DB and install it. It's official site: http://www.mongodb.org/downloads
 
 If you are using CentOS, RedHat or Fedora, use yum to install MongoDB.
 The instructions can be found here: http://docs.mongodb.org/manual/tutorial/install-mongodb-on-redhat-centos-or-fedora-linux/
