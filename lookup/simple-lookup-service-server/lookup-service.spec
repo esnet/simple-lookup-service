@@ -6,10 +6,10 @@
 %define log_dir /var/log/%{package_name}
 %define run_dir /var/run/%{package_name}
 %define data_dir /var/lib/%{package_name}
-%define relnum 11 
+%define relnum 4
 
 Name:           %{package_name}
-Version:        1.1
+Version:        2.0
 Release:        %{relnum}
 Summary:        Lookup Service
 License:        distributable, see LICENSE
@@ -23,6 +23,7 @@ BuildArch:      noarch
 Requires:       java-openjdk >= 1.6.0
 Requires:       chkconfig
 Requires:	mongo-10gen-server
+
 %description
 Lookup Service is used to find registered services. 
 This package provides a server that allows clients to register and query services 

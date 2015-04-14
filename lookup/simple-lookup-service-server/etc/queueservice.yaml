@@ -1,7 +1,8 @@
 #Queue
 queue:
-    queueservice: 'on'
-    host: 'antg-test-vm.es.net'
+    queueservice: 'off'
+    host: 
+        - 'localhost'
     port: 61616
     protocol: 'tcp'
     batch_size: 500

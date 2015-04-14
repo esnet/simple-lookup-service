@@ -5,7 +5,7 @@ lookupservice:
     port: 8090
     lease:
         max: 2592000
-        default: 900 
+        default: 7200
         min: 240
     coreservice: 'on'
     cacheservice: 'off'
