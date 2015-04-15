@@ -9,7 +9,7 @@ from optparse import OptionParser
 
 def get_ma_for_host(hostname):
     if(not hostname):
-        raise Exception("Empty hostname", "Please specify parameter")
+        raise Exception("Null Parameter", "Hostname parameter is empty.")
 
     response=[]
     queryKeys = ['psmetadata-dst-address','psmetadata-src-address']
