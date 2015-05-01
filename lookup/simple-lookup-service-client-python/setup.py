@@ -5,19 +5,17 @@ from setuptools import find_packages
 
 setup(
     name="sls-client",
-    version="1.0",
+    version="1.0.4",
     description="A python client for the Simple Lookup Service",
     long_description=open("README.rst").read(),
-    author="Andrew Sides",
-    author_email="asides@es.net",
+    author=["Andrew Sides","Sowmya Balasubramanian"],
+    author_email=["asides@es.net","sowmya@es.net"],
     url="https://github.com/esnet/python-sls-client",
-    license=open("LICENSE").read(),
+    license="3-clause BSD License",
+    package_data={
+        "sls-client":["sls-client/LICENSE"]
+    },
     packages=find_packages(),
-    include_package_data=True,
-    data_files=[
-        ("sls-client", ["LICENSE"]),
-        ("sls-client", ["README.rst"])
-    ],
     install_requires=[
         "IPy",
         "YURL",

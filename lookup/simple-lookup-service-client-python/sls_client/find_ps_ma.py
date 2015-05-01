@@ -4,21 +4,32 @@ from sls_client.records import *
 from sls_client.query import *
 import sys
 import json
+import socket
 
 from optparse import OptionParser
 
-
 def get_ma_for_host(hostname):
+
+    ipaddresses={}
     if(not hostname):
         raise Exception("Null Parameter", "Hostname parameter is empty.")
+    ipaddr = socket.getaddrinfo(hostname, None)
+
+    #ipaddr is a 5-tuple and the ipv4 or ipv6 is the last element in the tuple.
+    for ip in ipaddr:
+        if(ip[4][0]):
+            ipaddresses[ip[4][0]]=1
 
     response=[]
+    result={}
     queryKeys = ['psmetadata-dst-address','psmetadata-src-address']
     for queryKey in queryKeys:
-        queryString = queryKey+"="+hostname
+        queryString=""
+        for ip in ipaddresses:
+            queryString += queryKey+"="+ip+"&"
         response += query(queryString)
 
-    result={}
+
     for record in response:
         malocators = record[u'psmetadata-ma-locator']
         for malocator in malocators:
@@ -27,10 +38,11 @@ def get_ma_for_host(hostname):
 
     return result.keys()
 
-def get_json(query,hostlist):
+def get_ma_for_host_json(hostname):
+    hostlist = get_ma_for_host(hostname)
     result={}
     result["ma-hosts"] = []
-    result["search-query"] = query
+    result["search-query"] = hostname
     if(hostlist):
         result["ma-hosts"] = hostlist
 
@@ -48,7 +60,7 @@ def main():
     parser.add_option("-o", "--output",
                       dest="output_type",
                       help="output type - json or console",
-                      choices=["console","json"],
+                      choices=["console","json","list"],
                       default="console"
                       )
     (options, args) = parser.parse_args()
@@ -57,12 +69,14 @@ def main():
         print "Please specify hostname"
         sys.exit(1)
 
-    result = get_ma_for_host(options.hostname)
-    if(options.output_type == "json"):
-        output=get_json(options.hostname,result)
-        print output
+    if(options.output_type=="json"):
+        print get_ma_for_host_json(options.hostname)
+    elif(options.output_type=="console"):
+        result=get_ma_for_host(options.hostname)
+        for ma in result:
+            print ma
     else:
-        for host in result:
-            print host
+        print get_ma_for_host(options.hostname)
+
 if __name__=='__main__':
     main()
