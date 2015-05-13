@@ -25,11 +25,12 @@ def get_host_info(hostname):
         uris=__get_interface_uris_for_host(response)
 
         interfaces = __get_interfaces(uris)
-
         #get interfaces
-        for interface in interfaces:
-            for result in response:
-                result[HOST_INTERFACE]=interface
+        for result in response:
+            result[HOST_INTERFACE]=[]
+            for interface in interfaces:
+                result[HOST_INTERFACE].append(interface)
+
         hosts=response
 
     else:
@@ -99,7 +100,6 @@ def __get_interfaces(list_of_uris):
     for uri in list_of_uris:
         interfaceQuery= RECORD_URI+'='+uri
         interfaceResponse += query(interfaceQuery)
-
     return interfaceResponse
 
 def get_host_info_json(hostname):

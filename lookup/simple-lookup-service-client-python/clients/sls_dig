@@ -18,8 +18,8 @@ HOST_HW_MEMORY = 'host-hardware-memory'
 
 HOST_NET_TCP_AUTOTUNEMAXBUFFER_RECV='host-net-tcp-autotunemaxbuffer-recv'
 HOST_NET_TCP_AUTOTUNEMAXBUFFER_SEND='host-net-tcp-autotunemaxbuffer-send'
-HOST_NET_TCP_MAXBUFFER_RECV='host-net-tcp-autotunemaxbuffer-recv'
-HOST_NET_TCP_MAXBUFFER_SEND='host-net-tcp-autotunemaxbuffer-send'
+HOST_NET_TCP_MAXBUFFER_RECV='host-net-tcp-maxbuffer-recv'
+HOST_NET_TCP_MAXBUFFER_SEND='host-net-tcp-maxbuffer-send'
 HOST_NET_TCP_CONGESTIONALGORITHM='host-net-tcp-congestionalgorithm'
 
 HOST_OS_VERSION = 'host-os-version'
@@ -34,6 +34,8 @@ LOCATION_CITY='location-city'
 LOCATION_STATE='location-state'
 LOCATION_COUNTRY='location-country'
 LOCATION_SITE='location-sitename'
+LOCATION_LATITUDE='location-latitude'
+LOCATION_LONGITUDE='location-longitude'
 
 PERSON_NAME='person-name'
 PERSON_EMAILS='person-emails'
@@ -51,147 +53,196 @@ def main():
 
     parser = OptionParser()
 
-    parser.add_option("-n", "--hostname",
-                      dest="hostname",
-                      help="specify hostname or IP")
     parser.add_option("-o", "--output",
                       dest="output_type",
                       help="output type - json or console",
                       choices=["console","json","list"],
                       default="console"
+
     )
     (options, args) = parser.parse_args()
-    if (not options.hostname):
+    if (len(args)!= 1):
         print "Please specify hostname"
         sys.exit(1)
 
-
+    hostname=args[0]
     if(options.output_type=="json"):
-        print sls_client.find_host_info.get_host_info_json(options.hostname)
+        print sls_client.find_host_info.get_host_info_json(hostname)
     elif(options.output_type=="console"):
-        result = sls_client.find_host_info.get_host_info(options.hostname)
+        result = sls_client.find_host_info.get_host_info(hostname)
         for host in result:
-            interface=host[HOST_INTERFACE]
-            print "\n***** HOST INTERFACE ADDRESS *****",
-            if (interface):
-                print "\n"+ INTERFACE_NAME+":",
-                for ifname in interface[INTERFACE_NAME]:
-                    print ifname,
-
-                print "\n"+ INTERFACE_ADDRESS+":",
-                for ip in interface[INTERFACE_ADDRESS]:
-                    print ip,
-
-                print "\n"+ INTERFACE_MAC+":",
-                for mtu in interface[INTERFACE_MAC]:
-                    print mtu,
-
-                print "\n"+ INTERFACE_CAPACITY+":",
-                for cap in interface[INTERFACE_CAPACITY]:
-                    print cap,
-
-                print "\n"+ INTERFACE_MTU+":",
-                for mtu in interface[INTERFACE_MTU]:
-                    print mtu
-
-
-            print "\n"
+            interfaces=host[HOST_INTERFACE]
+            core=1
+            count=1
             print "\n***** HOST HARDWARE *****",
-            print "\n"+HOST_HW_PROCESSORCORE+":",
-            for core in host[HOST_HW_PROCESSORCORE]:
-                print core,
-
-            print "\n"+HOST_HW_PROCESSORSPEED+":",
-            for speed in host[HOST_HW_PROCESSORSPEED]:
-                print speed,
-
-            print "\n"+HOST_HW_PROCESSORCOUNT+":",
-            for count in host[HOST_HW_PROCESSORCOUNT]:
-                print count,
-
-            print "\n"+HOST_HW_MEMORY+":",
+            print "\nMemory:",
             for memory in host[HOST_HW_MEMORY]:
-                print memory
+                print memory,
+            if(host[HOST_HW_PROCESSORCORE]):
+                core = int(host[HOST_HW_PROCESSORCORE][0])
+            if(host[HOST_HW_PROCESSORCOUNT]):
+                count = int(host[HOST_HW_PROCESSORCOUNT][0])
 
+            print "\nNumber of processors: ",
+            print str(count),
 
-            print "\n***** HOST OS *****",
-            print "\n"+HOST_OS_NAME+":",
+            for i in range(0,count):
+                print "\nProcessor #"+str(i)+": ",
+                cpp=core
+                if (count>1):
+                    cpp = int(core/count)
+                print str(cpp)+" cores",
+                print "\nProcessor #"+str(i)+" Speed: ",
+                for speed in host[HOST_HW_PROCESSORSPEED]:
+                    print speed,
+
+            print "\n\n***** HOST OS *****",
+            print "\nOS: ",
             for osname in host[HOST_OS_NAME]:
                 print osname,
 
-            print "\n"+HOST_OS_VERSION+":",
+            print "\nOS Version: ",
             for osversion in host[HOST_OS_VERSION]:
                 print osversion,
 
-            print "\n"+HOST_OS_KERNEL+":",
+            print "\nOS Kernel: ",
             for oskernel in host[HOST_OS_KERNEL]:
                 print oskernel
 
+            print "\n***** HOST NETWORKING *****\n",
+            if (interfaces):
+                i=0
+                for interface in interfaces:
+                    print "\n*** INTERFACE "+str(i)+" ***" ,
+                    i+=1
+                    print "\n"+ INTERFACE_NAME+":",
+                    for ifname in interface[INTERFACE_NAME]:
+                        print ifname,
 
-            print "\n***** HOST NETWORKING *****",
-            print "\n"+HOST_NET_TCP_CONGESTIONALGORITHM+":",
+                    print "\n"+ INTERFACE_ADDRESS+":",
+                    for ip in interface[INTERFACE_ADDRESS]:
+                        print ip,
+
+                    print "\n"+ INTERFACE_MAC+":",
+                    for mac in interface[INTERFACE_MAC]:
+                        print mac,
+
+                    print "\n"+ INTERFACE_CAPACITY+":",
+                    for cap in interface[INTERFACE_CAPACITY]:
+                        int_cap = int(cap)
+                        c = _format_metrics(int_cap)
+                        print c+"bps",
+
+                    print "\n"+ INTERFACE_MTU+":",
+                    for mtu in interface[INTERFACE_MTU]:
+                        print mtu
+
+
+
+
+            print "\n***** HOST TCP PARAMETERS *****",
+            print "\nCongestion Algorithm: ",
             for alg in host[HOST_NET_TCP_CONGESTIONALGORITHM]:
                 print alg,
-
-            print "\n"+HOST_NET_TCP_AUTOTUNEMAXBUFFER_RECV+":",
+            print "\nRECV Autotunemaxbuffer",
             for buf in host[HOST_NET_TCP_AUTOTUNEMAXBUFFER_RECV]:
                 print buf,
-
-            print "\n"+HOST_NET_TCP_AUTOTUNEMAXBUFFER_SEND+":",
-            for buf in host[HOST_NET_TCP_AUTOTUNEMAXBUFFER_SEND]:
-                print buf,
-
-            print "\n"+HOST_NET_TCP_MAXBUFFER_RECV+":",
+                print "\nRECV Maxbuffer: ",
             for buf in host[HOST_NET_TCP_MAXBUFFER_RECV]:
                 print buf,
-
-            print "\n"+HOST_NET_TCP_MAXBUFFER_SEND+":",
+            print "\nSEND Autotunemaxbuffer: ",
+            for buf in host[HOST_NET_TCP_AUTOTUNEMAXBUFFER_SEND]:
+                print buf,
+            print "\nSEND Maxbuffer: ",
             for buf in host[HOST_NET_TCP_MAXBUFFER_SEND]:
                 print buf
 
 
             print "\n***** HOST LOCATION *****",
-            print "\n"+LOCATION_SITE+":",
-            for site in host[LOCATION_SITE]:
-                print site,
 
-            print "\n"+LOCATION_CITY+":",
-            for city in host[LOCATION_CITY]:
-                print city,
+            if( LOCATION_SITE in host and host[LOCATION_SITE]):
+                print "\nSite Name: ",
+                for site in host[LOCATION_SITE]:
+                    print site,
 
-            print "\n"+LOCATION_STATE+":",
-            for state in host[LOCATION_STATE]:
-                print state,
+            if(LOCATION_CITY in host and host[LOCATION_CITY]):
+                print "\nCity: ",
+                for city in host[LOCATION_CITY]:
+                    print city,
 
-            print "\n"+LOCATION_COUNTRY+":",
-            for country in host[LOCATION_COUNTRY]:
-                print country
+            if(LOCATION_STATE in host and host[LOCATION_STATE]):
+                print "\nState: ",
+                for state in host[LOCATION_STATE]:
+                    print state,
+
+            if(LOCATION_COUNTRY in host and host[LOCATION_COUNTRY]):
+                print "\nCountry: ",
+                for country in host[LOCATION_COUNTRY]:
+                    print country,
+
+            if(LOCATION_LATITUDE in host and host[LOCATION_LATITUDE]):
+                print "\nLatitude: ",
+                for lat in host[LOCATION_LATITUDE]:
+                    latitude = float(lat)
+                    print ('%.2f' %latitude),
+
+            if(LOCATION_LONGITUDE in host and host[LOCATION_LONGITUDE]):
+                print "\nLongitude: ",
+                for lo in host[LOCATION_LONGITUDE]:
+                    longitude = float(lo)
+                    print ('%.2f' %longitude)
 
             print "\n***** HOST ADMIN *****",
             admins=host[HOST_ADMINISTRATORS]
             for admin in admins:
-                print "\n"+PERSON_NAME+":",
+                print "\nAdmin Name: ",
                 for name in admin[PERSON_NAME]:
                     print name,
 
-                print "\n"+PERSON_EMAILS+":",
+                print "\nAdmin Email: ",
                 for email in admin[PERSON_EMAILS]:
                     print email,
 
-                print "\n"+LOCATION_CITY+":",
+                print "\nCity :",
                 for city in admin[LOCATION_CITY]:
                     print city,
 
-                print "\n"+LOCATION_STATE+":",
+                print "\n State: ",
                 for state in admin[LOCATION_STATE]:
                     print state,
 
-                print "\n"+LOCATION_COUNTRY+":",
+                print "\nCountry: ",
                 for country in admin[LOCATION_COUNTRY]:
                     print country
 
+
+
     else:
-        print sls_client.find_host_info.get_host_info(options.hostname)
+        print sls_client.find_host_info.get_host_info(hostname)
+
+
+def _format_metrics(capacity):
+    lower_limit=1
+    upper_limit=1000
+    if(capacity):
+        if (capacity/1000000000 >= lower_limit and capacity/1000000000 < upper_limit):
+            cap = capacity/1000000000
+            return str(cap)+" G"
+        elif (capacity/1000000 >= lower_limit and capacity/1000000 < upper_limit):
+            cap = capacity/1000000
+            return str(cap)+" M"
+        elif (capacity/1000 >=lower_limit and capacity/1000 <upper_limit):
+            cap = capacity/1000
+            return str(cap)+" K"
+        else:
+            return str(capacity)
+
+
+def __parse_float_from_string(string):
+    if(string):
+        result=[float(x) for x in string.split() if x.isdigit()]
+
+
 
 if __name__=='__main__':
     main()
