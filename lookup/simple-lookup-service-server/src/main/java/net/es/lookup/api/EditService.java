@@ -98,7 +98,9 @@ public class EditService {
                         LinkedList resList = new LinkedList();
                         resList.add(res);
                         try {
-                            queueDataGenerator.fillQueues(resList);
+                            if(queueDataGenerator != null){
+                                queueDataGenerator.fillQueues(resList);
+                            }
                         } catch (PubSubQueueException e) {
                             LOG.error("Error pushing register message to queue:" + e.getMessage());
                         } catch (PubSubQueryException e) {
@@ -212,6 +214,7 @@ public class EditService {
                     LOG.info("DeleteService status: FAILED; exiting");
                     throw new NotFoundException("ServiceRecord not found in DB\n");
 
+
                 } else {
                     //update state
                     serviceRecord.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_DELETE);
@@ -221,7 +224,9 @@ public class EditService {
                     LinkedList resList = new LinkedList();
                     resList.add(serviceRecord);
                     try {
-                        queueDataGenerator.fillQueues(resList);
+                        if (queueDataGenerator != null){
+                            queueDataGenerator.fillQueues(resList);
+                        }
                     } catch (PubSubQueueException e) {
                         LOG.error("Error pushing register message to queue:" + e.getMessage());
                     } catch (PubSubQueryException e) {

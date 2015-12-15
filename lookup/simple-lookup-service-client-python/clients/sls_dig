@@ -137,9 +137,6 @@ def main():
                     for mtu in interface[INTERFACE_MTU]:
                         print mtu
 
-
-
-
             print "\n***** HOST TCP PARAMETERS *****",
             print "\nCongestion Algorithm: ",
             for alg in host[HOST_NET_TCP_CONGESTIONALGORITHM]:

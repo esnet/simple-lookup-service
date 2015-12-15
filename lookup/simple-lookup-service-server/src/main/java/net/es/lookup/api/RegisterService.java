@@ -111,7 +111,9 @@ public class RegisterService {
                         LinkedList resList = new LinkedList();
                         resList.add(res);
                         try {
-                            queueDataGenerator.fillQueues(resList);
+                            if(queueDataGenerator != null){
+                                queueDataGenerator.fillQueues(resList);
+                            }
                         } catch (PubSubQueueException e) {
                             LOG.error("Error pushing register message to queue:" + e.getMessage());
                         } catch (PubSubQueryException e) {
