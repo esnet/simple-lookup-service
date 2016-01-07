@@ -16,7 +16,7 @@ setup(
         "sls-client":["sls-client/LICENSE"]
     },
     packages=['sls_client'],
-    scripts=['clients/sls_dig','clients/find_ps_ma'],
+    scripts=['clients/sls_dig','clients/find_ps_ma', 'clients/text_search'],
     install_requires=[
         "IPy",
         "YURL",
