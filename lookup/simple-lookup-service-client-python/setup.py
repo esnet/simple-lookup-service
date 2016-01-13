@@ -5,7 +5,7 @@ from setuptools import find_packages
 
 setup(
     name="sls-client",
-    version="1.0.10",
+    version="1.0.12",
     description="A python client for the Simple Lookup Service",
     long_description=open("README.rst").read(),
     author=["Andrew Sides","Sowmya Balasubramanian"],
@@ -16,7 +16,7 @@ setup(
         "sls-client":["sls-client/LICENSE"]
     },
     packages=['sls_client'],
-    scripts=['clients/sls_dig','clients/find_ps_ma'],
+    scripts=['clients/sls_dig','clients/find_ps_ma', 'clients/text_search'],
     install_requires=[
         "IPy",
         "YURL",

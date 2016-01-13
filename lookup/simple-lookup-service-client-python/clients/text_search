@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+
+"""
+find_ps_ma - finds the MA that has test data for specified host
+"""
+__author__ = 'sowmya'
+import  sls_client.records
+import sls_client.query
+import sls_client.text_search
+import sys
+from optparse import OptionParser
+
+
+
+
+def main():
+
+    parser = OptionParser()
+
+    parser.add_option("-t", "--type",
+                      dest="record_type",
+                      help="specify type of record")
+    parser.add_option("-s", "--searchtext",
+                      dest="search_text",
+                      help="specify text to search")
+    parser.add_option("-o", "--output",
+                      dest="output_type",
+                      help="output type - json or console",
+                      choices=["console","json"],
+                      default="console"
+    )
+    (options, args) = parser.parse_args()
+
+    if (not options.record_type):
+        print "Please specify type of record"
+        sys.exit(1)
+
+    if(not options.search_text):
+        print "Please specify search text"
+        sys.exit(1)
+
+    if(options.output_type=="json"):
+        print sls_client.text_search.search_tojson(options.record_type,options.search_text)
+    elif(options.output_type=="console"):
+        result=sls_client.text_search.search(options.record_type,options.search_text)
+        for record in result:
+            name=options.record_type+'-name'
+            if name in record:
+                print record[name]
+
+        print 'Total number of hosts: '+ str(len(result))
+            
+
+if __name__=='__main__':
+    main()
