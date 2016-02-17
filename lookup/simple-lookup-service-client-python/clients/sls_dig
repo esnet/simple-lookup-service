@@ -40,13 +40,11 @@ LOCATION_LONGITUDE='location-longitude'
 PERSON_NAME='person-name'
 PERSON_EMAILS='person-emails'
 
-
 INTERFACE_ADDRESS = 'interface-addresses'
 INTERFACE_NAME='interface-name'
 INTERFACE_CAPACITY='interface-capacity'
 INTERFACE_MTU='interface-mtu'
 INTERFACE_MAC='interface-mac'
-
 
 #TODO: Add location information, admin
 def main():

@@ -19,7 +19,7 @@ public class
 
     private static long DEFAULT_LEASE = 2 * 60 * 60;
     private static long MAX_LEASE = DEFAULT_LEASE;
-    private static long MIN_LEASE = DEFAULT_LEASE;
+    private static long MIN_LEASE = 240;
     private static LeaseManager instance = null;
     private DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
     private LookupServiceConfigReader lcfg;
@@ -55,9 +55,7 @@ public class
         // Retrieve requested TTL
         String requestedTTL = "";
 
-        if(requestedTTL != null && !requestedTTL.isEmpty()){
-            requestedTTL = message.getTTL();
-        }
+        requestedTTL = message.getTTL();
 
         long ttl = 0;
 
@@ -86,6 +84,7 @@ public class
 
         }
 
+
         if (requestedTTL != null && requestedTTL != "") {
 
             PeriodFormatter fmt = ISOPeriodFormat.standard();
@@ -101,6 +100,9 @@ public class
                 return false;
 
             }
+
+
+
 
             if (ttl == 0 || ttl > LeaseManager.MAX_LEASE || ttl < LeaseManager.MIN_LEASE) {
 

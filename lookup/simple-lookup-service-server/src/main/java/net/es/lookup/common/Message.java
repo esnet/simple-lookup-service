@@ -1,7 +1,5 @@
 package net.es.lookup.common;
 
-import sun.util.LocaleServiceProviderPool;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,11 +79,15 @@ public class Message {
     public String getTTL() {
 
         Object val = this.getMap().get(ReservedKeys.RECORD_TTL);
-
-        if(val instanceof String){
-            return (String)val;
-        }else if(val instanceof List){
-            return (String)((List) val).get(0);
+        if(val != null) {
+            if (val instanceof String) {
+                return (String) val;
+            } else if (val instanceof List) {
+                if(((List) val).isEmpty()){
+                    return "";
+                }
+                return (String) ((List) val).get(0);
+            }
         }
 
         return null;
@@ -128,7 +130,7 @@ public class Message {
 
     public String getOperator() {
 
-        Object val = this.getMap().get(ReservedKeys.RECORD_TYPE);
+        Object val = this.getMap().get(ReservedKeys.RECORD_OPERATOR);
 
         if(val instanceof String){
             return (String)val;
@@ -205,6 +207,5 @@ public class Message {
         return returnVal;
 
     }
-
 
 }

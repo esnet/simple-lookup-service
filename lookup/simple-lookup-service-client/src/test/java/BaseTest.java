@@ -13,6 +13,8 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.util.*;
 
+import static org.junit.Assert.fail;
+
 /**
  * Created with IntelliJ IDEA.
  * User: student5
@@ -143,7 +145,7 @@ public class BaseTest {
                 }catch (InterruptedException e) {
 
                     System.out.println("Interrupted while waiting for socket connection");
-                    Assert.fail("Interrupted while waiting for socket connection");
+                    fail("Interrupted while waiting for socket connection");
                 } finally {
 
                     try {
@@ -177,7 +179,7 @@ public class BaseTest {
                 } catch (LSClientException e) {
 
                     System.out.println(e.getMessage());
-                    Assert.fail(e.getMessage());
+                    fail(e.getMessage());
                 }
             }
         }

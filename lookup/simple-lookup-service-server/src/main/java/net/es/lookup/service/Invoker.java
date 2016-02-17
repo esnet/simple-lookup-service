@@ -35,7 +35,6 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 
-
 public class Invoker {
 
     private static int port = 8080;
@@ -53,10 +52,11 @@ public class Invoker {
     private static String logConfig = "./etc/log4j.properties";
     private static String queueDataDir = "../elements";
 
-    private static String dataDir="data/";
+    private static String dataDir = "data/";
 
 
     private static boolean cacheServiceRequest = false;
+
 
     public static String getDataDir() {
 
@@ -89,7 +89,7 @@ public class Invoker {
 
         port = lcfg.getPort();
         host = lcfg.getHost();
-        cacheServiceRequest = lcfg.isCacheserviceOn();
+        //cacheServiceRequest = lcfg.isCacheserviceOn();
 
         int dbpruneInterval = lcfg.getPruneInterval();
         long prunethreshold = lcfg.getPruneThreshold();
@@ -107,15 +107,15 @@ public class Invoker {
             if (lcfg.isCoreserviceOn()) {
                 new ServiceDAOMongoDb(dburl, dbport, LookupService.LOOKUP_SERVICE, collname);
 
-                if (qcfg.isServiceOn()) {
+/*                if (qcfg.isServiceOn()) {
                     new AMQueueManager(LookupService.LOOKUP_SERVICE);
                     new AMQueueDataGenerator(LookupService.LOOKUP_SERVICE);
-                }
+                }*/
 
                 services.add(LookupService.LOOKUP_SERVICE);
             }
 
-
+/*
             if (cacheServiceRequest) {
                 SubscriberConfigReader.init(configPath + subscribecfg);
                 sfg = SubscriberConfigReader.getInstance();
@@ -155,7 +155,7 @@ public class Invoker {
                 Invoker.cacheService = CacheService.initialize(cacheList);
 
                 System.out.println("Cache service initialized: " + Invoker.cacheService.isInitialized());
-            }
+            }*/
 
         } catch (DatabaseException e) {
 
@@ -167,13 +167,13 @@ public class Invoker {
         // Create the REST service
         Invoker.lookupService = new LookupService(Invoker.host, Invoker.port, qcfg.isServiceOn());
 
-        if (qcfg.isServiceOn()) {
+/*        if (qcfg.isServiceOn()) {
             Invoker.lookupService.setDatadirectory(queueDataDir);
             Invoker.lookupService.setQueueurl(qcfg.getUrl());
-        }
+        }*/
 
 
-        if (cacheServiceRequest && Invoker.cacheService.isInitialized()) {
+/*        if (cacheServiceRequest && Invoker.cacheService.isInitialized()) {
             System.out.println("Starting cache service");
             Invoker.cacheService.startService();
         } else {
@@ -182,7 +182,7 @@ public class Invoker {
             }
 
 
-        }
+        }*/
 
         // Start the service
         Invoker.lookupService.startService(services);
@@ -208,7 +208,7 @@ public class Invoker {
                 scheduler.scheduleJob(job, trigger);
             }
 
-            //DB Pruning for core LS
+/*            //DB Pruning for core LS
             if (qcfg.isServiceOn()) {
                 JobDetail job = newJob(PublisherJob.class)
                         .withIdentity("PublisherJob", "Publisher")
@@ -224,11 +224,11 @@ public class Invoker {
                         .build();
 
                 scheduler.scheduleJob(job, trigger);
-            }
+            }*/
 
-            if(cacheServiceRequest){
-                for(Cache cache: cacheList ){
-                    if(cache.getType().equals(ReservedValues.CACHE_TYPE_REPLICATION)){
+/*            if (cacheServiceRequest) {
+                for (Cache cache : cacheList) {
+                    if (cache.getType().equals(ReservedValues.CACHE_TYPE_REPLICATION)) {
                         String dbname = cache.getName();
                         // define the job and tie it to  mongoJob class
                         JobDetail job = newJob(MongoDBMaintenanceJob.class)
@@ -251,7 +251,7 @@ public class Invoker {
 
 
                 }
-            }
+            }*/
 
             JobDetail gcInvoker = newJob(MemoryManager.class)
                     .withIdentity("gc", "MemoryManagement")
@@ -260,7 +260,7 @@ public class Invoker {
             Trigger gcTrigger = newTrigger().withIdentity("gc trigger", "MemoryManagement")
                     .startNow()
                     .withSchedule(simpleSchedule()
-                            .withIntervalInSeconds(600)
+                            .withIntervalInSeconds(60)
                             .repeatForever()
                             .withMisfireHandlingInstructionIgnoreMisfires())
                     .build();
@@ -279,6 +279,7 @@ public class Invoker {
             blockMe.wait();
 
         }
+
 
     }
 

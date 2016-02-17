@@ -11,6 +11,7 @@ import net.es.lookup.common.exception.ParserException;
 import net.es.lookup.common.exception.QueryException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
+import net.es.lookup.common.exception.internal.RecordNotFoundException;
 import net.es.lookup.database.DBPool;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.pubsub.Publisher;
@@ -29,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import net.es.lookup.common.ReservedKeys;
-import net.es.lookup.common.ReservedValues;
 
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
@@ -405,8 +405,10 @@ public class Cache implements SubscriberListener {
                 LOG.info("net.es.lookup.pubsub.client.Cache.save: Cache type is replication. Deleting 'expired' record");
 
                 try{
-                    db.deleteService(recordUri);
+                    db.deleteRecord(recordUri);
                 }catch (DatabaseException dbe){
+                    LOG.debug("net.es.lookup.pubsub.client.Cache.save: Error deleting record");
+                } catch (RecordNotFoundException e) {
                     LOG.debug("net.es.lookup.pubsub.client.Cache.save: Did not find record");
                 }
 
@@ -416,8 +418,10 @@ public class Cache implements SubscriberListener {
                 LOG.info("net.es.lookup.pubsub.client.Cache.save: Cache type is replication. Deleting 'deleted' record");
 
                 try{
-                    db.deleteService(recordUri);
+                    db.deleteRecord(recordUri);
                 }catch (DatabaseException dbe){
+                    LOG.debug("net.es.lookup.pubsub.client.Cache.save: Error deleting record");
+                } catch (RecordNotFoundException e) {
                     LOG.debug("net.es.lookup.pubsub.client.Cache.save: Did not find record");
                 }
 
@@ -466,7 +470,7 @@ public class Cache implements SubscriberListener {
 
         LOG.info("net.es.lookup.pubsub.client.CacheService.emptyCache: Emptying cache");
         ServiceDAOMongoDb db = DBPool.getDb(this.name);
-        db.deleteAll();
+        db.deleteAllRecords();
         LOG.info("net.es.lookup.pubsub.client.CacheService.emptyCache: Emptied cache");
     }
 

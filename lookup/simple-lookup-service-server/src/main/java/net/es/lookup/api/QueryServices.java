@@ -10,6 +10,7 @@ import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.DBPool;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
+import net.es.lookup.service.Invoker;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -22,11 +23,14 @@ public class QueryServices {
     private static Logger LOG = Logger.getLogger(QueryServices.class);
     private String params;
 
+    public static boolean QUERY_ALL_FLAG=false;
+
 
     //constructs query and operator messages and calls the DB function
     public String query(String dbname, Message request, int maxResult, int skip) {
 
         //TODO: Implement maxResult and skip
+        System.gc(); //call gc before a query operation to clear any unwanted objects and retrieve some space
         LOG.info("Processing queryService...");
         LOG.info("Received message: " + request.getMap());
         String response;
@@ -39,11 +43,18 @@ public class QueryServices {
             ServiceDAOMongoDb db = DBPool.getDb(dbname);
 
             if(db != null){
+
                 List<Message> res = db.query(request, queryParameters, operators, maxResult, skip);
                 // Build response
                 response = JSONMessage.toString(res);
+                res = null;
                 LOG.info("Query status: SUCCESS;");
-                LOG.debug("Response:" + response);
+
+                if(queryParameters.getMap().size()==0){
+                    QUERY_ALL_FLAG = true;
+
+                }
+                LOG.debug("Sending response");
                 return response;
             }else{
                 throw new NotFoundException("Cannot access database");
@@ -131,7 +142,7 @@ public class QueryServices {
 
             }
 
-            LOG.debug("operators::" + operators.getMap());////
+            LOG.debug("operators::" + operators.getMap());
 
         }
 

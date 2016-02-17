@@ -2,4 +2,6 @@
 Lookup Service Python Client
 ============================
 
-Under development...
+Currently, Python supports only query client.
+
+The pyth

@@ -10,13 +10,10 @@ import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.common.exception.internal.PubSubQueryException;
-import net.es.lookup.common.exception.internal.PubSubQueueException;
+import net.es.lookup.common.exception.internal.RecordNotFoundException;
 import net.es.lookup.database.DBPool;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.*;
-import net.es.lookup.pubsub.QueueDataGenerator;
-import net.es.lookup.pubsub.QueueServiceMapping;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -61,7 +58,7 @@ public class EditService {
                     LOG.error(("Error accessing database object"));
                     throw new InternalErrorException("Error accessing database");
                 }
-                Message serviceRecord = db.getServiceByURI(serviceid);
+                Message serviceRecord = db.getRecordByURI(serviceid);
 
                 if (serviceRecord != null) {
 
@@ -89,24 +86,7 @@ public class EditService {
                         newRequest.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_RENEW);
                         Message res = db.updateService(serviceid, newRequest);
 
-
-
                         response = new JSONRenewResponse(res.getMap());
-
-                        //Push message to queue
-                        QueueDataGenerator queueDataGenerator = QueueServiceMapping.getQueueDataGenerator(dbname);
-                        LinkedList resList = new LinkedList();
-                        resList.add(res);
-                        try {
-                            if(queueDataGenerator != null){
-                                queueDataGenerator.fillQueues(resList);
-                            }
-                        } catch (PubSubQueueException e) {
-                            LOG.error("Error pushing register message to queue:" + e.getMessage());
-                        } catch (PubSubQueryException e) {
-                            LOG.error("Error retrieving query to push register message to queue:" + e.getMessage());
-                        }
-
 
                         try {
                             return JSONMessage.toString(response);
@@ -179,7 +159,7 @@ public class EditService {
 
     public String deleteService(String dbname, String serviceid, String service) {
 
-        LOG.info("Processing deleteService...");
+        LOG.info("Processing deleteRecord...");
         LOG.info("serviceid: " + serviceid);
         JSONDeleteResponse response;
 
@@ -197,70 +177,57 @@ public class EditService {
         // Verify that requestUrl is valid and authorized
         LOG.debug("Is the requestUrl valid?" + this.isValid(request));
 
-        if (this.isValid(request) && this.isAuthed(serviceid, request)) {
+        if (this.isValid(request) && this.isAuthed(serviceid, request)) try {
+            ServiceDAOMongoDb db = DBPool.getDb(dbname);
 
-            try {
-                ServiceDAOMongoDb db = DBPool.getDb(dbname);
+            if (db == null) {
+                LOG.error("Error accessing database");
+                throw new InternalErrorException("Error accessing database");
+            }
+            Message serviceRecord = db.deleteRecord(serviceid);
 
-                if(db == null){
-                    LOG.error("Error accessing database");
-                    throw new InternalErrorException("Error accessing database");
-                }
-                Message serviceRecord = db.deleteService(serviceid);
+            if (serviceRecord == null) {
 
-                if (serviceRecord == null) {
-
-                    LOG.error("ServiceRecord Not found");
-                    LOG.info("DeleteService status: FAILED; exiting");
-                    throw new NotFoundException("ServiceRecord not found in DB\n");
-
-
-                } else {
-                    //update state
-                    serviceRecord.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_DELETE);
-
-                    //Push to Queue
-                    QueueDataGenerator queueDataGenerator = QueueServiceMapping.getQueueDataGenerator(dbname);
-                    LinkedList resList = new LinkedList();
-                    resList.add(serviceRecord);
-                    try {
-                        if (queueDataGenerator != null){
-                            queueDataGenerator.fillQueues(resList);
-                        }
-                    } catch (PubSubQueueException e) {
-                        LOG.error("Error pushing register message to queue:" + e.getMessage());
-                    } catch (PubSubQueryException e) {
-                        LOG.error("Error retrieving query to push register message to queue:" + e.getMessage());
-                    }
-
-                    response = new JSONDeleteResponse(serviceRecord.getMap());
-
-
-                    try {
-
-                        LOG.info("ServiceRecord Deleted");
-                        LOG.info("DeleteService status: SUCCESS; exiting");
-                        return JSONMessage.toString(response);
-
-                    } catch (DataFormatException e) {
-
-                        LOG.error("Data formatting exception");
-                        LOG.info("DeleteService status: FAILED; exiting");
-                        throw new InternalErrorException("Database error\n");
-
-                    }
-
-                }
-
-            } catch (DatabaseException e) {
-
-                LOG.fatal("DatabaseException: The database is out of service." + e.getMessage());
+                LOG.error("ServiceRecord Not found");
                 LOG.info("DeleteService status: FAILED; exiting");
-                throw new InternalErrorException("Database error\n");
+                throw new NotFoundException("ServiceRecord not found in DB\n");
+
+
+            } else {
+                //update state
+                serviceRecord.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_DELETE);
+
+                response = new JSONDeleteResponse(serviceRecord.getMap());
+
+                try {
+
+                    LOG.info("ServiceRecord Deleted");
+                    LOG.info("DeleteService status: SUCCESS; exiting");
+                    return JSONMessage.toString(response);
+
+                } catch (DataFormatException e) {
+
+                    LOG.error("Data formatting exception");
+                    LOG.info("DeleteService status: FAILED; exiting");
+                    throw new InternalErrorException("Database error\n");
+
+                }
 
             }
 
-        } else {
+        } catch (DatabaseException e) {
+
+            LOG.fatal("DatabaseException: The database is out of service." + e.getMessage());
+            LOG.info("DeleteService status: FAILED; exiting");
+            throw new InternalErrorException("Database error\n");
+
+        } catch (RecordNotFoundException e) {
+
+            LOG.info("Record Not found. DeleteService status: FAILED; exiting");
+            throw new NotFoundException("Record does not exist");
+
+        }
+        else {
             //fails either because it is not valid or not authorized
             if (!this.isValid(request)) {
 

@@ -34,7 +34,7 @@ public class AccessService {
         try {
             ServiceDAOMongoDb db = DBPool.getDb(dbname);
             if(db != null){
-                serviceRecord =db.getServiceByURI(serviceid);
+                serviceRecord =db.getRecordByURI(serviceid);
 
                 if (serviceRecord != null) {
 
@@ -92,7 +92,7 @@ public class AccessService {
         try {
             ServiceDAOMongoDb db = DBPool.getDb(dbname);
             if(db!=null){
-                serviceRecord = db.getServiceByURI(serviceid);
+                serviceRecord = db.getRecordByURI(serviceid);
 
                 if (serviceRecord != null) {
 

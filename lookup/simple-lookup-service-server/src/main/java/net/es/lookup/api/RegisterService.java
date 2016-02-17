@@ -14,8 +14,6 @@ import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
-import net.es.lookup.pubsub.QueueDataGenerator;
-import net.es.lookup.pubsub.QueueServiceMapping;
 import net.es.lookup.service.LookupService;
 import org.apache.log4j.Logger;
 
@@ -105,19 +103,6 @@ public class RegisterService {
                                 throw new InternalErrorException("Error in creating response. Data formatting exception at server.");
 
 
-                        }
-
-                        QueueDataGenerator queueDataGenerator = QueueServiceMapping.getQueueDataGenerator(dbname);
-                        LinkedList resList = new LinkedList();
-                        resList.add(res);
-                        try {
-                            if(queueDataGenerator != null){
-                                queueDataGenerator.fillQueues(resList);
-                            }
-                        } catch (PubSubQueueException e) {
-                            LOG.error("Error pushing register message to queue:" + e.getMessage());
-                        } catch (PubSubQueryException e) {
-                            LOG.error("Error retrieving query to push register message to queue:" + e.getMessage());
                         }
 
                         LOG.info("Register status: SUCCESS; exiting");

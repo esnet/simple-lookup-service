@@ -1,4 +1,3 @@
-import junit.framework.Assert;
 import net.es.lookup.client.RecordManager;
 import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.ParserException;
@@ -6,6 +5,9 @@ import net.es.lookup.protocol.json.JSONParser;
 import net.es.lookup.records.ErrorRecord;
 import net.es.lookup.records.Record;
 import org.junit.Test;
+
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,7 +34,7 @@ public class RecordManagerTest extends BaseTest {
             String response = regLS.getResponse();
 
             if (regLS.getResponseCode() == 403) {
-                Assert.fail("Test record is duplicate of existing record");
+                fail("Test record is duplicate of existing record");
             }
 
             if (regLS.getResponseCode() == 200) {
@@ -48,20 +50,20 @@ public class RecordManagerTest extends BaseTest {
             } else {
 
                 System.out.println("Test setup failed with error code " + regLS.getResponseCode() + ". Could not register test record with specified LS.");
-                Assert.fail(regLS.getErrorMessage());
+                fail(regLS.getErrorMessage());
             }
 
         } catch (LSClientException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (ParserException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
         System.out.println(simpleLS.getResponseCode() + ": " + simpleLS.getErrorMessage());
-        Assert.assertTrue("Renew attempt did not return expected Record", rec != null && rec.validate());
+        assertTrue("Renew attempt did not return expected Record", rec != null && rec.validate());
     }
 
     @Test
@@ -80,14 +82,14 @@ public class RecordManagerTest extends BaseTest {
         } catch (LSClientException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (ParserException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
         System.out.println(simpleLS.getResponseCode() + ": " + simpleLS.getErrorMessage());
-        Assert.assertTrue("Renew attempt did not return expected ErrorRecord", rec != null && rec instanceof ErrorRecord);
+        assertTrue("Renew attempt did not return expected ErrorRecord", rec != null && rec instanceof ErrorRecord);
     }
 
     @Test
@@ -106,7 +108,7 @@ public class RecordManagerTest extends BaseTest {
             String response = regLS.getResponse();
 
             if (regLS.getResponseCode() == 403) {
-                Assert.fail("Test record is duplicate of existing record");
+                fail("Test record is duplicate of existing record");
             }
 
             if (regLS.getResponseCode() == 200) {
@@ -122,20 +124,20 @@ public class RecordManagerTest extends BaseTest {
             } else {
 
                 System.out.println("Test setup failed with error code " + regLS.getResponseCode() + ". Could not register test record with specified LS.");
-                Assert.fail(regLS.getErrorMessage());
+                fail(regLS.getErrorMessage());
             }
 
         } catch (LSClientException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (ParserException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
         System.out.println(simpleLS.getResponseCode() + ": " + simpleLS.getErrorMessage());
-        Assert.assertTrue("Access attempt did not return expected Record", rec != null && rec.validate());
+        assertTrue("Access attempt did not return expected Record", rec != null && rec.validate());
     }
 
     @Test
@@ -154,14 +156,14 @@ public class RecordManagerTest extends BaseTest {
         } catch (LSClientException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (ParserException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
         System.out.println(simpleLS.getResponseCode() + ": " + simpleLS.getErrorMessage());
-        Assert.assertTrue("Access attempt did not return expected ErrorRecord", rec != null && rec instanceof ErrorRecord);
+        assertTrue("Access attempt did not return expected ErrorRecord", rec != null && rec instanceof ErrorRecord);
     }
 
     @Test
@@ -180,7 +182,7 @@ public class RecordManagerTest extends BaseTest {
             String response = regLS.getResponse();
 
             if (regLS.getResponseCode() == 403) {
-                Assert.fail("Test record is duplicate of existing record");
+                fail("Test record is duplicate of existing record");
             }
 
             if (regLS.getResponseCode() == 200) {
@@ -196,20 +198,20 @@ public class RecordManagerTest extends BaseTest {
             } else {
 
                 System.out.println("Test setup failed with error code " + regLS.getResponseCode() + ". Could not register test record with specified LS.");
-                Assert.fail(regLS.getErrorMessage());
+                fail(regLS.getErrorMessage());
             }
 
         } catch (LSClientException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (ParserException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
         System.out.println(simpleLS.getResponseCode() + ": " + simpleLS.getErrorMessage());
-        Assert.assertTrue("Access attempt did not return expected Record", rec != null && rec.validate());
+        assertTrue("Access attempt did not return expected Record", rec != null && rec.validate());
     }
 
     @Test
@@ -228,14 +230,14 @@ public class RecordManagerTest extends BaseTest {
         } catch (LSClientException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (ParserException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
         System.out.println(simpleLS.getResponseCode() + ": " + simpleLS.getErrorMessage());
-        Assert.assertTrue("Access attempt did not return expected ErrorRecord", rec != null && rec instanceof ErrorRecord);
+        assertTrue("Access attempt did not return expected ErrorRecord", rec != null && rec instanceof ErrorRecord);
     }
 
     @Test
@@ -254,7 +256,7 @@ public class RecordManagerTest extends BaseTest {
             String response = regLS.getResponse();
 
             if (regLS.getResponseCode() == 403) {
-                Assert.fail("Test record is duplicate of existing record");
+                fail("Test record is duplicate of existing record");
             }
 
             if (regLS.getResponseCode() == 200) {
@@ -270,20 +272,20 @@ public class RecordManagerTest extends BaseTest {
             } else {
 
                 System.out.println("Test setup failed with error code " + regLS.getResponseCode() + ". Could not register test record with specified LS.");
-                Assert.fail(regLS.getErrorMessage());
+                fail(regLS.getErrorMessage());
             }
 
         } catch (LSClientException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (ParserException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
         System.out.println(simpleLS.getResponseCode() + ": " + simpleLS.getErrorMessage());
-        Assert.assertTrue("Delete attempt did not return expected Record", rec != null && rec.validate());
+        assertTrue("Delete attempt did not return expected Record", rec != null && rec.validate());
     }
 
     @Test
@@ -302,14 +304,14 @@ public class RecordManagerTest extends BaseTest {
         } catch (LSClientException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (ParserException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
         System.out.println(simpleLS.getResponseCode() + ": " + simpleLS.getErrorMessage());
-        Assert.assertTrue("Delete attempt did not return expected ErrorRecord", rec != null && rec instanceof ErrorRecord);
+        assertTrue("Delete attempt did not return expected ErrorRecord", rec != null && rec instanceof ErrorRecord);
     }
 }
 

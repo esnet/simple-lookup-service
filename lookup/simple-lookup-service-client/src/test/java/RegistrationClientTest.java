@@ -9,6 +9,8 @@ import org.junit.Test;
 
 import java.util.*;
 
+import static org.junit.Assert.fail;
+
 /**
  * Created with IntelliJ IDEA.
  * User: student5
@@ -17,48 +19,44 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class RegistrationClientTest extends BaseTest {
-    private final int NUM_THREADS = 1;
-    private final int NUM_RECORDS = 25000;
+    private final int NUM_THREADS = 4;
+    private final int NUM_RECORDS = 5000;
     @Test
     public void registerRecord() throws InterruptedException {
 
 
         System.out.println("Testing record registration");
 
+        final int bucket = Math.round(NUM_RECORDS/NUM_THREADS);
+        System.out.println("Num records in each thread="+bucket);
 
-
-        Thread threads[] = new Thread[NUM_THREADS];
+        final Thread threads[] = new Thread[NUM_THREADS];
 
         for (int j=0;j<NUM_THREADS;j++){
-            System.out.println(j);
-            rand.setSeed(j);
+
+            final int start = bucket*j;
+            System.out.println(j+"---"+start);
 
             threads[j] = new Thread(){
 
                 public void run(){
-                    //rand.setSeed(new Random().nextLong()*10);
 
-                    for(int i=0; i<NUM_RECORDS;i++){
+                    for(int i=0; i<bucket;i++){
 
-                        int tmp = rand.nextInt();
-                       // System.out.println(tmp);
-                        int tmp1 = rand.nextInt();
-                        //registrationData = registrationData.replace(registrationData.substring(registrationData.indexOf("unique")), "unique\":[\"" + Integer.toString(tmp) + Integer.toString(tmp1)+ "\"]}");
-
+                        int id = start+i;
 
                         try {
                             Record rec;
                             rec = JSONParser.toRecord(registrationData);
-                            List<String> randomval = new ArrayList<String>();
-                            randomval.add(UUID.randomUUID().toString());
-                            rec.add("random", randomval);
+                            rec.add("unique-id", String.valueOf(id));
+
 
                             rc = new RegistrationClient(regLS, rec);
                             registrationResult = rc.register();
 
                             if (registrationResult instanceof ErrorRecord) {
 
-                                Assert.fail(regLS.getResponseCode()+":"+regLS.getErrorMessage());
+                                fail(regLS.getResponseCode() + ":" + regLS.getErrorMessage());
                             } else if (registrationResult instanceof Record) {
 
                                 int index = ((Record) registrationResult).getURI().lastIndexOf("/") + 1;
@@ -69,15 +67,13 @@ public class RegistrationClientTest extends BaseTest {
                         } catch (LSClientException e) {
 
                             System.out.println(e.getMessage());
-                            Assert.fail(e.getMessage());
+                            fail(e.getMessage());
                         } catch (ParserException e) {
 
                             System.out.println(e.getMessage());
-                            Assert.fail(e.getMessage());
+                            fail(e.getMessage());
                         }
-                        //System.out.println(regLS.getResponseCode() + ": " + regLS.getErrorMessage());
                         Assert.assertTrue(((Record) registrationResult).validate() && regLS.getResponseCode() == 200);
-
 
                     }
 

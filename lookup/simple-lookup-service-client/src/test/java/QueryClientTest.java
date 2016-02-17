@@ -1,4 +1,3 @@
-import junit.framework.Assert;
 import net.es.lookup.client.QueryClient;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
@@ -12,6 +11,9 @@ import org.junit.Test;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Created with IntelliJ IDEA.
@@ -37,7 +39,7 @@ public class QueryClientTest extends BaseTest {
             String response = regLS.getResponse();
 
             if (regLS.getResponseCode() == 403) {
-                Assert.fail("Test record is duplicate of existing record");
+                fail("Test record is duplicate of existing record");
             }
 
             if (regLS.getResponseCode() == 200) {
@@ -51,23 +53,23 @@ public class QueryClientTest extends BaseTest {
             } else {
 
                 System.out.println("Test setup failed with error code " + regLS.getResponseCode() + ". Could not register test record with specified LS.");
-                Assert.fail(regLS.getErrorMessage());
+                fail(regLS.getErrorMessage());
             }
         } catch (LSClientException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail();
+            fail();
         } catch (ParserException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail();
+            fail();
         } catch (QueryException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail();
+            fail();
         }
         System.out.println(queryLS.getResponseCode() + ": " + queryLS.getErrorMessage());
-        Assert.assertTrue(result != null && !result.isEmpty());
+        assertTrue(result != null && !result.isEmpty());
     }
 
     @Test
@@ -88,7 +90,7 @@ public class QueryClientTest extends BaseTest {
             String response = regLS.getResponse();
 
             if (regLS.getResponseCode() == 403) {
-                Assert.fail("Test record is duplicate of existing record");
+                fail("Test record is duplicate of existing record");
             }
 
             if (regLS.getResponseCode() == 200) {
@@ -105,23 +107,23 @@ public class QueryClientTest extends BaseTest {
             } else {
 
                 System.out.println("Test setup failed with error code " + regLS.getResponseCode() + ". Could not register test record with specified LS.");
-                Assert.fail(regLS.getErrorMessage());
+                fail(regLS.getErrorMessage());
             }
         } catch (LSClientException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (ParserException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (QueryException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
         System.out.println(queryLS.getResponseCode() + ": " + queryLS.getErrorMessage());
-        Assert.assertTrue(result != null && !result.isEmpty() && rec.validate());
+        assertTrue(result != null && !result.isEmpty() && rec.validate());
     }
 
     @Test
@@ -143,7 +145,7 @@ public class QueryClientTest extends BaseTest {
             String response = regLS.getResponse();
 
             if (regLS.getResponseCode() == 403) {
-                Assert.fail("Test record is duplicate of existing record");
+                fail("Test record is duplicate of existing record");
             }
 
             if (regLS.getResponseCode() == 200) {
@@ -160,23 +162,23 @@ public class QueryClientTest extends BaseTest {
             } else {
 
                 System.out.println("Test setup failed with error code " + regLS.getResponseCode() + ". Could not register test record with specified LS.");
-                Assert.fail(regLS.getErrorMessage());
+                fail(regLS.getErrorMessage());
             }
         } catch (LSClientException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (ParserException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (QueryException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+           fail(e.getMessage());
         }
         System.out.println(queryLS.getResponseCode() + ": " + queryLS.getErrorMessage());
-        Assert.assertTrue(result != null && !result.isEmpty() && rec.validate());
+        assertTrue(result != null && !result.isEmpty() && rec.validate());
     }
 
     @Test
@@ -197,7 +199,7 @@ public class QueryClientTest extends BaseTest {
             String response = regLS.getResponse();
 
             if (regLS.getResponseCode() == 403) {
-                Assert.fail("Test record is duplicate of existing record");
+                fail("Test record is duplicate of existing record");
             }
 
             if (regLS.getResponseCode() == 200) {
@@ -213,23 +215,23 @@ public class QueryClientTest extends BaseTest {
             } else {
 
                 System.out.println("Test setup failed with error code " + regLS.getResponseCode() + ". Could not register test record with specified LS.");
-                Assert.fail(regLS.getErrorMessage());
+                fail(regLS.getErrorMessage());
             }
         } catch (LSClientException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (ParserException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (QueryException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
         System.out.println(queryLS.getResponseCode() + ": " + queryLS.getErrorMessage());
-        Assert.assertTrue(result != null && !result.isEmpty() && rec.validate());
+        assertTrue(result != null && !result.isEmpty() && rec.validate());
     }
 
     @Test
@@ -250,7 +252,7 @@ public class QueryClientTest extends BaseTest {
             response = regLS.getResponse();
 
             if (regLS.getResponseCode() == 403) {
-                Assert.fail("Test record is duplicate of existing record");
+                fail("Test record is duplicate of existing record");
             }
 
             if (regLS.getResponseCode() == 200) {
@@ -262,7 +264,7 @@ public class QueryClientTest extends BaseTest {
             } else {
 
                 System.out.println("Test setup failed with error code " + regLS.getResponseCode() + ". Could not register test record with specified LS.");
-                Assert.fail(regLS.getErrorMessage());
+                fail(regLS.getErrorMessage());
             }
 
             tmp = rand.nextInt();
@@ -273,7 +275,7 @@ public class QueryClientTest extends BaseTest {
             response = regLS.getResponse();
 
             if (regLS.getResponseCode() == 403) {
-                Assert.fail("Test record is duplicate of existing record");
+                fail("Test record is duplicate of existing record");
             }
 
             if (regLS.getResponseCode() == 200) {
@@ -297,7 +299,7 @@ public class QueryClientTest extends BaseTest {
                 result = qc.query();
 
                 System.out.println(queryLS.getResponseCode() + ": " + queryLS.getErrorMessage());
-                Assert.assertTrue(result != null && !result.isEmpty() && result.size() > 1);
+                assertTrue(result != null && !result.isEmpty() && result.size() > 1);
 
                 //Test "operator":["all"] with multiple elements (should pass)
                 System.out.println("Testing operator value \"ALL\"");
@@ -310,7 +312,7 @@ public class QueryClientTest extends BaseTest {
                 qc.getRelativeUrl(); //Testing that this doesn't throw an exception
 
                 System.out.println(queryLS.getResponseCode() + ": " + queryLS.getErrorMessage());
-                Assert.assertTrue(result != null && !result.isEmpty() && result.size() >= 1);
+                assertTrue(result != null && !result.isEmpty() && result.size() >= 1);
 
                 //Test "<key1>-operator":["all"] with multiple elements (should pass)
                 System.out.println("Testing key-specific operator value \"ALL\"");
@@ -322,7 +324,7 @@ public class QueryClientTest extends BaseTest {
                 result = qc.query();
 
                 System.out.println(queryLS.getResponseCode() + ": " + queryLS.getErrorMessage());
-                Assert.assertTrue(result != null && !result.isEmpty() && result.size() >= 1);
+                assertTrue(result != null && !result.isEmpty() && result.size() >= 1);
 
                 //Test "<key1>-operator":["any"] with multiple elements (should pass)
                 System.out.println("Testing key-specific operator value \"ANY\"");
@@ -334,27 +336,30 @@ public class QueryClientTest extends BaseTest {
                 result = qc.query();
 
                 System.out.println(queryLS.getResponseCode() + ": " + queryLS.getErrorMessage());
-                Assert.assertTrue(result != null && !result.isEmpty() && result.size() >= 1);
+                assertTrue(result != null && !result.isEmpty() && result.size() >= 1);
             } else {
 
                 System.out.println("Test setup failed with error code " + regLS.getResponseCode() + ". Could not register test record with specified LS.");
-                Assert.fail(regLS.getErrorMessage());
+                fail(regLS.getErrorMessage());
             }
         } catch (LSClientException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (ParserException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+
+            fail(e.getMessage());
         } catch (QueryException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+
+            fail(e.getMessage());
         } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+
+            fail(e.getMessage());
         }
     }
 
@@ -375,7 +380,7 @@ public class QueryClientTest extends BaseTest {
             String response = regLS.getResponse();
 
             if (regLS.getResponseCode() == 403) {
-                Assert.fail("Test record is duplicate of existing record");
+                fail("Test record is duplicate of existing record");
             }
 
             if (regLS.getResponseCode() == 200) {
@@ -387,7 +392,7 @@ public class QueryClientTest extends BaseTest {
             } else {
 
                 System.out.println("Test setup failed with error code " + regLS.getResponseCode() + ". Could not register test record with specified LS.");
-                Assert.fail();
+                fail();
             }
 
             tmp = rand.nextInt();
@@ -398,7 +403,7 @@ public class QueryClientTest extends BaseTest {
             response = regLS.getResponse();
 
             if (regLS.getResponseCode() == 403) {
-                Assert.fail("Test record is duplicate of existing record");
+               fail("Test record is duplicate of existing record");
             }
 
             if (regLS.getResponseCode() == 200) {
@@ -413,7 +418,7 @@ public class QueryClientTest extends BaseTest {
             } else {
 
                 System.out.println("Test setup failed with error code " + regLS.getResponseCode() + ". Could not register test record with specified LS.");
-                Assert.fail(regLS.getErrorMessage());
+                fail(regLS.getErrorMessage());
             }
 
             if (result != null) {
@@ -428,17 +433,17 @@ public class QueryClientTest extends BaseTest {
         } catch (LSClientException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (ParserException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         } catch (QueryException e) {
 
             System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
         System.out.println(queryLS.getResponseCode() + ": " + queryLS.getErrorMessage());
-        Assert.assertTrue(result != null && !result.isEmpty() && listIsValid);
+        assertTrue(result != null && !result.isEmpty() && listIsValid);
     }
 }
