@@ -101,7 +101,7 @@ public class QueueServiceConfigReader {
         }
 
         url += ")?randomize=false";
-        System.out.println(url);
+        LOG.info(url);
         return url;
     }
 

@@ -16,8 +16,6 @@ public class StdOutErrLog {
     public static void redirectStdOutErrToLog(){
         System.setOut(createLoggingPrintStream(System.out));
         System.setErr(createLoggingPrintStream(System.err));
-
-        System.out.println("Hi");
     }
 
     private static PrintStream createLoggingPrintStream(final PrintStream printStream) {

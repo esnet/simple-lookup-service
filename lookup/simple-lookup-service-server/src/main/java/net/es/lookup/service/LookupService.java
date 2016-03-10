@@ -3,10 +3,12 @@ package net.es.lookup.service;
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.ClassNamesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
-import net.es.lookup.common.ReservedKeys;
-import net.es.lookup.resources.*;
+import net.es.lookup.resources.KeyResource;
+import net.es.lookup.resources.RecordResource;
+import net.es.lookup.resources.RegisterQueryResource;
+import net.es.lookup.resources.SubscribeResource;
+import org.apache.log4j.Logger;
 import org.glassfish.grizzly.http.server.HttpServer;
-import org.apache.activemq.broker.BrokerService;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
@@ -30,13 +32,10 @@ public class LookupService {
     private String datadirectory = "../elements";
     private HttpServer httpServer = null;
     private static LookupService instance = null;
-    BrokerService broker = null;
-    private boolean queueservice = false;
-    private String queueurl;
-    private boolean queueServiceRequired;
     private static final int MAX_SERVICES = 10;
     public static final String LOOKUP_SERVICE = "lookup" ;
-    public static final String QUEUE_SERVICE = "queue-service";
+
+    private static Logger LOG = Logger.getLogger(LookupService.class);
 
 
     public int getPort() {
@@ -58,22 +57,6 @@ public class LookupService {
 
         this.host = host;
     }
-
-    public String getQueueurl() {
-
-        return queueurl;
-    }
-
-    public void setQueueurl(String queueurl) {
-
-        this.queueurl = queueurl;
-    }
-
-    //static {
-    //  LookupService.instance = new LookupService();
-    //}
-
-
 
     public String getDatadirectory() {
 
@@ -133,21 +116,12 @@ public class LookupService {
 
     }
 
-    public LookupService(String host, int port, boolean queueServiceRequired) {
-
-        this.host = host;
-        this.port = port;
-        this.queueServiceRequired = queueServiceRequired;
-        init();
-
-    }
-
 
     public void startService(List<String> services) {
 
         List<String> resources = new LinkedList<String>();
         if(services.size()==0 || services.size() > MAX_SERVICES){
-            System.out.println("Too many or too little services");
+            LOG.info("Too many or too little services");
             System.exit(0);
 
         }else{
@@ -165,21 +139,18 @@ public class LookupService {
             resourceArray[i] = (String) rArray[i];
         }
 
-        System.out.println("Starting HTTP server");
+        LOG.info("Starting HTTP server");
         try {
 
             this.httpServer = this.startServer(resourceArray);
-            //if(this.queueServiceRequired){
-              //  this.broker = this.startBroker();
-            //}
 
 
         } catch (IOException e) {
 
-            System.out.println("Failed to start HTTP server: " + e);
+            LOG.info("Failed to start HTTP server: " + e);
 
         } catch (Exception e){
-            System.out.println("Failed to start broker: " + e);
+            LOG.info("Failed to start broker: " + e);
         }
 
     }
@@ -187,20 +158,19 @@ public class LookupService {
 
     protected HttpServer startServer(String[] serviceResources) throws IOException {
 
-        System.out.println("Creating Resource...");
+        LOG.info("Creating Resource...");
 
         ResourceConfig rc = new ClassNamesResourceConfig(serviceResources);
-        System.out.println();
         Set set = rc.getRootResourceClasses();
         Iterator iter = set.iterator();
 
         while (iter.hasNext()) {
 
-            System.out.println(iter.next());
+            LOG.debug(iter.next());
 
         }
 
-        System.out.println(("Starting grizzly..."));
+        LOG.info("Starting grizzly...");
         String hosturl = "http://" + this.host + "/";
         //return GrizzlyServerFactory.createHttpServer(UriBuilder.fromUri(hosturl).port(this.port).build(),rc);
 
@@ -212,19 +182,4 @@ public class LookupService {
 
     }
 
-
-    protected BrokerService startBroker() throws Exception{
-        System.out.println("Creating ActiveMQ Broker");
-        BrokerService br = new BrokerService();
-        String url = queueurl;
-        br.addConnector(url);
-        br.setDataDirectory(datadirectory);
-        br.start();
-        return br;
-    }
-
-    public boolean isQueueservice() {
-
-        return queueservice;
-    }
 }

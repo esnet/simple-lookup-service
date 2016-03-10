@@ -1,13 +1,13 @@
 package net.es.lookup.utils.config.reader;
 
-import net.es.lookup.bootstrap.BootStrapClient;
 import net.es.lookup.common.exception.internal.ConfigurationException;
-import net.es.lookup.utils.config.elements.CacheConfig;
-import net.es.lookup.utils.config.elements.PublisherConfig;
 import org.apache.log4j.Logger;
 
 import java.net.URI;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Singleton to store database configuration.
@@ -30,7 +30,6 @@ public class SubscriberConfigReader {
     private static SubscriberConfigReader instance;
     private static String configFile = "";
 
-    private List<CacheConfig> cacheList;
 
     private int reconnectInterval;
 
@@ -41,9 +40,6 @@ public class SubscriberConfigReader {
      * Constructor - private because this is a Singleton
      */
     private SubscriberConfigReader() {
-
-        cacheList = new LinkedList<CacheConfig>();
-
 
     }
 
@@ -71,15 +67,6 @@ public class SubscriberConfigReader {
     /**
      * @return Returns the list of cache names
      */
-    public List<CacheConfig> getCacheList() {
-
-        return cacheList;
-    }
-
-    public int getCacheCount(){
-
-        return cacheList.size();
-    }
 
     private void setInfo(String configFile) throws ConfigurationException {
 
@@ -111,7 +98,6 @@ public class SubscriberConfigReader {
 
                 String cType = (String) ((Map) (cList.get(i))).get(CACHE_TYPE);
 
-                List<PublisherConfig> sourceList = new LinkedList<PublisherConfig>();
 
                 List sList = (List) ((Map) (cList.get(i))).get(CACHE_SOURCE);
 
@@ -145,25 +131,14 @@ public class SubscriberConfigReader {
 
                     if (sAccessPoint.equals(WILDCARD)) {
                         //get bootstrap list
-                        BootStrapClient client = new BootStrapClient(bclientURI);
-                        List<String> lsList = client.getAllUrls();
-                        for(String s: lsList){
-                            URI accesspoint = new URI(s);
-                            PublisherConfig source = new PublisherConfig(accesspoint, queryList);
-                            sourceList.add(source);
-                        }
+                        ///add to subscribe list
+
                     } else {
-                        URI accesspoint = new URI(sAccessPoint);
-                        PublisherConfig source = new PublisherConfig(accesspoint, queryList);
-                        sourceList.add(source);
 
                     }
 
 
                 }
-
-                CacheConfig cache = new CacheConfig(cacheName, cType, sourceList);
-                cacheList.add(cache);
             }
 
         } catch (Exception e) {
