@@ -340,7 +340,6 @@ public class ServiceDAOMongoDb {
         if (!keyValueList.isEmpty()) {
             query.put(mongoOp, keyValueList);
         }
-
         return query;
 
     }
