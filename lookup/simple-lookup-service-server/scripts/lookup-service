@@ -26,7 +26,7 @@ STOP_TIMEOUT=10
 RESTART_DELAY=10
 PIDFILE=${RUNDIR}/${SHORT_NAME}.pid
 JARFILE=$DIST_PREFIX/target/$SHORT_NAME-server.one-jar.jar
-LOOKUPSERVICE_CMD="$BINDIR/startServer.sh $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.properties -d $QDATADIR > /dev/null &"
+LOOKUPSERVICE_CMD="$BINDIR/startServer.sh $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.properties > /dev/null &"
 
 #functions
 start(){
