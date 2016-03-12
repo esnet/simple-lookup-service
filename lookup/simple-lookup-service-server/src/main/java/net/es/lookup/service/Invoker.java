@@ -64,6 +64,7 @@ public class Invoker {
 
         SchedulerFactory sf = new StdSchedulerFactory();
         Scheduler scheduler = sf.getScheduler();
+        scheduler.start();
 
         LookupServiceConfigReader.init(configPath + lookupservicecfg);
 
