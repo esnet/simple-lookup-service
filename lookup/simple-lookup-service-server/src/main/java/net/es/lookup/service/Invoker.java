@@ -8,11 +8,13 @@ import net.es.lookup.common.MemoryManager;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.database.ServiceDAOMongoDb;
-import net.es.lookup.timer.Scheduler;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import org.apache.log4j.Logger;
 import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
+import org.quartz.impl.StdSchedulerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -60,8 +62,8 @@ public class Invoker {
         LOG = Logger.getLogger(Invoker.class);
 
 
-
-        Scheduler scheduler = Scheduler.getInstance();
+        SchedulerFactory sf = new StdSchedulerFactory();
+        Scheduler scheduler = sf.getScheduler();
 
         LookupServiceConfigReader.init(configPath + lookupservicecfg);
 
@@ -122,7 +124,7 @@ public class Invoker {
                                 .withMisfireHandlingInstructionIgnoreMisfires())
                         .build();
 
-                scheduler.schedule(job, trigger);
+                scheduler.scheduleJob(job, trigger);
             }
 
 
@@ -139,7 +141,7 @@ public class Invoker {
                             .withMisfireHandlingInstructionIgnoreMisfires())
                     .build();
 
-            scheduler.schedule(gcInvoker, gcTrigger);
+            scheduler.scheduleJob(gcInvoker, gcTrigger);
 
 
         } catch (Exception se) {
