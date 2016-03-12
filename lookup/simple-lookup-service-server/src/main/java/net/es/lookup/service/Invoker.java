@@ -10,7 +10,6 @@ import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.timer.Scheduler;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
-import net.es.lookup.utils.log.StdOutErrLog;
 import org.apache.log4j.Logger;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
@@ -57,7 +56,6 @@ public class Invoker {
         parseArgs(args);
         //set log config
         System.setProperty("log4j.configuration", "file:" + logConfig);
-        StdOutErrLog.redirectStdOutErrToLog();
 
         LOG = Logger.getLogger(Invoker.class);
 
