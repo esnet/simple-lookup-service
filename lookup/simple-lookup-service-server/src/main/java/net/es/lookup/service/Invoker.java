@@ -69,6 +69,8 @@ public class Invoker {
         LookupServiceConfigReader.init(configPath + lookupservicecfg);
 
 
+
+
         lcfg = LookupServiceConfigReader.getInstance();
 
         port = lcfg.getPort();
