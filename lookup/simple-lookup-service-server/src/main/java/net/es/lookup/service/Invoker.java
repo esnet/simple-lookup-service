@@ -5,29 +5,20 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.es.lookup.common.MemoryManager;
-import net.es.lookup.common.ReservedValues;
-import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.database.ServiceDAOMongoDb;
-import net.es.lookup.pubsub.Publisher;
-import net.es.lookup.pubsub.amq.AMQueueDataGenerator;
-import net.es.lookup.pubsub.amq.AMQueueManager;
-import net.es.lookup.pubsub.amq.PublisherJob;
 import net.es.lookup.pubsub.client.Cache;
-import net.es.lookup.utils.config.elements.CacheConfig;
-import net.es.lookup.utils.config.elements.PublisherConfig;
+import net.es.lookup.timer.Scheduler;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import net.es.lookup.utils.config.reader.SubscriberConfigReader;
 import net.es.lookup.utils.log.StdOutErrLog;
-import org.quartz.*;
-import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.JobDetail;
+import org.quartz.Trigger;
 
-import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static org.quartz.JobBuilder.newJob;
@@ -76,9 +67,9 @@ public class Invoker {
         //set log config
         System.setProperty("log4j.configuration", "file:" + logConfig);
         StdOutErrLog.redirectStdOutErrToLog();
-        SchedulerFactory sf = new StdSchedulerFactory();
-        Scheduler scheduler = sf.getScheduler();
-        scheduler.start();
+
+        Scheduler scheduler = Scheduler.getInstance();
+
 
         LookupServiceConfigReader.init(configPath + lookupservicecfg);
         QueueServiceConfigReader.init(configPath + queuecfg);
@@ -89,7 +80,6 @@ public class Invoker {
 
         port = lcfg.getPort();
         host = lcfg.getHost();
-        //cacheServiceRequest = lcfg.isCacheserviceOn();
 
         int dbpruneInterval = lcfg.getPruneInterval();
         long prunethreshold = lcfg.getPruneThreshold();
@@ -107,55 +97,8 @@ public class Invoker {
             if (lcfg.isCoreserviceOn()) {
                 new ServiceDAOMongoDb(dburl, dbport, LookupService.LOOKUP_SERVICE, collname);
 
-/*                if (qcfg.isServiceOn()) {
-                    new AMQueueManager(LookupService.LOOKUP_SERVICE);
-                    new AMQueueDataGenerator(LookupService.LOOKUP_SERVICE);
-                }*/
-
                 services.add(LookupService.LOOKUP_SERVICE);
             }
-
-/*
-            if (cacheServiceRequest) {
-                SubscriberConfigReader.init(configPath + subscribecfg);
-                sfg = SubscriberConfigReader.getInstance();
-
-                List<CacheConfig> cacheConfigList = sfg.getCacheList();
-
-
-                for (CacheConfig config : cacheConfigList) {
-
-                    String name = config.getName();
-                    String type = config.getType();
-
-                    List<PublisherConfig> publisherConfigList = config.getPublishers();
-                    List<Publisher> publishers = new LinkedList<Publisher>();
-                    for (PublisherConfig publisherConfig : publisherConfigList) {
-                        URI accesspoint = publisherConfig.getLocator();
-                        List<Map<String, Object>> queries = publisherConfig.getQueries();
-
-                        Publisher publisher = new Publisher(accesspoint, queries);
-                        publishers.add(publisher);
-                    }
-
-
-                    try {
-                        Cache cache = new Cache(name, type, publishers);
-                        cacheList.add(cache);
-                        new ServiceDAOMongoDb(dburl, dbport, name, collname);
-                        services.add(name);
-
-                    } catch (LSClientException e) {
-                        System.out.println("Error initializing cache: " + name + "; Type: " + type);
-                        continue;
-                    }
-                }
-
-
-                Invoker.cacheService = CacheService.initialize(cacheList);
-
-                System.out.println("Cache service initialized: " + Invoker.cacheService.isInitialized());
-            }*/
 
         } catch (DatabaseException e) {
 
@@ -165,113 +108,49 @@ public class Invoker {
         }
         System.out.println("starting Lookup Service");
         // Create the REST service
-        Invoker.lookupService = new LookupService(Invoker.host, Invoker.port, qcfg.isServiceOn());
+        Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
 
-/*        if (qcfg.isServiceOn()) {
-            Invoker.lookupService.setDatadirectory(queueDataDir);
-            Invoker.lookupService.setQueueurl(qcfg.getUrl());
-        }*/
-
-
-/*        if (cacheServiceRequest && Invoker.cacheService.isInitialized()) {
-            System.out.println("Starting cache service");
-            Invoker.cacheService.startService();
-        } else {
-            if (cacheServiceRequest) {
-                System.out.println("Error starting cache service");
-            }
-
-
-        }*/
 
         // Start the service
         Invoker.lookupService.startService(services);
 
-        try {
-            //DB Pruning for core LS
-            if (lcfg.isCoreserviceOn()) {
-                JobDetail job = newJob(MongoDBMaintenanceJob.class)
-                        .withIdentity(LookupService.LOOKUP_SERVICE + "clean", "DBMaintenance")
-                        .build();
-                job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
-                job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, LookupService.LOOKUP_SERVICE);
-
-                // Trigger the job to run now, and then every dbpruneInterval seconds
-                Trigger trigger = newTrigger().withIdentity(LookupService.LOOKUP_SERVICE + "DBTrigger", "DBMaintenance")
-                        .startNow()
-                        .withSchedule(simpleSchedule()
-                                .withIntervalInSeconds(dbpruneInterval)
-                                .repeatForever()
-                                .withMisfireHandlingInstructionIgnoreMisfires())
-                        .build();
-
-                scheduler.scheduleJob(job, trigger);
-            }
-
-/*            //DB Pruning for core LS
-            if (qcfg.isServiceOn()) {
-                JobDetail job = newJob(PublisherJob.class)
-                        .withIdentity("PublisherJob", "Publisher")
-                        .build();
-
-                // Trigger the job to run now, and then every dbpruneInterval seconds
-                Trigger trigger = newTrigger().withIdentity(LookupService.LOOKUP_SERVICE + "PublisherTrigger", "Publisher")
-                        .startNow()
-                        .withSchedule(simpleSchedule()
-                                .withIntervalInSeconds(qcfg.getPushInterval())
-                                .repeatForever()
-                                .withMisfireHandlingInstructionIgnoreMisfires())
-                        .build();
-
-                scheduler.scheduleJob(job, trigger);
-            }*/
-
-/*            if (cacheServiceRequest) {
-                for (Cache cache : cacheList) {
-                    if (cache.getType().equals(ReservedValues.CACHE_TYPE_REPLICATION)) {
-                        String dbname = cache.getName();
-                        // define the job and tie it to  mongoJob class
-                        JobDetail job = newJob(MongoDBMaintenanceJob.class)
-                                .withIdentity(dbname + "clean", "DBMaintenance")
-                                .build();
-                        job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
-                        job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, dbname);
-
-                        // Trigger the job to run now, and then every dbpruneInterval seconds
-                        Trigger trigger = newTrigger().withIdentity(dbname + "DBTrigger", "DBMaintenance")
-                                .startNow()
-                                .withSchedule(simpleSchedule()
-                                        .withIntervalInSeconds(dbpruneInterval)
-                                        .repeatForever()
-                                        .withMisfireHandlingInstructionIgnoreMisfires())
-                                .build();
-
-                        scheduler.scheduleJob(job, trigger);
-                    }
-
-
-                }
-            }*/
-
-            JobDetail gcInvoker = newJob(MemoryManager.class)
-                    .withIdentity("gc", "MemoryManagement")
+        //DB Pruning for core LS
+        if (lcfg.isCoreserviceOn()) {
+            JobDetail job = newJob(MongoDBMaintenanceJob.class)
+                    .withIdentity(LookupService.LOOKUP_SERVICE + "clean", "DBMaintenance")
                     .build();
+            job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
+            job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, LookupService.LOOKUP_SERVICE);
 
-            Trigger gcTrigger = newTrigger().withIdentity("gc trigger", "MemoryManagement")
+            // Trigger the job to run now, and then every dbpruneInterval seconds
+            Trigger trigger = newTrigger().withIdentity(LookupService.LOOKUP_SERVICE + "DBTrigger", "DBMaintenance")
                     .startNow()
                     .withSchedule(simpleSchedule()
-                            .withIntervalInSeconds(60)
+                            .withIntervalInSeconds(dbpruneInterval)
                             .repeatForever()
                             .withMisfireHandlingInstructionIgnoreMisfires())
                     .build();
 
-            scheduler.scheduleJob(gcInvoker, gcTrigger);
-
-
-        } catch (SchedulerException se) {
-            se.printStackTrace();
-
+            scheduler.schedule(job, trigger);
         }
+
+        PublishService publishService = PublishService.getInstance();
+        publishService.startService();
+
+        JobDetail gcInvoker = newJob(MemoryManager.class)
+                .withIdentity("gc", "MemoryManagement")
+                .build();
+
+        Trigger gcTrigger = newTrigger().withIdentity("gc trigger", "MemoryManagement")
+                .startNow()
+                .withSchedule(simpleSchedule()
+                        .withIntervalInSeconds(60)
+                        .repeatForever()
+                        .withMisfireHandlingInstructionIgnoreMisfires())
+                .build();
+
+        scheduler.schedule(gcInvoker, gcTrigger);
+
 
         // Block forever
         Object blockMe = new Object();
