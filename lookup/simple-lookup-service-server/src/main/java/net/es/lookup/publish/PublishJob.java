@@ -1,6 +1,5 @@
 package net.es.lookup.publish;
 
-import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.publish.rabbitmq.RMQueue;
 import org.quartz.Job;
@@ -48,8 +47,8 @@ public class PublishJob implements Job {
 
         RMQueue queue = (RMQueue)data.get(QUEUE);
 
-        Message message = (Message)data.get(MESSAGE);
-        System.out.println("Sending message");
+        String message = (String)data.get(MESSAGE);
+        System.out.println("Sending message"+message);
         try {
             queue.push(message);
         } catch (PubSubQueueException e) {

@@ -520,7 +520,7 @@ public class DatabaseTest {
 
 
 
-    @Test
+/*    @Test
     public void removesExpiredRecords(){
 
         try {
@@ -572,6 +572,67 @@ public class DatabaseTest {
         }
 
         System.out.println("Remove Expired Records Test - \tPASS\t");
+
+
+    }*/
+
+    @Test
+    public void queryRecordsInTimeRange(){
+
+
+        try {
+            database.deleteAllRecords();
+        } catch (DatabaseException e) {
+            fail("Database exception: "+ e.getMessage());
+        }
+        for (int i = 0; i < 1000; i++) {
+            Message message = new Message();
+            message.add("type", "test");
+
+            String uuid = UUID.randomUUID().toString();
+            message.add("uri", uuid);
+
+            message.add("ttl","PT1M");
+
+
+
+            leaseManager.requestLease(message);
+
+            DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+            DateTime dt = fmt.parseDateTime(message.getExpires());
+
+            Date timestamp = dt.toDate();
+            message.add("_lastUpdated", timestamp);
+            System.out.println(timestamp.getTime());
+
+
+            try {
+                database.publishService(message);
+            } catch (DatabaseException e) {
+                fail("Database exception: " + e.getMessage());
+            }
+        }
+
+        //wait for 2 minutes before deleting
+        try {
+            Thread.sleep(60000);
+        } catch (InterruptedException e) {
+            fail("Sleep interrupted: " + e.getMessage());
+        }
+
+        Date date = new Date();
+        Date oldDate = new Date(date.getTime()-120000);
+
+
+
+        try {
+            List<Message> messages = database.findRecordsInTimeRange(oldDate,date);
+            assertEquals(1000,messages.size());
+        } catch (DatabaseException e) {
+            fail("Database exception: " + e.getMessage());
+        }
+
+        System.out.println("Queried for records in time range - \tPASS\t");
 
 
     }

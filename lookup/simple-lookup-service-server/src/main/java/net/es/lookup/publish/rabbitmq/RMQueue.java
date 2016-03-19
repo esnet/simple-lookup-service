@@ -25,8 +25,12 @@ public class RMQueue extends Queue {
     private Connection connection;
 
     public RMQueue() throws PubSubQueueException {
+
+
         factory = new ConnectionFactory();
         factory.setHost("localhost");
+
+        this.setLastPushed(new Date());
 
         try {
             connection = factory.newConnection();
@@ -43,7 +47,6 @@ public class RMQueue extends Queue {
     public void push(List<Message> messages) throws PubSubQueueException {
 
         //TODO: get list of message and push them to queue
-
 
     }
 
@@ -109,6 +112,57 @@ public class RMQueue extends Queue {
 
 
     }
+
+
+    public void push(String message) throws PubSubQueueException {
+
+        if(!connection.isOpen()) {
+            try {
+                connection = factory.newConnection();
+            } catch (IOException e) {
+                throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.RMQueue()"+e.getMessage());
+            } catch (TimeoutException e) {
+                throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.RMQueue()"+e.getMessage());
+            }
+
+        }
+
+        Channel channel = null;
+        try {
+            channel = connection.createChannel();
+
+        } catch (IOException e) {
+            throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error closing connection"+e.getMessage());
+        }
+
+        if (channel != null) {
+            try {
+                channel.exchangeDeclare("sls_exchange", "direct");
+            } catch (IOException e) {
+                throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error creating exchange"+e.getMessage());
+            }
+        }
+
+        if (channel != null) {
+            try {
+                channel.basicPublish("sls_exchange", "all", null, message.getBytes());
+            } catch (IOException e) {
+                throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error publishing messages"+e.getMessage());
+            }
+        }
+
+        try {
+            channel.close();
+
+        } catch (IOException e) {
+            throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error closing connection"+e.getMessage());
+        } catch (TimeoutException e) {
+            throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error closing connection"+e.getMessage());
+        }
+
+
+    }
+
 
     @Override
     public String getQid() {

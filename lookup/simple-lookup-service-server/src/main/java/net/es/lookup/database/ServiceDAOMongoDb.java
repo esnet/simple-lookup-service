@@ -23,7 +23,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static com.mongodb.client.model.Filters.lte;
+import static com.mongodb.client.model.Filters.*;
 
 
 public class ServiceDAOMongoDb {
@@ -124,6 +124,7 @@ public class ServiceDAOMongoDb {
 
         Date timestamp = dt.toDate();
         services.put("_timestamp", timestamp);
+        services.put("_lastUpdated", new Date());
 
         Document doc = new Document();
         doc.putAll(services);
@@ -170,9 +171,7 @@ public class ServiceDAOMongoDb {
                 Document result = (Document)coll.findOneAndUpdate(query, updateObject, updateOptions);
 
                 if (result != null) {
-                     result.remove("_timestamp");
-                     result.remove("_id");
-                    response = new Message(result);
+                    response = toMessage(result);
                 } else {
                     throw new DatabaseException("Error renewing record");
                 }
@@ -214,13 +213,7 @@ public class ServiceDAOMongoDb {
 
             while (cursor.hasNext()) {
                 Document tmp = (Document)cursor.next();
-                if(tmp.containsKey("_id")){
-                    tmp.remove("_id");
-                }
-                if(tmp.containsKey("_timestamp")){
-                    tmp.remove("_timestamp");
-                }
-                Message dbObjectMessage = new Message(tmp);
+                Message dbObjectMessage = toMessage(tmp);
                 result.add(dbObjectMessage);
                 tmp=null;
             }
@@ -524,6 +517,7 @@ public class ServiceDAOMongoDb {
         if(doc != null){
             doc.remove("_timestamp");
             doc.remove("_id");
+            doc.remove("_lastUpdated");
             result = new Message(doc);
         }else{
             result = new Message();
@@ -545,5 +539,33 @@ public class ServiceDAOMongoDb {
 
     }
 
+    /*
+    * Finds records that were updated between start and end date
+    * */
+    public List<Message> findRecordsInTimeRange(Date start, Date end) throws DatabaseException {
+
+        List<Message> result = new ArrayList<Message>();
+
+        try {
+
+
+            //System.out.println("MongoDB query:"+query.toJson());
+            FindIterable resultIterator = coll.find(and(gt("_lastUpdated", start), lte("_lastUpdated", end)));
+            MongoCursor cursor = resultIterator.iterator();
+
+            while (cursor.hasNext()) {
+                Document tmp = (Document) cursor.next();
+                Message dbObjectMessage = toMessage(tmp);
+                result.add(dbObjectMessage);
+                tmp=null;
+            }
+        } catch (MongoException e) {
+
+            throw new DatabaseException(e.getMessage());
+
+        }
+        return result;
+
+    }
 
 }
