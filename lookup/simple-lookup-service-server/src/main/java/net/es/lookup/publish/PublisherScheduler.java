@@ -41,7 +41,12 @@ public class PublisherScheduler implements Job {
 
         for (Queue queue : queues) {
 
-            if (queue.getLastPushed().before(lastOneMinute)) {
+
+            //Push to queue if "x" minutes have passed since last push or if the max Events threshold has reached
+            if (queue.getLastPushed().before(lastOneMinute) || (queue.getCurrentPushEvents() >= queue.getMaxPushEvents())) {
+
+                System.out.println(queue.getLastPushed().before(lastOneMinute));
+                System.out.println((queue.getCurrentPushEvents() >= queue.getMaxPushEvents()));
                 List<Message> messages = null;
                 try {
                     messages = db.findRecordsInTimeRange(queue.getLastPushed(), now);
@@ -71,6 +76,7 @@ public class PublisherScheduler implements Job {
 
                         net.es.lookup.timer.Scheduler.getInstance().schedule(publishInvoker, publishTrigger);
                         queue.setLastPushed(now);
+                        queue.setCurrentPushEvents(0);
                     } catch (DataFormatException e) {
                         e.printStackTrace();
                     }

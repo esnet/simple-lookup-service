@@ -15,11 +15,12 @@ import java.util.List;
  */
 public abstract class Queue {
 
-    private int numEventsToPush;
+
+
+    private int currentPushEvents=0;
     private int timeInterval;
     private Date lastPushed;
-    private int numEventsSinceLastPush;
-    private int maxEventsToPush = 100;
+    private int maxPushEvents = 10;
     private Message query;
 
     public Date getLastPushed() {
@@ -32,24 +33,29 @@ public abstract class Queue {
         this.lastPushed = lastPushed;
     }
 
-    public int getMaxEventsToPush() {
+    public int getCurrentPushEvents() {
 
-        return maxEventsToPush;
+        return currentPushEvents;
     }
 
-    public void setMaxEventsToPush(int maxEventsToPush) {
+    public void setCurrentPushEvents(int currentPushEvents) {
 
-        this.maxEventsToPush = maxEventsToPush;
+        this.currentPushEvents = currentPushEvents;
     }
 
-    public int getNumEventsSinceLastPush() {
+    public void incrementCurrentPushEvents() {
 
-        return numEventsSinceLastPush;
+        this.currentPushEvents++;
     }
 
-    public void setNumEventsSinceLastPush(int numEventsSinceLastPush) {
+    public int getMaxPushEvents() {
 
-        this.numEventsSinceLastPush = numEventsSinceLastPush;
+        return maxPushEvents;
+    }
+
+    public void setMaxPushEvents(int maxPushEvents) {
+
+        this.maxPushEvents = maxPushEvents;
     }
 
     public Message getQuery() {

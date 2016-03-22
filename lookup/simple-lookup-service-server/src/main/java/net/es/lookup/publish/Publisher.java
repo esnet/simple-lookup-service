@@ -1,5 +1,6 @@
 package net.es.lookup.publish;
 
+import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DoesNotExistException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 
@@ -76,5 +77,19 @@ public class Publisher {
             return queryToQueueMap.values();
         }
         return null;
+    }
+
+    public void eventNotification(Message record){
+
+        //NOTE: currently assumes event is for all the queues. This will need to be modified if queries are implemented for queues.
+
+        if(record != null){
+            Collection<Queue> queues = getAllQueues();
+            for(Queue queue:queues){
+                queue.incrementCurrentPushEvents();
+            }
+
+        }
+
     }
 }

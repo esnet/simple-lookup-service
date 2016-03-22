@@ -14,6 +14,7 @@ import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
+import net.es.lookup.publish.Publisher;
 import net.es.lookup.service.LookupService;
 import org.apache.log4j.Logger;
 
@@ -107,6 +108,9 @@ public class RegisterService {
 
                         LOG.info("Register status: SUCCESS; exiting");
                         LOG.debug("response:" + responseString);
+
+                        Publisher publisher = Publisher.getInstance();
+                        publisher.eventNotification(res);
                         return responseString;
                     }else{
                         throw new InternalErrorException("Cannot access database");

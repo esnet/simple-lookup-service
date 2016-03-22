@@ -14,10 +14,10 @@ import net.es.lookup.common.exception.internal.RecordNotFoundException;
 import net.es.lookup.database.DBPool;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.*;
+import net.es.lookup.publish.Publisher;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -85,6 +85,9 @@ public class EditService {
 
                         newRequest.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_RENEW);
                         Message res = db.updateService(serviceid, newRequest);
+
+                        Publisher publisher = Publisher.getInstance();
+                        publisher.eventNotification(res);
 
                         response = new JSONRenewResponse(res.getMap());
 
