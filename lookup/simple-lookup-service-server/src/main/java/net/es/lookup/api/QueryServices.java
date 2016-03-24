@@ -10,10 +10,8 @@ import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.DBPool;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
-import net.es.lookup.service.Invoker;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +57,6 @@ public class QueryServices {
             }else{
                 throw new NotFoundException("Cannot access database");
             }
-
 
         } catch (DatabaseException e) {
 
