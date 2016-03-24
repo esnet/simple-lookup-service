@@ -31,26 +31,32 @@ public class PublisherScheduler implements Job {
 
         Date now = new Date();
 
-        //TODO: Get it as config parameter
-        long threshold = 120000;
 
-        Date lastOneMinute = new Date(now.getTime() - threshold);
 
         ServiceDAOMongoDb db = DBPool.getDb("lookup");
 
-
         for (Queue queue : queues) {
 
+            long interval = queue.getTimeInterval();
+
+            Date nextPushTime = new Date(queue.getLastPushed().getTime() + interval);
 
             //Push to queue if "x" minutes have passed since last push or if the max Events threshold has reached
-            if (queue.getLastPushed().before(lastOneMinute) || (queue.getCurrentPushEvents() >= queue.getMaxPushEvents())) {
+            if (nextPushTime.before(now) || (queue.getCurrentPushEvents() >= queue.getMaxPushEvents())) {
 
-                System.out.println(queue.getLastPushed().before(lastOneMinute));
-                System.out.println((queue.getCurrentPushEvents() >= queue.getMaxPushEvents()));
+                System.out.println("Time to send messages to Queue: "+nextPushTime.before(now));
+                System.out.println("Messages within max events? "+(queue.getCurrentPushEvents() >= queue.getMaxPushEvents()));
+
                 List<Message> messages = null;
                 try {
-                    messages = db.findRecordsInTimeRange(queue.getLastPushed(), now);
-                    System.out.println("Querying time range:"+queue.getLastPushed().toString()+"---"+now.toString());
+                    //DB Optimization - Query only if there are any events
+                    if(queue.getCurrentPushEvents()>0){
+                        System.out.println("Querying time range:"+queue.getLastPushed().toString()+"---"+now.toString());
+                        messages = db.findRecordsInTimeRange(queue.getLastPushed(), now);
+
+                    }
+
+
                 } catch (DatabaseException e) {
                     e.printStackTrace();
                 }
@@ -75,11 +81,13 @@ public class PublisherScheduler implements Job {
                         publishInvoker.getJobDataMap().put(PublishJob.QUEUE, queue);
 
                         net.es.lookup.timer.Scheduler.getInstance().schedule(publishInvoker, publishTrigger);
-                        queue.setLastPushed(now);
-                        queue.setCurrentPushEvents(0);
+
                     } catch (DataFormatException e) {
                         e.printStackTrace();
                     }
+
+                    queue.setLastPushed(now);
+                    queue.setCurrentPushEvents(0);
 
 
                 }else{

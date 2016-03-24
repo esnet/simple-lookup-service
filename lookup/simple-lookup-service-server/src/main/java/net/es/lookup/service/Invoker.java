@@ -8,11 +8,9 @@ import net.es.lookup.common.MemoryManager;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.database.ServiceDAOMongoDb;
-import net.es.lookup.pubsub.client.Cache;
 import net.es.lookup.timer.Scheduler;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
-import net.es.lookup.utils.config.reader.SubscriberConfigReader;
 import net.es.lookup.utils.log.StdOutErrLog;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
@@ -30,23 +28,16 @@ public class Invoker {
 
     private static int port = 8080;
     private static LookupService lookupService = null;
-    private static CacheService cacheService = null;
-    //private static ServiceDAOMongoDb dao = null;
     private static String host = "localhost";
     private static LookupServiceConfigReader lcfg;
-    private static SubscriberConfigReader sfg;
     private static QueueServiceConfigReader qcfg;
     private static String configPath = "etc/";
     private static String lookupservicecfg = "lookupservice.yaml";
+
     private static String queuecfg = "queueservice.yaml";
-    private static String subscribecfg = "subscriber.yaml";
     private static String logConfig = "./etc/log4j.properties";
-    private static String queueDataDir = "../elements";
 
     private static String dataDir = "data/";
-
-
-    private static boolean cacheServiceRequest = false;
 
 
     public static String getDataDir() {
@@ -90,7 +81,7 @@ public class Invoker {
         String collname = lcfg.getCollName();
 
         List<String> services = new LinkedList<String>();
-        List<Cache> cacheList = new LinkedList<Cache>();
+
         // Initialize services
         try {
 
@@ -135,6 +126,9 @@ public class Invoker {
         }
 
         PublishService publishService = PublishService.getInstance();
+        publishService.setMaxPushEvents(qcfg.getBatchSize());
+        publishService.setMaxInterval(qcfg.getPushInterval());
+        publishService.setHost(qcfg.getHost());
         publishService.startService();
 
         JobDetail gcInvoker = newJob(MemoryManager.class)
@@ -159,7 +153,6 @@ public class Invoker {
 
         }
 
-
     }
 
 
@@ -171,7 +164,6 @@ public class Invoker {
         OptionSpec<String> HOST = parser.accepts("h", "host").withRequiredArg().ofType(String.class);
         OptionSpec<String> CONFIG = parser.accepts("c", "configPath").withRequiredArg().ofType(String.class);
         OptionSpec<String> LOGCONFIG = parser.accepts("l", "logConfig").withRequiredArg().ofType(String.class);
-        OptionSpec<String> QUEUEDATADIR = parser.accepts("q", "queueDataDir").withRequiredArg().ofType(String.class);
         OptionSpec<String> DATADIR = parser.accepts("d", "dataDir").withRequiredArg().ofType(String.class);
         OptionSet options = parser.parse(args);
 
@@ -205,13 +197,6 @@ public class Invoker {
         if (options.has(LOGCONFIG)) {
 
             logConfig = options.valueOf(LOGCONFIG);
-
-        }
-
-
-        if (options.has(QUEUEDATADIR)) {
-
-            queueDataDir = options.valueOf(QUEUEDATADIR);
 
         }
 

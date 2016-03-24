@@ -2,9 +2,7 @@ package net.es.lookup.utils.config.reader;
 
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,8 +17,8 @@ public class QueueServiceConfigReader {
     private static final String DEFAULT_PATH = "etc";
     private static String configFile = DEFAULT_PATH + "/" + DEFAULT_FILE;
 
-    private int port = 61617;
-    private List<String> host;
+    private int port = 5672;
+    private String host;
     private String protocol = "tcp";
 
     private boolean serviceOn = false;
@@ -40,7 +38,7 @@ public class QueueServiceConfigReader {
      */
     private QueueServiceConfigReader() {
 
-        host = new ArrayList<String>();
+        host = "";
 
     }
 
@@ -65,7 +63,7 @@ public class QueueServiceConfigReader {
         return QueueServiceConfigReader.instance;
     }
 
-    public List<String> getHost() {
+    public String getHost() {
 
         return this.host;
     }
@@ -91,20 +89,6 @@ public class QueueServiceConfigReader {
         return persistent;
     }
 
-    public String getUrl(){
-
-        String url=""; //= protocol + "://" + host + ":" + port+"?wireFormat.maxInactivityDuration=600000";
-        url = "failover:(";
-        for(String h:host){
-            url += protocol + "://"+ h + ":" + port+"?wireFormat.maxInactivityDuration=600000,";
-
-        }
-
-        url += ")?randomize=false";
-        System.out.println(url);
-        return url;
-    }
-
     public int getBatchSize() {
 
         return batchSize;
@@ -126,8 +110,7 @@ public class QueueServiceConfigReader {
         try {
 
             HashMap<String, Object> queueServiceMap = (HashMap) yamlMap.get("queue");
-            host = (List<String>) queueServiceMap.get("host");
-            port = (Integer) queueServiceMap.get("port");
+            host = (String) queueServiceMap.get("host");
             String service = (String) queueServiceMap.get("queueservice");
             if(service.equals("on")){
                 serviceOn = true;
@@ -136,11 +119,6 @@ public class QueueServiceConfigReader {
             }
             batchSize = (Integer) queueServiceMap.get("batch_size");
             pushInterval = (Integer) queueServiceMap.get("push_interval");
-
-            HashMap<String, Object> messageMap = (HashMap) yamlMap.get("message");
-            persistent = (Boolean) messageMap.get("persistent");
-            ttl = ((Integer) messageMap.get("ttl")) * 1000;
-
 
 
         } catch (Exception e) {

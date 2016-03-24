@@ -18,7 +18,8 @@ public abstract class Queue {
 
 
     private int currentPushEvents=0;
-    private int timeInterval;
+
+    private long timeInterval;
     private Date lastPushed;
     private int maxPushEvents = 10;
     private Message query;
@@ -31,6 +32,16 @@ public abstract class Queue {
     public void setLastPushed(Date lastPushed) {
 
         this.lastPushed = lastPushed;
+    }
+
+    public long getTimeInterval() {
+
+        return timeInterval;
+    }
+
+    public void setTimeInterval(long timeInterval) {
+
+        this.timeInterval = timeInterval;
     }
 
     public int getCurrentPushEvents() {

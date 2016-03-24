@@ -1,14 +1,6 @@
 #Queue
 queue:
     queueservice: 'off'
-    host: 
-        - 'localhost'
-    port: 61616
-    protocol: 'tcp'
-    batch_size: 500
-    push_interval: 90
-
-#Messages
-message:
-    persistent: false
-    ttl: 120
+    host: 'localhost'
+    batch_size: 100
+    push_interval: 300

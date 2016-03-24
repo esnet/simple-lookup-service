@@ -23,6 +23,47 @@ public class PublishService {
     private static PublishService instance = null;
     private boolean createdPublishJob = false;
 
+    private String host;
+    private long maxInterval;
+    private int maxPushEvents;
+
+    public String getHost() {
+
+        return host;
+    }
+
+    public void setHost(String host) {
+
+        this.host = host;
+    }
+
+    public long getMaxInterval() {
+
+        return maxInterval;
+    }
+
+    public void setMaxInterval(long maxInterval) {
+
+        this.maxInterval = maxInterval;
+    }
+
+    public int getMaxPushEvents() {
+
+        return maxPushEvents;
+    }
+
+    public void setMaxPushEvents(int maxPushEvents) {
+
+        this.maxPushEvents = maxPushEvents;
+    }
+
+    public int getSCHEDULER_INTERVAL() {
+
+        return SCHEDULER_INTERVAL;
+    }
+
+    private final int SCHEDULER_INTERVAL=30;
+
 
     private PublishService(){
     }
@@ -41,10 +82,11 @@ public class PublishService {
     }
 
     public void startService(){
-
+        System.out.println("Starting publisher with host="+host+" maxPushEvents="+maxPushEvents + " maxInterval="+maxInterval);
 
         try {
-            RMQueue rmQueue = new RMQueue();
+
+            RMQueue rmQueue = new RMQueue(host,maxPushEvents,maxInterval);
             String query = "all";
             Publisher.getInstance().addQueue(query,rmQueue);
 
@@ -72,7 +114,7 @@ public class PublishService {
             Trigger psTrigger = newTrigger().withIdentity("pstrigger", "pubsub")
                     .startNow()
                     .withSchedule(simpleSchedule()
-                            .withIntervalInSeconds(15)
+                            .withIntervalInSeconds(SCHEDULER_INTERVAL)
                             .repeatForever()
                             .withMisfireHandlingInstructionIgnoreMisfires())
                     .build();

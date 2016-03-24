@@ -24,11 +24,24 @@ public class RMQueue extends Queue {
     private ConnectionFactory factory;
     private Connection connection;
 
+    /**
+     * Default constructor with max Events=25 and timeInterval between push set to 60s
+     *
+     * @throws PubSubQueueException
+     */
+
     public RMQueue() throws PubSubQueueException {
 
+        this("localhost", 25, 60);
+    }
+
+    public RMQueue(String host, int maxPushEvents, long timeInterval) throws PubSubQueueException {
 
         factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        factory.setHost(host);
+
+        this.setMaxPushEvents(maxPushEvents);
+        this.setTimeInterval(timeInterval);
 
         this.setLastPushed(new Date());
 
