@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd $CI_HOME/lookup
+cd lookup
 mvn clean test
 
 
