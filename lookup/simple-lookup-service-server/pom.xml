@@ -118,13 +118,6 @@
             <version>3.0.1</version>
         </dependency>
 
-        <!-- activemq  -->
-<dependency>
-	<groupId>org.apache.activemq</groupId>
-		<artifactId>activemq-all</artifactId>
-			<version>5.9.1</version>
-			</dependency>
-
         <!-- lookup-service-centos client -->
         <dependency>
             <artifactId>simple-lookup-service-client</artifactId>

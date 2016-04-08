@@ -1,7 +1,7 @@
 ---
 # Host values for SLS instance
 lookupservice:
-    host: 'localhost'
+    host: 'perfsonar-dev.es.net'
     port: 8090
 
 # Test values for specified service parameters
@@ -45,7 +45,7 @@ records:
         host-net-tcp-congestionalgorithm: *S
         location-zipcode: *S
         location-state: *S
-        location-country: *C
+        location-country: *S
         group-domains: *LOS
         service-administrators: *LOS
         host-net-interfaces: *LOS
@@ -65,8 +65,8 @@ records:
         host-net-tcp-maxbuffer-send: *IS
     interface-record:
         type: 'interface'
-        service-name: *S
-        interface-mac: *S
+        service-name: *LOP
+        interface-mac: *LOP
         group-domains: *LOS
         interface-mtu: *IS
         interface-capacity: *IS

@@ -1,3 +1,5 @@
 language: java
 notifications:
   email: false
+services: mongodb
+script: build.sh

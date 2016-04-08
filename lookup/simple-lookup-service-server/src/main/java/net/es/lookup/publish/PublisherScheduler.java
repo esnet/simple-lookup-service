@@ -64,23 +64,30 @@ public class PublisherScheduler implements Job {
                 //Push to queue only if there are messages to send
 
                 if (messages != null && !messages.isEmpty()) {
+
                     try {
-                        String jsonMessage = JSONMessage.toString(messages);
-                        System.out.println(jsonMessage);
+                        for(Message message: messages){
+                            String jsonMessage = JSONMessage.toString(message);
+                            System.out.println(jsonMessage);
 
 
-                        JobDetail publishInvoker = newJob(PublishJob.class)
-                                .withIdentity("publish", "pubsub")
-                                .build();
+                            JobDetail publishInvoker = newJob(PublishJob.class)
+                                    .withIdentity("publish"+message.getURI(), "pubsub")
+                                    .build();
+
+                            SimpleTrigger publishTrigger = (SimpleTrigger) newTrigger().withIdentity("publish trigger"+message.getURI(), "pubsub")
+                                    .startNow()
+                                    .build();
 
 
-                        SimpleTrigger publishTrigger = (SimpleTrigger) newTrigger().withIdentity("publish trigger", "pubsub")
-                                .startNow()
-                                .build();
-                        publishInvoker.getJobDataMap().put(PublishJob.MESSAGE, jsonMessage);
-                        publishInvoker.getJobDataMap().put(PublishJob.QUEUE, queue);
 
-                        net.es.lookup.timer.Scheduler.getInstance().schedule(publishInvoker, publishTrigger);
+                            publishInvoker.getJobDataMap().put(PublishJob.MESSAGE, jsonMessage);
+                            publishInvoker.getJobDataMap().put(PublishJob.QUEUE, queue);
+
+                            net.es.lookup.timer.Scheduler.getInstance().schedule(publishInvoker, publishTrigger);
+
+                        }
+
 
                     } catch (DataFormatException e) {
                         e.printStackTrace();

@@ -7,7 +7,6 @@ import net.es.lookup.common.exception.RecordException;
 import net.es.lookup.records.DataValidator;
 import net.es.lookup.records.Record;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**

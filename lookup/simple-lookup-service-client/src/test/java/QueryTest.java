@@ -1,3 +1,4 @@
+/*
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.ParserException;
@@ -17,13 +18,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+*/
 /**
  * Created with IntelliJ IDEA.
  * User: student5
  * Date: 6/17/13
  * Time: 4:55 PM
  * To change this template use File | Settings | File Templates.
- */
+ *//*
+
 public class QueryTest extends BaseTest {
 
     @Test
@@ -243,7 +246,7 @@ public class QueryTest extends BaseTest {
                 System.out.println("Bad type list accepted for InterfaceQuery");
             } catch (QueryException expected) {
 
-                System.out.println("Expected exception successfully thrown");
+                System.out.println("Expected QueryException thrown");
             }
 
         } catch (QueryException e) {
@@ -426,3 +429,4 @@ public class QueryTest extends BaseTest {
         Assert.fail("Bad country code was accepted");
     }
 }
+*/

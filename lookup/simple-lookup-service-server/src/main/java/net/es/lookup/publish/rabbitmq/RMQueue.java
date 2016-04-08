@@ -86,7 +86,7 @@ public class RMQueue extends Queue {
 
         if (channel != null) {
             try {
-                channel.exchangeDeclare("sls_exchange", "direct");
+                channel.exchangeDeclare("sls_exchange", "topic");
             } catch (IOException e) {
                 throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error creating exchange"+e.getMessage());
             }
@@ -108,6 +108,7 @@ public class RMQueue extends Queue {
         String rmqmessage= jsonMessage.toString();
         if (channel != null) {
             try {
+
                 channel.basicPublish("sls_exchange", "all", null, rmqmessage.getBytes());
             } catch (IOException e) {
                 throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error publishing messages"+e.getMessage());
@@ -150,7 +151,7 @@ public class RMQueue extends Queue {
 
         if (channel != null) {
             try {
-                channel.exchangeDeclare("sls_exchange", "direct");
+                channel.exchangeDeclare("sls_exchange", "topic");
             } catch (IOException e) {
                 throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error creating exchange"+e.getMessage());
             }

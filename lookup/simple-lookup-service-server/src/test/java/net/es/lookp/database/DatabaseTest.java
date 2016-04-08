@@ -603,7 +603,6 @@ public class DatabaseTest {
 
             Date timestamp = dt.toDate();
             message.add("_lastUpdated", timestamp);
-            System.out.println(timestamp.getTime());
 
 
             try {
