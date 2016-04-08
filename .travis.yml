@@ -2,4 +2,4 @@ language: java
 notifications:
   email: false
 services: mongodb
-script: build.sh
+script: /home/travis/esnet/simple-lookup-service/build.sh
