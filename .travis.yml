@@ -2,8 +2,8 @@ language: java
 notifications:
   email: false
 services: mongodb
-script: build.sh
 env:
   global:
     - REPO="esnet/simple-lookup-service"
     - CI_HOME=`pwd`/$REPO
+script: sh build.sh
