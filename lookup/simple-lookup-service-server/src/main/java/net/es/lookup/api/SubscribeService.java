@@ -1,5 +1,7 @@
 package net.es.lookup.api;
 
+
+import net.es.lookup.common.exception.api.NotSupportedException;
 import net.es.lookup.protocol.json.JSONSubRequest;
 import org.apache.log4j.Logger;
 
@@ -10,10 +12,8 @@ public class SubscribeService {
 
     public String subscribe(String serviceName, String message) {
 
-        return "To be implemented";
-
-        }
-
+        throw new NotSupportedException("Will be supported soon");
+    }
 
     private boolean isAuthed(JSONSubRequest request) {
 

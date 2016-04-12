@@ -15,6 +15,7 @@
         <module>simple-lookup-service-client</module>
         <module>simple-lookup-service-client-examples</module>
         <module>simple-lookup-service-server</module>
+        <module>simple-lookup-service-cache</module>
     </modules>
     <build>
         <pluginManagement>

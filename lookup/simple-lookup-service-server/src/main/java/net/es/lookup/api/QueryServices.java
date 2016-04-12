@@ -5,6 +5,7 @@ import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
+import net.es.lookup.common.exception.api.ServiceUnavailableTemporarilyException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.DBPool;
@@ -28,7 +29,6 @@ public class QueryServices {
     public String query(String dbname, Message request, int maxResult, int skip) {
 
         //TODO: Implement maxResult and skip
-        System.gc(); //call gc before a query operation to clear any unwanted objects and retrieve some space
         LOG.info("Processing queryService...");
         LOG.info("Received message: " + request.getMap());
         String response;
@@ -69,6 +69,19 @@ public class QueryServices {
             LOG.error("Data formatting exception");
             LOG.info("Query status: FAILED; exiting");
             throw new InternalErrorException("Error formatting elements");
+
+        }catch(OutOfMemoryError e){
+
+            LOG.error("The response was too large so ran out of memory");
+            LOG.info("Query status: FAILED; exiting");
+            throw new ServiceUnavailableTemporarilyException("Server is unable to process large query requests at this time. Please try later");
+
+        }
+        catch(Exception e){
+
+            LOG.error("Unexpected exception: "+e.getMessage());
+            LOG.info("Query status: FAILED; exiting");
+            throw new ServiceUnavailableTemporarilyException("Server is unable to process the request at this time. Please try later");
 
         }
 
