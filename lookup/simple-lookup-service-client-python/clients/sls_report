@@ -195,6 +195,44 @@ class SlsHostList(SlsReportBase):
         return self._host_count
 
 
+class SlsStatistics(SlsReportBase):
+    """
+    Take an SlsHostList object and use the sls_client library to get
+    detailed information about the hosts.
+
+    Then used to generate reports.
+    """
+    def __init__(self, sls_hosts, options, logger):
+        super(SlsStatistics, self).__init__(options, logger)
+
+        self._sls_hosts = sls_hosts
+
+        self._query_count = 0
+
+    def query_hosts(self):
+        """
+        Use the sls_client to lookup information on the hosts
+        in the SlsHostList.
+        """
+
+        self._log('query_hosts.begin', 'start')
+
+        for host in self._sls_hosts.hosts:
+            self._log('query_hosts.run', 'querying: {host}'.format(host=host))
+
+            # do stuff
+
+            self._query_count += 1
+
+            if self._options.single:
+                self._log('query_hosts.break', 'got --single flag - breaking')
+                break
+
+        self._log('query_hosts.end', 'client lookup on {num} hosts'.format(num=self._query_count))
+
+
+
+
 def main():
     """Execute the report."""
     usage = '%prog [ -h ACTIVE_HOSTS | -v ]'
@@ -218,7 +256,9 @@ def main():
 
     lookup_hosts.generate_host_list()
 
-    # hosts = get_host_list(lookup_hosts, options)
+    # get detailed information on the hosts the host list
+    report = SlsStatistics(lookup_hosts, options, _log)
+    report.query_hosts()
 
 if __name__ == '__main__':
     main()
