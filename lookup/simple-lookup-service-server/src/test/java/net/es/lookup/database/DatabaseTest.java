@@ -1,11 +1,10 @@
-package net.es.lookp.database;
+package net.es.lookup.database;
 
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.common.exception.internal.RecordNotFoundException;
-import net.es.lookup.database.ServiceDAOMongoDb;
 import org.bson.Document;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -18,9 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Author: sowmya
@@ -520,7 +517,8 @@ public class DatabaseTest {
 
 
 
-/*    @Test
+
+    @Test
     public void removesExpiredRecords(){
 
         try {
@@ -574,7 +572,7 @@ public class DatabaseTest {
         System.out.println("Remove Expired Records Test - \tPASS\t");
 
 
-    }*/
+    }
 
     @Test
     public void queryRecordsInTimeRange(){

@@ -4,18 +4,13 @@ import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeComparator;
 import org.joda.time.Instant;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.quartz.Job;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.quartz.JobDataMap;
 
 import java.util.Date;
-
-
 import java.util.List;
 
 
@@ -52,53 +47,13 @@ public class MongoDBMaintenanceJob implements Job {
         try {
 
             count = db.deleteExpiredRecords(daterange);
+            LOG.info("Record deleted: "+count);
 
         } catch (DatabaseException e) {
 
             LOG.error("DBException! Could not query database");
 
         }
-
-
-
-
-
-/*        try {
-
-            result = db.queryAll();
-
-        } catch (DatabaseException e) {
-
-            LOG.error("DBException! Could not query database");
-
-        }
-        if (result != null && result.size() > 0) {
-
-            for (int i = 0; i < result.size(); i++) {
-
-                Message message = result.get(i);
-                DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-                DateTime dt = fmt.parseDateTime(message.getExpires());
-                DateTimeComparator dtc = DateTimeComparator.getInstance();
-
-                if (dtc.compare(dt, pruneTime) < 0) {
-
-                    String uri = message.getURI();
-
-                    try {
-                         db.deleteRecord(uri);
-
-                    } catch (Exception e) {
-
-                        LOG.error("Error pruning DB!!" + e.getMessage());
-
-                    }
-
-                }
-
-            }
-
-        }*/
 
     }
 

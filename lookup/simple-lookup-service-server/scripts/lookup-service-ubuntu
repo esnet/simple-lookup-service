@@ -17,11 +17,11 @@ LOCK_FILE=/var/lock/$SHORT_NAME
 USER=lookup
 GROUP=lookup
 STOP_TIMEOUT=10
-RESTART_DELAY=5
+RESTART_DELAY=10
 PIDFILE=$RUNDIR/$SHORT_NAME.pid
 JARFILE=$DIST_PREFIX/target/$SHORT_NAME-server.one-jar.jar
 LOOKUPSERVICE_CMD="$BINDIR/startServer.sh"
-LOOKUPSERVICE_CMD_OPTION=" $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.properties > $LOGDIR/$SHORT_NAME.out -d $QDATADIR 2>&1"
+LOOKUPSERVICE_CMD_OPTION=" $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.properties > $LOGDIR/$SHORT_NAME.out"
 
 #functions
 start(){
@@ -39,6 +39,7 @@ stop(){
 	RETVAL=$?
 	echo
 	[ $RETVAL = 0 ] && rm -f $LOCK_FILE $PIDFILE
+	sleep $STOP_TIMEOUT
 }
 
 #handle arguments

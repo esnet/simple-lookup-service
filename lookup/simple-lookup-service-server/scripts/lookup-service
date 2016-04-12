@@ -23,10 +23,10 @@ LOCK_FILE=/var/lock/subsys/$SHORT_NAME
 USER=lookup
 GROUP=lookup
 STOP_TIMEOUT=10
-RESTART_DELAY=5
+RESTART_DELAY=10
 PIDFILE=${RUNDIR}/${SHORT_NAME}.pid
 JARFILE=$DIST_PREFIX/target/$SHORT_NAME-server.one-jar.jar
-LOOKUPSERVICE_CMD="$BINDIR/startServer.sh $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.properties -d $QDATADIR > $LOGDIR/$SHORT_NAME.out 2>&1 &"
+LOOKUPSERVICE_CMD="$BINDIR/startServer.sh $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.properties > /var/log/lookup-service.out 2>&1 &"
 
 #functions
 start(){
@@ -34,7 +34,6 @@ start(){
     echo $LOOKUPSERVICE_CMD
     daemon --pidfile=${PIDFILE} --user=${USER} $LOOKUPSERVICE_CMD
     RETVAL=$?
-    echo
     [ $RETVAL = 0 ] && touch ${LOCK_FILE}
     return $RETVAL
 }
@@ -45,6 +44,7 @@ stop(){
 	RETVAL=$?
 	echo
 	[ $RETVAL = 0 ] && rm -f ${LOCK_FILE} ${PIDFILE}
+	sleep $STOP_TIMEOUT
 }
 
 #handle arguments

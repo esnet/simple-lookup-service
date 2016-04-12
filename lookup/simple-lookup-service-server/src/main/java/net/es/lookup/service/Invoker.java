@@ -11,7 +11,8 @@ import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.timer.Scheduler;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
-import net.es.lookup.utils.log.StdOutErrLog;
+import net.es.lookup.utils.log.StdOutErrToLog;
+import org.apache.log4j.Logger;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 
@@ -28,22 +29,25 @@ public class Invoker {
 
     private static int port = 8080;
     private static LookupService lookupService = null;
+
+
+    //private static ServiceDAOMongoDb dao = null;
     private static String host = "localhost";
     private static LookupServiceConfigReader lcfg;
     private static QueueServiceConfigReader qcfg;
+
     private static String configPath = "etc/";
     private static String lookupservicecfg = "lookupservice.yaml";
-
     private static String queuecfg = "queueservice.yaml";
+
+
     private static String logConfig = "./etc/log4j.properties";
 
-    private static String dataDir = "data/";
+
+    private static Logger LOG;
 
 
-    public static String getDataDir() {
-
-        return dataDir;
-    }
+    private static boolean cacheServiceRequest = false;
 
     /**
      * Main program to start the Lookup ServiceRecord
@@ -57,14 +61,15 @@ public class Invoker {
         parseArgs(args);
         //set log config
         System.setProperty("log4j.configuration", "file:" + logConfig);
-        StdOutErrLog.redirectStdOutErrToLog();
+
+        StdOutErrToLog.redirectStdOutErrToLog();
 
         Scheduler scheduler = Scheduler.getInstance();
 
+        LOG = Logger.getLogger(Invoker.class);
 
         LookupServiceConfigReader.init(configPath + lookupservicecfg);
-        QueueServiceConfigReader.init(configPath + queuecfg);
-
+        QueueServiceConfigReader.init(configPath+queuecfg);
 
         lcfg = LookupServiceConfigReader.getInstance();
         qcfg = QueueServiceConfigReader.getInstance();
@@ -74,7 +79,8 @@ public class Invoker {
 
         int dbpruneInterval = lcfg.getPruneInterval();
         long prunethreshold = lcfg.getPruneThreshold();
-        System.out.println("starting ServiceDAOMongoDb");
+
+        LOG.info("starting ServiceDAOMongoDb");
 
         String dburl = lcfg.getDbUrl();
         int dbport = lcfg.getDbPort();
@@ -84,23 +90,19 @@ public class Invoker {
 
         // Initialize services
         try {
-
             if (lcfg.isCoreserviceOn()) {
                 new ServiceDAOMongoDb(dburl, dbport, LookupService.LOOKUP_SERVICE, collname);
-
                 services.add(LookupService.LOOKUP_SERVICE);
             }
-
         } catch (DatabaseException e) {
 
-            System.out.println("Error connecting to database; Please check if MongoDB is running");
+            LOG.info("Error connecting to database; Please check if MongoDB is running");
             System.exit(1);
 
         }
-        System.out.println("starting Lookup Service");
+        LOG.info("starting Lookup Service");
         // Create the REST service
         Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
-
 
         // Start the service
         Invoker.lookupService.startService(services);
@@ -109,6 +111,7 @@ public class Invoker {
         if (lcfg.isCoreserviceOn()) {
             JobDetail job = newJob(MongoDBMaintenanceJob.class)
                     .withIdentity(LookupService.LOOKUP_SERVICE + "clean", "DBMaintenance")
+
                     .build();
             job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
             job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, LookupService.LOOKUP_SERVICE);
@@ -146,6 +149,7 @@ public class Invoker {
         scheduler.schedule(gcInvoker, gcTrigger);
 
 
+
         // Block forever
         Object blockMe = new Object();
         synchronized (blockMe) {
@@ -164,7 +168,7 @@ public class Invoker {
         OptionSpec<String> HOST = parser.accepts("h", "host").withRequiredArg().ofType(String.class);
         OptionSpec<String> CONFIG = parser.accepts("c", "configPath").withRequiredArg().ofType(String.class);
         OptionSpec<String> LOGCONFIG = parser.accepts("l", "logConfig").withRequiredArg().ofType(String.class);
-        OptionSpec<String> DATADIR = parser.accepts("d", "dataDir").withRequiredArg().ofType(String.class);
+
         OptionSet options = parser.parse(args);
 
         // check for help
@@ -197,12 +201,6 @@ public class Invoker {
         if (options.has(LOGCONFIG)) {
 
             logConfig = options.valueOf(LOGCONFIG);
-
-        }
-
-        if (options.has(DATADIR)) {
-
-            dataDir = options.valueOf(DATADIR);
 
         }
 

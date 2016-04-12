@@ -235,7 +235,6 @@ public class ServiceDAOMongoDb {
 
     }
 
-
     /**
      * Builds the MongoDB query from the given map. The map is received from the REST API. All the operators
      * and the wildcard characters have to be converted to Mongo's wildcard characters and operators.
@@ -334,7 +333,6 @@ public class ServiceDAOMongoDb {
         if (!keyValueList.isEmpty()) {
             query.put(mongoOp, keyValueList);
         }
-
         return query;
 
     }
@@ -469,6 +467,8 @@ public class ServiceDAOMongoDb {
         return response;
 
     }
+
+
 
     /**
      *  This method deletes expired records from db and returns number of records deleted.
