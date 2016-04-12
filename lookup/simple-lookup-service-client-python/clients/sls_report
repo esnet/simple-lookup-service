@@ -5,15 +5,15 @@ Produce a formatted report from sls hosts.
 """
 
 import json
+import logging
 import pprint
+import time
 import warnings
 from optparse import OptionParser
 
 import requests
 
 from sls_client.find_host_info import get_host_info_json
-
-pp = pprint.PrettyPrinter(indent=4)
 
 ACTIVE_HOSTS = 'http://ps-west.es.net/lookup/activehosts.json'
 
@@ -33,33 +33,106 @@ class SlsReportWarning(Warning):
     pass
 
 
-def _warn(msg):
-    """raise a custom warning."""
-    warnings.warn(msg, SlsReportWarning, stacklevel=2)
+def setup_log(log_path=None):
+    """
+    Usage:
+    _log('main.start', 'happy simple log event')
+    _log('launch', 'more={0}, complex={1} log=event'.format(100, 200))
+    """
+    # pylint: disable=redefined-variable-type
+    logger = logging.getLogger("sls_report")
+    if not log_path:
+        handle = logging.StreamHandler()
+    else:
+        # it's on you to make sure log_path is valid.
+        logfile = '{0}/sls_report.log'.format(log_path)
+        handle = logging.FileHandler(logfile)
+    handle.setFormatter(logging.Formatter('ts=%(asctime)s %(message)s'))
+    logger.addHandler(handle)
+    logger.setLevel(logging.INFO)
+    return logger
+
+log = setup_log()  # pylint: disable=invalid-name
 
 
-def get_lookup_host_list(options):
-    """Generate a list of hosts from the lookup hosts."""
-    hosts = list()
+def _log(event, msg):
+    log.info('event=%s id=%s %s', event, int(time.time()), msg)
 
-    r = requests.get(options.active_source)
 
-    if not r.status_code == 200:
-        raise SlsReportException('Request to {host} failed: status:{code} {msg}'.format(
-            host=options.active_source,
-            code=r.status_code,
-            msg=r.content
-            ))
+class SlsReportBase(object):
+    """
+    Base class for other report classes.
+    """
+    def __init__(self, options, logger):
+        self._options = options
+        self._log = logger
+        self._pp = pprint.PrettyPrinter(indent=4)
 
-    host_source = json.loads(r.content)
+    def pretty_verbose(self, obj):
+        """
+        Pretty print data structures if --verbose flag is on.
+        """
+        if self._options.verbose:
+            self._pp.pprint(obj)
 
-    if options.verbose:
-        pp.pprint(host_source)
+    @staticmethod
+    def warn(msg):
+        """raise a custom warning."""
+        warnings.warn(msg, SlsReportWarning, stacklevel=2)
 
-    for i in host_source.get('hosts'):
-        hosts.append(i.get('locator'))
 
-    return hosts
+class SlsHostList(SlsReportBase):
+    """
+    Query the activehost node, then the lookup hosts to generate a list
+    of perfSONAR hosts.
+
+    The host_count attribute/property is used because a lookup host might
+    report on a host, but not give a valid hostname. So just using len()
+    won't give an accurate count.
+    """
+    def __init__(self, options, logger):
+        super(SlsHostList, self).__init__(options, logger)
+
+        self._hosts = list()
+        self._host_count = 0
+
+        self._lookup_hosts = list()
+
+        # Get the main lookup host list or it's a no go
+
+        self._log('SlsHostList.init.run', 'fetching activehost list')
+
+        try:
+            r = requests.get(options.active_source)
+        except requests.exceptions.ConnectionError as ex:
+            raise SlsReportException('activehost lookup connection error: {ex}'.format(ex=str(ex)))
+
+        if not r.status_code == 200:
+            raise SlsReportException('Request to {host} failed: status:{code} {msg}'.format(
+                host=options.active_source,
+                code=r.status_code,
+                msg=r.content
+                ))
+
+        host_source = json.loads(r.content)
+
+        for i in host_source.get('hosts'):
+            self._lookup_hosts.append(i.get('locator'))
+
+        self.pretty_verbose(self._lookup_hosts)
+
+        self._log('SlsHostList.init.end',
+                  'got {count} lookup hosts'.format(count=len(self._lookup_hosts)))
+
+    @property
+    def hosts(self):
+        """hosts property"""
+        return self._hosts
+
+    @property
+    def host_count(self):
+        """host_count property"""
+        return self._host_count
 
 
 def get_host_list(lookup_hosts, options):
@@ -84,7 +157,8 @@ def get_host_list(lookup_hosts, options):
 
     if bad_lookup:
         msg = 'requests to lookup host(s) failed: {h}'.format(h=' | '.join(bad_lookup))
-        _warn(msg)
+        print msg
+        # _warn(msg)
 
     return hosts
 
@@ -102,14 +176,12 @@ def main():
     options, _ = parser.parse_args()
 
     try:
-        lookup_hosts = get_lookup_host_list(options)
+        lookup_hosts = SlsHostList(options, _log)
     except SlsReportException as ex:
         print str(ex)
         return -1
 
-    hosts = get_host_list(lookup_hosts, options)
-
-    pp.pprint(hosts)
+    # hosts = get_host_list(lookup_hosts, options)
 
 if __name__ == '__main__':
     main()
