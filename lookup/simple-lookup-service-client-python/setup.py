@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from setuptools import setup
-from setuptools import find_packages
 
 setup(
     name="sls-client",
@@ -28,7 +27,9 @@ setup(
         "isodate",
         "futures",
         "requests",
-        "voluptuous"
+        "voluptuous",
+        "IPy==0.83",
+        "tldextract==1.7.4",
     ],
     zip_safe=False,
     classifiers=[

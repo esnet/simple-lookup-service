@@ -14,8 +14,9 @@ import warnings
 from collections import OrderedDict
 from optparse import OptionParser
 
-import requests
 import IPy
+import requests
+import tldextract
 
 from sls_client.find_host_info import get_host_info_json
 
@@ -208,7 +209,7 @@ class SlsHostList(SlsReportBase):
         return self._host_count
 
 
-class SlsStatCapsule(object):
+class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
     """
     Encapsulation class and accessors manage the statistics
     from SlsStatstics.
@@ -219,6 +220,8 @@ class SlsStatCapsule(object):
         self._speed = dict()
         self._iface_type = dict()
         self._iface_pub = dict()
+        self._ps_version = dict()
+        self._domains = dict()
 
         self._pp = pprint.PrettyPrinter(indent=4)
 
@@ -237,41 +240,56 @@ class SlsStatCapsule(object):
 
     def mtu(self, mtu):
         """store mtu values."""
-        for val in mtu:
-            self._counter('_mtu', val)
+        if mtu:
+            for val in mtu:
+                self._counter('_mtu', val)
 
     def nic_speed(self, speed):
         """store nic speed values."""
 
         xlate = {
-            '40000000000': u'40Gbps',
-            '20000000000': u'20Gbps',
-            '10000000000': u'10Gbps',
-            '1000000000': u'1Gbps',
-            '2000000000': u'2Gbps',
-            '100000000': u'100Mbps',
-            '10000000': u'10Mbps',
+            '40000000000': u'40 Gbps',
+            '20000000000': u'20 Gbps',
+            '10000000000': u'10 Gbps',
+            '1000000000': u'1 Gbps',
+            '2000000000': u'2 Gbps',
+            '100000000': u'100 Mbps',
+            '10000000': u'10 Mbps',
             '0': u'undefined',
         }
 
-        for val in speed:
-            self._counter('_speed', xlate.get(val))
+        if speed:
+            for val in speed:
+                self._counter('_speed', xlate.get(val))
 
     def iface_summary(self, addresses):
-        """store the nature of the addresses on the interfaces."""
-        for addy in addresses:
-            try:
-                ip = IPy.IP(addy)
-            except ValueError:
-                # fqdn -> ip
-                ip = IPy.IP(socket.gethostbyname(addy))
+        """store the nature of the addresses on the interfaces,
+        ipv4/6, public/private, domains, etc."""
+        if addresses:
+            for addy in addresses:
+                try:
+                    ip = IPy.IP(addy)
+                except ValueError:
+                    # fqdn -> ip
+                    ip = IPy.IP(socket.gethostbyname(addy))
 
-            self._counter('_iface_type', ip.version())
+                self._counter('_iface_type', ip.version())
 
-            if ip.iptype() == 'PRIVATE':
-                self._counter('_iface_pub', 'private')
-            else:
-                self._counter('_iface_pub', 'public')
+                if ip.iptype() == 'PRIVATE':
+                    self._counter('_iface_pub', 'private')
+                else:
+                    self._counter('_iface_pub', 'public')
+
+                fqdn = socket.gethostbyaddr(ip.strNormal())[0]
+                extract = tldextract.extract(fqdn)
+
+                self._counter('_domains', extract.registered_domain)
+
+    def ps_toolkit_version(self, version):
+        """store the ps toolkit version."""
+        if version:
+            for ver in version:
+                self._counter('_ps_version', ver)
 
     # formatting, etc.
 
@@ -284,7 +302,11 @@ class SlsStatCapsule(object):
 
         for order in sorted(sdict.keys()):
 
-            val = '{0} %'.format(round((sdict.get(order) / total) * 100, 3))
+            val = round(
+                (float(sdict.get(order)) / total) * 100,
+                2
+            )
+
             stat_dict.update({order: (sdict.get(order), val,)})
 
         return stat_dict
@@ -293,7 +315,12 @@ class SlsStatCapsule(object):
         """Return a sorted dict of the statistics."""
         doc = OrderedDict(
             [
-                ('mtu summary', self._dict_to_stat('_mtu')),
+                ('domains', self._dict_to_stat('_domains')),
+                ('iface_version', self._dict_to_stat('_iface_type')),
+                ('public_private', self._dict_to_stat('_iface_pub')),
+                ('mtu_summary', self._dict_to_stat('_mtu')),
+                ('iface_speed', self._dict_to_stat('_speed')),
+                ('ps_version', self._dict_to_stat('_ps_version')),
             ]
         )
 
@@ -338,7 +365,6 @@ class SlsStatistics(SlsReportBase):
             in main:
 
             host-os-name | host-os-version | host-os-kernel[0] (list)
-            pshost-toolkitversion
             architecture from end of kernel string
 
             Domains???
@@ -355,8 +381,12 @@ class SlsStatistics(SlsReportBase):
 
                 self._capsule.tick_host_count()
 
+                self._capsule.ps_toolkit_version(res_host.get('pshost-toolkitversion'))
+
                 for iface in res_host.get('host-net-interfaces', []):
                     # get stats about the interface
+                    if not isinstance(iface, dict):
+                        continue
                     self._capsule.mtu(iface.get('interface-mtu'))
                     self._capsule.nic_speed(iface.get('interface-capacity'))
                     self._capsule.iface_summary(iface.get('interface-addresses'))
