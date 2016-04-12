@@ -294,7 +294,7 @@ class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
 
     def _dict_to_stats(self, dname):
         """convert a 'counter' sub-dict to a sorted dict of percentages."""
-        sdict = self._counter_stats.get(dname)
+        sdict = self._counter_stats.get(dname, {})
         total = sum(sdict.values())
 
         stat_dict = OrderedDict()
