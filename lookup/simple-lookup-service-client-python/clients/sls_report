@@ -7,8 +7,11 @@ Produce a formatted report from sls hosts.
 import json
 import logging
 import pprint
+import socket
 import time
 import warnings
+
+from collections import OrderedDict
 from optparse import OptionParser
 
 import requests
@@ -217,9 +220,13 @@ class SlsStatCapsule(object):
         self._iface_type = dict()
         self._iface_pub = dict()
 
+        self._pp = pprint.PrettyPrinter(indent=4)
+
     def tick_host_count(self):
         """increment host count."""
         self._host_count += 1
+
+    # stats to count numbers of things.
 
     def _counter(self, dname, val):
         """Interface to the underlying dicts meant to count instances of things."""
@@ -229,12 +236,12 @@ class SlsStatCapsule(object):
         cdict[val] += 1
 
     def mtu(self, mtu):
-        """handle mtu values."""
+        """store mtu values."""
         for val in mtu:
             self._counter('_mtu', val)
 
     def nic_speed(self, speed):
-        """handle nic speed values."""
+        """store nic speed values."""
 
         xlate = {
             '40000000000': u'40Gbps',
@@ -251,9 +258,13 @@ class SlsStatCapsule(object):
             self._counter('_speed', xlate.get(val))
 
     def iface_summary(self, addresses):
-        """handle the nature of the addresses on the interfaces."""
+        """store the nature of the addresses on the interfaces."""
         for addy in addresses:
-            ip = IPy.IP(addy)
+            try:
+                ip = IPy.IP(addy)
+            except ValueError:
+                # fqdn -> ip
+                ip = IPy.IP(socket.gethostbyname(addy))
 
             self._counter('_iface_type', ip.version())
 
@@ -261,6 +272,35 @@ class SlsStatCapsule(object):
                 self._counter('_iface_pub', 'private')
             else:
                 self._counter('_iface_pub', 'public')
+
+    # formatting, etc.
+
+    def _dict_to_stat(self, dname):
+        """convert a 'counter' dict to a sorted dict of percentages."""
+        sdict = getattr(self, dname)
+        total = sum(sdict.values())
+
+        stat_dict = OrderedDict()
+
+        for order in sorted(sdict.keys()):
+
+            val = '{0} %'.format(round((sdict.get(order) / total) * 100, 3))
+            stat_dict.update({order: (sdict.get(order), val,)})
+
+        return stat_dict
+
+    def to_dict(self):
+        """Return a sorted dict of the statistics."""
+        doc = OrderedDict(
+            [
+                ('mtu summary', self._dict_to_stat('_mtu')),
+            ]
+        )
+
+        return doc
+
+    def __str__(self):
+        return json.dumps(self.to_dict(), indent=4)
 
 
 class SlsStatistics(SlsReportBase):
@@ -289,8 +329,7 @@ class SlsStatistics(SlsReportBase):
         self._log('query_hosts.begin', 'start')
 
         for host in self._sls_hosts.hosts:
-            if host.startswith('fiona'):
-                continue
+
             self._log('query_hosts.run', 'querying: {host}'.format(host=host))
 
             result = json.loads(get_host_info_json(host))
@@ -322,11 +361,12 @@ class SlsStatistics(SlsReportBase):
                     self._capsule.nic_speed(iface.get('interface-capacity'))
                     self._capsule.iface_summary(iface.get('interface-addresses'))
 
+            self._pp.pprint(self._capsule.__dict__)
+            print self._capsule
+
             if self._options.single and self._good_record:
                 self._log('query_hosts.break', '--single flag and a good record - breaking')
                 break
-
-        self._pp.pprint(self._capsule.__dict__)
 
         self._log('query_hosts.end', 'client lookup on {num} hosts'.format(num=self._query_count))
 
