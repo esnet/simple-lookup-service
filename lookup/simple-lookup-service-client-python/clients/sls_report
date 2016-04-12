@@ -87,8 +87,8 @@ class SlsHostList(SlsReportBase):
     of perfSONAR hosts.
 
     The host_count attribute/property is used because a lookup host might
-    report on a host, but not give a valid hostname. So just using len()
-    won't give an accurate count.
+    report on a host, but not give a valid hostname. So just using
+    len(self._hosts) won't give an accurate count.
     """
     def __init__(self, options, logger):
         super(SlsHostList, self).__init__(options, logger)
@@ -124,6 +124,66 @@ class SlsHostList(SlsReportBase):
         self._log('SlsHostList.init.end',
                   'got {count} lookup hosts'.format(count=len(self._lookup_hosts)))
 
+    def generate_host_list(self):
+        """
+        Query the lookup hosts and generate a list of hostnames and also
+        a count of the hosts that were reported.
+        """
+        for look in self._lookup_hosts:
+            self._log('generate_host_list.run', 'querying {host}'.format(host=look))
+            fail_msg = 'query to {host} failed'.format(host=look)
+            try:
+                r = requests.get(look, params=dict(type='host'))
+            except requests.exceptions.ConnectionError as ex:
+                self.warn('Unable to connect to {host} : {ex} - skipping'.format(
+                    host=look, ex=str(ex)))
+                self._log('generate_host_list.error', fail_msg)
+
+            if not r.status_code == 200:
+                msg = 'non http 200 return code: {code} {msg}'.format(
+                    code=r.status_code, msg=r.content)
+                self.warn(msg)
+                self._log('generate_host_list.error', fail_msg)
+
+            payload = json.loads(r.content)
+
+            self.pretty_verbose(payload)
+
+            for i in payload:
+                host = self._extract_hostname(i.get('host-name'))
+
+                if host:
+                    # got a hostname, stash it and increment
+                    self._hosts.append(host)
+                    self._host_count += 1
+                elif i.get('type', None) and i.get('uri', None):
+                    # still worth counting
+                    self._host_count += 1
+
+            if self._options.single:
+                self._log('generate_host_list.break', 'got --single flag - breaking')
+                break
+
+        self.pretty_verbose(self._hosts)
+        self._log('generate_host_list.end', '{num} hosts found'.format(num=self._host_count))
+
+    @staticmethod
+    def _extract_hostname(hlist):
+        """Get the hostname from the lookup service payload. The host-name
+        element will generally be a list with a single unicode element.
+        Sometimes there will be more than one element, and sometimes only
+        empty strings. Find the first valid string and return."""
+
+        host_name = None
+
+        if isinstance(hlist, list):
+            for i in hlist:
+                if i and isinstance(i, unicode):
+                    host_name = i
+                    break
+
+        return host_name
+
     @property
     def hosts(self):
         """hosts property"""
@@ -135,34 +195,6 @@ class SlsHostList(SlsReportBase):
         return self._host_count
 
 
-def get_host_list(lookup_hosts, options):
-    """Ask the lookup hosts what they know."""
-    hosts = list()
-    bad_lookup = list()
-
-    for look in lookup_hosts:
-        # requests.exceptions.ConnectionError:
-        r = requests.get(look, params=dict(type='host'))
-        if not r.status_code == 200:
-            bad_lookup.append(look)
-
-        payload = json.loads(r.content)
-
-        if options.verbose:
-            pp.pprint(payload)
-
-        for i in payload:  # XXX: work this out?
-            if i.get('host-name')[0]:
-                hosts += i.get('host-name')
-
-    if bad_lookup:
-        msg = 'requests to lookup host(s) failed: {h}'.format(h=' | '.join(bad_lookup))
-        print msg
-        # _warn(msg)
-
-    return hosts
-
-
 def main():
     """Execute the report."""
     usage = '%prog [ -h ACTIVE_HOSTS | -v ]'
@@ -170,6 +202,9 @@ def main():
     parser.add_option('-a', '--active-hosts', metavar='ACTIVE_SOURCE',
                       type='string', dest='active_source', default=ACTIVE_HOSTS,
                       help='Source of the seed active hosts file (default: %default) .')
+    parser.add_option('-s', '--single',
+                      dest='single', action='store_true', default=False,
+                      help='Query a single host and then break. Primarily for development.')
     parser.add_option('-v', '--verbose',
                       dest='verbose', action='store_true', default=False,
                       help='Verbose output.')
@@ -180,6 +215,8 @@ def main():
     except SlsReportException as ex:
         print str(ex)
         return -1
+
+    lookup_hosts.generate_host_list()
 
     # hosts = get_host_list(lookup_hosts, options)
 
