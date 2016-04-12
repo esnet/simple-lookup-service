@@ -216,12 +216,7 @@ class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
     """
     def __init__(self):
         self._host_count = 0
-        self._mtu = dict()
-        self._speed = dict()
-        self._iface_type = dict()
-        self._iface_pub = dict()
-        self._ps_version = dict()
-        self._domains = dict()
+        self._counter_stats = dict()
 
         self._pp = pprint.PrettyPrinter(indent=4)
 
@@ -233,16 +228,20 @@ class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
 
     def _counter(self, dname, val):
         """Interface to the underlying dicts meant to count instances of things."""
-        cdict = getattr(self, dname)
-        if val not in cdict:
-            cdict[val] = 0
-        cdict[val] += 1
+
+        if dname not in self._counter_stats:
+            self._counter_stats[dname] = dict()
+
+        if val not in self._counter_stats.get(dname):
+            self._counter_stats[dname][val] = 0
+
+        self._counter_stats[dname][val] += 1
 
     def mtu(self, mtu):
         """store mtu values."""
         if mtu:
             for val in mtu:
-                self._counter('_mtu', val)
+                self._counter('mtu', val)
 
     def nic_speed(self, speed):
         """store nic speed values."""
@@ -260,7 +259,7 @@ class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
 
         if speed:
             for val in speed:
-                self._counter('_speed', xlate.get(val))
+                self._counter('speed', xlate.get(val))
 
     def iface_summary(self, addresses):
         """store the nature of the addresses on the interfaces,
@@ -273,29 +272,29 @@ class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
                     # fqdn -> ip
                     ip = IPy.IP(socket.gethostbyname(addy))
 
-                self._counter('_iface_type', ip.version())
+                self._counter('iface_type', ip.version())
 
                 if ip.iptype() == 'PRIVATE':
-                    self._counter('_iface_pub', 'private')
+                    self._counter('iface_pub', 'private')
                 else:
-                    self._counter('_iface_pub', 'public')
+                    self._counter('iface_pub', 'public')
 
                 fqdn = socket.gethostbyaddr(ip.strNormal())[0]
                 extract = tldextract.extract(fqdn)
 
-                self._counter('_domains', extract.registered_domain)
+                self._counter('domains', extract.registered_domain)
 
     def ps_toolkit_version(self, version):
         """store the ps toolkit version."""
         if version:
             for ver in version:
-                self._counter('_ps_version', ver)
+                self._counter('ps_version', ver)
 
     # formatting, etc.
 
-    def _dict_to_stat(self, dname):
-        """convert a 'counter' dict to a sorted dict of percentages."""
-        sdict = getattr(self, dname)
+    def _dict_to_stats(self, dname):
+        """convert a 'counter' sub-dict to a sorted dict of percentages."""
+        sdict = self._counter_stats.get(dname)
         total = sum(sdict.values())
 
         stat_dict = OrderedDict()
@@ -315,18 +314,24 @@ class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
         """Return a sorted dict of the statistics."""
         doc = OrderedDict(
             [
-                ('domains', self._dict_to_stat('_domains')),
-                ('iface_version', self._dict_to_stat('_iface_type')),
-                ('public_private', self._dict_to_stat('_iface_pub')),
-                ('mtu_summary', self._dict_to_stat('_mtu')),
-                ('iface_speed', self._dict_to_stat('_speed')),
-                ('ps_version', self._dict_to_stat('_ps_version')),
+                ('domains', self._dict_to_stats('domains')),
+                ('iface_version', self._dict_to_stats('iface_type')),
+                ('public_private', self._dict_to_stats('iface_pub')),
+                ('mtu_summary', self._dict_to_stats('mtu')),
+                ('iface_speed', self._dict_to_stats('speed')),
+                ('ps_version', self._dict_to_stats('ps_version')),
             ]
         )
 
         return doc
 
+    @property
+    def host_count(self):
+        """get the host count"""
+        return self._host_count
+
     def __str__(self):
+        """str repr"""
         return json.dumps(self.to_dict(), indent=4)
 
 
@@ -367,14 +372,13 @@ class SlsStatistics(SlsReportBase):
             host-os-name | host-os-version | host-os-kernel[0] (list)
             architecture from end of kernel string
 
-            Domains???
-            Can use https://github.com/john-kurkowski/tldextract ?
-            search-query element in "outer" payload has the hostname
             """
 
             for res_host in result.get('host', []):
                 self.pretty_verbose(res_host)
 
+                # keep track of the first time we see an entry with interface
+                # information for development/--single.
                 if self._good_record is False and len(res_host.get('host-net-interfaces', [])) > 0:
                     self._log('query_hosts.run', 'found first good record')
                     self._good_record = True
@@ -384,7 +388,6 @@ class SlsStatistics(SlsReportBase):
                 self._capsule.ps_toolkit_version(res_host.get('pshost-toolkitversion'))
 
                 for iface in res_host.get('host-net-interfaces', []):
-                    # get stats about the interface
                     if not isinstance(iface, dict):
                         continue
                     self._capsule.mtu(iface.get('interface-mtu'))
@@ -398,7 +401,8 @@ class SlsStatistics(SlsReportBase):
                 self._log('query_hosts.break', '--single flag and a good record - breaking')
                 break
 
-        self._log('query_hosts.end', 'client lookup on {num} hosts'.format(num=self._query_count))
+        self._log('query_hosts.end',
+                  'client lookup on {num} hosts'.format(num=self._capsule.host_count))
 
 
 def main():
