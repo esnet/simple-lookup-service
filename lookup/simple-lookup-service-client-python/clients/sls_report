@@ -279,10 +279,14 @@ class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
                 else:
                     self._counter('iface_pub', 'public')
 
-                fqdn = socket.gethostbyaddr(ip.strNormal())[0]
-                extract = tldextract.extract(fqdn)
+                try:
+                    fqdn = socket.gethostbyaddr(ip.strNormal())[0]
+                    extract = tldextract.extract(fqdn)
 
-                self._counter('domains', extract.registered_domain)
+                    self._counter('domains', extract.registered_domain)
+                except socket.herror:
+                    # couldn't resolve, so skip it
+                    pass
 
     def ps_toolkit_version(self, version):
         """store the ps toolkit version."""
