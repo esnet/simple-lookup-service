@@ -12,6 +12,7 @@ import warnings
 from optparse import OptionParser
 
 import requests
+import IPy
 
 from sls_client.find_host_info import get_host_info_json
 
@@ -128,7 +129,16 @@ class SlsHostList(SlsReportBase):
         """
         Query the lookup hosts and generate a list of hostnames and also
         a count of the hosts that were reported.
+
+        force_host can be used to pass in a specific host and short circuit
+        the lookups. This is to speed develoment up.
         """
+        if self._options.host:
+            self._log('generate_host_list.force',
+                      'forcing host list: {f}'.format(f=self._options.host))
+            self._hosts = [self._options.host]
+            return
+
         for look in self._lookup_hosts:
             self._log('generate_host_list.run', 'querying {host}'.format(host=look))
             fail_msg = 'query to {host} failed'.format(host=look)
@@ -147,7 +157,7 @@ class SlsHostList(SlsReportBase):
 
             payload = json.loads(r.content)
 
-            self.pretty_verbose(payload)
+            # self.pretty_verbose(payload)
 
             for i in payload:
                 host = self._extract_hostname(i.get('host-name'))
@@ -195,6 +205,64 @@ class SlsHostList(SlsReportBase):
         return self._host_count
 
 
+class SlsStatCapsule(object):
+    """
+    Encapsulation class and accessors manage the statistics
+    from SlsStatstics.
+    """
+    def __init__(self):
+        self._host_count = 0
+        self._mtu = dict()
+        self._speed = dict()
+        self._iface_type = dict()
+        self._iface_pub = dict()
+
+    def tick_host_count(self):
+        """increment host count."""
+        self._host_count += 1
+
+    def _counter(self, dname, val):
+        """Interface to the underlying dicts meant to count instances of things."""
+        cdict = getattr(self, dname)
+        if val not in cdict:
+            cdict[val] = 0
+        cdict[val] += 1
+
+    def mtu(self, mtu):
+        """handle mtu values."""
+        for val in mtu:
+            self._counter('_mtu', val)
+
+    def nic_speed(self, speed):
+        """handle nic speed values."""
+
+        xlate = {
+            '40000000000': u'40Gbps',
+            '20000000000': u'20Gbps',
+            '10000000000': u'10Gbps',
+            '1000000000': u'1Gbps',
+            '2000000000': u'2Gbps',
+            '100000000': u'100Mbps',
+            '10000000': u'10Mbps',
+            '0': u'undefined',
+        }
+
+        for val in speed:
+            self._counter('_speed', xlate.get(val))
+
+    def iface_summary(self, addresses):
+        """handle the nature of the addresses on the interfaces."""
+        for addy in addresses:
+            ip = IPy.IP(addy)
+
+            self._counter('_iface_type', ip.version())
+
+            if ip.iptype() == 'PRIVATE':
+                self._counter('_iface_pub', 'private')
+            else:
+                self._counter('_iface_pub', 'public')
+
+
 class SlsStatistics(SlsReportBase):
     """
     Take an SlsHostList object and use the sls_client library to get
@@ -208,6 +276,9 @@ class SlsStatistics(SlsReportBase):
         self._sls_hosts = sls_hosts
 
         self._query_count = 0
+        self._good_record = False
+
+        self._capsule = SlsStatCapsule()
 
     def query_hosts(self):
         """
@@ -218,19 +289,46 @@ class SlsStatistics(SlsReportBase):
         self._log('query_hosts.begin', 'start')
 
         for host in self._sls_hosts.hosts:
+            if host.startswith('fiona'):
+                continue
             self._log('query_hosts.run', 'querying: {host}'.format(host=host))
 
-            # do stuff
+            result = json.loads(get_host_info_json(host))
 
-            self._query_count += 1
+            """
+            in main:
 
-            if self._options.single:
-                self._log('query_hosts.break', 'got --single flag - breaking')
+            host-os-name | host-os-version | host-os-kernel[0] (list)
+            pshost-toolkitversion
+            architecture from end of kernel string
+
+            Domains???
+            Can use https://github.com/john-kurkowski/tldextract ?
+            search-query element in "outer" payload has the hostname
+            """
+
+            for res_host in result.get('host', []):
+                self.pretty_verbose(res_host)
+
+                if self._good_record is False and len(res_host.get('host-net-interfaces', [])) > 0:
+                    self._log('query_hosts.run', 'found first good record')
+                    self._good_record = True
+
+                self._capsule.tick_host_count()
+
+                for iface in res_host.get('host-net-interfaces', []):
+                    # get stats about the interface
+                    self._capsule.mtu(iface.get('interface-mtu'))
+                    self._capsule.nic_speed(iface.get('interface-capacity'))
+                    self._capsule.iface_summary(iface.get('interface-addresses'))
+
+            if self._options.single and self._good_record:
+                self._log('query_hosts.break', '--single flag and a good record - breaking')
                 break
 
+        self._pp.pprint(self._capsule.__dict__)
+
         self._log('query_hosts.end', 'client lookup on {num} hosts'.format(num=self._query_count))
-
-
 
 
 def main():
@@ -243,6 +341,9 @@ def main():
     parser.add_option('-s', '--single',
                       dest='single', action='store_true', default=False,
                       help='Query a single host and then break. Primarily for development.')
+    parser.add_option('-H', '--host', metavar='HOST',
+                      type='string', dest='host', default=None,
+                      help='Force host list to use a single host. Primarily for development.')
     parser.add_option('-v', '--verbose',
                       dest='verbose', action='store_true', default=False,
                       help='Verbose output.')
