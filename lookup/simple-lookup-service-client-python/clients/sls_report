@@ -347,7 +347,8 @@ class SlsStatCapsule(SlsReportBase):  # pylint: disable=too-many-instance-attrib
             # notify if the lookup takes a while
             duration = round(time.time() - t_start, 2)
             if duration > 5:
-                self._log('iface_summary.notice', 'took {sec} seconds'.format(sec=duration))
+                self._log('iface_summary.notice', 'took {sec} seconds resolving {addr}'.format(
+                    sec=duration, addr=addy))
 
     def ps_toolkit_version(self, version):
         """store the ps toolkit version."""
@@ -389,7 +390,7 @@ class SlsStatCapsule(SlsReportBase):  # pylint: disable=too-many-instance-attrib
                 2
             )
 
-            stat_dict.update({order: (sdict.get(order), val,)})
+            stat_dict.update({str(order): (str(sdict.get(order)), str(val),)})
 
         return stat_dict
 
@@ -403,8 +404,8 @@ class SlsStatCapsule(SlsReportBase):  # pylint: disable=too-many-instance-attrib
                 ('mtu_summary', self._dict_to_stats('mtu')),
                 ('iface_speed', self._dict_to_stats('speed')),
                 ('ps_version', self._dict_to_stats('ps_version')),
-                ('os_info', self._dict_to_stats('os')),
                 ('architecture', self._dict_to_stats('arch')),
+                ('os_info', self._dict_to_stats('os')),
             ]
         )
 
@@ -515,7 +516,7 @@ def main():
     import jinja2
 
     tblock = """{{section}}:
-{% for key, val in _dict | dictsort %}{{key}} - {{val[0]}} - {{val[1]}} %
+{% for key, val in _dict | dictsort %}{{ key.ljust(25) }}{{ val[0].ljust(6) }}{{ val[1] }} %
 {% endfor %}"""
 
     template = jinja2.Template(tblock)
