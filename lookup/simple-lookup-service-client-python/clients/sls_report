@@ -13,6 +13,7 @@ import urlparse
 import warnings
 
 from collections import OrderedDict
+from multiprocessing.dummy import Pool
 from optparse import OptionParser
 
 import IPy
@@ -141,9 +142,20 @@ class SlsHostList(SlsReportBase):
         the lookups. This is to speed develoment up.
         """
 
+        hosts_processed = 0
+        ifaces_processed = 0
+
         for look in self._lookup_hosts:
+
+            if urlparse.urlparse(look).netloc.startswith('62'):
+                print 'skipping'
+                continue
+
             self._log('generate_host_list.run', 'querying {host}'.format(host=look))
             fail_msg = 'query to {host} failed'.format(host=look)
+
+            t_start = time.time()
+
             try:
                 r = requests.get(look, params=dict(type='host'))
             except requests.exceptions.ConnectionError as ex:
@@ -161,24 +173,13 @@ class SlsHostList(SlsReportBase):
 
             self.pretty_verbose(payload, level=4)
 
-            hosts_processed = 0
-            ifaces_processed = 0
-
             for i in payload:
                 if i.get('host-net-interfaces', None) is not None:
-                    new_iface_list = list()
-                    for ii in i.get('host-net-interfaces', []):
-                        upar = urlparse.urlparse(look)
-                        iface_url = upar.scheme + '://' + upar.netloc + '/' + ii
-                        try:
-                            rr = requests.get(iface_url)  # pylint: disable=invalid-name
-                        except requests.exceptions.ConnectionError as ex:
-                            continue
-                        if rr.status_code == 200 and rr.content:
-                            new_iface_list.append(json.loads(rr.content))
-                            ifaces_processed += 1
 
-                    i['host-net-interfaces'] = new_iface_list
+                    i['host-net-interfaces'] = self._get_interfaces(
+                        i.get('host-net-interfaces', []), look)
+
+                    ifaces_processed += len(i.get('host-net-interfaces', []))
 
                 self._hosts.append(i)
                 hosts_processed += 1
@@ -189,6 +190,9 @@ class SlsHostList(SlsReportBase):
                                   limit=self._options.limit))
                     break
 
+            self._log('generate_host_list.run', 'processed {host} in {sec} seconds'.format(
+                host=look, sec=round(time.time() - t_start, 2)))
+
             if self._options.single:
                 self._log('generate_host_list.break', 'got --single flag - breaking')
                 break
@@ -197,6 +201,43 @@ class SlsHostList(SlsReportBase):
         self._log('generate_host_list.end',
                   '{num} hosts and {inum} interfaces processed'.format(
                       num=hosts_processed, inum=ifaces_processed))
+
+    def _get_interfaces(self, iface_uris, look):
+        """launch threads and get the interface data."""
+
+        urls = list()
+
+        for i in iface_uris:
+            if not i:
+                continue
+            upar = urlparse.urlparse(look)
+            iface_url = upar.scheme + '://' + upar.netloc + '/' + i
+            urls.append(iface_url)
+
+        if urls:
+            pool = Pool(processes=len(urls))
+
+            ret = pool.map(self.quick_fetch, urls)
+
+            pool.close()
+            pool.join()
+
+            return [x for x in ret if x is not None]
+        else:
+            return list()
+
+    @staticmethod
+    def quick_fetch(url):
+        """method to get the interfaces."""
+        try:
+            r = requests.get(url)
+        except requests.exceptions.ConnectionError:
+            return None
+
+        if r.status_code == 200 and r.content:
+            return json.loads(r.content)
+        else:
+            return None
 
     @staticmethod
     def _extract_hostname(hlist):
@@ -410,8 +451,10 @@ class SlsStatistics(SlsReportBase):
 
         for res_host in self._sls_hosts.hosts:
 
-            self._log('query_hosts.run',
-                      'processing {host}'.format(host=res_host.get('host-name')[0]))
+            self._log('query_hosts.run', 'processing {host} [{i}/{len}]'.format(
+                host=res_host.get('host-name')[0],
+                i=self._capsule.host_count + 1,
+                len=len(self._sls_hosts.hosts)))
 
             self.pretty_verbose(res_host, level=2)
 
@@ -476,7 +519,7 @@ def main():
     import jinja2
 
     tblock = """{{section}}:
-{% for key, val in _dict | dictsort %}{{key}} - {{val[0]}} - {{val[1]}}
+{% for key, val in _dict | dictsort %}{{key}} - {{val[0]}} - {{val[1]}} %
 {% endfor %}"""
 
     template = jinja2.Template(tblock)
