@@ -408,14 +408,6 @@ class SlsStatistics(SlsReportBase):
             self._log('query_hosts.run', '{sec} seconds to answer query'.format(
                 sec=round(time.time() - start_t, 2)))
 
-            """
-            in main:
-
-            host-os-name | host-os-version | host-os-kernel[0] (list)
-            architecture from end of kernel string
-
-            """
-
             for res_host in result.get('host', []):
 
                 self.pretty_verbose(res_host, level=2)
@@ -449,6 +441,11 @@ class SlsStatistics(SlsReportBase):
                 self._log('query_hosts.break', '--single flag and a good record - breaking')
                 break
 
+            if self._options.limit and self._capsule.host_count >= self._options.limit:
+                self._log('query_hosts.limit', 'reached host limit of {limit} - breaking'.format(
+                    limit=self._options.limit))
+                break
+
         self._log('query_hosts.end',
                   'client lookup on {num} hosts'.format(num=self._capsule.host_count))
 
@@ -462,10 +459,13 @@ def main():
                       help='Source of the seed active hosts file (default: %default) .')
     parser.add_option('-s', '--single',
                       dest='single', action='store_true', default=False,
-                      help='Query a single host and then break. Primarily for development.')
+                      help='Query a single host and then break after a good record is found. Primarily for development.')  # pylint: disable=line-too-long
     parser.add_option('-H', '--host', metavar='HOST',
                       type='string', dest='host', default=None,
                       help='Force host list to use a single host. Primarily for development.')
+    parser.add_option('-l', '--limit', metavar='NUM',
+                      type='int', dest='limit', default=0,
+                      help='Query NUM hosts and exit.')
     parser.add_option('-v', '--verbose',
                       dest='verbose', action='count', default=0,
                       help='Verbose output.')
