@@ -147,10 +147,6 @@ class SlsHostList(SlsReportBase):
 
         for look in self._lookup_hosts:
 
-            if urlparse.urlparse(look).netloc.startswith('62'):
-                print 'skipping'
-                continue
-
             self._log('generate_host_list.run', 'querying {host}'.format(host=look))
             fail_msg = 'query to {host} failed'.format(host=look)
 
