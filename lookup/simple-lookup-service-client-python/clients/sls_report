@@ -73,12 +73,17 @@ class SlsReportBase(object):
         self._log = logger
         self._pp = pprint.PrettyPrinter(indent=4)
 
-    def pretty_verbose(self, obj):
+    def pretty_verbose(self, obj, level=1):
         """
-        Pretty print data structures if --verbose flag is on.
+        Pretty print data structures if --verbose flag is on (default)
+        or above a certain -v -v -v level.
         """
-        if self._options.verbose:
-            self._pp.pprint(obj)
+        if self._options.verbose >= level:
+            if isinstance(obj, SlsStatCapsule):
+                out = str(obj)
+            else:
+                out = self._pp.pformat(obj)
+            self._log('verbose.level.{level}'.format(level=level), out)
 
     @staticmethod
     def warn(msg):
@@ -161,7 +166,7 @@ class SlsHostList(SlsReportBase):
 
             payload = json.loads(r.content)
 
-            # self.pretty_verbose(payload)
+            self.pretty_verbose(payload, level=4)
 
             for i in payload:
                 host = self._extract_hostname(i.get('host-name'))
@@ -178,7 +183,7 @@ class SlsHostList(SlsReportBase):
                 self._log('generate_host_list.break', 'got --single flag - breaking')
                 break
 
-        self.pretty_verbose(self._hosts)
+        self.pretty_verbose(self._hosts, level=3)
         self._log('generate_host_list.end', '{num} hosts found'.format(num=self._host_count))
 
     @staticmethod
@@ -270,7 +275,11 @@ class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
                     ip = IPy.IP(addy)
                 except ValueError:
                     # fqdn -> ip
-                    ip = IPy.IP(socket.gethostbyname(addy))
+                    try:
+                        ip = IPy.IP(socket.gethostbyname(addy))
+                    except socket.gaierror:
+                        # time to give up
+                        return
 
                 self._counter('iface_type', ip.version())
 
@@ -336,7 +345,7 @@ class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
 
     def __str__(self):
         """str repr"""
-        return json.dumps(self.to_dict(), indent=4)
+        return json.dumps(self.to_dict())
 
 
 class SlsStatistics(SlsReportBase):
@@ -368,7 +377,16 @@ class SlsStatistics(SlsReportBase):
 
             self._log('query_hosts.run', 'querying: {host}'.format(host=host))
 
-            result = json.loads(get_host_info_json(host))
+            start_t = time.time()
+
+            try:
+                result = json.loads(get_host_info_json(host))
+            except socket.gaierror:
+                self._log('query_hosts.error', 'could not query {host}'.format(host=host))
+                continue
+
+            self._log('query_hosts.run', '{sec} seconds to answer query'.format(
+                sec=round(time.time() - start_t, 2)))
 
             """
             in main:
@@ -379,7 +397,8 @@ class SlsStatistics(SlsReportBase):
             """
 
             for res_host in result.get('host', []):
-                self.pretty_verbose(res_host)
+
+                self.pretty_verbose(res_host, level=2)
 
                 # keep track of the first time we see an entry with interface
                 # information for development/--single.
@@ -398,8 +417,7 @@ class SlsStatistics(SlsReportBase):
                     self._capsule.nic_speed(iface.get('interface-capacity'))
                     self._capsule.iface_summary(iface.get('interface-addresses'))
 
-            self._pp.pprint(self._capsule.__dict__)
-            print self._capsule
+            self.pretty_verbose(self._capsule)
 
             if self._options.single and self._good_record:
                 self._log('query_hosts.break', '--single flag and a good record - breaking')
@@ -423,7 +441,7 @@ def main():
                       type='string', dest='host', default=None,
                       help='Force host list to use a single host. Primarily for development.')
     parser.add_option('-v', '--verbose',
-                      dest='verbose', action='store_true', default=False,
+                      dest='verbose', action='count', default=0,
                       help='Verbose output.')
     options, _ = parser.parse_args()
 
