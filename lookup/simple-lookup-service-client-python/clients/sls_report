@@ -13,7 +13,7 @@ import urlparse
 import warnings
 
 from collections import OrderedDict
-from multiprocessing.dummy import Pool
+from multiprocessing.dummy import Pool, Process, Value
 from optparse import OptionParser
 
 import IPy
@@ -315,9 +315,13 @@ class SlsStatCapsule(SlsReportBase):  # pylint: disable=too-many-instance-attrib
         """store the nature of the addresses on the interfaces,
         ipv4/6, public/private, domains, etc."""
         if addresses:
-            t_start = time.time()
+
+            streamline = False
 
             for addy in addresses:
+
+                t_start = time.time()
+
                 try:
                     ip = IPy.IP(addy)
                 except ValueError:
@@ -335,20 +339,48 @@ class SlsStatCapsule(SlsReportBase):  # pylint: disable=too-many-instance-attrib
                 else:
                     self._counter('iface_pub', 'public')
 
-                try:
-                    fqdn = socket.gethostbyaddr(ip.strNormal())[0]
-                    extract = tldextract.extract(fqdn)
+                # this little song and dance here is becasue gethostbyaddr()
+                # does not have a timeout, nor does it honor when you set
+                # socket.setdefaulttimeout() - and some of these lookups
+                # take a good long while to timeout. So the theory here
+                # is to do the lookup in a single thread and call join() to
+                # enforce the desired timeout.
+                #
+                # Yes, the thread will keep running unti it times out but
+                # I don't think that'll be the end of the world vs. the
+                # performance increase. It's only a few lookups that cause
+                # things to hang, most bad ones raise the exception almost
+                # immediately.
+                #
+                # Also, if reverse lookup times out for the address on one
+                # interface, presume the other interfaces will as well and
+                # blow off domain resolution.
 
+                if streamline:
+                    print 'skipping'
+                    continue
+
+                def quick_ns(val, ip):
+                    """wrapper to run in thread to deal with timeouts."""
+                    try:
+                        val.value = socket.gethostbyaddr(ip)[0]
+                    except socket.herror:
+                        pass
+
+                val = Value('i', 0)  # a shared memory object
+                lookup = Process(target=quick_ns, args=(val, ip.strNormal()))
+                lookup.start()
+                lookup.join(8)
+
+                if val.value:
+                    extract = tldextract.extract(val.value)
                     self._counter('domains', extract.registered_domain)
-                except socket.herror:
-                    # couldn't resolve, so skip it
-                    pass
 
-            # notify if the lookup takes a while
-            duration = round(time.time() - t_start, 2)
-            if duration > 5:
-                self._log('iface_summary.notice', 'took {sec} seconds resolving {addr}'.format(
-                    sec=duration, addr=addy))
+                # notify if the lookup takes a while
+                duration = round(time.time() - t_start, 2)
+                if duration > 5:
+                    self._log('iface_summary.notice', 'took {sec} seconds resolving {addr}'.format(
+                        sec=duration, addr=addy))
 
     def ps_toolkit_version(self, version):
         """store the ps toolkit version."""
