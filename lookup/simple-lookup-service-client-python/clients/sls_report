@@ -9,6 +9,7 @@ import logging
 import pprint
 import socket
 import time
+import urlparse
 import warnings
 
 from collections import OrderedDict
@@ -17,8 +18,6 @@ from optparse import OptionParser
 import IPy
 import requests
 import tldextract
-
-from sls_client.find_host_info import get_host_info_json
 
 ACTIVE_HOSTS = 'http://ps-west.es.net/lookup/activehosts.json'
 
@@ -104,7 +103,6 @@ class SlsHostList(SlsReportBase):
         super(SlsHostList, self).__init__(options, logger)
 
         self._hosts = list()
-        self._host_count = 0
 
         self._lookup_hosts = list()
 
@@ -142,11 +140,6 @@ class SlsHostList(SlsReportBase):
         force_host can be used to pass in a specific host and short circuit
         the lookups. This is to speed develoment up.
         """
-        if self._options.host:
-            self._log('generate_host_list.force',
-                      'forcing host list: {f}'.format(f=self._options.host))
-            self._hosts = [self._options.host]
-            return
 
         for look in self._lookup_hosts:
             self._log('generate_host_list.run', 'querying {host}'.format(host=look))
@@ -168,23 +161,42 @@ class SlsHostList(SlsReportBase):
 
             self.pretty_verbose(payload, level=4)
 
-            for i in payload:
-                host = self._extract_hostname(i.get('host-name'))
+            hosts_processed = 0
+            ifaces_processed = 0
 
-                if host:
-                    # got a hostname, stash it and increment
-                    self._hosts.append(host)
-                    self._host_count += 1
-                elif i.get('type', None) and i.get('uri', None):
-                    # still worth counting
-                    self._host_count += 1
+            for i in payload:
+                if i.get('host-net-interfaces', None) is not None:
+                    new_iface_list = list()
+                    for ii in i.get('host-net-interfaces', []):
+                        upar = urlparse.urlparse(look)
+                        iface_url = upar.scheme + '://' + upar.netloc + '/' + ii
+                        try:
+                            rr = requests.get(iface_url)  # pylint: disable=invalid-name
+                        except requests.exceptions.ConnectionError as ex:
+                            continue
+                        if rr.status_code == 200 and rr.content:
+                            new_iface_list.append(json.loads(rr.content))
+                            ifaces_processed += 1
+
+                    i['host-net-interfaces'] = new_iface_list
+
+                self._hosts.append(i)
+                hosts_processed += 1
+
+                if self._options.limit and hosts_processed >= self._options.limit:
+                    self._log('query_hosts.limit',
+                              'reached host limit of {limit} - breaking'.format(
+                                  limit=self._options.limit))
+                    break
 
             if self._options.single:
                 self._log('generate_host_list.break', 'got --single flag - breaking')
                 break
 
         self.pretty_verbose(self._hosts, level=3)
-        self._log('generate_host_list.end', '{num} hosts found'.format(num=self._host_count))
+        self._log('generate_host_list.end',
+                  '{num} hosts and {inum} interfaces processed'.format(
+                      num=hosts_processed, inum=ifaces_processed))
 
     @staticmethod
     def _extract_hostname(hlist):
@@ -208,18 +220,14 @@ class SlsHostList(SlsReportBase):
         """hosts property"""
         return self._hosts
 
-    @property
-    def host_count(self):
-        """host_count property"""
-        return self._host_count
 
-
-class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
+class SlsStatCapsule(SlsReportBase):  # pylint: disable=too-many-instance-attributes
     """
     Encapsulation class and accessors manage the statistics
     from SlsStatstics.
     """
-    def __init__(self):
+    def __init__(self, options, logger):
+        super(SlsStatCapsule, self).__init__(options, logger)
         self._host_count = 0
         self._counter_stats = dict()
 
@@ -270,6 +278,8 @@ class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
         """store the nature of the addresses on the interfaces,
         ipv4/6, public/private, domains, etc."""
         if addresses:
+            t_start = time.time()
+
             for addy in addresses:
                 try:
                     ip = IPy.IP(addy)
@@ -296,6 +306,11 @@ class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
                 except socket.herror:
                     # couldn't resolve, so skip it
                     pass
+
+            # notify if the lookup takes a while
+            duration = round(time.time() - t_start, 2)
+            if duration > 5:
+                self._log('iface_summary.notice', 'took {sec} seconds'.format(sec=duration))
 
     def ps_toolkit_version(self, version):
         """store the ps toolkit version."""
@@ -383,7 +398,7 @@ class SlsStatistics(SlsReportBase):
         self._query_count = 0
         self._good_record = False
 
-        self._capsule = SlsStatCapsule()
+        self._capsule = SlsStatCapsule(options, logger)
 
     def query_hosts(self):
         """
@@ -393,61 +408,39 @@ class SlsStatistics(SlsReportBase):
 
         self._log('query_hosts.begin', 'start')
 
-        for host in self._sls_hosts.hosts:
+        for res_host in self._sls_hosts.hosts:
 
-            self._log('query_hosts.run', 'querying: {host}'.format(host=host))
+            self._log('query_hosts.run',
+                      'processing {host}'.format(host=res_host.get('host-name')[0]))
 
-            start_t = time.time()
+            self.pretty_verbose(res_host, level=2)
 
-            try:
-                result = json.loads(get_host_info_json(host))
-            except socket.gaierror:
-                self._log('query_hosts.error', 'could not query {host}'.format(host=host))
-                continue
+            self._capsule.tick_host_count()
 
-            self._log('query_hosts.run', '{sec} seconds to answer query'.format(
-                sec=round(time.time() - start_t, 2)))
+            self._capsule.ps_toolkit_version(res_host.get('pshost-toolkitversion'))
 
-            for res_host in result.get('host', []):
+            self._capsule.os_and_architecture(
+                res_host.get('host-os-name'),
+                res_host.get('host-os-version'),
+                res_host.get('host-os-kernel'),
+            )
 
-                self.pretty_verbose(res_host, level=2)
-
-                # keep track of the first time we see an entry with interface
-                # information for development/--single.
-                if self._good_record is False and len(res_host.get('host-net-interfaces', [])) > 0:
-                    self._log('query_hosts.run', 'found first good record')
-                    self._good_record = True
-
-                self._capsule.tick_host_count()
-
-                self._capsule.ps_toolkit_version(res_host.get('pshost-toolkitversion'))
-
-                self._capsule.os_and_architecture(
-                    res_host.get('host-os-name'),
-                    res_host.get('host-os-version'),
-                    res_host.get('host-os-kernel'),
-                )
-
-                for iface in res_host.get('host-net-interfaces', []):
-                    if not isinstance(iface, dict):
-                        continue
-                    self._capsule.mtu(iface.get('interface-mtu'))
-                    self._capsule.nic_speed(iface.get('interface-capacity'))
-                    self._capsule.iface_summary(iface.get('interface-addresses'))
+            for iface in res_host.get('host-net-interfaces', []):
+                if not isinstance(iface, dict):
+                    continue
+                self._capsule.mtu(iface.get('interface-mtu'))
+                self._capsule.nic_speed(iface.get('interface-capacity'))
+                self._capsule.iface_summary(iface.get('interface-addresses'))
 
             self.pretty_verbose(self._capsule)
 
-            if self._options.single and self._good_record:
-                self._log('query_hosts.break', '--single flag and a good record - breaking')
-                break
-
-            if self._options.limit and self._capsule.host_count >= self._options.limit:
-                self._log('query_hosts.limit', 'reached host limit of {limit} - breaking'.format(
-                    limit=self._options.limit))
-                break
-
         self._log('query_hosts.end',
                   'client lookup on {num} hosts'.format(num=self._capsule.host_count))
+
+    @property
+    def get_report(self):
+        """Get the raw statistics dict o' dicts."""
+        return self._capsule.to_dict()
 
 
 def main():
@@ -459,16 +452,13 @@ def main():
                       help='Source of the seed active hosts file (default: %default) .')
     parser.add_option('-s', '--single',
                       dest='single', action='store_true', default=False,
-                      help='Query a single host and then break after a good record is found. Primarily for development.')  # pylint: disable=line-too-long
-    parser.add_option('-H', '--host', metavar='HOST',
-                      type='string', dest='host', default=None,
-                      help='Force host list to use a single host. Primarily for development.')
+                      help='Query a single lookup host and then break. Primarily for development.')
     parser.add_option('-l', '--limit', metavar='NUM',
                       type='int', dest='limit', default=0,
-                      help='Query NUM hosts and exit.')
+                      help='Get NUM hosts from each lookup host and exit.')
     parser.add_option('-v', '--verbose',
                       dest='verbose', action='count', default=0,
-                      help='Verbose output.')
+                      help='Verbose output. Can take multiple flags for more output.')
     options, _ = parser.parse_args()
 
     try:
@@ -482,6 +472,16 @@ def main():
     # get detailed information on the hosts the host list
     report = SlsStatistics(lookup_hosts, options, _log)
     report.query_hosts()
+
+    import jinja2
+
+    tblock = """{{section}}:
+{% for key, val in _dict | dictsort %}{{key}} - {{val[0]}} - {{val[1]}}
+{% endfor %}"""
+
+    template = jinja2.Template(tblock)
+    for k, v in report.get_report.items():
+        print template.render(section=k.replace('_', ' ').title(), _dict=v)
 
 if __name__ == '__main__':
     main()

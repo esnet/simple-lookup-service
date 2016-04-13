@@ -30,6 +30,7 @@ setup(
         "voluptuous",
         "IPy==0.83",
         "tldextract==1.7.4",
+        "Jinja2==2.8",
     ],
     zip_safe=False,
     classifiers=[
