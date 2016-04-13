@@ -232,7 +232,7 @@ class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
     # stats to count numbers of things.
 
     def _counter(self, dname, val):
-        """Interface to the underlying dicts meant to count instances of things."""
+        """Interface to the underlying dict of dicts meant to count instances of things."""
 
         if dname not in self._counter_stats:
             self._counter_stats[dname] = dict()
@@ -303,6 +303,24 @@ class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
             for ver in version:
                 self._counter('ps_version', ver)
 
+    def os_and_architecture(self, os, version, kernel):  # pylint: disable=invalid-name
+        """handle storing OS/etc information."""
+
+        for i in os, version, kernel:
+            if not isinstance(i, list) or not len(i):
+                print 'skip'
+                return
+
+        os_info = '{os} {version} {kernel}'.format(
+            os=os[0], version=version[0], kernel=kernel[0]
+            )
+
+        self._counter('os', os_info)
+
+        arch = kernel[0].split('.')[-1]
+
+        self._counter('arch', arch)
+
     # formatting, etc.
 
     def _dict_to_stats(self, dname):
@@ -333,6 +351,8 @@ class SlsStatCapsule(object):  # pylint: disable=too-many-instance-attributes
                 ('mtu_summary', self._dict_to_stats('mtu')),
                 ('iface_speed', self._dict_to_stats('speed')),
                 ('ps_version', self._dict_to_stats('ps_version')),
+                ('os_info', self._dict_to_stats('os')),
+                ('architecture', self._dict_to_stats('arch')),
             ]
         )
 
@@ -409,6 +429,12 @@ class SlsStatistics(SlsReportBase):
                 self._capsule.tick_host_count()
 
                 self._capsule.ps_toolkit_version(res_host.get('pshost-toolkitversion'))
+
+                self._capsule.os_and_architecture(
+                    res_host.get('host-os-name'),
+                    res_host.get('host-os-version'),
+                    res_host.get('host-os-kernel'),
+                )
 
                 for iface in res_host.get('host-net-interfaces', []):
                     if not isinstance(iface, dict):
