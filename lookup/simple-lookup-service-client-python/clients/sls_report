@@ -436,13 +436,13 @@ class SlsStatCapsule(SlsReportBase):
         """Return a sorted dict of the statistics."""
         doc = OrderedDict(
             [
-                ('domains', self._dict_to_stats('domains')),
                 ('ipv', self._dict_to_stats('iface_type')),
                 ('public_private', self._dict_to_stats('iface_pub')),
                 ('mtu_summary', self._dict_to_stats('mtu')),
                 ('iface_speed', self._dict_to_stats('speed')),
                 ('ps_version', self._dict_to_stats('ps_version')),
                 ('architecture', self._dict_to_stats('arch')),
+                ('domains', self._dict_to_stats('domains')),
                 ('os_info', self._dict_to_stats('os')),
             ]
         )
@@ -476,17 +476,16 @@ class SlsStatistics(SlsReportBase):
 
         self._capsule = SlsStatCapsule(options, logger)
 
-    def query_hosts(self):
+    def process_hosts(self):
         """
-        Use the sls_client to lookup information on the hosts
-        in the SlsHostList.
+        Process the hosts that were gathered up from the lookup hosts.
         """
 
-        self._log('query_hosts.begin', 'start')
+        self._log('process_hosts.begin', 'start')
 
         for res_host in self._sls_hosts.hosts:
 
-            self._log('query_hosts.run', 'processing {host} [{i}/{len}]'.format(
+            self._log('process_hosts.run', 'processing {host} [{i}/{len}]'.format(
                 host=res_host.get('host-name')[0],
                 i=self._capsule.host_count + 1,
                 len=len(self._sls_hosts.hosts)))
@@ -519,7 +518,7 @@ class SlsStatistics(SlsReportBase):
 
             self.pretty_verbose(self._capsule)
 
-        self._log('query_hosts.end',
+        self._log('process_hosts.end',
                   'client lookup on {num} hosts'.format(num=self._capsule.host_count))
 
     @property
@@ -551,7 +550,7 @@ count   percent   os version and kernel
 
     def get_formatted_report(self):
         """Returns a formatted string of template output."""
-        fmt = ''
+        fmt = '\n'
 
         for k, v in self._report.items():
             if k == 'os_info':
@@ -597,7 +596,7 @@ def main():
 
     # get detailed information on the hosts the host list
     report = SlsStatistics(lookup_hosts, options, _log)
-    report.query_hosts()
+    report.process_hosts()
 
     formatter = SlsReportFormatter(report.get_report)
     print formatter
