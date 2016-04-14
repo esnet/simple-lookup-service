@@ -1,0 +1,15 @@
+#All caches are read-only
+
+queue:
+    - host: "ps-mexchg.es.net"
+      username: "abc"
+      password: "xyz"
+      vhost: "perfsonar"
+      port: 5672
+      exchange: "sls_exchange"
+      queries:
+        - "all"
+destination:
+    - type: "elastic"
+      url: "http://perfsonar-dev.es.net:9200/perfsonar/records"
+thread_pool: 120
