@@ -95,11 +95,7 @@ class SlsReportBase(object):
 class SlsHostList(SlsReportBase):
     """
     Query the activehost node, then the lookup hosts to generate a list
-    of perfSONAR hosts.
-
-    The host_count attribute/property is used because a lookup host might
-    report on a host, but not give a valid hostname. So just using
-    len(self._hosts) won't give an accurate count.
+    of perfSONAR hosts, and the interface information for each host.
     """
     def __init__(self, options, logger):
         super(SlsHostList, self).__init__(options, logger)
@@ -148,6 +144,8 @@ class SlsHostList(SlsReportBase):
 
         for look in self._lookup_hosts:
 
+            count_per_lookup_host = 0
+
             self._log('generate_host_list.run', 'querying {host}'.format(host=look))
             fail_msg = 'query to {host} failed'.format(host=look)
 
@@ -180,8 +178,9 @@ class SlsHostList(SlsReportBase):
 
                 self._hosts.append(i)
                 hosts_processed += 1
+                count_per_lookup_host += 1
 
-                if self._options.limit and hosts_processed >= self._options.limit:
+                if self._options.limit and count_per_lookup_host >= self._options.limit:
                     self._log('query_hosts.limit',
                               'reached host limit of {limit} - breaking'.format(
                                   limit=self._options.limit))
@@ -225,7 +224,7 @@ class SlsHostList(SlsReportBase):
 
     @staticmethod
     def quick_fetch(url):
-        """method to get the interfaces."""
+        """method to run in thread to get the interfaces."""
         try:
             r = requests.get(url)
         except requests.exceptions.ConnectionError:
@@ -235,23 +234,6 @@ class SlsHostList(SlsReportBase):
             return json.loads(r.content)
         else:
             return None
-
-    @staticmethod
-    def _extract_hostname(hlist):
-        """Get the hostname from the lookup service payload. The host-name
-        element will generally be a list with a single unicode element.
-        Sometimes there will be more than one element, and sometimes only
-        empty strings. Find the first valid string and return."""
-
-        host_name = None
-
-        if isinstance(hlist, list):
-            for i in hlist:
-                if i and isinstance(i, unicode):
-                    host_name = i
-                    break
-
-        return host_name
 
     @property
     def hosts(self):
@@ -354,8 +336,8 @@ class SlsStatCapsule(SlsReportBase):
                 # immediately.
                 #
                 # Also, if a reverse lookup times out for an address on one
-                # interface, presume any additional addresses will do the
-                # same so bail.
+                # interface, presume any additional addresses on this interface
+                # or other interfaces on the same host will do the same so bail.
 
                 if skip_reverse_dns:
                     self._log('iface_summary.skip', 'skipping lookup for {addy}'.format(addy=addy))
@@ -526,11 +508,17 @@ class SlsStatistics(SlsReportBase):
         """Get the raw statistics dict o' dicts."""
         return self._capsule.to_dict()
 
+    @property
+    def host_count(self):
+        """Get the underlying number of hosts from the capsule."""
+        return self._capsule.host_count
+
 
 class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
     """Wrapper class to produce the formatted output."""
-    def __init__(self, report):
+    def __init__(self, report, count):
         self._report = report
+        self._count = count
 
         # jinja template strings
         # default name/count/percent columns
@@ -550,7 +538,7 @@ count   percent   os version and kernel
 
     def get_formatted_report(self):
         """Returns a formatted string of template output."""
-        fmt = '\n'
+        fmt = '\nLookup data for {count} hosts:\n\n'.format(count=self._count)
 
         for k, v in self._report.items():
             if k == 'os_info':
@@ -598,7 +586,7 @@ def main():
     report = SlsStatistics(lookup_hosts, options, _log)
     report.process_hosts()
 
-    formatter = SlsReportFormatter(report.get_report)
+    formatter = SlsReportFormatter(report.get_report, report.host_count)
     print formatter
 
 if __name__ == '__main__':
