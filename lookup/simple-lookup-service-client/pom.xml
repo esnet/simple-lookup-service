@@ -59,7 +59,7 @@
         </dependency>
         <!-- lookup-service keywords -->
         <dependency>
-            <artifactId>simple-lookup-service-keywords</artifactId>
+            <artifactId>simple-lookup-service-common</artifactId>
             <groupId>net.es.lookup</groupId>
             <version>2.0-SNAPSHOT</version>
         </dependency>
