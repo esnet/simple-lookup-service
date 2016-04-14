@@ -11,7 +11,7 @@
     </properties>
 
     <modules>
-        <module>simple-lookup-service-keywords</module>
+        <module>simple-lookup-service-common</module>
         <module>simple-lookup-service-client</module>
         <module>simple-lookup-service-client-examples</module>
         <module>simple-lookup-service-server</module>
