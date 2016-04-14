@@ -1,0 +1,93 @@
+#!/bin/bash
+#
+# Init file for Lookup Service 
+# chkconfig: 2345 90 20
+# description: Lookup Service server. Used if using rpm to install
+#
+#
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+SHORT_NAME=lookup-service-subscriber
+LONG_NAME="Simple Lookup Service Subscriber"
+
+#LS variables
+HOME_PREFIX=/etc/$SHORT_NAME
+DIST_PREFIX=/opt/$SHORT_NAME
+BINDIR=$DIST_PREFIX/bin
+CONFDIR=$HOME_PREFIX
+RUNDIR=/var/run/$SHORT_NAME
+LOGDIR=/var/log/$SHORT_NAME
+QDATADIR=$DIST_PREFIX/data
+LOCK_FILE=/var/lock/subsys/$SHORT_NAME
+USER=lookup
+GROUP=lookup
+STOP_TIMEOUT=10
+RESTART_DELAY=10
+PIDFILE=${RUNDIR}/${SHORT_NAME}.pid
+JARFILE=$DIST_PREFIX/target/$SHORT_NAME-server.one-jar.jar
+LOOKUPSERVICE_CMD="$BINDIR/startSubscriber.sh $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.properties > /var/log/lookup-service-subscriber.out 2>&1 &"
+
+#functions
+start(){
+    echo -n $"Starting ${SHORT_NAME}: "
+    echo $LOOKUPSERVICE_CMD
+    daemon --pidfile=${PIDFILE} --user=${USER} $LOOKUPSERVICE_CMD
+    RETVAL=$?
+    [ $RETVAL = 0 ] && touch ${LOCK_FILE}
+    return $RETVAL
+}
+
+stop(){
+    echo -n $"Stopping ${SHORT_NAME}: "
+	killproc -p ${PIDFILE} -d ${STOP_TIMEOUT} java
+	RETVAL=$?
+	echo
+	[ $RETVAL = 0 ] && rm -f ${LOCK_FILE} ${PIDFILE}
+	sleep $STOP_TIMEOUT
+}
+
+#handle arguments
+ERROR=0
+ARGV="$@"
+if [ -z "$ARGV" ] ; then 
+    ARGS="help"
+fi
+
+for ARG in $@ $ARGS
+do
+    case $ARG in
+    start)
+        start
+	;;
+    stop)
+	    stop
+	;;
+    restart)
+    	stop
+    	sleep $RESTART_DELAY
+    	start
+	;;
+	status)
+	    status -p ${PIDFILE} ${SHORT_NAME}
+	;;
+    *)
+	echo "usage: $0 (start|stop|restart|help)"
+	cat <<EOF
+
+start      - start ${LONG_NAME}
+stop       - stop ${LONG_NAME}
+restart    - restart ${LONG_NAME} if running by sending a SIGHUP or start if 
+             not running
+status     - status of ${LONG_NAME}
+help       - this screen
+
+EOF
+	ERROR=2
+    ;;
+
+    esac
+
+done
+
+exit $ERROR

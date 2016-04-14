@@ -1,5 +1,8 @@
 package net.es.lookup.cache.service;
 
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import net.es.lookup.cache.agent.Destination;
 import net.es.lookup.cache.subscriber.SLSSubscriber;
 import net.es.lookup.cache.subscriber.Subscriber;
@@ -10,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
+
 /**
  * Author: sowmya
  * Date: 3/29/16
@@ -19,15 +24,20 @@ public class Invoker {
 
     private static SubscriberConfigReader subscriberConfigReader;
 
-    private static String subscriberConfigFile = "etc/subscriber.yml";
+    private static String configPath = "etc";
+
+    private static String subscriberConfigFile = "subscriber.yml";
 
     private static String logConfig = "./etc/log4j.properties";
 
+
     public static void main(String[] args) throws Exception{
+
+        parseArgs(args);
 
         System.setProperty("log4j.configuration", "file:" + logConfig);
 
-        SubscriberConfigReader.init(subscriberConfigFile);
+        SubscriberConfigReader.init(configPath+"/"+subscriberConfigFile);
         subscriberConfigReader = SubscriberConfigReader.getInstance();
 
 
@@ -87,6 +97,40 @@ public class Invoker {
         synchronized (blockingObject){
             blockingObject.wait();
         }
+    }
+
+
+
+    public static void parseArgs(String args[]) throws java.io.IOException {
+
+        OptionParser parser = new OptionParser();
+        parser.acceptsAll(asList("h", "?"), "show help then exit");
+        OptionSpec<String> CONFIG = parser.accepts("c", "configPath").withRequiredArg().ofType(String.class);
+        OptionSpec<String> LOGCONFIG = parser.accepts("l", "logConfig").withRequiredArg().ofType(String.class);
+
+        OptionSet options = parser.parse(args);
+
+        // check for help
+        if (options.has("?")) {
+
+            parser.printHelpOn(System.out);
+            System.exit(0);
+
+        }
+
+        if (options.has(CONFIG)) {
+
+            configPath = options.valueOf(CONFIG);
+            System.out.println("Config files Path:" + configPath);
+
+        }
+
+        if (options.has(LOGCONFIG)) {
+
+            logConfig = options.valueOf(LOGCONFIG);
+
+        }
+
     }
 
 }

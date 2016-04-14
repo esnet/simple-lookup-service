@@ -50,6 +50,13 @@
             <version>2.0-SNAPSHOT</version>
         </dependency>
 
+        <!-- command-line parsing -->
+        <dependency>
+            <groupId>net.sf.jopt-simple</groupId>
+            <artifactId>jopt-simple</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
