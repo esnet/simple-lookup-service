@@ -346,18 +346,17 @@ class SlsStatCapsule(SlsReportBase):  # pylint: disable=too-many-instance-attrib
                 # is to do the lookup in a single thread and call join() to
                 # enforce the desired timeout.
                 #
-                # Yes, the thread will keep running unti it times out but
+                # Yes, the thread will keep running unti it completes, but
                 # I don't think that'll be the end of the world vs. the
                 # performance increase. It's only a few lookups that cause
                 # things to hang, most bad ones raise the exception almost
                 # immediately.
                 #
-                # Also, if reverse lookup times out for the address on one
-                # interface, presume the other interfaces will as well and
-                # blow off domain resolution.
+                # Also, if a reverse lookup times out for an address on one
+                # interface, presume any additional addresses will do the
+                # same so bail.
 
                 if streamline:
-                    print 'skipping'
                     continue
 
                 def quick_ns(val, ip):
@@ -370,7 +369,7 @@ class SlsStatCapsule(SlsReportBase):  # pylint: disable=too-many-instance-attrib
                 val = Value('i', 0)  # a shared memory object
                 lookup = Process(target=quick_ns, args=(val, ip.strNormal()))
                 lookup.start()
-                lookup.join(8)
+                lookup.join(8)  # sorry buddy, time's up
 
                 if val.value:
                     extract = tldextract.extract(val.value)
@@ -379,6 +378,7 @@ class SlsStatCapsule(SlsReportBase):  # pylint: disable=too-many-instance-attrib
                 # notify if the lookup takes a while
                 duration = round(time.time() - t_start, 2)
                 if duration > 5:
+                    streamline = True
                     self._log('iface_summary.notice', 'took {sec} seconds resolving {addr}'.format(
                         sec=duration, addr=addy))
 
