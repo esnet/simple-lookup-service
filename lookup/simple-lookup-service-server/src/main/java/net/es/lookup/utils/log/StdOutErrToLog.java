@@ -11,14 +11,11 @@ package net.es.lookup.utils.log;
  */
 public class StdOutErrToLog {
 
-
         private static Logger LOG = Logger.getLogger(StdOutErrToLog.class);
 
         public static void redirectStdOutErrToLog(){
             System.setOut(createLoggingPrintStream(System.out));
             System.setErr(createLoggingPrintStream(System.err));
-
-            System.out.println("Hi");
         }
 
         private static PrintStream createLoggingPrintStream(final PrintStream printStream) {
@@ -41,9 +38,7 @@ public class StdOutErrToLog {
                     LOG.debug(o);
                 }
 
-
             };
 
         }
-
 }

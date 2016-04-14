@@ -17,6 +17,17 @@ public class QueueServiceConfigReader {
     private static final String DEFAULT_PATH = "etc";
     private static String configFile = DEFAULT_PATH + "/" + DEFAULT_FILE;
 
+
+
+
+    public static final String USERNAME ="username";
+    public static final String PASSWORD  = "password";
+    public static final String VHOST  = "vhost";
+
+
+    private String userName;
+    private String password;
+    private String vhost;
     private int port = 5672;
     private String host;
     private String protocol = "tcp";
@@ -99,6 +110,21 @@ public class QueueServiceConfigReader {
         return pushInterval;
     }
 
+    public String getUserName() {
+
+        return userName;
+    }
+
+    public String getPassword() {
+
+        return password;
+    }
+
+    public String getVhost() {
+
+        return vhost;
+    }
+
     private void setInfo(String configFile) {
 
         BaseConfigReader cfg = BaseConfigReader.getInstance();
@@ -108,7 +134,9 @@ public class QueueServiceConfigReader {
 
 
         try {
-
+            userName = (String) yamlMap.get(USERNAME);
+            password = (String) yamlMap.get(PASSWORD);
+            vhost = (String) yamlMap.get(VHOST);
             HashMap<String, Object> queueServiceMap = (HashMap) yamlMap.get("queue");
             host = (String) queueServiceMap.get("host");
             String service = (String) queueServiceMap.get("queueservice");

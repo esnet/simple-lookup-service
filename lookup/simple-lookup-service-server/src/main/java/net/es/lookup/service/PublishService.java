@@ -27,6 +27,33 @@ public class PublishService {
     private long maxInterval;
     private int maxPushEvents;
 
+
+    private String userName;
+    private String password;
+    private String vhost;
+    private int port = 5672;
+
+
+    private static boolean serviceOn=false;
+
+    private final int SCHEDULER_INTERVAL=30;
+
+    private PublishService(){
+    }
+
+    public static PublishService getInstance(){
+        if(instance == null){
+            createInstance();
+        }
+        return instance;
+    }
+
+    private static synchronized void createInstance(){
+        if (instance == null){
+            instance = new PublishService();
+        }
+    }
+
     public String getHost() {
 
         return host;
@@ -62,31 +89,58 @@ public class PublishService {
         return SCHEDULER_INTERVAL;
     }
 
-    private final int SCHEDULER_INTERVAL=30;
+    public static boolean isServiceOn() {
 
-
-    private PublishService(){
+        return serviceOn;
     }
 
-    public static PublishService getInstance(){
-        if(instance == null){
-            createInstance();
-        }
-        return instance;
+    public String getUserName() {
+
+        return userName;
     }
 
-    private static synchronized void createInstance(){
-        if (instance == null){
-            instance = new PublishService();
-        }
+    public void setUserName(String userName) {
+
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+
+        return password;
+    }
+
+    public void setPassword(String password) {
+
+        this.password = password;
+    }
+
+    public String getVhost() {
+
+        return vhost;
+    }
+
+    public void setVhost(String vhost) {
+
+        this.vhost = vhost;
+    }
+
+    public int getPort() {
+
+        return port;
+    }
+
+    public void setPort(int port) {
+
+        this.port = port;
     }
 
     public void startService(){
+        serviceOn=true;
         System.out.println("Starting publisher with host="+host+" maxPushEvents="+maxPushEvents + " maxInterval="+maxInterval);
 
         try {
 
-            RMQueue rmQueue = new RMQueue(host,maxPushEvents,maxInterval);
+            RMQueue rmQueue = new RMQueue(host,port,userName,password,vhost,maxPushEvents,maxInterval);
             String query = "all";
             Publisher.getInstance().addQueue(query,rmQueue);
 
@@ -95,9 +149,6 @@ public class PublishService {
         } catch (DuplicateEntryException e) {
             e.printStackTrace();
         }
-
-
-
         createPublishJob();
 
     }
@@ -126,5 +177,6 @@ public class PublishService {
 
     }
 
+    //TODO:Create a stop method
 
 }

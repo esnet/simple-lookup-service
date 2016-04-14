@@ -1,6 +1,10 @@
 #Queue
 queue:
-    queueservice: 'off'
-    host: 'localhost'
+    queueservice: 'on'
+    host: 'ps-mexchg.es.net'
     batch_size: 100
     push_interval: 300
+
+username: "abc"
+password: "xyz"
+vhost: "perfsonar"

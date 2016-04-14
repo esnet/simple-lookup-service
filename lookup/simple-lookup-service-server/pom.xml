@@ -127,7 +127,7 @@
 
         <!-- lookup-service-centos keywords -->
         <dependency>
-            <artifactId>simple-lookup-service-keywords</artifactId>
+            <artifactId>simple-lookup-service-common</artifactId>
             <groupId>net.es.lookup</groupId>
             <version>2.0-SNAPSHOT</version>
         </dependency>
@@ -179,9 +179,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <inherited>true</inherited>
-                <configuration>
-                     <argLine>-Xmx1024m</argLine>
-                </configuration>
             </plugin>
 
             <plugin>
