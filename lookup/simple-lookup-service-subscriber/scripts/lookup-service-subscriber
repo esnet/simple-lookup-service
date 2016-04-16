@@ -25,8 +25,8 @@ GROUP=lookup
 STOP_TIMEOUT=10
 RESTART_DELAY=10
 PIDFILE=${RUNDIR}/${SHORT_NAME}.pid
-JARFILE=$DIST_PREFIX/target/$SHORT_NAME-server.one-jar.jar
-LOOKUPSERVICE_CMD="$BINDIR/startSubscriber.sh $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.properties > /var/log/lookup-service-subscriber.out 2>&1 &"
+JARFILE=$DIST_PREFIX/target/$SHORT_NAME.one-jar.jar
+LOOKUPSERVICE_CMD="$BINDIR/startSubscriber.sh $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.properties > $LOGDIR/lookup-service-subscriber.out 2>&1 &"
 
 #functions
 start(){

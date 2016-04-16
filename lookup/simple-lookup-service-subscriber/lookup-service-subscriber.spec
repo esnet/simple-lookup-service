@@ -6,10 +6,10 @@
 %define log_dir /var/log/%{package_name}
 %define run_dir /var/run/%{package_name}
 %define data_dir /var/lib/%{package_name}
-%define relnum 4
+%define relnum 0
 
 Name:           %{package_name}
-Version:        2.0
+Version:        2.2
 Release:        %{relnum}
 Summary:        Lookup Service
 License:        distributable, see LICENSE
@@ -22,7 +22,6 @@ BuildRequires:  sed
 BuildArch:      noarch
 Requires:       java-openjdk >= 1.6.0
 Requires:       chkconfig
-Requires:	    mongodb-server
 
 %description
 Lookup Service is used to find registered services. 
@@ -56,17 +55,15 @@ mkdir -p %{buildroot}/%{config_base}
 mkdir -p %{buildroot}/etc/init.d
 
 #Copy jar files and scripts
-cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/target/*.jar %{buildroot}/%{install_base}/target/
-install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/bin/* %{buildroot}/%{install_base}/bin/
-install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scripts/lookup-service %{buildroot}/etc/init.d/%{package_name}
+cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/target/*.jar %{buildroot}/%{install_base}/target/
+install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/bin/* %{buildroot}/%{install_base}/bin/
+install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/scripts/lookup-service-subscriber %{buildroot}/etc/init.d/%{package_name}
 
 # Copy default config file
-cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/lookupservice.yaml %{buildroot}/%{config_base}/lookupservice.yaml
-cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/subscriber.yaml %{buildroot}/%{config_base}/subscriber.yaml
-cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/queueservice.yaml %{buildroot}/%{config_base}/queueservice.yaml
+cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/etc/subscriber.yaml %{buildroot}/%{config_base}/subscriber.yaml
 
 #Update log locations
-sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/log4j.properties > %{buildroot}/%{config_base}/log4j.properties
+sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/etc/log4j.properties > %{buildroot}/%{config_base}/log4j.properties
 
 %post
 #Create directory for PID files
@@ -82,9 +79,6 @@ chown lookup:lookup %{log_dir}
 mkdir -p %{data_dir}
 chown lookup:lookup %{data_dir}
 
-#Create queuedir
-mkdir -p %{install_base}/data
-chown lookup:lookup %{install_base}/data
 #Create symbolic links to latest version of jar files
 ##if update then delete old links
 if [ $1 == 2 ]; then
@@ -94,13 +88,12 @@ if [ $1 == 2 ]; then
   if [ -L %{install_base}/target/%{package_name}.one-jar.jar ]; then
       unlink %{install_base}/target/%{package_name}.one-jar.jar
   fi
-  if [ -L %{install_base}/target/%{package_name}-server.one-jar.jar ]; then
-     unlink %{install_base}/target/%{package_name}-server.one-jar.jar
+  if [ -L %{install_base}/target/%{package_name}.one-jar.jar ]; then
+     unlink %{install_base}/target/%{package_name}.one-jar.jar
   fi
 fi
-   ln -s %{install_base}/target/%{mvn_project_name}-server-%{version}-SNAPSHOT.one-jar.jar %{install_base}/target/%{package_name}-server.one-jar.jar
-chown lookup:lookup %{install_base}/target/%{package_name}-server.one-jar.jar
-#ln -s %{install_base}/target/%{mvn_project_name}-server-%{version}.jar %{install_base}/target/%{package_name}.jar
+   ln -s %{install_base}/target/%{mvn_project_name}-subscriber-%{version}-SNAPSHOT.one-jar.jar %{install_base}/target/%{package_name}.one-jar.jar
+chown lookup:lookup %{install_base}/target/%{package_name}.one-jar.jar
 
 #Configure service to start when machine boots
 /sbin/chkconfig --add %{package_name}
@@ -116,8 +109,8 @@ chown lookup:lookup %{install_base}/target/%{package_name}-server.one-jar.jar
 if [ $1 == 0 ]; then
     /sbin/chkconfig --del %{package_name}
     /sbin/service %{package_name} stop
-    if [ -L %{install_base}/target/%{package_name}-server.one-jar.jar ]; then
-        unlink %{install_base}/target/%{package_name}-server.one-jar.jar
+    if [ -L %{install_base}/target/%{package_name}.one-jar.jar ]; then
+        unlink %{install_base}/target/%{package_name}.one-jar.jar
     fi
     if [ -L %{install_base}/target/%{package_name}.one-jar.jar ]; then
         unlink %{install_base}/target/%{package_name}.one-jar.jar
