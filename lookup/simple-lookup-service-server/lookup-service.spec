@@ -1,15 +1,15 @@
 %define package_name lookup-service
 %define mvn_project_name simple-lookup-service
-%define mvn_project_list %{mvn_project_name}-keywords,%{mvn_project_name}-client,%{mvn_project_name}-server
+%define mvn_project_list %{mvn_project_name}-common,%{mvn_project_name}-client,%{mvn_project_name}-server
 %define install_base /opt/%{package_name}
 %define config_base /etc/%{package_name}
 %define log_dir /var/log/%{package_name}
 %define run_dir /var/run/%{package_name}
 %define data_dir /var/lib/%{package_name}
-%define relnum 4
+%define relnum 0
 
 Name:           %{package_name}
-Version:        2.0
+Version:        2.2
 Release:        %{relnum}
 Summary:        Lookup Service
 License:        distributable, see LICENSE
@@ -22,7 +22,7 @@ BuildRequires:  sed
 BuildArch:      noarch
 Requires:       java-openjdk >= 1.6.0
 Requires:       chkconfig
-Requires:	mongo-10gen-server
+Requires:	mongodb-org-server
 
 %description
 Lookup Service is used to find registered services. 
@@ -62,7 +62,6 @@ install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scrip
 
 # Copy default config file
 cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/lookupservice.yaml %{buildroot}/%{config_base}/lookupservice.yaml
-cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/subscriber.yaml %{buildroot}/%{config_base}/subscriber.yaml
 cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/queueservice.yaml %{buildroot}/%{config_base}/queueservice.yaml
 
 #Update log locations
