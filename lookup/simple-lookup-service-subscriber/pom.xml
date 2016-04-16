@@ -12,9 +12,17 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.es.lookup</groupId>
     <artifactId>simple-lookup-service-subscriber</artifactId>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>onejar-maven-plugin.googlecode.com</id>
+            <url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+
     <dependencies>
         <!--- Rabbitmq client -->
-
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
