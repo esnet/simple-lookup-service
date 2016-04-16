@@ -91,7 +91,7 @@
                 <executions>
                     <execution>
                         <configuration>
-                            <mainClass>net.es.lookup.service.Invoker</mainClass>
+                            <mainClass>net.es.lookup.cache.service.Invoker</mainClass>
                             <classifier>onejar</classifier>
                             <attachToBuild>true</attachToBuild>
                         </configuration>
