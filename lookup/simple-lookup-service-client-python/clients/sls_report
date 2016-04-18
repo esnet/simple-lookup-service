@@ -125,7 +125,7 @@ class SlsHostList(SlsReportBase):
         for i in host_source.get('hosts'):
             self._lookup_hosts.append(i.get('locator'))
 
-        self.pretty_verbose(self._lookup_hosts)
+        self.pretty_verbose(self._lookup_hosts, level=2)
 
         self._log('SlsHostList.init.end',
                   'got {count} lookup hosts'.format(count=len(self._lookup_hosts)))
@@ -141,6 +141,8 @@ class SlsHostList(SlsReportBase):
 
         hosts_processed = 0
         ifaces_processed = 0
+
+        gen_start = time.time()
 
         for look in self._lookup_hosts:
 
@@ -195,8 +197,9 @@ class SlsHostList(SlsReportBase):
 
         self.pretty_verbose(self._hosts, level=3)
         self._log('generate_host_list.end',
-                  '{num} hosts and {inum} interfaces processed'.format(
-                      num=hosts_processed, inum=ifaces_processed))
+                  '{num} hosts and {inum} interfaces processed in {sec} seconds'.format(
+                      num=hosts_processed, inum=ifaces_processed,
+                      sec=round(time.time() - gen_start, 2)))
 
     def _get_interfaces(self, iface_uris, look):
         """launch threads and get the interface data."""
@@ -250,8 +253,6 @@ class SlsStatCapsule(SlsReportBase):
         super(SlsStatCapsule, self).__init__(options, logger)
         self._host_count = 0
         self._counter_stats = dict()
-
-        self._pp = pprint.PrettyPrinter(indent=4)
 
     def tick_host_count(self):
         """increment host count."""
@@ -322,6 +323,12 @@ class SlsStatCapsule(SlsReportBase):
                 else:
                     self._counter('iface_pub', 'public')
 
+                # Don't generate the domain statistics unless toggled
+                # on since it will increase processing time.
+                if not self._options.domain:
+                    self._counter('domains', 'off: use --domain')
+                    continue
+
                 # this little song and dance here is becasue gethostbyaddr()
                 # does not have a timeout, nor does it honor when you set
                 # socket.setdefaulttimeout() - and some of these lookups
@@ -339,7 +346,7 @@ class SlsStatCapsule(SlsReportBase):
                 # interface, presume any additional addresses on this interface
                 # or other interfaces on the same host will do the same so bail.
 
-                if skip_reverse_dns:
+                if lookup_hang:
                     self._log('iface_summary.skip', 'skipping lookup for {addy}'.format(addy=addy))
                     continue
 
@@ -410,6 +417,7 @@ class SlsStatCapsule(SlsReportBase):
                 2
             )
 
+            # make everything strings for the templating library
             stat_dict.update({str(order): (str(sdict.get(order)), str(val),)})
 
         return stat_dict
@@ -467,12 +475,13 @@ class SlsStatistics(SlsReportBase):
 
         for res_host in self._sls_hosts.hosts:
 
-            self._log('process_hosts.run', 'processing {host} [{i}/{len}]'.format(
-                host=res_host.get('host-name')[0],
-                i=self._capsule.host_count + 1,
-                len=len(self._sls_hosts.hosts)))
+            if self._options.verbose:
+                self._log('process_hosts.run', 'processing {host} [{i}/{len}]'.format(
+                    host=res_host.get('host-name')[0],
+                    i=self._capsule.host_count + 1,
+                    len=len(self._sls_hosts.hosts)))
 
-            self.pretty_verbose(res_host, level=2)
+            self.pretty_verbose(res_host, level=3)
 
             self._capsule.tick_host_count()
 
@@ -498,7 +507,7 @@ class SlsStatistics(SlsReportBase):
                 skip_reverse_dns = self._capsule.iface_summary(
                     iface.get('interface-addresses'), skip_reverse_dns)
 
-            self.pretty_verbose(self._capsule)
+            self.pretty_verbose(self._capsule, level=2)
 
         self._log('process_hosts.end',
                   'client lookup on {num} hosts'.format(num=self._capsule.host_count))
@@ -523,8 +532,8 @@ class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
         # jinja template strings
         # default name/count/percent columns
         self._columns = """{{section}}:
-                         count    percent
-{% for key, val in _dict | dictsort %}  {{ key.ljust(25) }}{{ val[0].rjust(3) }}{{ val[1].rjust(9) }} %
+                          count    percent
+{% for key, val in _dict | dictsort %}  {{ key.ljust(25) }}{{ val[0].rjust(4) }}{{ val[1].rjust(9) }} %
 {% endfor %}"""
 
         # reversed count/percent/value format for os information.
@@ -536,7 +545,7 @@ count   percent   os version and kernel
         self._column_template = jinja2.Template(self._columns)
         self._reverse_template = jinja2.Template(self._reverse)
 
-    def get_formatted_report(self):
+    def get_console_report(self):
         """Returns a formatted string of template output."""
         fmt = '\nLookup data for {count} hosts:\n\n'.format(count=self._count)
 
@@ -553,7 +562,7 @@ count   percent   os version and kernel
 
     def __str__(self):
         """wrap this around the formatter."""
-        return self.get_formatted_report()
+        return self.get_console_report()
 
 
 def main():
@@ -569,10 +578,15 @@ def main():
     parser.add_option('-l', '--limit', metavar='NUM',
                       type='int', dest='limit', default=0,
                       help='Get NUM hosts from each lookup host and exit.')
+    parser.add_option('-d', '--domain',
+                      dest='domain', action='store_true', default=False,
+                      help='Generate reporting information on domains - increases processing time.')
     parser.add_option('-v', '--verbose',
                       dest='verbose', action='count', default=0,
                       help='Verbose output. Can take multiple flags for more output.')
     options, _ = parser.parse_args()
+
+    t_start = time.time()
 
     try:
         lookup_hosts = SlsHostList(options, _log)
@@ -585,6 +599,8 @@ def main():
     # get detailed information on the hosts the host list
     report = SlsStatistics(lookup_hosts, options, _log)
     report.process_hosts()
+
+    _log('main.end', 'completed in {sec} seconds'.format(sec=round(time.time() - t_start, 2)))
 
     formatter = SlsReportFormatter(report.get_report, report.host_count)
     print formatter
