@@ -144,12 +144,14 @@ class SlsHostList(SlsReportBase):
             self.warn('Unable to connect to {host} : {ex} - skipping'.format(
                 host=look, ex=str(ex)))
             self._log('generate_host_list.error', fail_msg)
+            return []
 
         if not r.status_code == 200:
             msg = 'non http 200 return code: {code} {msg}'.format(
                 code=r.status_code, msg=r.content)
             self.warn(msg)
             self._log('generate_host_list.error', fail_msg)
+            return []
 
         payload = json.loads(r.content)
 
@@ -179,6 +181,8 @@ class SlsHostList(SlsReportBase):
 
             t_start = time.time()
 
+            # Generate a dict of interface records, keyed by the uri element.
+
             iface_records = dict()
 
             iface_list = self._query_lookup_host(look, record_type='interface')
@@ -186,15 +190,20 @@ class SlsHostList(SlsReportBase):
             for i_rec in iface_list:
                 iface_records[i_rec.get('uri')] = i_rec
 
+            # now get the list of hosts.
+
             payload = self._query_lookup_host(look)
 
             self.pretty_verbose(payload, level=4)
+
+            # loop through list hosts, lookup the interfaces from the cached
+            # interface information, build main list and count.
 
             for i in payload:
                 if i.get('host-net-interfaces', None) is not None:
 
                     i['host-net-interfaces'] = self._get_interfaces(
-                        i.get('host-net-interfaces', []), look)
+                        i.get('host-net-interfaces', []), iface_records)
 
                     ifaces_processed += len(i.get('host-net-interfaces', []))
 
@@ -221,29 +230,22 @@ class SlsHostList(SlsReportBase):
                       num=hosts_processed, inum=ifaces_processed,
                       sec=round(time.time() - gen_start, 2)))
 
-    def _get_interfaces(self, iface_uris, look):
-        """launch threads and get the interface data."""
+    def _get_interfaces(self, iface_uris, iface_records):
+        """Generate a list of interface objects pulled from pre-cached
+        interface records."""
 
-        urls = list()
+        iface_objects = list()
 
         for i in iface_uris:
             if not i:
                 continue
-            upar = urlparse.urlparse(look)
-            iface_url = upar.scheme + '://' + upar.netloc + '/' + i
-            urls.append(iface_url)
+            if iface_records.get(i):
+                iface_objects.append(iface_records.get(i))
+            else:
+                if self._options.verbose:
+                    self._log('_get_interfaces.warn', 'cache miss for {u}'.format(u=i))
 
-        if urls:
-            pool = Pool(processes=len(urls))
-
-            ret = pool.map(self.quick_fetch, urls)
-
-            pool.close()
-            pool.join()
-
-            return [x for x in ret if x is not None]
-        else:
-            return list()
+        return iface_objects
 
     @staticmethod
     def quick_fetch(url):
@@ -408,7 +410,6 @@ class SlsStatCapsule(SlsReportBase):
 
         for i in os, version, kernel:
             if not isinstance(i, list) or not len(i):
-                print 'skip'
                 return
 
         os_info = '{os} {version} {kernel}'.format(
