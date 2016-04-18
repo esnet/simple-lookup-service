@@ -130,6 +130,33 @@ class SlsHostList(SlsReportBase):
         self._log('SlsHostList.init.end',
                   'got {count} lookup hosts'.format(count=len(self._lookup_hosts)))
 
+    def _query_lookup_host(self, look, record_type='host'):
+        """
+        Method to query the lookup hosts. Originally in generate_host_list
+        but another pass for interfaces was added.
+        """
+
+        fail_msg = 'query to {host}?type={t} failed'.format(host=look, t=record_type)
+
+        try:
+            r = requests.get(look, params=dict(type=record_type))
+        except requests.exceptions.ConnectionError as ex:
+            self.warn('Unable to connect to {host} : {ex} - skipping'.format(
+                host=look, ex=str(ex)))
+            self._log('generate_host_list.error', fail_msg)
+
+        if not r.status_code == 200:
+            msg = 'non http 200 return code: {code} {msg}'.format(
+                code=r.status_code, msg=r.content)
+            self.warn(msg)
+            self._log('generate_host_list.error', fail_msg)
+
+        payload = json.loads(r.content)
+
+        self.pretty_verbose(payload, level=4)
+
+        return payload
+
     def generate_host_list(self):
         """
         Query the lookup hosts and generate a list of hostnames and also
@@ -149,24 +176,17 @@ class SlsHostList(SlsReportBase):
             count_per_lookup_host = 0
 
             self._log('generate_host_list.run', 'querying {host}'.format(host=look))
-            fail_msg = 'query to {host} failed'.format(host=look)
 
             t_start = time.time()
 
-            try:
-                r = requests.get(look, params=dict(type='host'))
-            except requests.exceptions.ConnectionError as ex:
-                self.warn('Unable to connect to {host} : {ex} - skipping'.format(
-                    host=look, ex=str(ex)))
-                self._log('generate_host_list.error', fail_msg)
+            iface_records = dict()
 
-            if not r.status_code == 200:
-                msg = 'non http 200 return code: {code} {msg}'.format(
-                    code=r.status_code, msg=r.content)
-                self.warn(msg)
-                self._log('generate_host_list.error', fail_msg)
+            iface_list = self._query_lookup_host(look, record_type='interface')
 
-            payload = json.loads(r.content)
+            for i_rec in iface_list:
+                iface_records[i_rec.get('uri')] = i_rec
+
+            payload = self._query_lookup_host(look)
 
             self.pretty_verbose(payload, level=4)
 
