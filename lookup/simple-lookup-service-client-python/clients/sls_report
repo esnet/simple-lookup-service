@@ -104,6 +104,8 @@ class SlsHostList(SlsReportBase):
 
         self._lookup_hosts = list()
 
+        self._ls_count = dict()
+
         # Get the main lookup host list or it's a no go
 
         self._log('SlsHostList.init.run', 'fetching activehost list')
@@ -220,6 +222,10 @@ class SlsHostList(SlsReportBase):
             self._log('generate_host_list.run', 'processed {host} in {sec} seconds'.format(
                 host=look, sec=round(time.time() - t_start, 2)))
 
+            # count how many records we got for this host for report.
+            upar = urlparse.urlparse(look)
+            self._ls_count[upar.netloc] = len(payload)
+
             if self._options.single:
                 self._log('generate_host_list.break', 'got --single flag - breaking')
                 break
@@ -260,6 +266,11 @@ class SlsHostList(SlsReportBase):
     def hosts(self):
         """hosts property"""
         return self._hosts
+
+    @property
+    def ls_count(self):
+        """ls_count property."""
+        return self._ls_count
 
 
 class SlsStatCapsule(SlsReportBase):
@@ -333,7 +344,7 @@ class SlsStatCapsule(SlsReportBase):
                 if not i:
                     continue
                 self._counter('domains', i)
-                c_tmp[i] = 1
+                c_tmp[i.lower()] = 1
 
             # parse out the country
             for i in c_tmp.keys():
@@ -468,6 +479,7 @@ class SlsStatCapsule(SlsReportBase):
         """Return a sorted dict of the statistics."""
         doc = OrderedDict(
             [
+                ('ls_count', self._dict_to_stats('ls_count')),
                 ('ps_version', self._dict_to_stats('ps_version')),
                 ('iface_speed', self._dict_to_stats('speed')),
                 ('architecture', self._dict_to_stats('arch')),
@@ -481,6 +493,14 @@ class SlsStatCapsule(SlsReportBase):
         )
 
         return doc
+
+    def add_counter_dict(self, dname, cdict):
+        """
+        Allow the calling stats class to add a new dict to the
+        _counter_stats dict o' dicts for the report rather than
+        using _counter()
+        """
+        self._counter_stats[dname] = cdict
 
     @property
     def host_count(self):
@@ -508,6 +528,7 @@ class SlsStatistics(SlsReportBase):
         self._good_record = False
 
         self._capsule = SlsStatCapsule(options, logger)
+        self._capsule.add_counter_dict('ls_count', self._sls_hosts.ls_count)
 
     def process_hosts(self):
         """
