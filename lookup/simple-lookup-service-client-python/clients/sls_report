@@ -427,7 +427,8 @@ class SlsStatCapsule(SlsReportBase):
 
         stat_dict = OrderedDict()
 
-        for order in sorted(sdict.keys()):
+        # sort by the values, with the highest value first
+        for order in sorted(sdict, key=sdict.get, reverse=True):
 
             val = round(
                 (float(sdict.get(order)) / total) * 100,
@@ -550,7 +551,7 @@ class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
         # default name/count/percent columns
         self._columns = """{{section}}:
                           count    percent
-{% for key, val in _dict | dictsort %}  {{ key.ljust(25) }}{{ val[0].rjust(4) }}{{ val[1].rjust(9) }} %
+{% for key, val in _dict.iteritems() %}  {{ key.ljust(25) }}{{ val[0].rjust(4) }}{{ val[1].rjust(9) }} %
 {% endfor %}"""
 
         # reversed count/percent/value format for os information.
