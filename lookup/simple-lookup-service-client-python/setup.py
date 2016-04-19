@@ -22,7 +22,6 @@ setup(
         'clients/sls_report'
     ],
     install_requires=[
-        "IPy",
         "YURL",
         "isodate",
         "futures",
