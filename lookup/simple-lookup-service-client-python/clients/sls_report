@@ -444,14 +444,15 @@ class SlsStatCapsule(SlsReportBase):
         """Return a sorted dict of the statistics."""
         doc = OrderedDict(
             [
-                ('ipv', self._dict_to_stats('iface_type')),
-                ('public_private', self._dict_to_stats('iface_pub')),
-                ('mtu_summary', self._dict_to_stats('mtu')),
-                ('iface_speed', self._dict_to_stats('speed')),
                 ('ps_version', self._dict_to_stats('ps_version')),
-                ('domains', self._dict_to_stats('domains')),
+                ('iface_speed', self._dict_to_stats('speed')),
                 ('architecture', self._dict_to_stats('arch')),
                 ('os_info', self._dict_to_stats('os')),
+                ('ipv', self._dict_to_stats('iface_type')),
+                ('mtu_summary', self._dict_to_stats('mtu')),
+                ('public_private', self._dict_to_stats('iface_pub')),
+                ('country', {}),
+                ('domains', self._dict_to_stats('domains')),
             ]
         )
 
