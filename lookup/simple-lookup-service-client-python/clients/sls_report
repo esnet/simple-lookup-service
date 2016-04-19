@@ -13,7 +13,7 @@ import urlparse
 import warnings
 
 from collections import OrderedDict
-from multiprocessing.dummy import Pool, Process, Value
+from multiprocessing.dummy import Process, Value
 from optparse import OptionParser
 
 import IPy
@@ -313,39 +313,61 @@ class SlsStatCapsule(SlsReportBase):
             for val in speed:
                 self._counter('speed', xlate.get(val))
 
-    def iface_summary(self, addresses, skip_reverse_dns):
-        """store the nature of the addresses on the interfaces,
-        ipv4/6, public/private, domains, etc."""
-        if addresses:
+    def interface_summary(self, address, skip_reverse_dns):  # pylint: disable=too-many-branches
+        """
+        Gather the information from the interface objects.
+        Public/private, ipv4/6, domain and country information.
 
-            lookup_hang = skip_reverse_dns
+        Sorry pylint, it's gotta be this way.
+        """
 
-            for addy in addresses:
+        # if --domain flag not given, do a quick and dirty domain
+        # and country report from the group-domains element
+        # from the interface object.
 
-                t_start = time.time()
+        if not self._options.domain:
+            c_tmp = dict()
 
-                try:
-                    ip = IPy.IP(addy)
-                except ValueError:
-                    # fqdn -> ip
-                    try:
-                        ip = IPy.IP(socket.gethostbyname(addy))
-                    except socket.gaierror:
-                        # time to give up
-                        return
-
-                self._counter('iface_type', ip.version())
-
-                if ip.iptype() == 'PRIVATE':
-                    self._counter('iface_pub', 'private')
-                else:
-                    self._counter('iface_pub', 'public')
-
-                # Don't generate the domain statistics unless toggled
-                # on since it will increase processing time.
-                if not self._options.domain:
-                    self._counter('domains', 'off: use --domain')
+            for i in address.get('group-domains', []):
+                # domains
+                if not i:
                     continue
+                self._counter('domains', i)
+                c_tmp[i] = 1
+
+            # parse out the country
+            for i in c_tmp.keys():
+                extract = tldextract.extract(i)
+                self._counter('country', extract.suffix)
+
+        # get information on the addresses on the interface and
+        # do the "live" dns/country resolution if that was requested.
+
+        lookup_hang = skip_reverse_dns
+
+        for addy in address.get('interface-addresses', []):
+
+            t_start = time.time()
+
+            try:
+                ip = IPy.IP(addy)
+            except ValueError:
+                # fqdn -> ip
+                try:
+                    ip = IPy.IP(socket.gethostbyname(addy))
+                except socket.gaierror:
+                    # time to give up
+                    continue
+
+            self._counter('iface_type', ip.version())
+
+            if ip.iptype() == 'PRIVATE':
+                self._counter('iface_pub', 'private')
+            else:
+                self._counter('iface_pub', 'public')
+
+            # do the live lookup if that's what they requested.
+            if self._options.domain:
 
                 # this little song and dance here is becasue gethostbyaddr()
                 # does not have a timeout, nor does it honor when you set
@@ -365,7 +387,8 @@ class SlsStatCapsule(SlsReportBase):
                 # or other interfaces on the same host will do the same so bail.
 
                 if lookup_hang:
-                    self._log('iface_summary.skip', 'skipping lookup for {addy}'.format(addy=addy))
+                    self._log('interface_summary.skip', 'skipping lookup for {addy}'.format(
+                        addy=addy))
                     continue
 
                 def quick_ns(val, ip):
@@ -383,17 +406,18 @@ class SlsStatCapsule(SlsReportBase):
                 if val.value:
                     extract = tldextract.extract(val.value)
                     self._counter('domains', extract.registered_domain)
+                    self._counter('country', extract.suffix)
 
                 # notify if the lookup takes a while
                 duration = round(time.time() - t_start, 2)
                 if duration > 5:
-                    self._log('iface_summary.notice', 'took {sec} seconds resolving {addr}'.format(
+                    self._log('ip_summary.notice', 'took {sec} seconds resolving {addr}'.format(
                         sec=duration, addr=addy))
                     # stop additional iterations on this interface and subsequent
                     # interfaces on this host since they will likely hang as well.
                     lookup_hang = True
 
-            return lookup_hang
+        return lookup_hang
 
     def ps_toolkit_version(self, version):
         """store the ps toolkit version."""
@@ -451,7 +475,7 @@ class SlsStatCapsule(SlsReportBase):
                 ('ipv', self._dict_to_stats('iface_type')),
                 ('mtu_summary', self._dict_to_stats('mtu')),
                 ('public_private', self._dict_to_stats('iface_pub')),
-                ('country', {}),
+                ('country', self._dict_to_stats('country')),
                 ('domains', self._dict_to_stats('domains')),
             ]
         )
@@ -523,8 +547,10 @@ class SlsStatistics(SlsReportBase):
                 # if there was a reverse dns lookup hang in an interface,
                 # note that state and don't do the lookup in subsequent
                 # interfaces on this host.
-                skip_reverse_dns = self._capsule.iface_summary(
-                    iface.get('interface-addresses'), skip_reverse_dns)
+                # skip_reverse_dns = self._capsule.ip_summary(
+                #     iface.get('interface-addresses'), skip_reverse_dns)
+                skip_reverse_dns = self._capsule.interface_summary(
+                    iface, skip_reverse_dns)
 
             self.pretty_verbose(self._capsule, level=2)
 
@@ -588,7 +614,7 @@ def main():
                       help='Get NUM hosts from each lookup host and exit.')
     parser.add_option('-d', '--domain',
                       dest='domain', action='store_true', default=False,
-                      help='Generate reporting information on domains - increases processing time.')
+                      help='Live domain resolution - greatly increases processing time.')
     parser.add_option('-v', '--verbose',
                       dest='verbose', action='count', default=0,
                       help='Verbose output. Can take multiple flags for more output.')
