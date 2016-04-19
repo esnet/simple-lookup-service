@@ -408,8 +408,8 @@ class SlsStatCapsule(SlsReportBase):
             if not isinstance(i, list) or not len(i):
                 return
 
-        os_info = '{os} {version} {kernel}'.format(
-            os=os[0], version=version[0], kernel=kernel[0]
+        os_info = '{os} {version}'.format(
+            os=os[0], version=version[0]
             )
 
         self._counter('os', os_info)
@@ -449,8 +449,8 @@ class SlsStatCapsule(SlsReportBase):
                 ('mtu_summary', self._dict_to_stats('mtu')),
                 ('iface_speed', self._dict_to_stats('speed')),
                 ('ps_version', self._dict_to_stats('ps_version')),
-                ('architecture', self._dict_to_stats('arch')),
                 ('domains', self._dict_to_stats('domains')),
+                ('architecture', self._dict_to_stats('arch')),
                 ('os_info', self._dict_to_stats('os')),
             ]
         )
@@ -554,26 +554,15 @@ class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
 {% for key, val in _dict.iteritems() %}  {{ key.ljust(25) }}{{ val[0].rjust(4) }}{{ val[1].rjust(9) }} %
 {% endfor %}"""
 
-        # reversed count/percent/value format for os information.
-        self._reverse = """{{section}}:
-count   percent   os version and kernel
-{% for key, val in _dict | dictsort %}{{ val[0].rjust(5) }}{{ val[1].rjust(8) }} % - {{ key }}
-{% endfor %}"""
-
         self._column_template = jinja2.Template(self._columns)
-        self._reverse_template = jinja2.Template(self._reverse)
 
     def get_console_report(self):
         """Returns a formatted string of template output."""
         fmt = '\nLookup data for {count} hosts:\n\n'.format(count=self._count)
 
         for k, v in self._report.items():
-            if k == 'os_info':
-                fmt += self._reverse_template.render(
-                    section=k.replace('_', ' ').title(), _dict=v)
-            else:
-                fmt += self._column_template.render(
-                    section=k.replace('_', ' ').title(), _dict=v)
+            fmt += self._column_template.render(
+                section=k.replace('_', ' ').title(), _dict=v)
             fmt += '\n'
 
         return fmt
