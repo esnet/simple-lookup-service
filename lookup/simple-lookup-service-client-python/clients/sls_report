@@ -237,15 +237,11 @@ class SlsHostList(SlsReportBase):
         iface_objects = list()
 
         for i in iface_uris:
-            if not i:
-                continue
-            if iface_records.get(i):
-                iface_objects.append(iface_records.get(i))
-            else:
-                if self._options.verbose:
-                    self._log('_get_interfaces.warn', 'cache miss for {u}'.format(u=i))
+            iface = iface_records.get(i, None)
+            iface_objects.append(iface)
+            self.pretty_verbose(iface, level=4)
 
-        return iface_objects
+        return [x for x in iface_objects if x is not None]
 
     @staticmethod
     def quick_fetch(url):
