@@ -598,8 +598,8 @@ class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
         # jinja template strings
         # default name/count/percent columns
         self._columns = """{{section}}:
-                          count    percent
-{% for key, val in _dict.iteritems() %}  {{ key.ljust(25) }}{{ val[0].rjust(4) }}{{ val[1].rjust(9) }} %
+                                                     count    percent
+{% for key, val in _dict.iteritems() %}  {{ key.ljust(52) }}{{ val[0].rjust(4) }}{{ val[1].rjust(9) }} %
 {% endfor %}"""
 
         self._column_template = jinja2.Template(self._columns)
