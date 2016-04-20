@@ -11,8 +11,6 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 
-import java.util.ArrayList;
-
 
 public class
         LeaseManager {
@@ -120,7 +118,7 @@ public class
         LOG.info("Lease granted. ttl value: " + ttl);
 
         String convertedExpires = this.fmt.print(newExpires);
-        message.add(ReservedKeys.RECORD_EXPIRES, convertedExpires);
+        message.add(net.es.lookup.common.ReservedKeys.RECORD_EXPIRES, convertedExpires);
 
         LOG.info("Lease granted. expires value: " + convertedExpires);
         return true;

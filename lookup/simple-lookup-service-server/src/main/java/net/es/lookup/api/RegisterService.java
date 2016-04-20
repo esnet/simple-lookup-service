@@ -16,6 +16,7 @@ import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
 import net.es.lookup.publish.Publisher;
 import net.es.lookup.service.LookupService;
+import net.es.lookup.service.PublishService;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -109,8 +110,11 @@ public class RegisterService {
                         LOG.info("Register status: SUCCESS; exiting");
                         LOG.debug("response:" + responseString);
 
-                        Publisher publisher = Publisher.getInstance();
-                        publisher.eventNotification(res);
+                        if(PublishService.isServiceOn()){
+                            Publisher publisher = Publisher.getInstance();
+                            publisher.eventNotification(res);
+                        }
+
                         return responseString;
                     }else{
                         throw new InternalErrorException("Cannot access database");

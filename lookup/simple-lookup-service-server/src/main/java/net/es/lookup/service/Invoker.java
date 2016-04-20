@@ -128,11 +128,20 @@ public class Invoker {
             scheduler.schedule(job, trigger);
         }
 
-        PublishService publishService = PublishService.getInstance();
-        publishService.setMaxPushEvents(qcfg.getBatchSize());
-        publishService.setMaxInterval(qcfg.getPushInterval());
-        publishService.setHost(qcfg.getHost());
-        publishService.startService();
+        if(qcfg != null && qcfg.isServiceOn()){
+
+            PublishService publishService = PublishService.getInstance();
+            publishService.setMaxPushEvents(qcfg.getBatchSize());
+            publishService.setMaxInterval(qcfg.getPushInterval());
+            publishService.setHost(qcfg.getHost());
+            publishService.setPort(qcfg.getPort());
+            publishService.setUserName(qcfg.getUserName());
+            publishService.setPassword(qcfg.getPassword());
+            publishService.setVhost(qcfg.getVhost());
+            publishService.startService();
+
+        }
+
 
         JobDetail gcInvoker = newJob(MemoryManager.class)
                 .withIdentity("gc", "MemoryManagement")

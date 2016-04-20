@@ -3,18 +3,19 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.es.lookup</groupId>
     <artifactId>SIMPLELOOKUPSERVICE</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>2.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Simple Lookup Service</name>
     <properties>
-        <java.version>1.5</java.version>
+        <java.version>1.6</java.version>
     </properties>
 
     <modules>
-        <module>simple-lookup-service-keywords</module>
+        <module>simple-lookup-service-common</module>
         <module>simple-lookup-service-client</module>
         <module>simple-lookup-service-client-examples</module>
         <module>simple-lookup-service-server</module>
+        <module>simple-lookup-service-subscriber</module>
     </modules>
     <build>
         <pluginManagement>
