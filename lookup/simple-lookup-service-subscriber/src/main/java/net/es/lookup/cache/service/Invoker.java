@@ -26,7 +26,7 @@ public class Invoker {
 
     private static String configPath = "etc";
 
-    private static String subscriberConfigFile = "subscriber.yml";
+    private static String subscriberConfigFile = "subscriber.yaml";
 
     private static String logConfig = "./etc/log4j.properties";
 
