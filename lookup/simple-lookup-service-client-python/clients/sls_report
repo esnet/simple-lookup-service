@@ -100,11 +100,11 @@ class SlsHostList(SlsReportBase):
     def __init__(self, options, logger):
         super(SlsHostList, self).__init__(options, logger)
 
+        self._lookup_hosts = list()  # the ls hosts
+        self._ls_count = dict()  # records per ls host
+
         self._hosts = list()
-
-        self._lookup_hosts = list()
-
-        self._ls_count = dict()
+        self._host_map = dict()
 
         # Get the main lookup host list or it's a no go
 
@@ -263,7 +263,7 @@ class SlsHostList(SlsReportBase):
             return None
 
     @property
-    def hosts(self):
+    def host_list(self):
         """hosts property"""
         return self._hosts
 
@@ -476,7 +476,8 @@ class SlsStatCapsule(SlsReportBase):
         return stat_dict
 
     def to_dict(self):
-        """Return a sorted dict of the statistics."""
+        """Return a sorted dict of the statistics. The order of the tuples
+        in the OrderedDict defines how the report is ordered."""
         doc = OrderedDict(
             [
                 ('ls_count', self._dict_to_stats('ls_count')),
@@ -537,7 +538,7 @@ class SlsStatistics(SlsReportBase):
 
         self._log('process_hosts.begin', 'start')
 
-        for res_host in self._sls_hosts.hosts:
+        for res_host in self._sls_hosts.host_list:
 
             if self._options.verbose:
                 self._log('process_hosts.run', 'processing {host} [{i}/{len}]'.format(
@@ -632,10 +633,10 @@ def main():
                       help='Query a single lookup host and then break. Primarily for development.')
     parser.add_option('-l', '--limit', metavar='NUM',
                       type='int', dest='limit', default=0,
-                      help='Get NUM hosts from each lookup host and exit.')
+                      help='Limit to NUM hosts from each lookup host.')
     parser.add_option('-d', '--domain',
                       dest='domain', action='store_true', default=False,
-                      help='Live domain resolution - greatly increases processing time.')
+                      help='Live domain resolution - greatly increases accuracy and processing time.')  # pylint: disable=line-too-long
     parser.add_option('-v', '--verbose',
                       dest='verbose', action='count', default=0,
                       help='Verbose output. Can take multiple flags for more output.')
