@@ -86,6 +86,11 @@ class SlsReportBase(object):
                 out = self._pp.pformat(obj)
             self._log('verbose.level.{level}'.format(level=level), out)
 
+    def verbose_log(self, event, msg):
+        """Log message if --verbose is on."""
+        if self._options.verbose:
+            self._log(event, msg)
+
     @staticmethod
     def warn(msg):
         """raise a custom warning."""
@@ -210,17 +215,18 @@ class SlsHostList(SlsReportBase):
 
                     ifaces_processed += len(i.get('host-net-interfaces', []))
 
-                if not len(i.get('host-name', [])):
-                    self._log('generate_host_list.error'
-                              'record missing hostname - skipping {rec}'.format(
-                                  rec=i))
+                hname = self._get_hostname(i.get('host-name', []))
+
+                if not hname:
+                    self.verbose_log('generate_host_list.error',
+                                     'record missing hostname - skipping {rec}'.format(
+                                         rec=i))
                     continue
 
-                hname = i.get('host-name')[0]
                 # check for duplicate entries
                 if hname in self._host_map:
-                    self._log('generate_host_list.warn',
-                              'duplicate found for {host}'.format(host=hname))
+                    self.verbose_log('generate_host_list.warn',
+                                     'duplicate found for {host}'.format(host=hname))
                     self._duplicates += 1
                     count_per_lookup_host -= 1  # don't count this one then
 
@@ -264,6 +270,18 @@ class SlsHostList(SlsReportBase):
             self.pretty_verbose(iface, level=4)
 
         return [x for x in iface_objects if x is not None]
+
+    @staticmethod
+    def _get_hostname(hlist):
+        """try to extract a valid hostname from the host-name element list."""
+        hname = None
+
+        for i in hlist:
+            if i:
+                hname = i
+                break
+
+        return hname
 
     @staticmethod
     def quick_fetch(url):
@@ -561,11 +579,10 @@ class SlsStatistics(SlsReportBase):
 
         for res_host in self._sls_hosts.host_list:
 
-            if self._options.verbose:
-                self._log('process_hosts.run', 'processing {host} [{i}/{len}]'.format(
-                    host=res_host.get('host-name')[0],
-                    i=self._capsule.host_count + 1,
-                    len=len(self._sls_hosts.host_list)))
+            self.verbose_log('process_hosts.run', 'processing {host} [{i}/{len}]'.format(
+                host=res_host.get('host-name')[0],
+                i=self._capsule.host_count + 1,
+                len=len(self._sls_hosts.host_list)))
 
             self.pretty_verbose(res_host, level=3)
 
