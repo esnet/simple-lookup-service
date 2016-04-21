@@ -103,8 +103,9 @@ class SlsHostList(SlsReportBase):
         self._lookup_hosts = list()  # the ls hosts
         self._ls_count = dict()  # records per ls host
 
-        self._hosts = list()
-        self._host_map = dict()
+        self._host_map = dict()  # key: hostname/value: record object
+
+        self._duplicates = 0  # count dupe host records
 
         # Get the main lookup host list or it's a no go
 
@@ -209,7 +210,22 @@ class SlsHostList(SlsReportBase):
 
                     ifaces_processed += len(i.get('host-net-interfaces', []))
 
-                self._hosts.append(i)
+                if not len(i.get('host-name', [])):
+                    self._log('generate_host_list.error'
+                              'record missing hostname - skipping {rec}'.format(
+                                  rec=i))
+                    continue
+
+                hname = i.get('host-name')[0]
+                # check for duplicate entries
+                if hname in self._host_map:
+                    self._log('generate_host_list.warn',
+                              'duplicate found for {host}'.format(host=hname))
+                    self._duplicates += 1
+                    count_per_lookup_host -= 1  # don't count this one then
+
+                self._host_map[hname] = i
+
                 hosts_processed += 1
                 count_per_lookup_host += 1
 
@@ -224,13 +240,13 @@ class SlsHostList(SlsReportBase):
 
             # count how many records we got for this host for report.
             upar = urlparse.urlparse(look)
-            self._ls_count[upar.netloc] = len(payload)
+            self._ls_count[upar.netloc] = count_per_lookup_host
 
             if self._options.single:
                 self._log('generate_host_list.break', 'got --single flag - breaking')
                 break
 
-        self.pretty_verbose(self._hosts, level=3)
+        self.pretty_verbose(self._host_map, level=3)
         self._log('generate_host_list.end',
                   '{num} hosts and {inum} interfaces processed in {sec} seconds'.format(
                       num=hosts_processed, inum=ifaces_processed,
@@ -265,7 +281,12 @@ class SlsHostList(SlsReportBase):
     @property
     def host_list(self):
         """hosts property"""
-        return self._hosts
+        return self._host_map.values()
+
+    @property
+    def duplicates(self):
+        """duplicates property."""
+        return self._duplicates
 
     @property
     def ls_count(self):
@@ -544,7 +565,7 @@ class SlsStatistics(SlsReportBase):
                 self._log('process_hosts.run', 'processing {host} [{i}/{len}]'.format(
                     host=res_host.get('host-name')[0],
                     i=self._capsule.host_count + 1,
-                    len=len(self._sls_hosts.hosts)))
+                    len=len(self._sls_hosts.host_list)))
 
             self.pretty_verbose(res_host, level=3)
 
@@ -589,12 +610,18 @@ class SlsStatistics(SlsReportBase):
         """Get the underlying number of hosts from the capsule."""
         return self._capsule.host_count
 
+    @property
+    def duplicates(self):
+        """Get the duplicates from the underlying host list object."""
+        return self._sls_hosts.duplicates
+
 
 class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
     """Wrapper class to produce the formatted output."""
-    def __init__(self, report, count):
+    def __init__(self, report, count, duplicates):
         self._report = report
         self._count = count
+        self._duplicates = duplicates
 
         # jinja template strings
         # default name/count/percent columns
@@ -607,7 +634,11 @@ class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
 
     def get_console_report(self):
         """Returns a formatted string of template output."""
-        fmt = '\nLookup data for {count} hosts:\n\n'.format(count=self._count)
+        fmt = '\nLookup data for {count} hosts ({dupe} duplicates found):\n\n'.format(
+            count=self._count, dupe=self._duplicates)
+
+        if self._duplicates == 1:
+            fmt = fmt.replace('duplicates', 'duplicate')
 
         for k, v in self._report.items():
             fmt += self._column_template.render(
@@ -658,7 +689,7 @@ def main():
 
     _log('main.end', 'completed in {sec} seconds'.format(sec=round(time.time() - t_start, 2)))
 
-    formatter = SlsReportFormatter(report.get_report, report.host_count)
+    formatter = SlsReportFormatter(report.get_report, report.host_count, report.duplicates)
     print formatter
 
 if __name__ == '__main__':
