@@ -86,9 +86,9 @@ class SlsReportBase(object):
                 out = self._pp.pformat(obj)
             self._log('verbose.level.{level}'.format(level=level), out)
 
-    def verbose_log(self, event, msg):
+    def verbose_log(self, event, msg, level=1):
         """Log message if --verbose is on."""
-        if self._options.verbose:
+        if self._options.verbose >= level:
             self._log(event, msg)
 
     @staticmethod
@@ -220,7 +220,7 @@ class SlsHostList(SlsReportBase):
                 if not hname:
                     self.verbose_log('generate_host_list.error',
                                      'record missing hostname - skipping {rec}'.format(
-                                         rec=i))
+                                         rec=self._pp.pformat(i)))
                     continue
 
                 # check for duplicate entries
@@ -582,7 +582,7 @@ class SlsStatistics(SlsReportBase):
             self.verbose_log('process_hosts.run', 'processing {host} [{i}/{len}]'.format(
                 host=res_host.get('host-name')[0],
                 i=self._capsule.host_count + 1,
-                len=len(self._sls_hosts.host_list)))
+                len=len(self._sls_hosts.host_list)), level=2)
 
             self.pretty_verbose(res_host, level=3)
 
