@@ -388,7 +388,10 @@ class SlsStatCapsule(SlsReportBase):
             # parse out the country
             for i in c_tmp.keys():
                 extract = tldextract.extract(i)
-                self._counter('country', extract.suffix)
+                if extract.suffix.strip():
+                    self._counter('country', extract.suffix)
+                else:
+                    self._counter('country', 'unknown')
 
         # get information on the addresses on the interface and
         # do the "live" dns/country resolution if that was requested.
@@ -456,7 +459,10 @@ class SlsStatCapsule(SlsReportBase):
                 if val.value:
                     extract = tldextract.extract(val.value)
                     self._counter('domains', extract.registered_domain)
-                    self._counter('country', extract.suffix)
+                    if extract.suffix.strip():
+                        self._counter('country', extract.suffix)
+                    else:
+                        self._counter('country', 'unknown')
 
                 # notify if the lookup takes a while
                 duration = round(time.time() - t_start, 2)
@@ -484,7 +490,7 @@ class SlsStatCapsule(SlsReportBase):
 
         os_info = '{os} {version}'.format(
             os=os[0], version=version[0]
-            )
+        )
 
         self._counter('os', os_info)
 
@@ -524,10 +530,10 @@ class SlsStatCapsule(SlsReportBase):
                 ('iface_speed', self._dict_to_stats('speed')),
                 ('architecture', self._dict_to_stats('arch')),
                 ('os_info', self._dict_to_stats('os')),
-                ('ipv', self._dict_to_stats('iface_type')),
+                ('ipv4/v6', self._dict_to_stats('iface_type')),
                 ('mtu_summary', self._dict_to_stats('mtu')),
                 ('public_private', self._dict_to_stats('iface_pub')),
-                ('country', self._dict_to_stats('country')),
+                ('top_level_domain/country', self._dict_to_stats('country')),
                 ('domains', self._dict_to_stats('domains')),
             ]
         )
@@ -642,7 +648,7 @@ class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
 
         # jinja template strings
         # default name/count/percent columns
-        self._columns = """{{section}}:
+        self._columns = """{{section}} ({{count}}):
                                                      count    percent
 {% for key, val in _dict.iteritems() %}  {{ key.ljust(52) }}{{ val[0].rjust(4) }}{{ val[1].rjust(9) }} %
 {% endfor %}"""
@@ -659,7 +665,7 @@ class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
 
         for k, v in self._report.items():
             fmt += self._column_template.render(
-                section=k.replace('_', ' ').title(), _dict=v)
+                section=k.replace('_', ' ').title(), _dict=v, count=len(v.keys()))
             fmt += '\n'
 
         return fmt
