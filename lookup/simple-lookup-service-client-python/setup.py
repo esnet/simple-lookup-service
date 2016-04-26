@@ -1,29 +1,35 @@
 #!/usr/bin/env python
 
 from setuptools import setup
-from setuptools import find_packages
 
 setup(
     name="sls-client",
     version="1.0.12",
     description="A python client for the Simple Lookup Service",
     long_description=open("README.rst").read(),
-    author=["Andrew Sides","Sowmya Balasubramanian"],
-    author_email=["asides@es.net","sowmya@es.net"],
+    author=["Andrew Sides", "Sowmya Balasubramanian"],
+    author_email=["asides@es.net", "sowmya@es.net"],
     url="https://github.com/esnet/python-sls-client",
     license="3-clause BSD License",
     package_data={
-        "sls-client":["sls-client/LICENSE"]
+        "sls-client": ["sls-client/LICENSE"]
     },
     packages=['sls_client'],
-    scripts=['clients/sls_dig','clients/find_ps_ma', 'clients/sls_text_search'],
+    scripts=[
+        'clients/sls_dig',
+        'clients/find_ps_ma',
+        'clients/sls_text_search',
+        'clients/sls_report'
+    ],
     install_requires=[
-        "IPy",
         "YURL",
         "isodate",
         "futures",
         "requests",
-        "voluptuous"
+        "voluptuous",
+        "IPy==0.83",
+        "tldextract==1.7.4",
+        "Jinja2==2.8",
     ],
     zip_safe=False,
     classifiers=[
