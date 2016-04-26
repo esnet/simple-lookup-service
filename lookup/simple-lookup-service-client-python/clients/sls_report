@@ -65,6 +65,11 @@ def _log(event, msg):
     log.info('event=%s id=%s %s', event, int(time.time()), msg)
 
 
+def _dummy_log(event, msg):  # pylint: disable=unused-argument
+    """used to completely silence default logging."""
+    pass
+
+
 class SlsReportBase(object):
     """
     Base class for other report classes.
@@ -126,7 +131,7 @@ class SlsHostList(SlsReportBase):
                 host=options.active_source,
                 code=r.status_code,
                 msg=r.content
-                ))
+            ))
 
         host_source = json.loads(r.content)
 
@@ -694,12 +699,21 @@ def main():
     parser.add_option('-v', '--verbose',
                       dest='verbose', action='count', default=0,
                       help='Verbose output. Can take multiple flags for more output.')
+    parser.add_option('-q', '--quiet',
+                      dest='quiet', action='store_true', default=False,
+                      help='Silence all default log output - meant for cron.')
     options, _ = parser.parse_args()
 
     t_start = time.time()
 
+    # silence even default logging
+    if options.quiet:
+        _logger = _dummy_log
+    else:
+        _logger = _log
+
     try:
-        lookup_hosts = SlsHostList(options, _log)
+        lookup_hosts = SlsHostList(options, _logger)
     except SlsReportException as ex:
         print str(ex)
         return -1
@@ -707,10 +721,10 @@ def main():
     lookup_hosts.generate_host_list()
 
     # get detailed information on the hosts the host list
-    report = SlsStatistics(lookup_hosts, options, _log)
+    report = SlsStatistics(lookup_hosts, options, _logger)
     report.process_hosts()
 
-    _log('main.end', 'completed in {sec} seconds'.format(sec=round(time.time() - t_start, 2)))
+    _logger('main.end', 'completed in {sec} seconds'.format(sec=round(time.time() - t_start, 2)))
 
     formatter = SlsReportFormatter(report.get_report, report.host_count, report.duplicates)
     print formatter
