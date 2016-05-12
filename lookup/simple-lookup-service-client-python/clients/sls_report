@@ -341,6 +341,17 @@ class SlsStatCapsule(SlsReportBase):
     def _counter(self, dname, val):
         """Interface to the underlying dict of dicts meant to count instances of things."""
 
+        # strip the strings to iron out empty string, none, etc...
+        # empty strings of variable len() were creating multiple bogus entries.
+
+        if isinstance(val, int):
+            # make the ints into strings - should just be ipv4/6 info - due
+            # to bulletproofing in the _dict_to_stats() method.
+            val = str(val)
+        else:
+            if val is None or not val.strip():
+                val = 'unknown'
+
         if dname not in self._counter_stats:
             self._counter_stats[dname] = dict()
 
@@ -508,6 +519,19 @@ class SlsStatCapsule(SlsReportBase):
 
         self._counter('arch', arch)
 
+    def hardware_and_vm(self, hvm, manufacturer, product):
+        """process vm and product information."""
+
+        info = dict(
+            vm=self.first_element(hvm),
+            manufacturer=self.first_element(manufacturer),
+            productname=self.first_element(product)
+        )
+
+        for k, v in info.items():
+            if v is not None and k is not None:
+                self._counter(k, v)
+
     # formatting, etc.
 
     def _dict_to_stats(self, dname):
@@ -526,7 +550,16 @@ class SlsStatCapsule(SlsReportBase):
             )
 
             # make everything strings for the templating library
-            stat_dict.update({str(order): (str(sdict.get(order)), str(val),)})
+
+            # NOTE: any keys (order) that are integers (ipv4/6) have
+            # been xformed to strings in the _counter() method.
+
+            try:
+                order = str(order)
+            except UnicodeEncodeError:
+                order = unicode(order)  # pylint: disable=redefined-variable-type
+
+            stat_dict.update({order: (str(sdict.get(order)), str(val),)})
 
         return stat_dict
 
@@ -540,6 +573,9 @@ class SlsStatCapsule(SlsReportBase):
                 ('iface_speed', self._dict_to_stats('speed')),
                 ('architecture', self._dict_to_stats('arch')),
                 ('os_info', self._dict_to_stats('os')),
+                ('manufacturer', self._dict_to_stats('manufacturer')),
+                ('product_name', self._dict_to_stats('productname')),
+                ('vm', self._dict_to_stats('vm')),
                 ('ipv4/v6', self._dict_to_stats('iface_type')),
                 ('mtu_summary', self._dict_to_stats('mtu')),
                 ('public_private', self._dict_to_stats('iface_pub')),
@@ -612,11 +648,11 @@ class SlsStatistics(SlsReportBase):
                 res_host.get('host-os-kernel'),
             )
 
-            # self._capsule.hardware_and_vm(
-            #     res_host.get('host-vm'),
-            #     res_host.get('host-manufacturer'),
-            #     res_host.get('host-productname'),
-            # )
+            self._capsule.hardware_and_vm(
+                res_host.get('host-vm'),
+                res_host.get('host-manufacturer'),
+                res_host.get('host-productname'),
+            )
 
             # reset this when processing a new host
             skip_reverse_dns = False
@@ -681,7 +717,7 @@ class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
 
         for k, v in self._report.items():
             fmt += self._column_template.render(
-                section=k.replace('_', ' ').title(), _dict=v, count=len(v.keys()))
+                section=k.replace('_', ' ').title(), _dict=v, count=len(v.keys())).encode('utf-8')
             fmt += '\n'
 
         return fmt
