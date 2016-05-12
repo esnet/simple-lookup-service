@@ -101,6 +101,22 @@ class SlsReportBase(object):
         """raise a custom warning."""
         warnings.warn(msg, SlsReportWarning, stacklevel=2)
 
+    @staticmethod
+    def first_element(obj):
+        """Get the first valid element from a list.  This is for json elements
+        that are theoretically lists of a single element, or like hostname,
+        it's unpredictable what index the first valid element willb at."""
+
+        element = None
+
+        if isinstance(obj, list):
+            for i in obj:
+                if i:
+                    element = i
+                    break
+
+        return element
+
 
 class SlsHostList(SlsReportBase):
     """
@@ -220,7 +236,8 @@ class SlsHostList(SlsReportBase):
 
                     ifaces_processed += len(i.get('host-net-interfaces', []))
 
-                hname = self._get_hostname(i.get('host-name', []))
+                # do we have a hostname?
+                hname = self.first_element(i.get('host-name', []))
 
                 if not hname:
                     self.verbose_log('generate_host_list.error',
@@ -275,18 +292,6 @@ class SlsHostList(SlsReportBase):
             self.pretty_verbose(iface, level=4)
 
         return [x for x in iface_objects if x is not None]
-
-    @staticmethod
-    def _get_hostname(hlist):
-        """try to extract a valid hostname from the host-name element list."""
-        hname = None
-
-        for i in hlist:
-            if i:
-                hname = i
-                break
-
-        return hname
 
     @staticmethod
     def quick_fetch(url):
@@ -606,6 +611,12 @@ class SlsStatistics(SlsReportBase):
                 res_host.get('host-os-version'),
                 res_host.get('host-os-kernel'),
             )
+
+            # self._capsule.hardware_and_vm(
+            #     res_host.get('host-vm'),
+            #     res_host.get('host-manufacturer'),
+            #     res_host.get('host-productname'),
+            # )
 
             # reset this when processing a new host
             skip_reverse_dns = False
