@@ -23,7 +23,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static com.mongodb.client.model.Filters.lte;
+import static com.mongodb.client.model.Filters.*;
 
 
 public class ServiceDAOMongoDb {
@@ -106,7 +106,7 @@ public class ServiceDAOMongoDb {
      */
     public Message queryAndPublishService(Message message, Message queryRequest, Message operators) throws DatabaseException, DuplicateEntryException {
 
-       Message response;
+        Message response;
 
         //check for duplicates
         try {
@@ -118,12 +118,8 @@ public class ServiceDAOMongoDb {
             throw new DatabaseException("Error inserting record");
         }
 
-        Map<String, Object> services = message.getMap();
-        DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-        DateTime dt = fmt.parseDateTime(message.getExpires());
-
-        Date timestamp = dt.toDate();
-        services.put("_timestamp", timestamp);
+        Message timestampedMessage = addTimestamp(message);
+        Map<String, Object> services = timestampedMessage.getMap();
 
         Document doc = new Document();
         doc.putAll(services);
@@ -162,7 +158,9 @@ public class ServiceDAOMongoDb {
             Document query = new Document();
             query.put(ReservedKeys.RECORD_URI, serviceid);
 
-            Document updateObject = new Document("$set",new Document(updateRequest.getMap()));
+            Message timestampedMessage = addTimestamp(updateRequest);
+
+            Document updateObject = new Document("$set",new Document(timestampedMessage.getMap()));
             try {
                 FindOneAndUpdateOptions updateOptions = new FindOneAndUpdateOptions();
                 updateOptions.returnDocument(ReturnDocument.AFTER);
@@ -170,9 +168,7 @@ public class ServiceDAOMongoDb {
                 Document result = (Document)coll.findOneAndUpdate(query, updateObject, updateOptions);
 
                 if (result != null) {
-                     result.remove("_timestamp");
-                     result.remove("_id");
-                    response = new Message(result);
+                    response = toMessage(result);
                 } else {
                     throw new DatabaseException("Error renewing record");
                 }
@@ -214,13 +210,7 @@ public class ServiceDAOMongoDb {
 
             while (cursor.hasNext()) {
                 Document tmp = (Document)cursor.next();
-                if(tmp.containsKey("_id")){
-                    tmp.remove("_id");
-                }
-                if(tmp.containsKey("_timestamp")){
-                    tmp.remove("_timestamp");
-                }
-                Message dbObjectMessage = new Message(tmp);
+                Message dbObjectMessage = toMessage(tmp);
                 result.add(dbObjectMessage);
                 tmp=null;
             }
@@ -524,6 +514,7 @@ public class ServiceDAOMongoDb {
         if(doc != null){
             doc.remove("_timestamp");
             doc.remove("_id");
+            doc.remove("_lastUpdated");
             result = new Message(doc);
         }else{
             result = new Message();
@@ -545,5 +536,46 @@ public class ServiceDAOMongoDb {
 
     }
 
+    /*
+    * Finds records that were updated between start and end date
+    * */
+    public List<Message> findRecordsInTimeRange(Date start, Date end) throws DatabaseException {
+
+        List<Message> result = new ArrayList<Message>();
+
+        try {
+
+
+            //System.out.println("MongoDB query:"+query.toJson());
+            FindIterable resultIterator = coll.find(and(gt("_lastUpdated", start), lte("_lastUpdated", end)));
+            MongoCursor cursor = resultIterator.iterator();
+
+            while (cursor.hasNext()) {
+                Document tmp = (Document) cursor.next();
+                Message dbObjectMessage = toMessage(tmp);
+                result.add(dbObjectMessage);
+                tmp=null;
+            }
+        } catch (MongoException e) {
+
+            throw new DatabaseException(e.getMessage());
+
+        }
+        return result;
+
+    }
+
+
+    private Message addTimestamp(Message message){
+
+        DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+        DateTime dt = fmt.parseDateTime(message.getExpires());
+
+        Date timestamp = dt.toDate();
+        message.add("_timestamp", timestamp);
+        message.add("_lastUpdated", new Date());
+        return message;
+
+    }
 
 }

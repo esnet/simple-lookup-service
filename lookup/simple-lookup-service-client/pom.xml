@@ -5,7 +5,7 @@
     <parent>
         <artifactId>SIMPLELOOKUPSERVICE</artifactId>
         <groupId>net.es.lookup</groupId>
-        <version>2.0-SNAPSHOT</version>
+        <version>2.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -61,7 +61,7 @@
         <dependency>
             <artifactId>simple-lookup-service-keywords</artifactId>
             <groupId>net.es.lookup</groupId>
-            <version>2.0-SNAPSHOT</version>
+            <version>2.1-SNAPSHOT</version>
         </dependency>
         <!-- yaml configuration -->
         <dependency>
