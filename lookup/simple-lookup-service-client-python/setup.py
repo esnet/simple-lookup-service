@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="sls-client",
-    version="1.0.12",
+    version="1.0.14",
     description="A python client for the Simple Lookup Service",
     long_description=open("README.rst").read(),
     author=["Andrew Sides", "Sowmya Balasubramanian"],
