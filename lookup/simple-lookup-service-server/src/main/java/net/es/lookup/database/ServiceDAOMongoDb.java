@@ -106,7 +106,7 @@ public class ServiceDAOMongoDb {
      */
     public Message queryAndPublishService(Message message, Message queryRequest, Message operators) throws DatabaseException, DuplicateEntryException {
 
-       Message response;
+        Message response;
 
         //check for duplicates
         try {
@@ -118,13 +118,8 @@ public class ServiceDAOMongoDb {
             throw new DatabaseException("Error inserting record");
         }
 
-        Map<String, Object> services = message.getMap();
-        DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-        DateTime dt = fmt.parseDateTime(message.getExpires());
-
-        Date timestamp = dt.toDate();
-        services.put("_timestamp", timestamp);
-        services.put("_lastUpdated", new Date());
+        Message timestampedMessage = addTimestamp(message);
+        Map<String, Object> services = timestampedMessage.getMap();
 
         Document doc = new Document();
         doc.putAll(services);
@@ -163,7 +158,9 @@ public class ServiceDAOMongoDb {
             Document query = new Document();
             query.put(ReservedKeys.RECORD_URI, serviceid);
 
-            Document updateObject = new Document("$set",new Document(updateRequest.getMap()));
+            Message timestampedMessage = addTimestamp(updateRequest);
+
+            Document updateObject = new Document("$set",new Document(timestampedMessage.getMap()));
             try {
                 FindOneAndUpdateOptions updateOptions = new FindOneAndUpdateOptions();
                 updateOptions.returnDocument(ReturnDocument.AFTER);
@@ -565,6 +562,18 @@ public class ServiceDAOMongoDb {
 
         }
         return result;
+
+    }
+
+    private Message addTimestamp(Message message){
+
+        DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+        DateTime dt = fmt.parseDateTime(message.getExpires());
+
+        Date timestamp = dt.toDate();
+        message.add("_timestamp", timestamp);
+        message.add("_lastUpdated", new Date());
+        return message;
 
     }
 
