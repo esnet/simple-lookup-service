@@ -265,7 +265,7 @@ public class DatabaseTest {
             Message response = database.updateService(uri,message);
 
             assertEquals(message.getURI(),response.getURI());
-            assertEquals("2",response.getKey("test-id"));
+            assertEquals(message.getExpires(),response.getExpires());
 
         } catch (DatabaseException e) {
             fail("Database exception: " + e.getMessage());
