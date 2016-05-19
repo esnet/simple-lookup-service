@@ -261,9 +261,8 @@ public class DatabaseTest {
 
         try {
             String uri = message.getURI();
-            Message updateFields = new Message();
-            updateFields.add("test-id", String.valueOf(2));
-            Message response = database.updateService(uri,updateFields);
+            leaseManager.requestLease(message);
+            Message response = database.updateService(uri,message);
 
             assertEquals(message.getURI(),response.getURI());
             assertEquals("2",response.getKey("test-id"));
