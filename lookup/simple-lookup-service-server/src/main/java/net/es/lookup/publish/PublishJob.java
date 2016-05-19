@@ -7,6 +7,8 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+import java.util.Date;
+
 /**
  * Author: sowmya
  * Date: 3/8/16
@@ -20,28 +22,12 @@ public class PublishJob implements Job {
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-       /* JobDataMap data = jobExecutionContext.getJobDetail().getJobDataMap();
 
-        Publisher publisherObject = (Publisher)data.get(PUBLISHER);
+        Date now = new Date();
 
-        Set<String> queues =  publisherObject.getAllQueues();
+        long start = now.getTime();
 
-        ServiceDAOMongoDb dbInstance = DBPool.getDb("lookup");
-        for(String queueName: queues){
-            Date lastPushed = publisherObject.getLastPushed();
-            try {
-                List<Message> messages = dbInstance.queryRecordsAfterTime(lastPushed);
-                publisherObject.publish(queueName,messages);
-
-            } catch (DatabaseException e) {
-                e.printStackTrace();
-            } catch (PubSubQueueException e) {
-                e.printStackTrace();
-            }
-
-        }
-
-        publisherObject.setLastPushed(new Date());*/
+        System.out.println("Executing PublishJob"+start);
 
         JobDataMap data = jobExecutionContext.getJobDetail().getJobDataMap();
 
@@ -54,6 +40,11 @@ public class PublishJob implements Job {
         } catch (PubSubQueueException e) {
             e.printStackTrace();
         }
+
+        Date end = new Date();
+        long endTime = end.getTime();
+        long totalProcessingTime = endTime-start;
+        System.out.println("Total time to Execute PublishJob"+jobExecutionContext.getFireInstanceId()+totalProcessingTime);
 
 
     }

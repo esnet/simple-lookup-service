@@ -23,15 +23,14 @@ import static org.quartz.TriggerBuilder.newTrigger;
 public class PublisherScheduler implements Job {
 
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+        Date now = new Date();
 
-        System.out.println("Executing Publisher Scheduler");
+        long start = now.getTime();
+
+        System.out.println("Executing Publisher Scheduler"+start);
 
         Publisher publisher = Publisher.getInstance();
         Collection<Queue> queues = publisher.getAllQueues();
-
-        Date now = new Date();
-
-
 
         ServiceDAOMongoDb db = DBPool.getDb("lookup");
 
@@ -50,12 +49,11 @@ public class PublisherScheduler implements Job {
                 List<Message> messages = null;
                 try {
                     //DB Optimization - Query only if there are any events
-                    if(queue.getCurrentPushEvents()>0){
-                        System.out.println("Querying time range:"+queue.getLastPushed().toString()+"---"+now.toString());
+                    if(queue.getCurrentPushEvents()>0) {
+                        System.out.println("Querying time range:" + queue.getLastPushed().toString() + "---" + now.toString());
                         messages = db.findRecordsInTimeRange(queue.getLastPushed(), now);
 
                     }
-
 
                 } catch (DatabaseException e) {
                     e.printStackTrace();
@@ -64,6 +62,10 @@ public class PublisherScheduler implements Job {
                 //Push to queue only if there are messages to send
 
                 if (messages != null && !messages.isEmpty()) {
+                    Date overhead = new Date();
+                    long overheadTime = overhead.getTime();
+                    long overheadProcessingTime = overheadTime-start;
+                    System.out.println("Overhead processing in Publisher scheduler"+overheadProcessingTime);
 
                     try {
                         for(Message message: messages){
@@ -101,14 +103,13 @@ public class PublisherScheduler implements Job {
                     System.out.println("No messages to send");
                 }
 
-
-
-
             }
 
         }
-
-
+        Date end = new Date();
+        long endTime = end.getTime();
+        long totalProcessingTime = endTime-start;
+        System.out.println("Total time to Execute Publisher Scheduler"+totalProcessingTime);
     }
 
 }
