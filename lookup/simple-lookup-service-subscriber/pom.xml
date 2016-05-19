@@ -99,9 +99,9 @@
             </plugin>
 
             <plugin>
-                <groupId>org.dstovall</groupId>
+                <groupId>com.jolira</groupId>
                 <artifactId>onejar-maven-plugin</artifactId>
-                <version>1.4.1</version>
+                <version>1.4.4</version>
                 <executions>
                     <execution>
                         <configuration>
@@ -115,7 +115,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
