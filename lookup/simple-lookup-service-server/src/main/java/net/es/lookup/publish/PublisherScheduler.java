@@ -6,6 +6,7 @@ import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.DBPool;
 import net.es.lookup.database.ServiceDAOMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
+import org.apache.log4j.Logger;
 import org.quartz.*;
 
 import java.util.Collection;
@@ -21,13 +22,15 @@ import static org.quartz.TriggerBuilder.newTrigger;
  * Time: 2:52 PM
  */
 public class PublisherScheduler implements Job {
+    private static Logger LOG = Logger.getLogger(PublisherScheduler.class);
 
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         Date now = new Date();
 
         long start = now.getTime();
 
-        System.out.println("Executing Publisher Scheduler"+start);
+        LOG.info("Executing Publisher Scheduler");
+        LOG.debug("Start time: "+start);
 
         Publisher publisher = Publisher.getInstance();
         Collection<Queue> queues = publisher.getAllQueues();
@@ -43,14 +46,14 @@ public class PublisherScheduler implements Job {
             //Push to queue if "x" minutes have passed since last push or if the max Events threshold has reached
             if (nextPushTime.before(now) || (queue.getCurrentPushEvents() >= queue.getMaxPushEvents())) {
 
-                System.out.println("Time to send messages to Queue: "+nextPushTime.before(now));
-                System.out.println("Messages within max events? "+(queue.getCurrentPushEvents() >= queue.getMaxPushEvents()));
+                LOG.debug("Time to send messages to Queue: "+nextPushTime.before(now));
+                LOG.debug("Messages within max events? "+(queue.getCurrentPushEvents() >= queue.getMaxPushEvents()));
 
                 List<Message> messages = null;
                 try {
                     //DB Optimization - Query only if there are any events
                     if(queue.getCurrentPushEvents()>0) {
-                        System.out.println("Querying time range:" + queue.getLastPushed().toString() + "---" + now.toString());
+                        LOG.debug("Querying time range:" + queue.getLastPushed().toString() + "---" + now.toString());
                         messages = db.findRecordsInTimeRange(queue.getLastPushed(), now);
 
                     }
@@ -65,12 +68,12 @@ public class PublisherScheduler implements Job {
                     Date overhead = new Date();
                     long overheadTime = overhead.getTime();
                     long overheadProcessingTime = overheadTime-start;
-                    System.out.println("Overhead processing in Publisher scheduler"+overheadProcessingTime);
+                    LOG.debug("Overhead processing in Publisher scheduler"+overheadProcessingTime);
 
                     try {
                         for(Message message: messages){
                             String jsonMessage = JSONMessage.toString(message);
-                            System.out.println(jsonMessage);
+                            LOG.debug("net.es.lookup.publish.PublisherScheduler:"+ jsonMessage);
 
 
                             JobDetail publishInvoker = newJob(PublishJob.class)
@@ -92,7 +95,7 @@ public class PublisherScheduler implements Job {
 
 
                     } catch (DataFormatException e) {
-                        e.printStackTrace();
+                        LOG.error("net.es.lookup.publish.PublisherScheduler: "+e.getMessage());
                     }
 
                     queue.setLastPushed(now);
@@ -100,7 +103,7 @@ public class PublisherScheduler implements Job {
 
 
                 }else{
-                    System.out.println("No messages to send");
+                    LOG.info("net.es.lookup.publish.PublisherScheduler:No messages to send");
                 }
 
             }
@@ -109,7 +112,7 @@ public class PublisherScheduler implements Job {
         Date end = new Date();
         long endTime = end.getTime();
         long totalProcessingTime = endTime-start;
-        System.out.println("Total time to Execute Publisher Scheduler"+totalProcessingTime);
+        LOG.debug("net.es.lookup.publish.PublisherScheduler: Total time to Execute Publisher Scheduler "+totalProcessingTime);
     }
 
 }
