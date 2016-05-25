@@ -22,11 +22,7 @@ BuildRequires:  sed
 BuildArch:      noarch
 Requires:       java-openjdk >= 1.6.0
 Requires:       chkconfig
-<<<<<<< HEAD
 Requires:	mongodb-org-server
-=======
-Requires:	mongodb-org
->>>>>>> release-2.1
 
 %description
 Lookup Service is used to find registered services. 
