@@ -35,7 +35,7 @@ def get_host_info_json(domain,record_type):
     hostlist = search_domains(hostname)
     result={}
     result["host"] = []
-    result["search-query"] = 
+    result["search-query"] = GROUP_DOMAINS+"="+hostname+ "&"+RECORD_TYPE+"="+record_type
     if(hostlist):
         result["host"] = hostlist
 
