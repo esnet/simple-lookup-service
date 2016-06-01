@@ -10,6 +10,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.util.Date;
 
 /**
  * Author: sowmya
@@ -57,6 +58,8 @@ public class ForwardingAgent implements Runnable {
 
 
         try {
+
+            data.put("createdInCache", new Date());
             StringEntity se = new StringEntity(data.toString());
             httpPost.setEntity(se);
             httpclient.execute(httpPost);
