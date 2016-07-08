@@ -24,10 +24,12 @@ LOCK_FILE=/var/lock/subsys/$SHORT_NAME
 USER=lookup
 GROUP=lookup
 STOP_TIMEOUT=10
-RESTART_DELAY=5
-PIDFILE=$RUNDIR/$SHORT_NAME.pid
+RESTART_DELAY=10
+PIDFILE=${RUNDIR}/${SHORT_NAME}.pid
 JARFILE=$DIST_PREFIX/target/$SHORT_NAME-server.one-jar.jar
-LOOKUPSERVICE_CMD="$BINDIR/startServer.sh $PIDFILE $JARFILE -c $CONFDIR/ -l $CONFDIR/log4j.properties > $LOGDIR/$SHORT_NAME.out 2>&1 &"
+MEMORY=`awk '/memory/ {print $2}' $CONFDIR/process.yml`
+MEMORYUNITS="m"
+LOOKUPSERVICE_CMD="$BINDIR/startServer.sh $PIDFILE $JARFILE  -Xmx$MEMORY$MEMORYUNITS $CONFDIR/ -l $CONFDIR/log4j.properties > $LOGDIR/$SHORT_NAME.out 2>&1 &"
 
 #functions
 start(){

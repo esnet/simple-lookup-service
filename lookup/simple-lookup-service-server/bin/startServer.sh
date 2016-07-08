@@ -19,6 +19,6 @@ if [ -z "$jarfile" ]; then
     echo "Starting ${shortname} with version:$vers"
 fi
 
-java -Xmx2048m  -jar $jarfile $* &
+java -jar $jarfile $* &
 echo "Starting ${shortname} with $*"
 echo $! > $pidfile
