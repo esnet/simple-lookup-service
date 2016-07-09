@@ -2,7 +2,8 @@
 
 pidfile=$1
 jarfile=$2
-shift 2
+memory=$3
+shift 3
 vers="2.0"
 shortname=lookup-service
 
@@ -19,6 +20,6 @@ if [ -z "$jarfile" ]; then
     echo "Starting ${shortname} with version:$vers"
 fi
 
-java -jar $jarfile $* &
+java $memory -jar $jarfile $* &
 echo "Starting ${shortname} with $*"
 echo $! > $pidfile
