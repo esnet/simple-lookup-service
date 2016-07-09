@@ -6,7 +6,7 @@
 %define log_dir /var/log/%{package_name}
 %define run_dir /var/run/%{package_name}
 %define data_dir /var/lib/%{package_name}
-%define relnum 2
+%define relnum 3
 
 Name:           %{package_name}
 Version:        2.2
