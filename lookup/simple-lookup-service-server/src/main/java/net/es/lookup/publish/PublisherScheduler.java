@@ -1,20 +1,20 @@
 package net.es.lookup.publish;
 
 import net.es.lookup.common.Message;
-import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.DBPool;
 import net.es.lookup.database.ServiceDAOMongoDb;
-import net.es.lookup.protocol.json.JSONMessage;
+import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import org.apache.log4j.Logger;
-import org.quartz.*;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.TriggerBuilder.newTrigger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Author: sowmya
@@ -23,6 +23,8 @@ import static org.quartz.TriggerBuilder.newTrigger;
  */
 public class PublisherScheduler implements Job {
     private static Logger LOG = Logger.getLogger(PublisherScheduler.class);
+
+    private static final int DEFAULT_BATCHSIZE = 100;
 
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         Date now = new Date();
@@ -34,6 +36,14 @@ public class PublisherScheduler implements Job {
 
         Publisher publisher = Publisher.getInstance();
         Collection<Queue> queues = publisher.getAllQueues();
+
+        int batchSize = DEFAULT_BATCHSIZE;
+        if (QueueServiceConfigReader.getInstance().getBatchSize()>0){
+            batchSize = QueueServiceConfigReader.getInstance().getBatchSize();
+        }
+
+        ExecutorService executorService = Executors.newFixedThreadPool(batchSize);
+
 
         ServiceDAOMongoDb db = DBPool.getDb("lookup");
 
@@ -70,33 +80,14 @@ public class PublisherScheduler implements Job {
                     long overheadProcessingTime = overheadTime-start;
                     LOG.debug("Overhead processing in Publisher scheduler"+overheadProcessingTime);
 
-                    try {
+
                         for(Message message: messages){
-                            String jsonMessage = JSONMessage.toString(message);
-                            LOG.debug("net.es.lookup.publish.PublisherScheduler:"+ jsonMessage);
 
+                            PublishTask publish = new PublishTask(queue, message);
 
-                            JobDetail publishInvoker = newJob(PublishJob.class)
-                                    .withIdentity("publish"+message.getURI(), "pubsub")
-                                    .build();
-
-                            SimpleTrigger publishTrigger = (SimpleTrigger) newTrigger().withIdentity("publish trigger"+message.getURI(), "pubsub")
-                                    .startNow()
-                                    .build();
-
-
-
-                            publishInvoker.getJobDataMap().put(PublishJob.MESSAGE, jsonMessage);
-                            publishInvoker.getJobDataMap().put(PublishJob.QUEUE, queue);
-
-                            net.es.lookup.timer.Scheduler.getInstance().schedule(publishInvoker, publishTrigger);
+                            executorService.execute(publish);
 
                         }
-
-
-                    } catch (DataFormatException e) {
-                        LOG.error("net.es.lookup.publish.PublisherScheduler: "+e.getMessage());
-                    }
 
                     queue.setLastPushed(now);
                     queue.setCurrentPushEvents(0);

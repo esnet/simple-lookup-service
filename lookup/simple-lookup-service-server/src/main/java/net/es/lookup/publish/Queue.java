@@ -89,6 +89,24 @@ public abstract class Queue {
 
 
     /**
+     * This method is used to push messages to the queue, which also includes pushing the message to the client
+     *
+     * @param message The message that will be pushed to the queue and subsequently to the client
+     * @return void This method returns void. In case of errors, an exception is thrown
+     * */
+    public abstract void push(Message message) throws PubSubQueueException;
+
+
+    /**
+     * This method is used to push messages to the queue, which also includes pushing the message to the client
+     *
+     * @param message The message that will be pushed to the queue and subsequently to the client
+     * @return void This method returns void. In case of errors, an exception is thrown
+     * */
+    public abstract void push(String message) throws PubSubQueueException;
+
+
+    /**
      * This method retrieves the id of the queue
      *
      * @return String  The id of the queue is expected to be a string

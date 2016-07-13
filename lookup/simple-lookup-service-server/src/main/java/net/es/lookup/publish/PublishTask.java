@@ -1,7 +1,7 @@
 package net.es.lookup.publish;
 
+import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.PubSubQueueException;
-import net.es.lookup.publish.rabbitmq.RMQueue;
 import org.apache.log4j.Logger;
 
 import java.util.Date;
@@ -18,11 +18,11 @@ class PublishTask implements Runnable {
     public final static String MESSAGE = "message";
     private static Logger LOG = Logger.getLogger(PublishTask.class);
 
-    private RMQueue queue;
+    private Queue queue;
 
-    private String message;
+    private Message message;
 
-    public PublishTask(Queue queue, String message){
+    public PublishTask(Queue queue, Message message){
         this.queue = queue;
         this.message = message;
 
