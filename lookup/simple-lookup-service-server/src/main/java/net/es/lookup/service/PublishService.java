@@ -36,7 +36,9 @@ public class PublishService {
 
     private static boolean serviceOn=false;
 
-    private final int SCHEDULER_INTERVAL=30;
+    private final int DEFAULT_SCHEDULER_INTERVAL=30;
+
+    private int schedulerInterval=DEFAULT_SCHEDULER_INTERVAL;
 
     private PublishService(){
     }
@@ -47,6 +49,8 @@ public class PublishService {
         }
         return instance;
     }
+
+
 
     private static synchronized void createInstance(){
         if (instance == null){
@@ -84,9 +88,14 @@ public class PublishService {
         this.maxPushEvents = maxPushEvents;
     }
 
-    public int getSCHEDULER_INTERVAL() {
+    public int getSchedulerInterval() {
 
-        return SCHEDULER_INTERVAL;
+        return schedulerInterval;
+    }
+
+    public void setSchedulerInterval(int schedulerInterval) {
+
+        this.schedulerInterval = schedulerInterval;
     }
 
     public static boolean isServiceOn() {
@@ -165,7 +174,7 @@ public class PublishService {
             Trigger psTrigger = newTrigger().withIdentity("pstrigger", "pubsub")
                     .startNow()
                     .withSchedule(simpleSchedule()
-                            .withIntervalInSeconds(SCHEDULER_INTERVAL)
+                            .withIntervalInSeconds(schedulerInterval)
                             .repeatForever()
                             .withMisfireHandlingInstructionIgnoreMisfires())
                     .build();

@@ -40,6 +40,7 @@ public class QueueServiceConfigReader {
 
     private int batchSize=10;
     private int pushInterval = 120;
+    private int pollingInterval = 10;
 
     private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
     
@@ -125,6 +126,11 @@ public class QueueServiceConfigReader {
         return vhost;
     }
 
+    public int getPollingInterval() {
+
+        return pollingInterval;
+    }
+
     private void setInfo(String configFile) {
 
         BaseConfigReader cfg = BaseConfigReader.getInstance();
@@ -147,6 +153,7 @@ public class QueueServiceConfigReader {
             }
             batchSize = (Integer) queueServiceMap.get("batch_size");
             pushInterval = (Integer) queueServiceMap.get("push_interval");
+            pollingInterval = (Integer) queueServiceMap.get("polling_interval");
 
 
         } catch (Exception e) {
@@ -161,4 +168,6 @@ public class QueueServiceConfigReader {
 
         return serviceOn;
     }
+
+
 }

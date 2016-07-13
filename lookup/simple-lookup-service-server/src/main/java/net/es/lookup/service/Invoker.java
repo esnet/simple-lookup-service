@@ -123,6 +123,7 @@ public class Invoker {
                             .withIntervalInSeconds(dbpruneInterval)
                             .repeatForever()
                             .withMisfireHandlingInstructionIgnoreMisfires())
+                            .withPriority(Thread.MAX_PRIORITY)
                     .build();
 
             scheduler.schedule(job, trigger);
@@ -138,6 +139,7 @@ public class Invoker {
             publishService.setUserName(qcfg.getUserName());
             publishService.setPassword(qcfg.getPassword());
             publishService.setVhost(qcfg.getVhost());
+            publishService.setSchedulerInterval(qcfg.getPollingInterval());
             publishService.startService();
 
         }

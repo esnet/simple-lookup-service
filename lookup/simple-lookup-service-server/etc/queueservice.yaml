@@ -4,6 +4,7 @@ queue:
     host: 'ps-mexchg.es.net'
     batch_size: 100
     push_interval: 300
+    polling_interval: 10
 
 username: "abc"
 password: "xyz"
