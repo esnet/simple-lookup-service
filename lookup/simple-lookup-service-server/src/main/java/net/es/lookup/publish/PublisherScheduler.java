@@ -26,6 +26,7 @@ public class PublisherScheduler implements Job {
 
     private static final int DEFAULT_BATCHSIZE = 100;
 
+
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         Date now = new Date();
 
@@ -99,7 +100,13 @@ public class PublisherScheduler implements Job {
 
             }
 
+
+
         }
+
+        executorService.shutdown();
+
+
         Date end = new Date();
         long endTime = end.getTime();
         long totalProcessingTime = endTime-start;
