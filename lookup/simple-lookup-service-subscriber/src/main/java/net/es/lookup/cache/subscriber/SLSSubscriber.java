@@ -166,7 +166,7 @@ public class SLSSubscriber extends Subscriber {
 
             LOG.info("net.es.lookup.cache.subscriber.SLSSubscriber.init: Starting to listen"+queueName);
 
-            channel.basicConsume(queueName, SLSConsumer);
+            channel.basicConsume(queueName, true, "", SLSConsumer);
         } catch (IOException e) {
             e.printStackTrace();
         }
