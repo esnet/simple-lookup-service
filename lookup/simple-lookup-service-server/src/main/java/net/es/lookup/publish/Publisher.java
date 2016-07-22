@@ -5,6 +5,7 @@ import net.es.lookup.common.exception.internal.DoesNotExistException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -18,13 +19,82 @@ import java.util.HashMap;
 
 public class Publisher {
 
+    public static final int DEFAULT_MAX_PUSHEVENTS = 100;
+    private static final long DEFAULT_PUSH_INTERVAL =120000;
     private HashMap<String,Queue> queryToQueueMap;
 
     private static Publisher instance;
 
+    private int currentPushEvents;
+
+    private long maxPushInterval;
+    private Date lastPushed;
+    private int maxPushEvents;
+    private long pollInterval;
+
+    public long getPollInterval() {
+
+        return pollInterval;
+    }
+
+    public void setPollInterval(long pollInterval) {
+
+        this.pollInterval = pollInterval;
+    }
+
+    public Date getLastPushed() {
+
+        return lastPushed;
+    }
+
+    public void setLastPushed(Date lastPushed) {
+
+        this.lastPushed = lastPushed;
+    }
+
+    public long getMaxPushInterval() {
+
+        return maxPushInterval;
+    }
+
+    public void setMaxPushInterval(long maxPushInterval) {
+
+        this.maxPushInterval = maxPushInterval;
+    }
+
+    public int getCurrentPushEvents() {
+
+        return currentPushEvents;
+    }
+
+    public void setCurrentPushEvents(int currentPushEvents) {
+
+        this.currentPushEvents = currentPushEvents;
+    }
+
+    public void incrementCurrentPushEvents() {
+
+        this.currentPushEvents++;
+    }
+
+    public int getMaxPushEvents() {
+
+        return maxPushEvents;
+    }
+
+    public void setMaxPushEvents(int maxPushEvents) {
+
+        this.maxPushEvents = maxPushEvents;
+    }
+
     private Publisher(){
 
         queryToQueueMap = new HashMap<String, Queue>();
+        this.currentPushEvents = 0;
+        this.maxPushEvents = DEFAULT_MAX_PUSHEVENTS;
+        lastPushed = new Date();
+        maxPushInterval = DEFAULT_PUSH_INTERVAL;
+
     }
 
     public static Publisher getInstance(){
@@ -84,10 +154,7 @@ public class Publisher {
         //NOTE: currently assumes event is for all the queues. This will need to be modified if queries are implemented for queues.
 
         if(record != null){
-            Collection<Queue> queues = getAllQueues();
-            for(Queue queue:queues){
-                queue.incrementCurrentPushEvents();
-            }
+            incrementCurrentPushEvents();
 
         }
 

@@ -3,7 +3,6 @@ package net.es.lookup.publish;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.PubSubQueueException;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,57 +16,10 @@ public abstract class Queue {
 
 
 
-    private int currentPushEvents=0;
 
-    private long timeInterval;
-    private Date lastPushed;
-    private int maxPushEvents = 10;
     private Message query;
 
-    public Date getLastPushed() {
 
-        return lastPushed;
-    }
-
-    public void setLastPushed(Date lastPushed) {
-
-        this.lastPushed = lastPushed;
-    }
-
-    public long getTimeInterval() {
-
-        return timeInterval;
-    }
-
-    public void setTimeInterval(long timeInterval) {
-
-        this.timeInterval = timeInterval;
-    }
-
-    public int getCurrentPushEvents() {
-
-        return currentPushEvents;
-    }
-
-    public void setCurrentPushEvents(int currentPushEvents) {
-
-        this.currentPushEvents = currentPushEvents;
-    }
-
-    public void incrementCurrentPushEvents() {
-
-        this.currentPushEvents++;
-    }
-
-    public int getMaxPushEvents() {
-
-        return maxPushEvents;
-    }
-
-    public void setMaxPushEvents(int maxPushEvents) {
-
-        this.maxPushEvents = maxPushEvents;
-    }
 
     public Message getQuery() {
 

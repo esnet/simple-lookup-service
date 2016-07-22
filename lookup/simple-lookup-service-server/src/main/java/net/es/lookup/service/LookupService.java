@@ -148,10 +148,8 @@ public class LookupService {
 
         } catch (IOException e) {
 
-            LOG.info("Failed to start HTTP server: " + e);
+            LOG.info("IOEXception Failed to start HTTP server: " + e);
 
-        } catch (Exception e){
-            LOG.info("Failed to start broker: " + e);
         }
 
     }
