@@ -1,0 +1,18 @@
+#Service toggle
+service: 'on'
+
+#Poll Interval Settings - In seconds
+poll_interval:
+    max: 10
+    min:  2
+
+#Batch Size Settings
+batch_size:
+    max: 750
+    min: 1
+
+#Weight Settings
+weight: 0.875
+
+#Intial Load estimate - In Messages/sec
+initial_load:  50
