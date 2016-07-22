@@ -22,13 +22,13 @@
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>
-            <version>1.12</version>
+            <version>1.19.1</version>
         </dependency>
 
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-grizzly2</artifactId>
-            <version>1.12</version>
+            <version>1.19.1</version>
         </dependency>
 
          <!-- json -->
@@ -131,6 +131,11 @@
             <groupId>net.es.lookup</groupId>
             <version>2.2-SNAPSHOT</version>
 
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-core</artifactId>
+            <version>1.19.1</version>
         </dependency>
 
 

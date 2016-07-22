@@ -50,22 +50,22 @@ public class PublisherScheduler implements Job {
 
         for (Queue queue : queues) {
 
-            long interval = queue.getTimeInterval();
+            long interval = publisher.getMaxPushInterval();
 
-            Date nextPushTime = new Date(queue.getLastPushed().getTime() + interval);
+            Date nextPushTime = new Date(publisher.getLastPushed().getTime() + interval);
 
             //Push to queue if "x" minutes have passed since last push or if the max Events threshold has reached
-            if (nextPushTime.before(now) || (queue.getCurrentPushEvents() >= queue.getMaxPushEvents())) {
+            if (nextPushTime.before(now) || (publisher.getCurrentPushEvents() >= publisher.getMaxPushEvents())) {
 
                 LOG.debug("Time to send messages to Queue: "+nextPushTime.before(now));
-                LOG.debug("Messages within max events? "+(queue.getCurrentPushEvents() >= queue.getMaxPushEvents()));
+                LOG.debug("Messages within max events? "+(publisher.getCurrentPushEvents() >= publisher.getMaxPushEvents()));
 
                 List<Message> messages = null;
                 try {
                     //DB Optimization - Query only if there are any events
-                    if(queue.getCurrentPushEvents()>0) {
-                        LOG.debug("Querying time range:" + queue.getLastPushed().toString() + "---" + now.toString());
-                        messages = db.findRecordsInTimeRange(queue.getLastPushed(), now);
+                    if(publisher.getCurrentPushEvents()>0) {
+                        LOG.debug("Querying time range:" + publisher.getLastPushed().toString() + "---" + now.toString());
+                        messages = db.findRecordsInTimeRange(publisher.getLastPushed(), now);
 
                     }
 
@@ -90,8 +90,8 @@ public class PublisherScheduler implements Job {
 
                         }
 
-                    queue.setLastPushed(now);
-                    queue.setCurrentPushEvents(0);
+                    publisher.setLastPushed(now);
+                    publisher.setCurrentPushEvents(0);
 
 
                 }else{

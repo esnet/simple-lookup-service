@@ -139,7 +139,7 @@ public class Invoker {
             publishService.setUserName(qcfg.getUserName());
             publishService.setPassword(qcfg.getPassword());
             publishService.setVhost(qcfg.getVhost());
-            publishService.setSchedulerInterval(qcfg.getPollingInterval());
+            publishService.setPollingInterval(qcfg.getPollingInterval());
             publishService.startService();
 
         }

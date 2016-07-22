@@ -9,6 +9,8 @@ import net.es.lookup.timer.Scheduler;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 
+import java.util.Date;
+
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
@@ -38,7 +40,7 @@ public class PublishService {
 
     private final int DEFAULT_SCHEDULER_INTERVAL=30;
 
-    private int schedulerInterval=DEFAULT_SCHEDULER_INTERVAL;
+    private int pollingInterval =DEFAULT_SCHEDULER_INTERVAL;
 
     private PublishService(){
     }
@@ -88,14 +90,14 @@ public class PublishService {
         this.maxPushEvents = maxPushEvents;
     }
 
-    public int getSchedulerInterval() {
+    public int getPollingInterval() {
 
-        return schedulerInterval;
+        return pollingInterval;
     }
 
-    public void setSchedulerInterval(int schedulerInterval) {
+    public void setPollingInterval(int pollingInterval) {
 
-        this.schedulerInterval = schedulerInterval;
+        this.pollingInterval = pollingInterval;
     }
 
     public static boolean isServiceOn() {
@@ -149,9 +151,15 @@ public class PublishService {
 
         try {
 
-            RMQueue rmQueue = new RMQueue(host,port,userName,password,vhost,maxPushEvents,maxInterval);
+            RMQueue rmQueue = new RMQueue(host,port,userName,password,vhost);
             String query = "all";
-            Publisher.getInstance().addQueue(query,rmQueue);
+            Publisher publisher = Publisher.getInstance();
+            publisher.addQueue(query,rmQueue);
+            publisher.setCurrentPushEvents(0);
+            publisher.setMaxPushEvents(maxPushEvents);
+            publisher.setMaxPushInterval(maxInterval);
+            publisher.setLastPushed(new Date());
+            publisher.setPollInterval(pollingInterval);
 
         } catch (PubSubQueueException e) {
             e.printStackTrace();
@@ -171,10 +179,12 @@ public class PublishService {
                     .build();
 
 
+
+
             Trigger psTrigger = newTrigger().withIdentity("pstrigger", "pubsub")
                     .startNow()
                     .withSchedule(simpleSchedule()
-                            .withIntervalInSeconds(schedulerInterval)
+                            .withIntervalInMilliseconds(pollingInterval)
                             .repeatForever()
                             .withMisfireHandlingInstructionIgnoreMisfires())
                     .build();

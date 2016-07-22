@@ -32,10 +32,10 @@ public class RMQueue extends Queue {
 
     public RMQueue() throws PubSubQueueException {
 
-        this("localhost", 5672,"guest","","/", 25, 60);
+        this("localhost", 5672,"guest","","/");
     }
 
-    public RMQueue(String host, int port, String username, String password, String vhost, int maxPushEvents, long timeInterval) throws PubSubQueueException {
+    public RMQueue(String host, int port, String username, String password, String vhost) throws PubSubQueueException {
 
         factory = new ConnectionFactory();
         factory.setHost(host);
@@ -44,10 +44,7 @@ public class RMQueue extends Queue {
         factory.setPassword(password);
         factory.setVirtualHost(vhost);
 
-        this.setMaxPushEvents(maxPushEvents);
-        this.setTimeInterval(timeInterval);
 
-        this.setLastPushed(new Date());
 
         try {
             connection = factory.newConnection();

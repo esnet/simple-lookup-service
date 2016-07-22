@@ -2,7 +2,6 @@ package net.es.lookup.utils.config.reader;
 
 import org.apache.log4j.Logger;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -143,17 +142,16 @@ public class QueueServiceConfigReader {
             userName = (String) yamlMap.get(USERNAME);
             password = (String) yamlMap.get(PASSWORD);
             vhost = (String) yamlMap.get(VHOST);
-            HashMap<String, Object> queueServiceMap = (HashMap) yamlMap.get("queue");
-            host = (String) queueServiceMap.get("host");
-            String service = (String) queueServiceMap.get("queueservice");
+            host = (String) yamlMap.get("host");
+            String service = (String) yamlMap.get("queueservice");
             if(service.equals("on")){
                 serviceOn = true;
             }else{
                 serviceOn=false;
             }
-            batchSize = (Integer) queueServiceMap.get("batch_size");
-            pushInterval = (Integer) queueServiceMap.get("push_interval");
-            pollingInterval = (Integer) queueServiceMap.get("polling_interval");
+            batchSize = (Integer) yamlMap.get("batch_size");
+            pushInterval = (Integer) yamlMap.get("push_interval");
+            pollingInterval = (Integer) yamlMap.get("polling_interval");
 
 
         } catch (Exception e) {
