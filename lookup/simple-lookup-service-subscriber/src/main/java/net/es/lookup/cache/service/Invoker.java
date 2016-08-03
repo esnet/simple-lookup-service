@@ -6,7 +6,13 @@ import joptsimple.OptionSpec;
 import net.es.lookup.cache.agent.Destination;
 import net.es.lookup.cache.subscriber.SLSSubscriber;
 import net.es.lookup.cache.subscriber.Subscriber;
+import net.es.lookup.utils.config.reader.IndexMapReader;
 import net.es.lookup.utils.config.reader.SubscriberConfigReader;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -24,9 +30,12 @@ public class Invoker {
 
     private static SubscriberConfigReader subscriberConfigReader;
 
+    private static IndexMapReader indexMapReader;
+
     private static String configPath = "etc";
 
     private static String subscriberConfigFile = "subscriber.yaml";
+    private static String mappingFile = "indexmapping.json";
 
     private static String logConfig = "./etc/log4j.properties";
 
@@ -41,6 +50,11 @@ public class Invoker {
         subscriberConfigReader = SubscriberConfigReader.getInstance();
 
 
+        String mappingFileLocation = configPath+"/"+mappingFile;
+        indexMapReader = IndexMapReader.getInstance();
+        String indexMapping = indexMapReader.readMapping(mappingFileLocation);
+
+
 
         List<Map> queues = subscriberConfigReader.getQueues();
         List<Map> destInConfig= subscriberConfigReader.getDestination();
@@ -53,33 +67,61 @@ public class Invoker {
             System.out.println("Initializing subscriber...");
 
             String host = (String)queue.get(SubscriberConfigReader.QUEUE_HOST);
-            System.out.println(host);
             int port=(Integer)queue.get(SubscriberConfigReader.QUEUE_PORT);
-            System.out.println(port);
             String exchangeName = (String) queue.get(SubscriberConfigReader.EXCHANGE_NAME);
             System.out.println(exchangeName);
 
             String userName = (String) queue.get(SubscriberConfigReader.USERNAME);
-            System.out.println(userName);
             String password = (String) queue.get(SubscriberConfigReader.PASSWORD);
-            System.out.println(password);
             String vhost= (String) queue.get(SubscriberConfigReader.VHOST);
-            System.out.println(vhost);
+            System.out.println("Using vhost"+vhost);
             List<String> queries = (List<String>) queue.get(SubscriberConfigReader.QUERIES);
             for(String s : queries){
                 System.out.println(s);
             }
 
+
+
+
             for (Map dest: destInConfig){
 
                 String dType = (String) dest.get(SubscriberConfigReader.DESTINATION_TYPE);
-                System.out.println(dType);
                 String dUrl = (String) dest.get(SubscriberConfigReader.DESTINATION_URL);
-                System.out.println(dUrl);
+                System.out.println(dType);
+
+
 
                 URI destinationAsUrl = new URI(dUrl);
 
                 Destination destination = new Destination(destinationAsUrl,dType);
+
+                //If it is an elastic destination, initialize mapping.
+                if(dType.equals(Destination.DESTINATION_ELASTIC)){
+                    HttpClient httpClient = new DefaultHttpClient();
+                    HttpPost mapRequest = new HttpPost();
+
+                    String index = IndexMapReader.getInstance().getElasticIndex(destinationAsUrl);
+                    System.out.println(index);
+
+                    mapRequest.setURI(new URI(index));
+
+                    mapRequest.setHeader("Content-type", "application/json");
+
+                    StringEntity stringEntity = new StringEntity(indexMapping);
+                    mapRequest.setEntity(stringEntity);
+
+                    HttpResponse response = httpClient.execute(mapRequest);
+
+                    if(response.getStatusLine().getStatusCode() ==200){
+                        System.out.println("Index created for ");
+                    }else{
+                        System.out.println("Index already exists");
+                    }
+
+
+
+                }
+                System.out.println(dUrl);
                 destinations.add(destination);
 
 

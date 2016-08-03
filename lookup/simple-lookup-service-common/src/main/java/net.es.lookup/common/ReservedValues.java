@@ -45,4 +45,8 @@ public class ReservedValues {
     public static final Object RECORD_SUBSCRIBER_QUEUE_STATE_NEW = "new";
     public static final Object RECORD_SUBSCRIBER_QUEUE_STATE_EXISTING = "existing";
 
+
+    public static final String RECORD_VALUE_UNDERSCORE = "_";
+    public static final String RECORD_VALUE_FORWARD_SLASH = "/";
+
 }
