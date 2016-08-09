@@ -33,7 +33,6 @@ public class LookupServiceConfigReader {
     private boolean coreservice = false;
 
     //cache service
-
     private boolean cacheservice=false;
 
 

@@ -25,7 +25,8 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 
-public class Invoker {
+public class Invoker
+{
 
     private static int port = 8080;
     private static LookupService lookupService = null;
@@ -35,10 +36,12 @@ public class Invoker {
     private static String host = "localhost";
     private static LookupServiceConfigReader lcfg;
     private static QueueServiceConfigReader qcfg;
+    private static AutoTuneConfigReader atcfg;
 
     private static String configPath = "etc/";
     private static String lookupservicecfg = "lookupservice.yaml";
     private static String queuecfg = "queueservice.yaml";
+    private static String autotunecfg = "autotune.yaml";
 
 
     private static String logConfig = "./etc/log4j.properties";
@@ -71,8 +74,14 @@ public class Invoker {
         LookupServiceConfigReader.init(configPath + lookupservicecfg);
         QueueServiceConfigReader.init(configPath+queuecfg);
 
+        //Autotune init
+        AutoTuneConfigReader.init(configPath+autotunecfg);
+
+
         lcfg = LookupServiceConfigReader.getInstance();
         qcfg = QueueServiceConfigReader.getInstance();
+
+
 
         port = lcfg.getPort();
         host = lcfg.getHost();
@@ -163,9 +172,9 @@ public class Invoker {
 
         // Block forever
         Object blockMe = new Object();
-        synchronized (blockMe) {
+        synchronized (blockMe)
+        {
             blockMe.wait();
-
         }
 
     }

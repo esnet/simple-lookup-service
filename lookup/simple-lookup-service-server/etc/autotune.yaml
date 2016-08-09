@@ -15,4 +15,9 @@ batch_size:
 weight: 0.875
 
 #Intial Load estimate - In Messages/sec
-initial_load:  50
+initial_load:  15
+
+#expected load information. (messages/sec)
+expected_load:
+  min : 2
+  max : 30

@@ -28,32 +28,35 @@ public class AutoTuneConfigReader {
     private static final String MIN = "min";
     private static final String WEIGHT = "weight";
     private static final String INTIALLOAD = "initial_load";
-    private static final String SERVICE = "Service";
+    private static final String SERVICE = "service";
+    private static final String EXPECTEDLOAD = "expected_load";
 
     //values
     private String serviceStatus;
     private long pollIntervalMin;
     private long pollIntervalMax;
-    private long batchSizeMin;
-    private long batchSizeMax;
-    private long intialLoad;
+    private int batchSizeMin;
+    private int batchSizeMax;
+    private int intialLoad;
     private double weight;
 
+    private int expectedLoadMax;
+    private int expectedLoadMin;
 
     private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
 
     /*getters for the values*/
-    public long getBatchSizeMax()
+    public int getBatchSizeMax()
     {
         return batchSizeMax;
     }
 
-    public long getBatchSizeMin()
+    public int getBatchSizeMin()
     {
         return batchSizeMin;
     }
 
-    public long getIntialLoad()
+    public int getIntialLoad()
     {
         return intialLoad;
     }
@@ -83,6 +86,13 @@ public class AutoTuneConfigReader {
         return weight;
     }
 
+    public int getExpectedLoadMax(){
+        return expectedLoadMax;
+    }
+
+    public int getExpectedLoadMin(){
+        return expectedLoadMin;
+    }
 
 
     /*private constructor*/
@@ -123,15 +133,19 @@ public class AutoTuneConfigReader {
             pollIntervalMin = (Long) pollIntervalMap.get(MIN);
 
             HashMap<String,Object> batchSizeMap = (HashMap<String,Object>) yamlMap.get(BATCHSIZE);
-            batchSizeMax = (Long) batchSizeMap.get(MAX);
-            batchSizeMin = (Long) batchSizeMap.get(MIN);
+            batchSizeMax = (Integer) batchSizeMap.get(MAX);
+            batchSizeMin = (Integer) batchSizeMap.get(MIN);
 
             weight = (Double) yamlMap.get(WEIGHT);
-            intialLoad = (Long) yamlMap.get(INTIALLOAD);
+            intialLoad = (Integer) yamlMap.get(INTIALLOAD);
+
+            HashMap<String,Object> expectedLoadMap = (HashMap<String,Object>) yamlMap.get(EXPECTEDLOAD);
+            expectedLoadMax = (Integer)expectedLoadMap.get(MAX);
+            expectedLoadMin = (Integer)expectedLoadMap.get(MIN);
         }
         catch(Exception e)
         {
-            LOG.error("Error parsing config file. Please check config parameters " + e.toString());
+            LOG.error("Error parsing autotune config file. Please check config parameters " + e.toString());
             System.exit(1);
         }
 

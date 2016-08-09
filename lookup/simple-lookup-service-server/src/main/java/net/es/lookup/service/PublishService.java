@@ -185,7 +185,6 @@ public class PublishService {
                     .startNow()
                     .withSchedule(simpleSchedule()
                             .withIntervalInMilliseconds(pollingInterval)
-                            .repeatForever()
                             .withMisfireHandlingInstructionIgnoreMisfires())
                     .build();
 

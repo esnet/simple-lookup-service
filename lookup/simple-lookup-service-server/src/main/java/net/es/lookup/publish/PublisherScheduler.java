@@ -43,12 +43,20 @@ public class PublisherScheduler implements Job {
             batchSize = QueueServiceConfigReader.getInstance().getBatchSize();
         }
 
+        //override batch size if autotuning is on
+        AutoTuner autoTuner = AutoTuner.getInstance();
+        if(autoTuner.getServiceStatus() == true)
+        {
+            batchSize = autoTuner.getBatchSize();
+        }
+
         ExecutorService executorService = Executors.newFixedThreadPool(batchSize);
 
 
         ServiceDAOMongoDb db = DBPool.getDb("lookup");
 
-        for (Queue queue : queues) {
+        for (Queue queue : queues)
+        {
 
             long interval = publisher.getMaxPushInterval();
 
@@ -105,6 +113,32 @@ public class PublisherScheduler implements Job {
         }
 
         executorService.shutdown();
+
+        /*Autotuning*/
+        //calculate next Batch Size
+        autoTuner.calculateNextBatchSize(publisher.getMaxPushEvents());
+        //calculate next  Polling interval
+        long nextPollInterval = autoTuner.calculateNextPollInterval();
+        //schedule
+        JobDetail publisherScheduler = newJob(PublisherScheduler.class)
+                .withIdentity("publisher_Scheduler", "pubsub")
+                .build();
+
+
+
+
+        Trigger psTrigger = newTrigger().withIdentity("pstrigger", "pubsub")
+                .startNow()
+                .withSchedule(simpleSchedule()
+                        .withIntervalInMilliseconds(nextPollInterval)
+                        .withMisfireHandlingInstructionIgnoreMisfires())
+                .build();
+
+        Scheduler.getInstance().schedule(publisherScheduler, psTrigger);
+
+        createdPublishJob = true;
+
+        /**/
 
 
         Date end = new Date();
