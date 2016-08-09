@@ -1,0 +1,2 @@
+number_of_threads: 2000
+sls_core_host: ps-cache.es.net

@@ -1,0 +1,12 @@
+#sls core
+sls_core_host_name: ps-cache.es.net
+
+#in seconds- number of seconds to run the test
+run_time: 600
+
+#average number of requests per second
+mean: 75
+
+# ratio of register to renew
+# eg: 0.85 = 85% Register and 15% renew
+ratio: 0.85

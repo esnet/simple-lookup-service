@@ -1,0 +1,22 @@
+#M,N,T will be included in the data store records.
+M: 500
+N: 500
+T: 2
+
+# host for the cache
+sls_cache_host_name: ps-cache-west.es.net
+# in seconds
+cache_poll_interval: 30
+
+
+number_of_polls: 10
+
+
+#data store
+latency_data_store: sowmya-dev-vm.es.net
+
+# dont forget the leading '/' character.
+data_store_index: /n1_mean75_timeout5_tpoll10_run4
+data_store_type: /latency
+
+
