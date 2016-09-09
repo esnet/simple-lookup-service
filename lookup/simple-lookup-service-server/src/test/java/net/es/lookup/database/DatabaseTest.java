@@ -345,7 +345,7 @@ public class DatabaseTest {
         query.add("key2","val2");
 
         mongoquery = database.buildQuery(query,new Message());
-        jsonquery = "{ \"$and\" : [{ \"key2\" : \"val2\" }, { \"key1\" : \"val1\" }] }";
+        jsonquery = "{ \"$and\" : [{ \"key1\" : \"val1\" }, { \"key2\" : \"val2\" }] }";
         System.out.print("Checking: Is " + jsonquery + " equal to " + mongoquery.toJson());
         assertTrue(jsonquery.equals(mongoquery.toJson()));
         System.out.println("\t-\tPASS");
@@ -360,7 +360,7 @@ public class DatabaseTest {
         query.add("key2","val2");
 
         mongoquery = database.buildQuery(query,new Message());
-        jsonquery = "{ \"$and\" : [{ \"key2\" : \"val2\" }, { \"key1\" : [\"val11\", \"val12\"] }] }";
+        jsonquery = "{ \"$and\" : [{ \"key1\" : [\"val11\", \"val12\"] }, { \"key2\" : \"val2\" }] }";
         System.out.print("Checking: Is "+jsonquery+" equal to "+mongoquery.toJson());
         assertTrue(jsonquery.equals(mongoquery.toJson()));
         System.out.println("\t-\tPASS");
@@ -374,7 +374,7 @@ public class DatabaseTest {
         query.add("key2","val2");
 
         mongoquery = database.buildQuery(query,new Message());
-        jsonquery = "{ \"$and\" : [{ \"key2\" : \"val2\" }, { \"key1\" : \"val11\" }] }";
+        jsonquery = "{ \"$and\" : [{ \"key1\" : \"val11\" }, { \"key2\" : \"val2\" }] }";
         System.out.print("Checking: Is "+jsonquery+" equal to "+mongoquery.toJson());
         assertTrue(jsonquery.equals(mongoquery.toJson()));
         System.out.println("\t-\tPASS");
@@ -389,7 +389,7 @@ public class DatabaseTest {
         operator.add("operator","ALL");
 
         mongoquery = database.buildQuery(query,new Message());
-        jsonquery = "{ \"$and\" : [{ \"key2\" : \"val2\" }, { \"key1\" : \"val1\" }] }";
+        jsonquery = "{ \"$and\" : [{ \"key1\" : \"val1\" }, { \"key2\" : \"val2\" }] }";
         System.out.print("Checking: Is " + jsonquery + " equal to " + mongoquery.toJson());
         assertTrue(jsonquery.equals(mongoquery.toJson()));
         System.out.println("\t-\tPASS");
@@ -404,7 +404,7 @@ public class DatabaseTest {
         operator.add("operator","ANY");
 
         mongoquery = database.buildQuery(query,operator);
-        jsonquery = "{ \"$or\" : [{ \"key2\" : \"val2\" }, { \"key1\" : \"val1\" }] }";
+        jsonquery = "{ \"$or\" : [{ \"key1\" : \"val1\" }, { \"key2\" : \"val2\" }] }";
         System.out.print("Checking: Is " + jsonquery + " equal to " + mongoquery.toJson());
         assertTrue(jsonquery.equals(mongoquery.toJson()));
         System.out.println("\t-\tPASS");
@@ -425,7 +425,7 @@ public class DatabaseTest {
         operator.add("key1","ANY");
 
         mongoquery = database.buildQuery(query,operator);
-        jsonquery = "{ \"$and\" : [{ \"key2\" : \"val2\" }, { \"key1\" : { \"$in\" : [\"val11\", \"val12\", \"val13\"] } }] }";
+        jsonquery = "{ \"$and\" : [{ \"key1\" : { \"$in\" : [\"val11\", \"val12\", \"val13\"] } }, { \"key2\" : \"val2\" }] }";
         System.out.print("Checking: Is " + jsonquery + " equal to " + mongoquery.toJson());
         assertTrue(jsonquery.equals(mongoquery.toJson()));
         System.out.println("\t-\tPASS");
@@ -445,7 +445,7 @@ public class DatabaseTest {
         operator.add("key1","ALL");
 
         mongoquery = database.buildQuery(query,operator);
-        jsonquery = "{ \"$and\" : [{ \"key2\" : \"val2\" }, { \"key1\" : { \"$all\" : [\"val11\", \"val12\", \"val13\"] } }] }";
+        jsonquery = "{ \"$and\" : [{ \"key1\" : { \"$all\" : [\"val11\", \"val12\", \"val13\"] } }, { \"key2\" : \"val2\" }] }";
         System.out.print("Checking: Is " + jsonquery + " equal to " + mongoquery.toJson());
         assertTrue(jsonquery.equals(mongoquery.toJson()));
         System.out.println("\t-\tPASS");
