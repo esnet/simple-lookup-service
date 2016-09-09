@@ -32,13 +32,14 @@
             <version>4.2.1</version>
             <scope>compile</scope>
         </dependency>
-        <!-- json -->
+        <!-- https://mvnrepository.com/artifact/net.sf.json-lib/json-lib -->
         <dependency>
             <groupId>net.sf.json-lib</groupId>
             <artifactId>json-lib</artifactId>
             <version>2.4</version>
             <classifier>jdk15</classifier>
         </dependency>
+
         <!-- activemq -->
 <dependency>
 	<groupId>org.apache.activemq</groupId>

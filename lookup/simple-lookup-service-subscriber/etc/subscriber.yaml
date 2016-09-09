@@ -1,7 +1,8 @@
 #All caches are read-only
 
 queue:
-    - host: "ps-mexchg.es.net"
+    - type: "rabbitmq"
+      host: "ps-mexchg-west.es.net"
       username: "abc"
       password: "xyz"
       vhost: "perfsonar"
@@ -11,5 +12,8 @@ queue:
         - "all"
 destination:
     - type: "elastic"
-      url: "http://perfsonar-dev.es.net:9200/perfsonar/records"
-thread_pool: 120
+      url: "http://localhost:9200/"
+      write_index: "perfsonar_write"
+      search_index: "perfsonar"
+      document_type: "records"
+thread_pool: 500

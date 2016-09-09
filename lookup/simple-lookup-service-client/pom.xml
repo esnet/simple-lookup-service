@@ -45,12 +45,7 @@
             <version>2.4</version>
             <classifier>jdk15</classifier>
         </dependency>
-        <!-- activemq  -->
-        <dependency>
-        	<groupId>org.apache.activemq</groupId>
-                <artifactId>activemq-all</artifactId>
-        	<version>5.9.1</version>
-        </dependency>
+
         <!-- logging -->
         <dependency>
             <groupId>log4j</groupId>

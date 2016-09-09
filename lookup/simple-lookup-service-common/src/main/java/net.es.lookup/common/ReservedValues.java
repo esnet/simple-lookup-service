@@ -49,4 +49,11 @@ public class ReservedValues {
     public static final String RECORD_VALUE_UNDERSCORE = "_";
     public static final String RECORD_VALUE_FORWARD_SLASH = "/";
 
+    public static final Object RECORD_SUBSCRIBER_ENDPOINT_ELASTIC = "elastic";
+
+    //elastic search values
+    public static String ELASTIC_ALIASES_ENDPOINT = "_aliases";
+
+    public static String ELASTIC_WRITE_ALIAS_SUFFIX = "_write";
+
 }

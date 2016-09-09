@@ -10,9 +10,11 @@ import java.util.Map;
  * Author: sowmya
  * Date: 4/12/16
  * Time: 3:58 PM
+ *
+ * This class reads the subscriber config file and returns the
+ * various parameters
  */
 public class SubscriberConfigReader {
-
 
     private static SubscriberConfigReader instance;
     private static final String DEFAULT_FILE = "subscriber.yaml";
@@ -28,18 +30,17 @@ public class SubscriberConfigReader {
     public static final String QUEUE_PORT = "port";
     public static final String QUERIES = "queries";
     public static final String EXCHANGE_NAME = "exchange";
+    public static final String THREAD_POOL = "thread_pool";
 
     public static final String DESTINATION = "destination";
     public static final String DESTINATION_TYPE = "type";
     public static final String DESTINATION_URL = "url";
+    public static final String DESTINATION_ELASTIC_WRITEINDEX = "write_index";
+    public static final String DESTINATION_ELASTIC_SEARCHINDEX = "search_index";
+    public static final String DESTINATION_ELASTIC_DOCUMENTTYPE = "document_type";
 
 
-
-    //Subscriber fields
-
-    private String userName;
-    private String password;
-    private String vhost;
+    //subscriber fields
     private List<Map> queues;
     private List<Map> destination;
 
@@ -63,7 +64,7 @@ public class SubscriberConfigReader {
     }
 
     /**
-     * @return the initialized LookupServiceConfigReader singleton instance
+     * @return the initialized SubscriberConfigReader singleton instance
      */
     public static SubscriberConfigReader getInstance() {
 
@@ -74,15 +75,27 @@ public class SubscriberConfigReader {
         return SubscriberConfigReader.instance;
     }
 
+    /**
+     * Returns the list of queues specified in the config file
+     * @return List<Map> List of queues config specified as a map
+     * */
     public List<Map> getQueues(){
         return queues;
     }
 
+    /**
+     * Returns the list of destinations specified in the config file
+     * @return List<Map> A list of destination config expressed as a Map
+     * */
     public List<Map> getDestination() {
 
         return destination;
     }
 
+
+    /**
+     * This method reads the config file and populates the config file parameters
+     * */
     private void setInfo(String configPath) {
 
         BaseConfigReader cfg = BaseConfigReader.getInstance();
@@ -94,6 +107,7 @@ public class SubscriberConfigReader {
         try {
             queues = (List<Map>) yamlMap.get(QUEUE);
             destination = (List) yamlMap.get(DESTINATION);
+            threadPool = (Integer) yamlMap.get(THREAD_POOL);
 
 
 
@@ -105,8 +119,10 @@ public class SubscriberConfigReader {
 
     }
 
+    /**
+     * This method returns the specified thread pool size
+     * */
     public int getThreadPool() {
-
         return threadPool;
     }
 }
