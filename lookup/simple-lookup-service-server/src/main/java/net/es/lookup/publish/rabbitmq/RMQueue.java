@@ -8,6 +8,7 @@ import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.publish.Queue;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.Date;
@@ -24,6 +25,14 @@ public class RMQueue extends Queue {
     private ConnectionFactory factory;
     private Connection connection;
 
+    private String exchangeName;
+    private String exchangeType;
+    private boolean exchangeDurability;
+
+    public static final String QUERY = "all";
+
+    private static Logger LOG = Logger.getLogger(RMQueue.class);
+
     /**
      * Default constructor with max Events=25 and timeInterval between push set to 60s
      *
@@ -32,10 +41,10 @@ public class RMQueue extends Queue {
 
     public RMQueue() throws PubSubQueueException {
 
-        this("localhost", 5672,"guest","","/");
+        this("localhost", 5672,"guest","","/", "test_exchange","direct",false);
     }
 
-    public RMQueue(String host, int port, String username, String password, String vhost) throws PubSubQueueException {
+    public RMQueue(String host, int port, String username, String password, String vhost, String exchangeName, String exchangeType, boolean exchangeDurability) throws PubSubQueueException {
 
         factory = new ConnectionFactory();
         factory.setHost(host);
@@ -43,6 +52,10 @@ public class RMQueue extends Queue {
         factory.setUsername(username);
         factory.setPassword(password);
         factory.setVirtualHost(vhost);
+
+        this.exchangeName = exchangeName;
+        this.exchangeType = exchangeType;
+        this.exchangeDurability = exchangeDurability;
 
 
 
@@ -87,30 +100,26 @@ public class RMQueue extends Queue {
 
         if (channel != null) {
             try {
-                channel.exchangeDeclare("sls_exchange", "topic");
+                channel.exchangeDeclare(exchangeName, exchangeType, exchangeDurability);
             } catch (IOException e) {
-                throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error creating exchange"+e.getMessage());
+                LOG.debug(this.getClass().getName()+" Error creating channel"+e.getMessage());
+                throw new PubSubQueueException(this.getClass().getName()+" - Error creating exchange"+e.getMessage());
             }
         }
-        //String message = "Hello";
-
-        //JSONObject jsonObject = new JSONObject();
-        //jsonObject.accumulateAll(message.getMap());
-        //jsonObject.put("timestamp",(new Date()).toString());
         String jsonMessage="";
 
         try {
             message.add("timestamp",(new Date()).toString());
             jsonMessage = JSONMessage.toString(message);
         } catch (DataFormatException e) {
-            e.printStackTrace();
+            throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error creating exchange"+e.getMessage());
         }
 
         String rmqmessage= jsonMessage.toString();
         if (channel != null) {
             try {
 
-                channel.basicPublish("sls_exchange", "all", null, rmqmessage.getBytes());
+                channel.basicPublish(exchangeName, QUERY, null, rmqmessage.getBytes());
             } catch (IOException e) {
                 throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error publishing messages"+e.getMessage());
             }
@@ -124,8 +133,6 @@ public class RMQueue extends Queue {
         } catch (TimeoutException e) {
             throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error closing connection"+e.getMessage());
         }
-
-
     }
 
 
@@ -152,7 +159,8 @@ public class RMQueue extends Queue {
 
         if (channel != null) {
             try {
-                channel.exchangeDeclare("sls_exchange", "topic");
+
+                channel.exchangeDeclare(exchangeName, exchangeType);
             } catch (IOException e) {
                 throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error creating exchange"+e.getMessage());
             }
@@ -160,7 +168,7 @@ public class RMQueue extends Queue {
 
         if (channel != null) {
             try {
-                channel.basicPublish("sls_exchange", "all", null, message.getBytes());
+                channel.basicPublish(exchangeName, QUERY, null, message.getBytes());
             } catch (IOException e) {
                 throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error publishing messages"+e.getMessage());
             }
@@ -168,26 +176,21 @@ public class RMQueue extends Queue {
 
         try {
             channel.close();
-
         } catch (IOException e) {
             throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error closing connection"+e.getMessage());
         } catch (TimeoutException e) {
             throw new PubSubQueueException("net.es.lookup.publish.rabbitmq.RMQueue.push - Error closing connection"+e.getMessage());
         }
-
-
     }
 
 
     @Override
     public String getQid() {
-
         return null;
     }
 
     @Override
     public String getQAccessPoint() {
-
         return null;
     }
 }

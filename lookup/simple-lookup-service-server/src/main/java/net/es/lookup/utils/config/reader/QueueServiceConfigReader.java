@@ -15,18 +15,14 @@ public class QueueServiceConfigReader {
     private static final String DEFAULT_FILE = "queueservice.yaml";
     private static final String DEFAULT_PATH = "etc";
     private static String configFile = DEFAULT_PATH + "/" + DEFAULT_FILE;
-
-
-
-
     public static final String USERNAME ="username";
     public static final String PASSWORD  = "password";
     public static final String VHOST  = "vhost";
+    public static final String EXCHANGE_NAME  = "exchange_name";
+    public static final String EXCHANGE_TYPE = "exchange_type";
+    public static final String EXCHANGE_DURABILITY = "durable";
 
 
-    private String userName;
-    private String password;
-    private String vhost;
     private int port = 5672;
     private String host;
     private String protocol = "tcp";
@@ -40,6 +36,14 @@ public class QueueServiceConfigReader {
     private int batchSize=10;
     private int pushInterval = 120;
     private int pollingInterval = 10;
+
+    private String userName;
+    private String password;
+    private String vhost;
+
+    private String exchangeName;
+    private String exchangeType;
+    private boolean exchangeDurability;
 
     private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
     
@@ -130,6 +134,21 @@ public class QueueServiceConfigReader {
         return pollingInterval;
     }
 
+    public String getExchangeName() {
+
+        return exchangeName;
+    }
+
+    public String getExchangeType() {
+
+        return exchangeType;
+    }
+
+    public boolean getExchangeDurability() {
+
+        return exchangeDurability;
+    }
+
     private void setInfo(String configFile) {
 
         BaseConfigReader cfg = BaseConfigReader.getInstance();
@@ -153,8 +172,10 @@ public class QueueServiceConfigReader {
             pushInterval = (Integer) yamlMap.get("push_interval");
             pollingInterval = (Integer) yamlMap.get("polling_interval");
 
-
-        } catch (Exception e) {
+            exchangeName = (String) yamlMap.get(EXCHANGE_NAME);
+            exchangeType = (String) yamlMap.get(EXCHANGE_TYPE);
+            exchangeDurability = (Boolean) yamlMap.get(EXCHANGE_DURABILITY);
+     } catch (Exception e) {
             LOG.error("Error parsing config file; Please check config parameters" + e.toString());
             System.exit(1);
         }

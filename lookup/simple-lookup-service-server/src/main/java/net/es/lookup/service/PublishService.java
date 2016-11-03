@@ -6,6 +6,7 @@ import net.es.lookup.publish.Publisher;
 import net.es.lookup.publish.PublisherScheduler;
 import net.es.lookup.publish.rabbitmq.RMQueue;
 import net.es.lookup.timer.Scheduler;
+import org.apache.log4j.Logger;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 
@@ -36,11 +37,18 @@ public class PublishService {
     private int port = 5672;
 
 
+    private String exchangeName;
+    private String exchangeType;
+    private boolean exchangeDurability;
+
+
     private static boolean serviceOn=false;
 
     private final int DEFAULT_SCHEDULER_INTERVAL=30;
 
     private int pollingInterval =DEFAULT_SCHEDULER_INTERVAL;
+
+    private static Logger LOG = Logger.getLogger(PublishService.class);
 
     private PublishService(){
     }
@@ -145,13 +153,44 @@ public class PublishService {
         this.port = port;
     }
 
+    public boolean isExchangeDurability() {
+
+        return exchangeDurability;
+    }
+
+    public void setExchangeDurability(boolean exchangeDurability) {
+
+        this.exchangeDurability = exchangeDurability;
+    }
+
+    public String getExchangeType() {
+
+        return exchangeType;
+    }
+
+    public void setExchangeType(String exchangeType) {
+
+        this.exchangeType = exchangeType;
+    }
+
+    public String getExchangeName() {
+
+        return exchangeName;
+    }
+
+    public void setExchangeName(String exchangeName) {
+
+        this.exchangeName = exchangeName;
+    }
+
     public void startService(){
         serviceOn=true;
-        System.out.println("Starting publisher with host="+host+" maxPushEvents="+maxPushEvents + " maxInterval="+maxInterval);
+        LOG.info(this.getClass().getName()+" Starting publisher with host="+host+" maxPushEvents="+maxPushEvents + " maxInterval="+maxInterval);
 
         try {
 
-            RMQueue rmQueue = new RMQueue(host,port,userName,password,vhost);
+            RMQueue rmQueue = new RMQueue(host,port,userName,password,vhost, exchangeName, exchangeType, exchangeDurability);
+            //for now only one queue is supported. Hence the hard coded value.
             String query = "all";
             Publisher publisher = Publisher.getInstance();
             publisher.addQueue(query,rmQueue);
@@ -162,9 +201,9 @@ public class PublishService {
             publisher.setPollInterval(pollingInterval);
 
         } catch (PubSubQueueException e) {
-            e.printStackTrace();
+            LOG.error(this.getClass().getName()+"Error creating queue" + e.toString());
         } catch (DuplicateEntryException e) {
-            e.printStackTrace();
+            LOG.error(this.getClass().getName()+"Queue already exists" + e.toString());
         }
         createPublishJob();
 
@@ -172,7 +211,8 @@ public class PublishService {
 
     private synchronized void createPublishJob() {
         if (!createdPublishJob){
-            System.out.println("Created publisher scheduler job");
+            LOG.info(this.getClass().getName()+" Created publisher job instance");
+
 
             JobDetail publisherScheduler = newJob(PublisherScheduler.class)
                     .withIdentity("publisher_Scheduler", "pubsub")

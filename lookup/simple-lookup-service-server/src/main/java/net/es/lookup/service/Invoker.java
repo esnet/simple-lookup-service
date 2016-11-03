@@ -140,6 +140,9 @@ public class Invoker {
             publishService.setPassword(qcfg.getPassword());
             publishService.setVhost(qcfg.getVhost());
             publishService.setPollingInterval(qcfg.getPollingInterval());
+            publishService.setExchangeName(qcfg.getExchangeName());
+            publishService.setExchangeType(qcfg.getExchangeType());
+            publishService.setExchangeDurability(qcfg.getExchangeDurability());
             publishService.startService();
 
         }

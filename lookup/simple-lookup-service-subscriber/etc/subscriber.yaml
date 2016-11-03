@@ -2,12 +2,14 @@
 
 queue:
     - type: "rabbitmq"
+      name: "dev-queue"
       host: "ps-mexchg-west.es.net"
       username: "abc"
       password: "xyz"
       vhost: "perfsonar"
       port: 5672
-      exchange: "sls_exchange"
+      exchangeName: "sls_exchange1"
+      exchangeType: "fanout"
       queries:
         - "all"
 destination:

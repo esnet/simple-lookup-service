@@ -70,7 +70,8 @@ public class PublisherScheduler implements Job {
                     }
 
                 } catch (DatabaseException e) {
-                    e.printStackTrace();
+                    LOG.error(this.getClass().getName()+"Database error");
+
                 }
 
                 //Push to queue only if there are messages to send

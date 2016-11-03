@@ -40,7 +40,8 @@ class PublishTask implements Runnable {
         try {
             queue.push(message);
         } catch (PubSubQueueException e) {
-            e.printStackTrace();
+            LOG.error(this.getClass().getName()+" Error pushing to queue" + e.getMessage());
+
         }
 
         Date end = new Date();
