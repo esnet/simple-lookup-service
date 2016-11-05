@@ -2,14 +2,17 @@
 
 queue:
     - type: "rabbitmq"
-      name: "dev-queue"
+      name: "dev-queue1"
       host: "ps-mexchg-west.es.net"
       username: "abc"
       password: "xyz"
       vhost: "perfsonar"
       port: 5672
-      exchangeName: "sls_exchange1"
-      exchangeType: "fanout"
+      exchange_name: "sls_exchange"
+      exchange_type: "fanout"
+      queue_durability: true
+      queue_exclusive: true
+      queue_autodelete: true
       queries:
         - "all"
 destination:
@@ -18,4 +21,4 @@ destination:
       write_index: "perfsonar_write"
       search_index: "perfsonar"
       document_type: "records"
-thread_pool: 500
+thread_pool: 100

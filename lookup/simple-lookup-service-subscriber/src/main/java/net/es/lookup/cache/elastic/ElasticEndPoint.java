@@ -9,6 +9,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
@@ -34,7 +35,7 @@ public class ElasticEndPoint implements EndPoint,Runnable {
     public static final String INDEX_PREFIX = "perfsonar_";
     public static final String ALIAS_ACTION_ADD = "add";
     public static final String ALIAS_ACTION_REMOVE = "remove";
-
+    private static final String HTTP_GET = "GET" ;
     private URI location;
     JSONObject mapping;
 
@@ -102,7 +103,7 @@ public class ElasticEndPoint implements EndPoint,Runnable {
      * */
     private void init() {
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleAtFixedRate(this, 0, INDEX_INTERVAL, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(this, 2, INDEX_INTERVAL, TimeUnit.SECONDS);
     }
 
 
@@ -115,7 +116,7 @@ public class ElasticEndPoint implements EndPoint,Runnable {
         String indexUrl = ElasticUtils.getAbsoluteIndexUrl(location,index);
         try {
             URI uri = new URI(indexUrl);
-            send(mapping, uri);
+            set(mapping, uri);
         }catch (URISyntaxException e) {
             LOG.error(e.getClass().getCanonicalName()+e.getMessage());
         }
@@ -155,7 +156,44 @@ public class ElasticEndPoint implements EndPoint,Runnable {
             LOG.debug("URI to post Alias to: "+aliasEndPoint);
             send(actions, uri);
         } catch (URISyntaxException e) {
-            LOG.error(e.getClass().getCanonicalName()+e.getMessage());
+            LOG.error(this.getClass().getCanonicalName()+": "+e.getMessage());
+        }
+    }
+
+
+    /**
+     *
+     * This method performs a HTTP PUT operation.
+     * @param data Data to be sent in the put request
+     * @param location The URI for the put request
+     * */
+    public void set(JSONObject data, URI location) {
+        HttpClient httpclient = new DefaultHttpClient();
+        HttpPut httpPut = new HttpPut();
+        httpPut.setURI(location);
+        httpPut.setHeader("Accept", "application/json");
+        httpPut.setHeader("Content-type", "application/json");
+        try {
+            LOG.debug(this.getClass().getCanonicalName()+": URL to set"+location);
+            LOG.debug(this.getClass().getCanonicalName()+": Data to set"+data.toString());
+
+            StringEntity se = new StringEntity(data.toString());
+            httpPut.setEntity(se);
+            HttpResponse response = httpclient.execute(httpPut);
+            int statusCode = response.getStatusLine().getStatusCode();
+            LOG.info("Status code: "+ statusCode);
+            if(statusCode < 200 || statusCode > 299){
+                LOG.error(this.getClass().getCanonicalName()+": Error setting data in elasticsearch");
+                LOG.error(this.getClass().getCanonicalName()+":"+response.getStatusLine().getReasonPhrase());
+            }else{
+                LOG.debug(this.getClass().getCanonicalName()+": Success setting data in elasticsearch");
+            }
+        } catch (UnsupportedEncodingException e) {
+            LOG.error(this.getClass().getCanonicalName()+": "+e.getMessage());
+        } catch (ClientProtocolException e) {
+            LOG.error(this.getClass().getCanonicalName()+": "+e.getMessage());
+        } catch (IOException e) {
+            LOG.error(this.getClass().getCanonicalName()+": "+e.getMessage());
         }
     }
 
@@ -173,7 +211,7 @@ public class ElasticEndPoint implements EndPoint,Runnable {
             URI writeUri = new URI(writeLocation);
             send(data,writeUri);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            LOG.error(this.getClass().getCanonicalName()+": "+e.getMessage());
         }
 
 
@@ -186,6 +224,7 @@ public class ElasticEndPoint implements EndPoint,Runnable {
      * */
     public void send(JSONObject data, URI location){
         HttpClient httpclient = new DefaultHttpClient();
+
         HttpPost httpPost = new HttpPost();
         httpPost.setURI(location);
         httpPost.setHeader("Accept", "application/json");
@@ -198,8 +237,8 @@ public class ElasticEndPoint implements EndPoint,Runnable {
             httpPost.setEntity(se);
             HttpResponse response = httpclient.execute(httpPost);
             int statusCode = response.getStatusLine().getStatusCode();
-
-            if(statusCode < 200 && statusCode > 299){
+            LOG.info("Status code: "+ statusCode);
+            if(statusCode < 200 || statusCode > 299){
                 LOG.error(this.getClass().getCanonicalName()+": Error sending data to elasticsearch");
                 LOG.error(this.getClass().getCanonicalName()+":"+response.getStatusLine().getReasonPhrase());
             }else{
@@ -225,16 +264,16 @@ public class ElasticEndPoint implements EndPoint,Runnable {
         httpDelete.setHeader("Accept", "application/json");
         httpDelete.setHeader("Content-type", "application/json");
         try {
-            LOG.debug(this.getClass().getCanonicalName()+": URL to delet"+deleteUri);
+            LOG.debug(this.getClass().getCanonicalName()+": URL to delete: "+deleteUri);
 
             HttpResponse response = httpclient.execute(httpDelete);
             int statusCode = response.getStatusLine().getStatusCode();
-
-            if(statusCode < 200 && statusCode > 299){
+            LOG.info("Status code: "+ statusCode);
+            if(statusCode < 200 || statusCode > 299){
                 LOG.error(this.getClass().getCanonicalName()+": Error deleting index in elasticsearch: "+deleteUri);
                 LOG.error(this.getClass().getCanonicalName()+":"+response.getStatusLine().getReasonPhrase());
             }else{
-                LOG.debug(this.getClass().getCanonicalName()+": Success deleting data to elasticsearch"+deleteUri);
+                LOG.debug(this.getClass().getCanonicalName()+": Success deleting data in elastinsearch: "+deleteUri);
             }
         } catch (UnsupportedEncodingException e) {
             LOG.error(this.getClass().getCanonicalName()+": "+e.getMessage());
@@ -262,11 +301,11 @@ public class ElasticEndPoint implements EndPoint,Runnable {
         //Get index for this hour and previous hour indices
         Calendar today = Calendar.getInstance();
         int hour = today.get(Calendar.HOUR_OF_DAY);
-        int prev_2hour = hour - 2;
+        int prev_3hour = hour - 2;
         int prev_hour = hour - 1;
 
-        if(prev_2hour<0){
-            prev_2hour += MAX_INDEX;
+        if(prev_3hour<0){
+            prev_3hour += MAX_INDEX;
         }
 
         if(prev_hour<0){
@@ -289,14 +328,14 @@ public class ElasticEndPoint implements EndPoint,Runnable {
         modifyAlias(searchIndex,index,ALIAS_ACTION_ADD);
 
         // Remove prev_index from search alias
-        String prev_2hour_index = INDEX_PREFIX+prev_2hour;
-        modifyAlias(searchIndex,prev_2hour_index,ALIAS_ACTION_REMOVE);
+        String prev_3hour_index = INDEX_PREFIX+prev_3hour;
+        modifyAlias(searchIndex,prev_3hour_index,ALIAS_ACTION_REMOVE);
 
         //delete the 2 hour old index
-        String prev_2hour_uri = ElasticUtils.getAbsoluteEndPoint(location)+prev_2hour_index;
+        String prev_3hour_uri = ElasticUtils.getAbsoluteEndPoint(location)+prev_3hour_index;
         try {
-            URI prev_2hour_Index = new URI(prev_2hour_uri);
-            deleteIndex(prev_2hour_Index);
+            URI prev_3hour_Index = new URI(prev_3hour_uri);
+            deleteIndex(prev_3hour_Index);
         } catch (URISyntaxException e) {
             LOG.info(this.getClass().getCanonicalName()+": Error creating delete uri");
         }

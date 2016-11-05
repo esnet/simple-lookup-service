@@ -34,18 +34,14 @@ public class SlsSubscriber implements Subscriber {
 
     //RMQ Exchange fields
     private String exchangeName;
-    private String rmqExchangeType;
-    private QueueType queueType;
+    private String exchangeType;
+    private boolean queueDurability;
+    private boolean queueExclusive;
+    private boolean queueAutoDelete;
     private String queueName;
     private String userName;
     private String password;
     private String vhost;
-
-    //Enum to define the different Rabbitmq queue types
-    public enum QueueType{
-        DIRECT, TOPIC, HEADERS, FANOUT;
-    }
-
     /**
      * Returns the rabbitmq connection
      * */
@@ -72,16 +68,10 @@ public class SlsSubscriber implements Subscriber {
     /**
      * Returns the rabbitmq exchange type
      * */
-    public String getRmqExchangeType() {
-        return rmqExchangeType;
+    public String getExchangeType() {
+        return exchangeType;
     }
 
-    /**
-     * Returns the rabbitmq queue type
-     * */
-    public QueueType getQueueType() {
-        return queueType;
-    }
 
     /**
      * Returns the rabbitmq queue name
@@ -91,44 +81,30 @@ public class SlsSubscriber implements Subscriber {
     }
 
     /**
+     * Default constructor**/
+    public SlsSubscriber(){
+
+    }
+
+    /**
      * This constructor gets the general subscriber parameters and the rabbitmq parameters and creates the
      * SlsSubscriber instance out of it
      * */
-    public SlsSubscriber(String host, int port, String username, String password, String vhost, List<String> queries, String exchangeName, QueueType queueType, List<EndPoint> endpoints) {
+    public SlsSubscriber(String host, int port, String username, String password, String vhost, List<String> queries, String exchangeName, String exchangeType, String queueName, boolean queueDurability, boolean queueExclusive, boolean queueAutoDelete, List<EndPoint> endpoints) {
         this.host= host;
         this.port=port;
         this.queries = queries;
         this.exchangeName = exchangeName;
-        this.queueType = queueType;
+        this.exchangeType = exchangeType;
+        this.queueDurability = queueDurability;
+        this.queueExclusive = queueExclusive;
+        this.queueAutoDelete = queueAutoDelete;
+        this.queueName = queueName;
+
         this.userName = username;
         this.password = password;
         this.vhost = vhost;
         this.endpoints = endpoints;
-    }
-
-
-    /**
-     * Setter method to set the rabbitmq exhange according to queuetype
-     * */
-    private void setRmqExchange() {
-
-        switch (queueType) {
-            case DIRECT:
-                rmqExchangeType = "direct";
-                break;
-            case TOPIC:
-                rmqExchangeType = "topic";
-                break;
-            case HEADERS:
-                rmqExchangeType = "headers";
-                break;
-            case FANOUT:
-                rmqExchangeType = "fanout";
-                break;
-            default:
-                rmqExchangeType = "direct";
-                break;
-        }
     }
 
     /**
@@ -153,7 +129,114 @@ public class SlsSubscriber implements Subscriber {
     }
 
 
-   /**
+    public void setExchangeType(String exchangeType) {
+
+        this.exchangeType = exchangeType;
+    }
+
+    /**
+     * Returns whether the queue is durable or not.
+     * */
+    public boolean isQueueDurability() {
+
+        return queueDurability;
+    }
+
+
+    /**
+     * Sets the queue durability
+     * */
+    public void setQueueDurability(boolean queueDurability) {
+
+        this.queueDurability = queueDurability;
+    }
+
+    public boolean isQueueExclusive() {
+
+        return queueExclusive;
+    }
+
+    public void setQueueExclusive(boolean queueExclusive) {
+
+        this.queueExclusive = queueExclusive;
+    }
+
+    public boolean isQueueAutoDelete() {
+
+        return queueAutoDelete;
+    }
+
+    public void setQueueAutoDelete(boolean queueAutoDelete) {
+
+        this.queueAutoDelete = queueAutoDelete;
+    }
+
+    public void setHost(String host) {
+
+        this.host = host;
+    }
+
+    public void setPort(int port) {
+
+        this.port = port;
+    }
+
+    public void setQueries(List<String> queries) {
+
+        this.queries = queries;
+    }
+
+    public List<EndPoint> getEndpoints() {
+
+        return endpoints;
+    }
+
+    public void setEndpoints(List<EndPoint> endpoints) {
+
+        this.endpoints = endpoints;
+    }
+
+    public void setExchangeName(String exchangeName) {
+
+        this.exchangeName = exchangeName;
+    }
+
+    public void setQueueName(String queueName) {
+
+        this.queueName = queueName;
+    }
+
+    public String getUserName() {
+
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+
+        return password;
+    }
+
+    public void setPassword(String password) {
+
+        this.password = password;
+    }
+
+    public String getVhost() {
+
+        return vhost;
+    }
+
+    public void setVhost(String vhost) {
+
+        this.vhost = vhost;
+    }
+
+    /**
     * This method initializes the rabbitmq connection
     * */
     @Override
@@ -171,7 +254,6 @@ public class SlsSubscriber implements Subscriber {
         try {
             connection = factory.newConnection();
             channel = connection.createChannel();
-            setRmqExchange();
         } catch (TimeoutException e) {
             LOG.error(this.getClass().getCanonicalName()+": Error initializing subscriber"+e.getMessage());
         } catch (IOException e) {
@@ -194,8 +276,8 @@ public class SlsSubscriber implements Subscriber {
 
         LOG.debug(this.getClass().getCanonicalName()+": Starting SLS Subscriber");
         try {
-            channel.exchangeDeclare(exchangeName, rmqExchangeType);
-            queueName = channel.queueDeclare().getQueue();
+            channel.exchangeDeclare(exchangeName, exchangeType, true);
+            channel.queueDeclare(queueName, queueDurability, queueExclusive, queueAutoDelete, null);
 
             List<String> queries = getQueries();
             for(String q:queries) {
@@ -207,6 +289,7 @@ public class SlsSubscriber implements Subscriber {
 
             channel.basicConsume(queueName, true, "", this);
         } catch (IOException e) {
+            e.printStackTrace();
             LOG.error(this.getClass().getCanonicalName()+": Error starting subscriber"+e.getMessage());
         }
 

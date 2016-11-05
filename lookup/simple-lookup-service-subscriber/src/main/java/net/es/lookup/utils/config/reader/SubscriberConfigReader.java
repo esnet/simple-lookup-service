@@ -26,10 +26,15 @@ public class SubscriberConfigReader {
     public static final String PASSWORD  = "password";
     public static final String VHOST  = "vhost";
     public static final String QUEUE  = "queue";
+    public static final String QUEUE_NAME  = "name";
     public static final String QUEUE_HOST = "host";
     public static final String QUEUE_PORT = "port";
     public static final String QUERIES = "queries";
-    public static final String EXCHANGE_NAME = "exchange";
+    public static final String EXCHANGE_NAME = "exchange_name";
+    public static final String EXCHANGE_TYPE = "exchange_type";
+    public static final String QUEUE_DURABILITY = "queue_durability";
+    public static final String QUEUE_EXCLUSIVE = "queue_exclusive";
+    public static final String QUEUE_AUTODELETE = "queue_autodelete";
     public static final String THREAD_POOL = "thread_pool";
 
     public static final String DESTINATION = "destination";
@@ -91,7 +96,6 @@ public class SubscriberConfigReader {
 
         return destination;
     }
-
 
     /**
      * This method reads the config file and populates the config file parameters

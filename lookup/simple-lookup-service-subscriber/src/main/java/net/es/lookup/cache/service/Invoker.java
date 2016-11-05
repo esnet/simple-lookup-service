@@ -3,8 +3,8 @@ package net.es.lookup.cache.service;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import net.es.lookup.cache.elastic.ElasticEndPoint;
 import net.es.lookup.cache.dispatch.EndPoint;
+import net.es.lookup.cache.elastic.ElasticEndPoint;
 import net.es.lookup.cache.subscribe.SlsSubscriber;
 import net.es.lookup.cache.subscribe.Subscriber;
 import net.es.lookup.common.ReservedValues;
@@ -66,16 +66,18 @@ public class Invoker {
             String host = (String) queue.get(SubscriberConfigReader.QUEUE_HOST);
             int port = (Integer) queue.get(SubscriberConfigReader.QUEUE_PORT);
             String exchangeName = (String) queue.get(SubscriberConfigReader.EXCHANGE_NAME);
-            System.out.println(exchangeName);
+            String exchangeType = (String) queue.get(SubscriberConfigReader.EXCHANGE_TYPE);
 
             String userName = (String) queue.get(SubscriberConfigReader.USERNAME);
             String password = (String) queue.get(SubscriberConfigReader.PASSWORD);
             String vhost = (String) queue.get(SubscriberConfigReader.VHOST);
-            System.out.println("Using vhost" + vhost);
+
+            String queueName = (String) queue.get(SubscriberConfigReader.QUEUE_NAME);
+            boolean queueDurable = (Boolean) queue.get(SubscriberConfigReader.QUEUE_DURABILITY);
+            boolean queueExclusive = (Boolean) queue.get(SubscriberConfigReader.QUEUE_EXCLUSIVE);
+            boolean queueAutoDelete = (Boolean) queue.get(SubscriberConfigReader.QUEUE_AUTODELETE);
+
             List<String> queries = (List<String>) queue.get(SubscriberConfigReader.QUERIES);
-            for (String s : queries) {
-                System.out.println(s);
-            }
 
             for (Map dest : destInConfig) {
 
@@ -94,12 +96,29 @@ public class Invoker {
                     endPoint.setWriteIndex(dWriteIndex);
                     endPoint.setSearchIndex(dSearchIndex);
                     endPoint.setDocumentType(dDocumentType);
-                    System.out.println(dUrl);
                     endPoints.add(endPoint);
                 }
             }
 
-            Subscriber subscriber = new SlsSubscriber(host, port, userName, password, vhost, queries, exchangeName, SlsSubscriber.QueueType.TOPIC, endPoints);
+            SlsSubscriber subscriber = new SlsSubscriber();
+            subscriber.setHost(host);
+            subscriber.setPort(port);
+
+            subscriber.setUserName(userName);
+            subscriber.setPassword(password);
+            subscriber.setVhost(vhost);
+
+            subscriber.setExchangeName(exchangeName);
+            subscriber.setExchangeType(exchangeType);
+
+            subscriber.setQueueName(queueName);
+            subscriber.setQueueExclusive(queueExclusive);
+            subscriber.setQueueDurability(queueDurable);
+            subscriber.setQueueAutoDelete(queueAutoDelete);
+
+            subscriber.setQueries(queries);
+            subscriber.setEndpoints(endPoints);
+
             subscriber.init();
 
             subscriber.start();

@@ -2,9 +2,9 @@
   "mappings":{
     "records":{
       "properties": {
-        "uri": {"type": "string", "index": "not_analyzed"},
-        "expires":{"type":"date","format":"strict_date_optional_time||epoch_millis"},
-        "messageType":{"type":"string","index":"not_analyzed"}
+        "uri": {"type": "keyword"},
+        "expires":{"type":"date"},
+        "messageType":{"type":"keyword"}
       }
     }
   }
