@@ -7,8 +7,8 @@ setup(
     version="1.0.15",
     description="A python client for the Simple Lookup Service",
     long_description=open("README.rst").read(),
-    author=["Andrew Sides", "Sowmya Balasubramanian"],
-    author_email=["asides@es.net", "sowmya@es.net"],
+    author=["Andrew Sides", "Sowmya Balasubramanian", "Monte Goode"],
+    author_email=["asides@es.net", "sowmya@es.net", "mmgoode@lbl.gov"],
     url="https://github.com/esnet/python-sls-client",
     license="3-clause BSD License",
     package_data={
@@ -19,7 +19,8 @@ setup(
         'clients/sls_dig',
         'clients/find_ps_ma',
         'clients/sls_text_search',
-        'clients/sls_report'
+        'clients/sls_report',
+        'clients/sls_cache_report'
     ],
     install_requires=[
         "YURL",
