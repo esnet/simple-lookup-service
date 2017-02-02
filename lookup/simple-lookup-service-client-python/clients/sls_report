@@ -579,6 +579,7 @@ class SlsStatCapsule(SlsReportBase):
             [
                 ('ls_count', self._dict_to_stats('ls_count')),
                 ('ps_version', self._dict_to_stats('ps_version')),
+                ('bundles', self._dict_to_stats('bundle_type')),
                 ('iface_speed', self._dict_to_stats('speed')),
                 ('architecture', self._dict_to_stats('arch')),
                 ('os_info', self._dict_to_stats('os')),
@@ -590,7 +591,6 @@ class SlsStatCapsule(SlsReportBase):
                 ('public_private', self._dict_to_stats('iface_pub')),
                 ('top_level_domain/country', self._dict_to_stats('country')),
                 ('domains', self._dict_to_stats('domains')),
-                ('bundles', self._dict_to_stats('bundle_type')),
             ]
         )
 
