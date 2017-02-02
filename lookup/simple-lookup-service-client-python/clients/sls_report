@@ -742,6 +742,11 @@ class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
         for k, v in self._report.items():
             if self._output_count == 0:
                 limit = len(v.keys())
+                strcount = "" 
+            else:
+                strcount = "Top "
+            
+            strcount += str(limit)
             trimmed_val = OrderedDict()
             for idx,key in enumerate(v):
                 if idx < limit:
@@ -749,7 +754,7 @@ class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
                 else:
                     break
             fmt += self._column_template.render(
-                section=k.replace('_', ' ').title(), _dict=trimmed_val, count=len(trimmed_val.keys())).encode('utf-8')
+                section=k.replace('_', ' ').title(), _dict=trimmed_val, count=strcount).encode('utf-8')
             fmt += '\n'
 
         return fmt
