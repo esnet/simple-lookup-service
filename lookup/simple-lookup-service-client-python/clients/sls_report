@@ -20,6 +20,8 @@ import IPy
 import jinja2
 import requests
 import tldextract
+import datetime
+import operator
 
 ACTIVE_HOSTS = 'http://ps-west.es.net/lookup/activehosts.json'
 
@@ -78,6 +80,7 @@ class SlsReportBase(object):
         self._options = options
         self._log = logger
         self._pp = pprint.PrettyPrinter(indent=4)
+
 
     def pretty_verbose(self, obj, level=1):
         """
@@ -502,6 +505,12 @@ class SlsStatCapsule(SlsReportBase):
             for ver in version:
                 self._counter('ps_version', ver)
 
+    def ps_bundle_type(self, bundle_type):
+        """store the ps toolkit bundle type."""
+        if bundle_type:
+            for btype in bundle_type:
+                self._counter('bundle_type', btype)
+
     def os_and_architecture(self, os, version, kernel):  # pylint: disable=invalid-name
         """handle storing OS/etc information."""
 
@@ -581,6 +590,7 @@ class SlsStatCapsule(SlsReportBase):
                 ('public_private', self._dict_to_stats('iface_pub')),
                 ('top_level_domain/country', self._dict_to_stats('country')),
                 ('domains', self._dict_to_stats('domains')),
+                ('bundles', self._dict_to_stats('bundle_type')),
             ]
         )
 
@@ -642,6 +652,8 @@ class SlsStatistics(SlsReportBase):
 
             self._capsule.ps_toolkit_version(res_host.get('pshost-toolkitversion'))
 
+            self._capsule.ps_bundle_type(res_host.get('pshost-bundle'))
+
             self._capsule.os_and_architecture(
                 res_host.get('host-os-name'),
                 res_host.get('host-os-version'),
@@ -693,10 +705,11 @@ class SlsStatistics(SlsReportBase):
 
 class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
     """Wrapper class to produce the formatted output."""
-    def __init__(self, report, count, duplicates):
+    def __init__(self, report, count, duplicates, ntop):
         self._report = report
         self._count = count
         self._duplicates = duplicates
+        self._output_count = ntop
 
         # jinja template strings
         # default name/count/percent columns
@@ -709,15 +722,34 @@ class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
 
     def get_console_report(self):
         """Returns a formatted string of template output."""
-        fmt = '\nLookup data for {count} hosts ({dupe} duplicates found):\n\n'.format(
+        now = datetime.datetime.now()
+        fmt = '\nReport was generated on '
+        fmt += str(now)
+
+        limit = int(self._output_count)
+        if limit > 0:
+            fmt += '\n\nDisplaying top '
+            fmt += str(limit)
+        else:
+            fmt += '\n\nDisplaying all values '
+
+        fmt += '\n\nLookup data for {count} hosts ({dupe} duplicates found):\n\n'.format(
             count=self._count, dupe=self._duplicates)
 
         if self._duplicates == 1:
-            fmt = fmt.replace('duplicates', 'duplicate')
+            fmt = fmt.replace('duplicates', 'duplicate')     
 
         for k, v in self._report.items():
+            if self._output_count == 0:
+                limit = len(v.keys())
+            trimmed_val = OrderedDict()
+            for idx,key in enumerate(v):
+                if idx < limit:
+                    trimmed_val[key] = v[key]
+                else:
+                    break
             fmt += self._column_template.render(
-                section=k.replace('_', ' ').title(), _dict=v, count=len(v.keys())).encode('utf-8')
+                section=k.replace('_', ' ').title(), _dict=trimmed_val, count=len(trimmed_val.keys())).encode('utf-8')
             fmt += '\n'
 
         return fmt
@@ -749,6 +781,9 @@ def main():
     parser.add_option('-q', '--quiet',
                       dest='quiet', action='store_true', default=False,
                       help='Silence all default log output - meant for cron.')
+    parser.add_option('-n', '--ntop',
+                      dest='ntop', default=0,
+                      help='Display only top n statistics')
     options, _ = parser.parse_args()
 
     t_start = time.time()
@@ -773,7 +808,7 @@ def main():
 
     _logger('main.end', 'completed in {sec} seconds'.format(sec=round(time.time() - t_start, 2)))
 
-    formatter = SlsReportFormatter(report.get_report, report.host_count, report.duplicates)
+    formatter = SlsReportFormatter(report.get_report, report.host_count, report.duplicates, options.ntop)
     print formatter
 
 if __name__ == '__main__':
