@@ -520,7 +520,7 @@ class SlsStatCapsule(SlsReportBase):
         else:
             self._counter('bundle_type', UNKNOWN_FIELD) 
 
-    def os_and_architecture(self, os, version, kernel):  # pylint: disable=invalid-name
+    def os_and_architecture(self, os, version, kernel, architecture):  # pylint: disable=invalid-name
         """handle storing OS/etc information."""
 
         for i in os, version, kernel:
@@ -535,7 +535,16 @@ class SlsStatCapsule(SlsReportBase):
 
         self._counter('os', os_info)
 
-        arch = kernel[0].split('.')[-1]
+        if architecture:
+            arch = architecture
+        else:
+            arch = kernel[0].split('.')[-1]
+            arch = arch.split('-')[-1]
+
+        if arch == 'amd64':
+            arch = 'x86_64'
+        elif arch == '686':
+            arch = 'i686'
 
         if arch:
             self._counter('arch', arch)
@@ -673,6 +682,7 @@ class SlsStatistics(SlsReportBase):
                 res_host.get('host-os-name'),
                 res_host.get('host-os-version'),
                 res_host.get('host-os-kernel'),
+                res_host.get('host-os-architecture'),
             )
 
             self._capsule.hardware_and_vm(
