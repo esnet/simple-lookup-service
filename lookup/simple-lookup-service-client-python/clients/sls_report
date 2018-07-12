@@ -24,6 +24,7 @@ import datetime
 import operator
 
 ACTIVE_HOSTS = 'http://ps-west.es.net/lookup/activehosts.json'
+UNKNOWN_FIELD = 'unknown'
 
 
 class SlsReportException(Exception):
@@ -368,6 +369,8 @@ class SlsStatCapsule(SlsReportBase):
         if mtu:
             for val in mtu:
                 self._counter('mtu', val)
+        else:
+            self._counter('mtu', UNKNOWN_FIELD)
 
     def nic_speed(self, speed):
         """store nic speed values."""
@@ -386,6 +389,8 @@ class SlsStatCapsule(SlsReportBase):
         if speed:
             for val in speed:
                 self._counter('speed', xlate.get(val))
+        else:
+            self._counter('speed', UNKNOWN_FIELD)
 
     def interface_summary(self, address, skip_reverse_dns):  # pylint: disable=too-many-branches
         """
@@ -504,18 +509,24 @@ class SlsStatCapsule(SlsReportBase):
         if version:
             for ver in version:
                 self._counter('ps_version', ver)
+        else:
+            self._counter('ps_version', UNKNOWN_FIELD)
 
     def ps_bundle_type(self, bundle_type):
         """store the ps toolkit bundle type."""
         if bundle_type:
             for btype in bundle_type:
-                self._counter('bundle_type', btype)
+                self._counter('bundle_type', btype)        
+        else:
+            self._counter('bundle_type', UNKNOWN_FIELD) 
 
-    def os_and_architecture(self, os, version, kernel):  # pylint: disable=invalid-name
+    def os_and_architecture(self, os, version, kernel, architecture):  # pylint: disable=invalid-name
         """handle storing OS/etc information."""
 
         for i in os, version, kernel:
             if not isinstance(i, list) or not len(i):
+                self._counter('os', UNKNOWN_FIELD)
+                self._counter('arch', UNKNOWN_FIELD)
                 return
 
         os_info = '{os} {version}'.format(
@@ -524,9 +535,20 @@ class SlsStatCapsule(SlsReportBase):
 
         self._counter('os', os_info)
 
-        arch = kernel[0].split('.')[-1]
+        if architecture:
+            arch = architecture
+        else:
+            arch = kernel[0].split('.')[-1]
+            arch = arch.split('-')[-1]
 
-        self._counter('arch', arch)
+        if arch == 'amd64':
+            arch = 'x86_64'
+        elif arch == '686':
+            arch = 'i686'
+
+        if arch:
+            self._counter('arch', arch)
+        
 
     def hardware_and_vm(self, hvm, manufacturer, product):
         """process vm and product information."""
@@ -540,6 +562,8 @@ class SlsStatCapsule(SlsReportBase):
         for k, v in info.items():
             if v is not None and k is not None:
                 self._counter(k, v)
+            elif k is not None:
+                self._counter(k, UNKNOWN_FIELD)
 
     # formatting, etc.
 
@@ -658,6 +682,7 @@ class SlsStatistics(SlsReportBase):
                 res_host.get('host-os-name'),
                 res_host.get('host-os-version'),
                 res_host.get('host-os-kernel'),
+                res_host.get('host-os-architecture'),
             )
 
             self._capsule.hardware_and_vm(
