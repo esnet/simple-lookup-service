@@ -5,28 +5,34 @@
 %define config_base /etc/%{package_name}
 %define log_dir /var/log/%{package_name}
 %define run_dir /var/run/%{package_name}
-%define data_dir /var/lib/%{package_name}
-%define relnum 2
+%define init_script lookup-service-subscriber
+%define apacheconf apache_sls_cache.conf
+%define relnum 9
 
 Name:           %{package_name}
 Version:        2.2
 Release:        %{relnum}
 Summary:        Lookup Service
-License:        distributable, see LICENSE
+License:        BSD
 Group:          Development/Libraries
 URL:            https://github.com/esnet/simple-lookup-service
 Source0:        %{mvn_project_name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  java-openjdk >= 1.6.0
-BuildRequires:  sed 
 BuildArch:      noarch
 Requires:       java-openjdk >= 1.6.0
 Requires:       chkconfig
-
+Requires:       elasticsearch >= 5.0
+Requires(post): httpd
+%if 0%{?el7}
+BuildRequires: systemd
+%{?systemd_requires: %systemd_requires}
+%else
+Requires:		chkconfig
+%endif
+BuildRequires:  java-openjdk >= 1.6.0
+BuildRequires:  sed
 %description
-Lookup Service is used to find registered services. 
-This package provides a server that allows clients to register and query services 
-via REST interface.
+Lookup Service Cache aggregates data from all lookup service nodes.
 
 %pre
 /usr/sbin/groupadd lookup 2> /dev/null || :
@@ -35,6 +41,7 @@ via REST interface.
 %prep
 %setup -q -n  %{mvn_project_name}
 
+#Clean out previous build
 %clean
 rm -rf %{buildroot}
 
@@ -42,26 +49,31 @@ rm -rf %{buildroot}
 mvn --projects %{mvn_project_list} clean
 
 %install
-#Clean out previous build
-rm -rf %{buildroot}
-
 #Run install target
-mvn -DskipTests --projects %{mvn_project_list} install 
+mvn -DskipTests --projects %{mvn_project_list} install
 
 #Create directory structure for build root
 mkdir -p %{buildroot}/%{install_base}/target
 mkdir -p %{buildroot}/%{install_base}/bin
 mkdir -p %{buildroot}/%{config_base}
 mkdir -p %{buildroot}/etc/init.d
+mkdir -p %{buildroot}/etc/httpd/conf.d
 
 #Copy jar files and scripts
 cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/target/*.jar %{buildroot}/%{install_base}/target/
 install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/bin/* %{buildroot}/%{install_base}/bin/
-install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/scripts/lookup-service-subscriber %{buildroot}/etc/init.d/%{package_name}
+install -D -m 0644 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/etc/%{apacheconf} %{buildroot}/etc/httpd/conf.d/%{apacheconf}
+
+%if 0%{?el7}
+install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/scripts/lookup-service-subscriber %{buildroot}/%{_unitdir}/%{init_script}.service
+%else
+install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/scripts/lookup-service-subscriber %{buildroot}/etc/init.d/%{init_script}
+%endif
 
 # Copy default config file
-cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/etc/subscriber.yaml %{buildroot}/%{config_base}/subscriber.yaml
-
+cp %{_builddir}/%{mvn_project_name}/LICENSE %{buildroot}/%{install_base}/LICENSE
+#cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/etc/subscriber.yaml %{buildroot}/%{config_base}/subscriber.yaml
+cp -r %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/etc/* %{buildroot}/%{config_base}/
 #Update log locations
 sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/etc/log4j.properties > %{buildroot}/%{config_base}/log4j.properties
 
@@ -75,39 +87,35 @@ chmod 700 %{run_dir}
 mkdir -p %{log_dir}
 chown lookup:lookup %{log_dir}
 
-#Create database directory
-mkdir -p %{data_dir}
-chown lookup:lookup %{data_dir}
 
 #Create symbolic links to latest version of jar files
 ##if update then delete old links
 if [ $1 == 2 ]; then
-  if [ -e %{config_base}/lookup-service.yaml ]; then
-     rm %{config_base}/lookup-service.yaml
-  fi
   if [ -L %{install_base}/target/%{package_name}.one-jar.jar ]; then
       unlink %{install_base}/target/%{package_name}.one-jar.jar
   fi
-  if [ -L %{install_base}/target/%{package_name}.one-jar.jar ]; then
-     unlink %{install_base}/target/%{package_name}.one-jar.jar
-  fi
 fi
-   ln -s %{install_base}/target/%{mvn_project_name}-subscriber-%{version}-SNAPSHOT.one-jar.jar %{install_base}/target/%{package_name}.one-jar.jar
+ln -s %{install_base}/target/%{mvn_project_name}-subscriber-%{version}-SNAPSHOT.one-jar.jar %{install_base}/target/%{package_name}.one-jar.jar
 chown lookup:lookup %{install_base}/target/%{package_name}.one-jar.jar
 
 #Configure service to start when machine boots
+%if 0%{?el7}
+%systemd_post %{init_script}.service
+if [ "$1" = "1" ]; then
+    #if new install, then enable
+    systemctl enable %{init_script}.service
+    systemctl start %{init_script}.service
+fi
+%else
 /sbin/chkconfig --add %{package_name}
-
-%files
-%defattr(-,lookup,lookup,-)
-%config(noreplace) %{config_base}/*
-%{install_base}/target/*
-%{install_base}/bin/*
-/etc/init.d/%{package_name}
+%endif
 
 %preun
+%if 0%{?el7}
+%systemd_preun %{init_script}.service
+%else
 if [ $1 == 0 ]; then
-    /sbin/chkconfig --del %{package_name}
+    /sbin/chkconfig --del %{init_script}
     /sbin/service %{package_name} stop
     if [ -L %{install_base}/target/%{package_name}.one-jar.jar ]; then
         unlink %{install_base}/target/%{package_name}.one-jar.jar
@@ -116,3 +124,26 @@ if [ $1 == 0 ]; then
         unlink %{install_base}/target/%{package_name}.one-jar.jar
     fi
 fi
+%endif
+
+%files
+%defattr(-,lookup,lookup,-)
+%%license %{install_base}/LICENSE
+%config(noreplace) %{config_base}/*
+%exclude %{config_base}/%{apacheconf}
+/etc/httpd/conf.d/%{apacheconf}
+%{install_base}/target/*
+%{install_base}/bin/*
+
+
+%if 0%{?el7}
+%attr(0644,root,root) %{_unitdir}/%{init_script}.service
+%else
+%attr(0755,lookup,lookup) /etc/init.d/%{init_script}
+%endif
+
+
+%changelog
+* Fri Jul 13 2018 sowmya@es.net 2.2-9
+- Added apache rules conf
+- Updated spec file to support Centos 7
