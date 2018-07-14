@@ -63,6 +63,7 @@ mkdir -p %{buildroot}/etc/httpd/conf.d
 cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/target/*.jar %{buildroot}/%{install_base}/target/
 install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/bin/* %{buildroot}/%{install_base}/bin/
 install -D -m 0644 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/etc/%{apacheconf} %{buildroot}/etc/httpd/conf.d/%{apacheconf}
+rm -f %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/etc/%{apacheconf}
 
 %if 0%{?el7}
 install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/scripts/lookup-service-subscriber %{buildroot}/%{_unitdir}/%{init_script}.service
