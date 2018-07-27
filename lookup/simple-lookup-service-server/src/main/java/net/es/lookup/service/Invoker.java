@@ -1,6 +1,12 @@
 package net.es.lookup.service;
 
+import static java.util.Arrays.asList;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
 
+import java.util.LinkedList;
+import java.util.List;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -12,213 +18,189 @@ import net.es.lookup.timer.Scheduler;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import net.es.lookup.utils.log.StdOutErrToLog;
+
 import org.apache.log4j.Logger;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import static java.util.Arrays.asList;
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
-import static org.quartz.TriggerBuilder.newTrigger;
 
 
 public class Invoker {
 
-    private static int port = 8080;
-    private static LookupService lookupService = null;
+  private static int port = 8080;
+  private static LookupService lookupService = null;
 
+  // private static ServiceDAOMongoDb dao = null;
+  private static String host = "localhost";
+  private static LookupServiceConfigReader lookupServiceConfigReader;
+  private static QueueServiceConfigReader queueServiceConfigReader;
 
-    //private static ServiceDAOMongoDb dao = null;
-    private static String host = "localhost";
-    private static LookupServiceConfigReader lcfg;
-    private static QueueServiceConfigReader qcfg;
+  private static String configPath = "etc/";
+  private static final String lookupservicecfg = "lookupservice.yaml";
+  private static final String queuecfg = "queueservice.yaml";
 
-    private static String configPath = "etc/";
-    private static String lookupservicecfg = "lookupservice.yaml";
-    private static String queuecfg = "queueservice.yaml";
+  private static String logConfig = "./etc/log4j.properties";
 
+  private static Logger LOG;
 
-    private static String logConfig = "./etc/log4j.properties";
+  /**
+   * Main program to start the Lookup ServiceRecord.
+   *
+   * @param args [-h, ?] for help [-p server-port
+   * @throws Exception throws generic exception
+   */
+  public static void main(String[] args) throws Exception {
 
+    parseArgs(args);
+    // set log config
+    System.setProperty("log4j.configuration", "file:" + logConfig);
 
-    private static Logger LOG;
-
-
-    private static boolean cacheServiceRequest = false;
-
-    /**
-     * Main program to start the Lookup ServiceRecord
-     *
-     * @param args [-h, ?] for help
-     *             [-p server-port
-     * @throws Exception
-     */
-    public static void main(String[] args) throws Exception {
-
-        parseArgs(args);
-        //set log config
-        System.setProperty("log4j.configuration", "file:" + logConfig);
-
-        StdOutErrToLog.redirectStdOutErrToLog();
-
-        Scheduler scheduler = Scheduler.getInstance();
-
-        LOG = Logger.getLogger(Invoker.class);
-
-        LookupServiceConfigReader.init(configPath + lookupservicecfg);
-        QueueServiceConfigReader.init(configPath+queuecfg);
-
-        lcfg = LookupServiceConfigReader.getInstance();
-        qcfg = QueueServiceConfigReader.getInstance();
-
-        port = lcfg.getPort();
-        host = lcfg.getHost();
-
-        int dbpruneInterval = lcfg.getPruneInterval();
-        long prunethreshold = lcfg.getPruneThreshold();
-
-        LOG.info("starting ServiceDAOMongoDb");
-
-        String dburl = lcfg.getDbUrl();
-        int dbport = lcfg.getDbPort();
-        String collname = lcfg.getCollName();
-
-        List<String> services = new LinkedList<String>();
-
-        // Initialize services
-        try {
-            if (lcfg.isCoreserviceOn()) {
-                new ServiceDAOMongoDb(dburl, dbport, LookupService.LOOKUP_SERVICE, collname);
-                services.add(LookupService.LOOKUP_SERVICE);
-            }
-        } catch (DatabaseException e) {
-
-            LOG.info("Error connecting to database; Please check if MongoDB is running");
-            System.exit(1);
-
-        }
-        LOG.info("starting Lookup Service");
-        // Create the REST service
-        Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
-
-        // Start the service
-        Invoker.lookupService.startService(services);
-
-        //DB Pruning for core LS
-        if (lcfg.isCoreserviceOn()) {
-            JobDetail job = newJob(MongoDBMaintenanceJob.class)
-                    .withIdentity(LookupService.LOOKUP_SERVICE + "clean", "DBMaintenance")
-
-                    .build();
-            job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
-            job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, LookupService.LOOKUP_SERVICE);
-
-            // Trigger the job to run now, and then every dbpruneInterval seconds
-            Trigger trigger = newTrigger().withIdentity(LookupService.LOOKUP_SERVICE + "DBTrigger", "DBMaintenance")
-                    .startNow()
-                    .withSchedule(simpleSchedule()
-                            .withIntervalInSeconds(dbpruneInterval)
-                            .repeatForever()
-                            .withMisfireHandlingInstructionIgnoreMisfires())
-                            .withPriority(Thread.MAX_PRIORITY)
-                    .build();
-
-            scheduler.schedule(job, trigger);
-        }
-
-        if(qcfg != null && qcfg.isServiceOn()){
-
-            PublishService publishService = PublishService.getInstance();
-            publishService.setMaxPushEvents(qcfg.getBatchSize());
-            publishService.setMaxInterval(qcfg.getPushInterval());
-            publishService.setHost(qcfg.getHost());
-            publishService.setPort(qcfg.getPort());
-            publishService.setUserName(qcfg.getUserName());
-            publishService.setPassword(qcfg.getPassword());
-            publishService.setVhost(qcfg.getVhost());
-            publishService.setPollingInterval(qcfg.getPollingInterval());
-            publishService.setExchangeName(qcfg.getExchangeName());
-            publishService.setExchangeType(qcfg.getExchangeType());
-            publishService.setExchangeDurability(qcfg.getExchangeDurability());
-            publishService.startService();
-
-        }
-
-
-        JobDetail gcInvoker = newJob(MemoryManager.class)
-                .withIdentity("gc", "MemoryManagement")
-                .build();
-
-        Trigger gcTrigger = newTrigger().withIdentity("gc trigger", "MemoryManagement")
-                .startNow()
-                .withSchedule(simpleSchedule()
-                        .withIntervalInSeconds(60)
-                        .repeatForever()
-                        .withMisfireHandlingInstructionIgnoreMisfires())
-                .build();
-
-        scheduler.schedule(gcInvoker, gcTrigger);
+    StdOutErrToLog.redirectStdOutErrToLog();
 
 
 
-        // Block forever
-        Object blockMe = new Object();
-        synchronized (blockMe) {
-            blockMe.wait();
+    LOG = Logger.getLogger(Invoker.class);
 
-        }
+    LookupServiceConfigReader.init(configPath + lookupservicecfg);
+    QueueServiceConfigReader.init(configPath + queuecfg);
 
+    lookupServiceConfigReader = LookupServiceConfigReader.getInstance();
+    queueServiceConfigReader = QueueServiceConfigReader.getInstance();
+
+    port = lookupServiceConfigReader.getPort();
+    host = lookupServiceConfigReader.getHost();
+
+
+
+    LOG.info("starting ServiceDAOMongoDb");
+
+    String dburl = lookupServiceConfigReader.getDbUrl();
+    int dbport = lookupServiceConfigReader.getDbPort();
+    String dbname = lookupServiceConfigReader.getDbName();
+    String collname = lookupServiceConfigReader.getCollName();
+
+    List<String> services = new LinkedList<>();
+
+    // Initialize services
+    try {
+      new ServiceDAOMongoDb(dburl, dbport, dbname, collname);
+      services.add(LookupService.LOOKUP_SERVICE);
+
+    } catch (DatabaseException e) {
+
+      LOG.info("Error connecting to database; Please check if MongoDB is running");
+      System.exit(1);
+    }
+    LOG.info("starting Lookup Service");
+    // Create the REST service
+    Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
+
+    // Start the service
+    Invoker.lookupService.startService(services);
+
+    // DB Pruning
+    Scheduler scheduler = Scheduler.getInstance();
+    int dbpruneInterval = lookupServiceConfigReader.getPruneInterval();
+    long prunethreshold = lookupServiceConfigReader.getPruneThreshold();
+    JobDetail job =
+        newJob(MongoDBMaintenanceJob.class)
+            .withIdentity(LookupService.LOOKUP_SERVICE + "clean", "DBMaintenance")
+            .build();
+    job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
+    job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, LookupService.LOOKUP_SERVICE);
+
+    // Trigger the job to run now, and then every dbpruneInterval seconds
+    Trigger trigger =
+        newTrigger()
+            .withIdentity(LookupService.LOOKUP_SERVICE + "DBTrigger", "DBMaintenance")
+            .startNow()
+            .withSchedule(
+                simpleSchedule()
+                    .withIntervalInSeconds(dbpruneInterval)
+                    .repeatForever()
+                    .withMisfireHandlingInstructionIgnoreMisfires())
+            .withPriority(Thread.MAX_PRIORITY)
+            .build();
+
+    scheduler.schedule(job, trigger);
+
+    if (queueServiceConfigReader != null && queueServiceConfigReader.isServiceOn()) {
+
+      PublishService publishService = PublishService.getInstance();
+      publishService.setMaxPushEvents(queueServiceConfigReader.getBatchSize());
+      publishService.setMaxInterval(queueServiceConfigReader.getPushInterval());
+      publishService.setHost(queueServiceConfigReader.getHost());
+      publishService.setPort(queueServiceConfigReader.getPort());
+      publishService.setUserName(queueServiceConfigReader.getUserName());
+      publishService.setPassword(queueServiceConfigReader.getPassword());
+      publishService.setVhost(queueServiceConfigReader.getVhost());
+      publishService.setPollingInterval(queueServiceConfigReader.getPollingInterval());
+      publishService.setExchangeName(queueServiceConfigReader.getExchangeName());
+      publishService.setExchangeType(queueServiceConfigReader.getExchangeType());
+      publishService.setExchangeDurability(queueServiceConfigReader.getExchangeDurability());
+      publishService.startService();
     }
 
+    JobDetail gcInvoker =
+        newJob(MemoryManager.class).withIdentity("gc", "MemoryManagement").build();
 
-    public static void parseArgs(String args[]) throws java.io.IOException {
+    Trigger gcTrigger =
+        newTrigger()
+            .withIdentity("gc trigger", "MemoryManagement")
+            .startNow()
+            .withSchedule(
+                simpleSchedule()
+                    .withIntervalInMinutes(10)
+                    .repeatForever()
+                    .withMisfireHandlingInstructionIgnoreMisfires())
+            .build();
 
-        OptionParser parser = new OptionParser();
-        parser.acceptsAll(asList("h", "?"), "show help then exit");
-        OptionSpec<String> PORT = parser.accepts("p", "server port").withRequiredArg().ofType(String.class);
-        OptionSpec<String> HOST = parser.accepts("h", "host").withRequiredArg().ofType(String.class);
-        OptionSpec<String> CONFIG = parser.accepts("c", "configPath").withRequiredArg().ofType(String.class);
-        OptionSpec<String> LOGCONFIG = parser.accepts("l", "logConfig").withRequiredArg().ofType(String.class);
+    scheduler.schedule(gcInvoker, gcTrigger);
 
-        OptionSet options = parser.parse(args);
+    // Block forever
+    Object blockMe = new Object();
+    synchronized (blockMe) {
+      blockMe.wait();
+    }
+  }
 
-        // check for help
-        if (options.has("?")) {
+  private static void parseArgs(String[] args) throws java.io.IOException {
 
-            parser.printHelpOn(System.out);
-            System.exit(0);
+    OptionParser parser = new OptionParser();
+    parser.acceptsAll(asList("h", "?"), "show help then exit");
 
-        }
 
-        if (options.has(PORT)) {
+    OptionSet options = parser.parse(args);
 
-            port = Integer.parseInt(options.valueOf(PORT));
+    // check for help
+    if (options.has("?")) {
+      parser.printHelpOn(System.out);
+      System.exit(0);
+    }
+    OptionSpec<String> argPort =
+        parser.accepts("p", "server port").withRequiredArg().ofType(String.class);
 
-        }
+    if (options.has(argPort)) {
 
-        if (options.has(HOST)) {
-
-            host = options.valueOf(HOST);
-
-        }
-
-        if (options.has(CONFIG)) {
-
-            configPath = options.valueOf(CONFIG);
-            System.out.println("Config files Path:" + configPath);
-
-        }
-
-        if (options.has(LOGCONFIG)) {
-
-            logConfig = options.valueOf(LOGCONFIG);
-
-        }
-
+      port = Integer.parseInt(options.valueOf(argPort));
+    }
+    OptionSpec<String> argHost = parser.accepts("h", "host").withRequiredArg().ofType(String.class);
+    if (options.has(argHost)) {
+      host = options.valueOf(argHost);
     }
 
+    OptionSpec<String> argConfigPath =
+        parser.accepts("c", "configPath").withRequiredArg().ofType(String.class);
+    if (options.has(argConfigPath)) {
+      configPath = options.valueOf(argConfigPath);
+      System.out.println("Config files Path:" + configPath);
+    }
 
+    OptionSpec<String> argLogPath =
+        parser.accepts("l", "logConfig").withRequiredArg().ofType(String.class);
+    if (options.has(argLogPath)) {
+
+      logConfig = options.valueOf(argLogPath);
+    }
+  }
 }

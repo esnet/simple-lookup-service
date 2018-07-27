@@ -7,8 +7,6 @@ lookupservice:
         max: 2592000
         default: 7200
         min: 30
-    coreservice: 'on'
-    cacheservice: 'off'
 
 #Database settings  
 database:
