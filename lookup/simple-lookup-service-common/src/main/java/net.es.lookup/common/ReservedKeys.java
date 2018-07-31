@@ -101,6 +101,13 @@ public class ReservedKeys {
     public static final String RECORD_SUBSCRIBE_QUEUE_STATE = "queue-state";
     public static final String RECORD_SUBSCRIBE_QUEUE_TIMESTAMP = "queue-timestamp";
 
+    public static final String RECORD_BULK_URIS = "record-uris";
+    public static final String RECORD_BULKRENEW_TOTALRECORDS = "total";
+    public static final String RECORD_BULKRENEW_RENEWEDCOUNT = "renewed";
+    public static final String RECORD_BULKRENEW_FAILURECOUNT = "failure";
+    public static final String RECORD_BULKRENEW_FAILUREURIS = "failed-uris";
+    public static final String RECORD_BULKRENEW_RENEWEDURIS = "renewed-uris";
+
     //cache
 
 }
