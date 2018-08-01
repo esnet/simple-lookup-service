@@ -82,7 +82,7 @@ public class QueryServiceIT {
         try {
             long count = database.getCount();
             QueryServices queryServices = new QueryServices();
-            String jsonResult = queryServices.query(dbname, new Message(),0,0);
+            String jsonResult = queryServices.query(new Message(),0,0);
             List<Record> records = JSONParser.toRecords(jsonResult);
             assertEquals(records.size(), count);
         } catch (DatabaseException e) {
@@ -142,7 +142,7 @@ public class QueryServiceIT {
             QueryServices queryServices = new QueryServices();
             Message query = new Message();
             query.add("test-organization","ES*");
-            String jsonResult = queryServices.query(dbname, query,0,0);
+            String jsonResult = queryServices.query(query,0,0);
             List<Record> records = JSONParser.toRecords(jsonResult);
             assertEquals(count, records.size());
         }  catch (ParserException e) {
@@ -201,7 +201,7 @@ public class QueryServiceIT {
             query.add("test-organization","ESnet");
             query.add("test-name","bwctl");
             query.add("operator","ALL");
-            String jsonResult = queryServices.query(dbname, query,0,0);
+            String jsonResult = queryServices.query(query,0,0);
             List<Record> records = JSONParser.toRecords(jsonResult);
             assertEquals(count, records.size());
         }  catch (ParserException e) {
@@ -261,7 +261,7 @@ public class QueryServiceIT {
             query.add("test-organization","ESnet");
             query.add("test-name","bwctl");
             query.add("operator","ANY");
-            String jsonResult = queryServices.query(dbname, query,0,0);
+            String jsonResult = queryServices.query(query,0,0);
             List<Record> records = JSONParser.toRecords(jsonResult);
             assertEquals(count, records.size());
         }  catch (ParserException e) {
@@ -323,7 +323,7 @@ public class QueryServiceIT {
             values.add("LBL");
             query.add("test-organization",values);
             query.add("test-organization-operator","ANY");
-            String jsonResult = queryServices.query(dbname, query,0,0);
+            String jsonResult = queryServices.query(query,0,0);
             List<Record> records = JSONParser.toRecords(jsonResult);
             assertEquals(count, records.size());
         }  catch (ParserException e) {

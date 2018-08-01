@@ -5,7 +5,6 @@ import net.es.lookup.api.RegisterService;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.exception.api.NotSupportedException;
-import net.es.lookup.protocol.json.JSONRegisterResponse;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -33,7 +32,7 @@ public class RegisterQueryResource {
     public String postHandler(@PathParam("sls") String sls, String message) {
 
         if(sls.equalsIgnoreCase(prefix)){
-            return this.registerService.registerService(sls, message);
+            return this.registerService.registerService(message);
         }else{
             throw new NotSupportedException("Register Operation not supported");
         }
@@ -86,7 +85,7 @@ public class RegisterQueryResource {
 
         }
 
-        return this.queryServices.query(sls,message, maxResults, skip);
+        return this.queryServices.query(message, maxResults, skip);
 
     }
 

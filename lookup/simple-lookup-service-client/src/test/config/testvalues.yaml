@@ -1,7 +1,7 @@
 ---
 # Host values for SLS instance
 lookupservice:
-    host: 'perfsonar-dev.es.net'
+    host: 'localhost'
     port: 8090
 
 # Test values for specified service parameters
@@ -118,7 +118,7 @@ queries:
         host-os-name: *LOS
         host-os-version: *LOS
     interface-query:
-        service-name: *LOS
+        interface-name: *LOS
         interface-mac: *LOS
         group-domains: *LOS
     service-query:

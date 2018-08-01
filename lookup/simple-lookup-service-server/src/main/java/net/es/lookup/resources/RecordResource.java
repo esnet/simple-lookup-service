@@ -27,7 +27,7 @@ public class RecordResource {
         String dbname = path;
 
         String serviceuri = path+"/"+ record +"/"+ recordid;
-        return this.accessService.getService(dbname,serviceuri);
+        return this.accessService.getService(serviceuri);
 
     }
 
@@ -39,7 +39,7 @@ public class RecordResource {
             throw new NotSupportedException("Operation not supported");
         }
         String serviceuri = path+"/" + record +"/"+ recordid;
-        return this.editService.renewService(dbname, serviceuri, message);
+        return this.editService.renewService(serviceuri, message);
 
     }
 
@@ -51,7 +51,7 @@ public class RecordResource {
             throw new NotSupportedException("Operation not supported");
         }
         String serviceuri = path+"/"+ record +"/"+ recordid;
-        return this.editService.deleteService(dbname, serviceuri, service);
+        return this.editService.deleteService(serviceuri, service);
 
     }
 
