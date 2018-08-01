@@ -1,3 +1,5 @@
+package net.es.lookup.integration;
+
 import junit.framework.Assert;
 import net.es.lookup.client.QueryClient;
 import net.es.lookup.client.RecordManager;
@@ -22,7 +24,7 @@ import static org.junit.Assert.fail;
  * Time: 2:55 PM
  * To change this template use File | Settings | File Templates.
  */
-public class BaseTest {
+public class BaseIT {
 
     protected static boolean connectedToLS = false;
     private static boolean initialized = false;
@@ -197,9 +199,6 @@ public class BaseTest {
                 try {
 
                     SimpleLS deleteLS = new SimpleLS(host, port, "DELETE");
-                    //deleteLS.setRelativeUrl(action);
-                    //deleteLS.connect();
-                    //deleteLS.send();
                 } catch (LSClientException e) {
 
                     System.out.println("An exception occurred while trying to delete the test record: " + id);
@@ -215,7 +214,7 @@ public class BaseTest {
     protected static Map getConfiguration(String configFile) {
 
         Map configuration;
-        InputStream yamlFile = QueryClientTest.class.getClassLoader().getSystemResourceAsStream(configFile);
+        InputStream yamlFile = QueryClientIT.class.getClassLoader().getSystemResourceAsStream(configFile);
 
         try {
 

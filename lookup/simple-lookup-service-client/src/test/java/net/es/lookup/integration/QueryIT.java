@@ -1,8 +1,10 @@
-/*
+package net.es.lookup.integration;
+
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.ParserException;
 import net.es.lookup.common.exception.QueryException;
+import net.es.lookup.integration.BaseIT;
 import net.es.lookup.queries.Directory.PersonQuery;
 import net.es.lookup.queries.Network.HostQuery;
 import net.es.lookup.queries.Network.InterfaceQuery;
@@ -18,16 +20,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-*/
+
 /**
  * Created with IntelliJ IDEA.
  * User: student5
  * Date: 6/17/13
  * Time: 4:55 PM
  * To change this template use File | Settings | File Templates.
- *//*
+ */
 
-public class QueryTest extends BaseTest {
+public class QueryIT extends BaseIT {
 
     @Test
     public void generateGenericQuery() {
@@ -255,6 +257,8 @@ public class QueryTest extends BaseTest {
             Assert.fail();
         }
         Map<String, Object> expected = (HashMap)((HashMap) getConfiguration(configFile).get("queries")).get("interface-query");
+        System.out.println("This is expected: "+expected.toString());
+        System.out.println("This is actual:"+ query.getMap().toString());
         Assert.assertTrue(query.getMap().entrySet().containsAll(expected.entrySet()));
         Assert.assertTrue(query.validate());
     }
@@ -429,4 +433,4 @@ public class QueryTest extends BaseTest {
         Assert.fail("Bad country code was accepted");
     }
 }
-*/
+

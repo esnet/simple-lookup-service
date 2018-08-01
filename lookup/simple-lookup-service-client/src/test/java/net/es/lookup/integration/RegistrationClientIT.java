@@ -1,6 +1,9 @@
+package net.es.lookup.integration;
+
 import net.es.lookup.client.RegistrationClient;
 import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.ParserException;
+import net.es.lookup.integration.BaseIT;
 import net.es.lookup.protocol.json.JSONParser;
 import net.es.lookup.records.ErrorRecord;
 import net.es.lookup.records.Record;
@@ -18,7 +21,7 @@ import static org.junit.Assert.fail;
  * Time: 3:18 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RegistrationClientTest extends BaseTest {
+public class RegistrationClientIT extends BaseIT {
 
     private final int NUM_THREADS = 2;
     private final int NUM_RECORDS = 10;

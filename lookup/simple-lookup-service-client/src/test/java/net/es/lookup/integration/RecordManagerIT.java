@@ -1,6 +1,9 @@
+package net.es.lookup.integration;
+
 import net.es.lookup.client.RecordManager;
 import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.ParserException;
+import net.es.lookup.integration.BaseIT;
 import net.es.lookup.protocol.json.JSONParser;
 import net.es.lookup.records.ErrorRecord;
 import net.es.lookup.records.Record;
@@ -16,7 +19,7 @@ import static org.junit.Assert.fail;
  * Time: 4:25 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RecordManagerTest extends BaseTest {
+public class RecordManagerIT extends BaseIT {
 
     @Test
     public void renewRecord() {

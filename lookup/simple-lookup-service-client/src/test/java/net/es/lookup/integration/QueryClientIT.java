@@ -1,9 +1,12 @@
+package net.es.lookup.integration;
+
 import net.es.lookup.client.QueryClient;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.LSClientException;
 import net.es.lookup.common.exception.ParserException;
 import net.es.lookup.common.exception.QueryException;
+import net.es.lookup.integration.BaseIT;
 import net.es.lookup.protocol.json.JSONParser;
 import net.es.lookup.queries.Query;
 import net.es.lookup.records.Record;
@@ -22,7 +25,7 @@ import static org.junit.Assert.fail;
  * Time: 4:25 PM
  * To change this template use File | Settings | File Templates.
  */
-public class QueryClientTest extends BaseTest {
+public class QueryClientIT extends BaseIT {
 
     @Test
     public void queryUnspecified() {
