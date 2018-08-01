@@ -29,7 +29,7 @@ public class EditService {
 
     private static Logger LOG = Logger.getLogger(AccessService.class);
 
-    public String renewService(String dbname, String serviceid, String service) {
+    public String renewService(String serviceid, String service) {
 
         LOG.info("Processing renewService...");
         LOG.info(" serviceid: " + serviceid);
@@ -161,7 +161,7 @@ public class EditService {
     }
 
 
-    public String deleteService(String dbname, String serviceid, String service) {
+    public String deleteService(String serviceid, String service) {
 
         LOG.info("Processing deleteRecord...");
         LOG.info("serviceid: " + serviceid);

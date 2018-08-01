@@ -22,7 +22,7 @@ public class AccessService {
 
     private static Logger LOG = Logger.getLogger(AccessService.class);
 
-    public String getService(String dbname, String serviceid) {
+    public String getService(String serviceid) {
 
         LOG.info("Processing getService...");
         LOG.info(" serviceid: " + serviceid);

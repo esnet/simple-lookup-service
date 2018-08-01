@@ -25,7 +25,7 @@ public class RegisterService {
     private static Logger LOG = Logger.getLogger(RegisterService.class);
     private String params;
 
-    public String registerService(String dbname, String message) {
+    public String registerService(String message) {
 
         LOG.info(" Processing registerService.");
         LOG.info(" Received message: " + message);

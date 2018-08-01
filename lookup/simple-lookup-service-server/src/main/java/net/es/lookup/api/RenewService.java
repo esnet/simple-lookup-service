@@ -29,7 +29,7 @@ public class RenewService {
 
     private static Logger LOG = Logger.getLogger(AccessService.class);
 
-    public String renewService(String dbname, String serviceid, String service) {
+    public String renewService(String serviceid, String service) {
 
         LOG.info("Processing renewService...");
         LOG.info(" serviceid: " + serviceid);

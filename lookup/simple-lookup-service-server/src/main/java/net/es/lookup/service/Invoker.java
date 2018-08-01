@@ -107,7 +107,7 @@ public class Invoker {
             .withIdentity(LookupService.LOOKUP_SERVICE + "clean", "DBMaintenance")
             .build();
     job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
-    job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, LookupService.LOOKUP_SERVICE);
+    job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, dbname);
 
     // Trigger the job to run now, and then every dbpruneInterval seconds
     Trigger trigger =

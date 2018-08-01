@@ -25,7 +25,7 @@ public class QueryServices {
 
 
     //constructs query and operator messages and calls the DB function
-    public String query(String dbname, Message request, int maxResult, int skip) {
+    public String query(Message request, int maxResult, int skip) {
 
         //TODO: Implement maxResult and skip
         LOG.info("Processing queryService...");
