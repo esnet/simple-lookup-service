@@ -27,7 +27,7 @@ public class AccessService {
         LOG.info("Processing getService...");
         LOG.info(" serviceid: " + serviceid);
 
-        JSONSubGetResponse response;
+        JSONGetServiceResponse response;
         Message serviceRecord;
 
         try {
@@ -40,7 +40,7 @@ public class AccessService {
                     LOG.debug("servicerecord not null");
                     Map<String, Object> serviceMap = serviceRecord.getMap();
 
-                    response = new JSONSubGetResponse(serviceMap);
+                    response = new JSONGetServiceResponse(serviceMap);
                     try {
 
                         LOG.info("GetService status: SUCCESS; exiting");
@@ -85,7 +85,7 @@ public class AccessService {
         LOG.info("Processing getServiceKey...");
         LOG.info(" serviceid: " + serviceid);
 
-        JSONSubGetResponse response;
+        JSONGetServiceResponse response;
         Message serviceRecord;
 
         try {
@@ -106,7 +106,7 @@ public class AccessService {
                     LOG.info("GetServiceKey status: SUCCESS");
                     Map<String, Object> keyValueMap = new HashMap<String, Object>();
                     keyValueMap.put(key,serviceRecord.getKey(key));
-                    response = new JSONSubGetResponse(keyValueMap);
+                    response = new JSONGetServiceResponse(keyValueMap);
 
                     try {
 
