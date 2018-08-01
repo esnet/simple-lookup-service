@@ -17,7 +17,7 @@ import java.util.List;
 public class MongoDBMaintenanceJob implements Job {
 
     private static Logger LOG = Logger.getLogger(MongoDBMaintenanceJob.class);
-    private ServiceDAOMongoDb db;
+    private ServiceDaoMongoDb db;
     public static String PRUNE_THRESHOLD = "prune_threshold"; //parameter will be set during run time
     public static final String DBNAME = "db_name"; //parameter will be set during run time
 
@@ -35,8 +35,7 @@ public class MongoDBMaintenanceJob implements Job {
         LOG.info("Running MongoDBPrune...");
         JobDataMap data = context.getJobDetail().getJobDataMap();
 
-        String dbname = data.getString(DBNAME);
-        this.db = DBPool.getDb(dbname);
+        this.db = ServiceDaoMongoDb.getInstance();
 
         long prune_threshold = data.getLong(PRUNE_THRESHOLD);
         Instant now = new Instant();

@@ -1,11 +1,11 @@
-package net.es.lookup.webservice;
+package net.es.lookup.integration;
 
 import net.es.lookup.api.QueryServices;
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.ParserException;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.database.ServiceDAOMongoDb;
+import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.protocol.json.JSONParser;
 import net.es.lookup.records.Record;
 import org.junit.BeforeClass;
@@ -23,9 +23,9 @@ import static org.junit.Assert.fail;
  * Date: 3/10/16
  * Time: 4:13 PM
  */
-public class QueryServiceTest {
+public class QueryServiceIT {
 
-    private static ServiceDAOMongoDb database;
+    private static ServiceDaoMongoDb database;
     private static LeaseManager leaseManager;
     private static String host = "localhost";
     private static int port = 27017;
@@ -40,7 +40,12 @@ public class QueryServiceTest {
 
 
         try {
-            database = new ServiceDAOMongoDb(host, port, dbname, collection);
+            if (ServiceDaoMongoDb.getInstance() != null){
+                database = ServiceDaoMongoDb.getInstance();
+
+            }else{
+                database = new ServiceDaoMongoDb(host, port, dbname, collection);
+            }
 
 
         } catch (DatabaseException e) {

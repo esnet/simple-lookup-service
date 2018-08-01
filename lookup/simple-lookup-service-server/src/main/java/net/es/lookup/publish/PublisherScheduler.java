@@ -2,8 +2,7 @@ package net.es.lookup.publish;
 
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.database.DBPool;
-import net.es.lookup.database.ServiceDAOMongoDb;
+import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import org.apache.log4j.Logger;
 import org.quartz.Job;
@@ -46,7 +45,7 @@ public class PublisherScheduler implements Job {
         ExecutorService executorService = Executors.newFixedThreadPool(batchSize);
 
 
-        ServiceDAOMongoDb db = DBPool.getDb("lookup");
+        ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
 
         for (Queue queue : queues) {
 

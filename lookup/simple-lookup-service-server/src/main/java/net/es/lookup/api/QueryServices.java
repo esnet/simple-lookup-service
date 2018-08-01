@@ -8,8 +8,7 @@ import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.api.ServiceUnavailableTemporarilyException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.database.DBPool;
-import net.es.lookup.database.ServiceDAOMongoDb;
+import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import org.apache.log4j.Logger;
 
@@ -38,7 +37,7 @@ public class QueryServices {
 
         // Query DB
         try {
-            ServiceDAOMongoDb db = DBPool.getDb(dbname);
+            ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
 
             if(db != null){
 

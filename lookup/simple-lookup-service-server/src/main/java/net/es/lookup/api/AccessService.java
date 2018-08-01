@@ -6,8 +6,7 @@ import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.database.DBPool;
-import net.es.lookup.database.ServiceDAOMongoDb;
+import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.protocol.json.*;
 import org.apache.log4j.Logger;
 
@@ -32,7 +31,7 @@ public class AccessService {
         Message serviceRecord;
 
         try {
-            ServiceDAOMongoDb db = DBPool.getDb(dbname);
+            ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
             if(db != null){
                 serviceRecord =db.getRecordByURI(serviceid);
 
@@ -90,7 +89,7 @@ public class AccessService {
         Message serviceRecord;
 
         try {
-            ServiceDAOMongoDb db = DBPool.getDb(dbname);
+            ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
             if(db!=null){
                 serviceRecord = db.getRecordByURI(serviceid);
 

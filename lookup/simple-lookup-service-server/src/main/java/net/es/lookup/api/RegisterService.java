@@ -9,8 +9,7 @@ import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.UnauthorizedException;
 import net.es.lookup.common.exception.internal.*;
-import net.es.lookup.database.DBPool;
-import net.es.lookup.database.ServiceDAOMongoDb;
+import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
@@ -21,9 +20,6 @@ import org.apache.log4j.Logger;
 
 import java.util.*;
 
-/**
- *
- */
 public class RegisterService {
 
     private static Logger LOG = Logger.getLogger(RegisterService.class);
@@ -91,7 +87,7 @@ public class RegisterService {
 
 
                 try {
-                    ServiceDAOMongoDb db = DBPool.getDb(dbname);
+                    ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
                     if(db != null){
                         Message res = db.queryAndPublishService(request, query, operators);
                         response = new JSONRegisterResponse(res.getMap());

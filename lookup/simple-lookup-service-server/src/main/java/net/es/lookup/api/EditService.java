@@ -11,8 +11,7 @@ import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.RecordNotFoundException;
-import net.es.lookup.database.DBPool;
-import net.es.lookup.database.ServiceDAOMongoDb;
+import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.protocol.json.*;
 import net.es.lookup.publish.Publisher;
 import net.es.lookup.service.PublishService;
@@ -54,7 +53,7 @@ public class EditService {
         if (this.isValid(request) && this.isAuthed(serviceid, request)) {
 
             try {
-                ServiceDAOMongoDb db = DBPool.getDb(dbname);
+                ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
                 if(db == null){
                     LOG.error(("Error accessing database object"));
                     throw new InternalErrorException("Error accessing database");
@@ -183,7 +182,7 @@ public class EditService {
         LOG.debug("Is the requestUrl valid?" + this.isValid(request));
 
         if (this.isValid(request) && this.isAuthed(serviceid, request)) try {
-            ServiceDAOMongoDb db = DBPool.getDb(dbname);
+            ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
 
             if (db == null) {
                 LOG.error("Error accessing database");

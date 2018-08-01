@@ -13,7 +13,7 @@ import joptsimple.OptionSpec;
 import net.es.lookup.common.MemoryManager;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.MongoDBMaintenanceJob;
-import net.es.lookup.database.ServiceDAOMongoDb;
+import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.timer.Scheduler;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
@@ -30,7 +30,7 @@ public class Invoker {
   private static int port = 8080;
   private static LookupService lookupService = null;
 
-  // private static ServiceDAOMongoDb dao = null;
+  // private static ServiceDaoMongoDb dao = null;
   private static String host = "localhost";
   private static LookupServiceConfigReader lookupServiceConfigReader;
   private static QueueServiceConfigReader queueServiceConfigReader;
@@ -72,7 +72,7 @@ public class Invoker {
 
 
 
-    LOG.info("starting ServiceDAOMongoDb");
+    LOG.info("starting ServiceDaoMongoDb");
 
     String dburl = lookupServiceConfigReader.getDbUrl();
     int dbport = lookupServiceConfigReader.getDbPort();
@@ -83,7 +83,7 @@ public class Invoker {
 
     // Initialize services
     try {
-      new ServiceDAOMongoDb(dburl, dbport, dbname, collname);
+      new ServiceDaoMongoDb(dburl, dbport, dbname, collname);
       services.add(LookupService.LOOKUP_SERVICE);
 
     } catch (DatabaseException e) {
