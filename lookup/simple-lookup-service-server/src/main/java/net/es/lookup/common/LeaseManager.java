@@ -12,8 +12,7 @@ import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 
 
-public class
-        LeaseManager {
+public class LeaseManager {
 
     private static long DEFAULT_LEASE = 2 * 60 * 60;
     private static long MAX_LEASE = DEFAULT_LEASE;

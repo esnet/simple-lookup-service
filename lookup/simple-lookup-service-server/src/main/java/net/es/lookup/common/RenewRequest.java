@@ -4,17 +4,13 @@ import java.util.Map;
 
 public abstract class RenewRequest extends Message {
 
-    public RenewRequest() {
+  public RenewRequest() {
 
-        super();
+    super();
+  }
 
-    }
+  public RenewRequest(Map<String, Object> map) {
 
-    public RenewRequest(Map<String, Object> map) {
-
-        super(map);
-
-    }
-
-
+    super(map);
+  }
 }
