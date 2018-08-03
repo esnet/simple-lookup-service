@@ -10,6 +10,7 @@ import org.bson.Document;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -49,12 +50,21 @@ public class DatabaseIT {
     leaseManager = LeaseManager.getInstance();
   }
 
+  @Before
+  public void clearDatabase() {
+    try {
+      database.deleteAllRecords();
+    } catch (DatabaseException e) {
+      fail("Database exception: " + e.getMessage());
+    }
+    System.out.println("Cleared database");
+  }
+
 
   @Test
   public void publishData() {
 
     try {
-      database.deleteAllRecords();
       Message message = new Message();
       message.add("type", "test");
 
@@ -79,25 +89,10 @@ public class DatabaseIT {
     System.out.println("Publish a record without checking for Duplicates test - \tPASS\t");
   }
 
-  @Test
-  public void emptiesDatabase() {
-    try {
-      database.deleteAllRecords();
-      assertEquals(database.getCount(), 0);
-    } catch (DatabaseException e) {
-      fail("Database exception: " + e.getMessage());
-    }
 
-    System.out.println("Delete All Records test - \tPASS\t");
-  }
 
   @Test
   public void removesOneRecord() {
-    try {
-      database.deleteAllRecords();
-    } catch (DatabaseException e) {
-      fail("Database exception: " + e.getMessage());
-    }
 
     Message message = new Message();
     message.add("type", "test");
@@ -189,7 +184,6 @@ public class DatabaseIT {
     message.add("_timestamp", timestamp);
 
     try {
-      database.deleteAllRecords();
       database.queryAndPublishService(message, message, new Message());
     } catch (DatabaseException e) {
       fail("Database exception: " + e.getMessage());
@@ -230,7 +224,6 @@ public class DatabaseIT {
     message.add("_timestamp", timestamp);
 
     try {
-      database.deleteAllRecords();
       database.queryAndPublishService(message, message, new Message());
     } catch (DatabaseException e) {
       fail("Database exception: " + e.getMessage());
@@ -487,11 +480,6 @@ public class DatabaseIT {
   @Test
   public void removesExpiredRecords() {
 
-    try {
-      database.deleteAllRecords();
-    } catch (DatabaseException e) {
-      fail("Database exception: " + e.getMessage());
-    }
     for (int i = 0; i < 1000; i++) {
       Message message = new Message();
       message.add("type", "test");
@@ -538,11 +526,6 @@ public class DatabaseIT {
   @Test
   public void queryRecordsInTimeRange() {
 
-    try {
-      database.deleteAllRecords();
-    } catch (DatabaseException e) {
-      fail("Database exception: " + e.getMessage());
-    }
     for (int i = 0; i < 1000; i++) {
       Message message = new Message();
       message.add("type", "test");

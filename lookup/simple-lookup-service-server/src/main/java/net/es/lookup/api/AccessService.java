@@ -80,7 +80,7 @@ public class AccessService {
     }
 
 
-    public String getKeyService(String dbname, String serviceid, String key) {
+    public String getKeyService(String serviceid, String key) {
 
         LOG.info("Processing getServiceKey...");
         LOG.info(" serviceid: " + serviceid);
