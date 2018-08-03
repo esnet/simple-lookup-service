@@ -63,6 +63,12 @@
         </dependency>
 
         <!-- testing -->
+      <dependency>
+        <groupId>org.jmockit</groupId>
+        <artifactId>jmockit</artifactId>
+        <version>1.40</version>
+        <scope>test</scope>
+      </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -84,6 +90,8 @@
             <version>4.2</version>
             <scope>compile</scope>
         </dependency>
+
+
 
         <!--- Rabbitmq client -->
 
@@ -134,12 +142,30 @@
         </dependency>
 
 
+
     </dependencies>
 
 
    <build>
 
         <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <systemPropertyVariables>
+                <!-- At least one of the following needs to be set: -->
+                <coverage-output>html</coverage-output>     <!-- or: html-nocp, serial, serial-append -->
+                <coverage-metrics>all</coverage-metrics>    <!-- or: line, path, data -->
+                <coverage-classes>loaded</coverage-classes> <!-- or a "*" expression for class names -->
+
+                <!-- Other properties, if needed: -->
+                     <!-- default: target/coverage-report <coverage-outputDir>my-dir</coverage-outputDir>  -->
+                <!-- default: all "src" directories <coverage-srcDirs>sources</coverage-srcDirs>           -->
+                <!-- <coverage-excludes>some.package.*</coverage-excludes>  default: empty -->
+                <!-- <coverage-check>80</coverage-check>                    default: no checks -->
+              </systemPropertyVariables>
+            </configuration>
+          </plugin>
            <!--  Maven Exec Plug-In: http://mojo.codehaus.org/exec-maven-plugin/  -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -199,12 +225,32 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.22.0</version>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
         </plugins>
 
    </build>
 
     <profiles>
+
     </profiles>
 
 </project>

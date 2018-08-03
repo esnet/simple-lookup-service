@@ -12,8 +12,10 @@ import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.ResponseCodes;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
+import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.ServiceDaoMongoDb;
+import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRenewRequest;
 import net.es.lookup.protocol.json.JsonBulkRenewRequest;
 import net.es.lookup.protocol.json.JsonBulkRenewResponse;
@@ -25,7 +27,7 @@ public class BulkRenewService {
   private static Logger LOG = Logger.getLogger(BulkRenewService.class);
 
   /** The method bulk renews records. */
-  public String bulkRenew(String dbname, String renewRequests) {
+  public String bulkRenew(String renewRequests) {
 
     // parse records
     JsonBulkRenewRequest jsonBulkRenewRequest = new JsonBulkRenewRequest(renewRequests);
@@ -38,30 +40,118 @@ public class BulkRenewService {
 
     if (jsonBulkRenewRequest.getStatus() == JSONRenewRequest.INCORRECT_FORMAT) {
 
-      LOG.error("Request format is invalid.");
+      LOG.error("net.es.lookup.api.BulkRenewService: Request format is invalid.");
       throw new BadRequestException("Request is invalid. Please edit the request and resend.");
     }
 
-    renewRecords(dbname, jsonBulkRenewRequest);
+    ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
+    if (db == null) {
+
+      LOG.error(("net.es.lookup.api.BulkRenewService: Error accessing database object"));
+      throw new InternalErrorException("Error accessing database");
+    }
+
+    JsonBulkRenewResponse renewResponse = checkAndRenewRecords(db, jsonBulkRenewRequest);
+    String formattedRenewResponse = "";
+    try {
+      formattedRenewResponse = JSONMessage.toString(renewResponse);
+    } catch (DataFormatException e) {
+      LOG.error(("net.es.lookup.api.BulkRenewService: Error formatting result"));
+      throw new InternalErrorException(
+          "Error formatting result. Ask administrator to check logs to confirm status of renew operation");
+    }
 
     // convert to json response and send
-    return null;
+    return formattedRenewResponse;
   }
 
-  private Message getErrorRecord(int failureCode) {
+  private JsonBulkRenewResponse checkAndRenewRecords(
+      ServiceDaoMongoDb db, JsonBulkRenewRequest jsonBulkRenewRequest) {
+    // renew
+    Map<String, Message> failedUris = new HashMap<>();
+
+    try {
+      List<String> allRecordUris =
+          (List<String>) jsonBulkRenewRequest.getKey(ReservedKeys.RECORD_BULK_URIS);
+      Map<String, Message> bulkUpdateRequests = new HashMap<>();
+
+      for (String uri : allRecordUris) {
+
+        Message serviceRecord = db.getRecordByURI(uri);
+
+        if (serviceRecord == null ) {
+
+          Message error = createErrorRecord(ResponseCodes.ERROR_BULK_NOTFOUND);
+          failedUris.put(uri, error);
+          LOG.error("net.es.lookup.api.BulkRenewService Record uri not found: " + uri);
+          continue;
+        }
+
+        Message serviceLeaseRenewalRequest =
+            updateTtl(serviceRecord, jsonBulkRenewRequest.getTTL());
+        boolean gotLease = LeaseManager.getInstance().requestLease(serviceLeaseRenewalRequest);
+
+        if (!gotLease) {
+
+          Message error = createErrorRecord(ResponseCodes.ERROR_BULK_EXPIRED);
+          failedUris.put(uri, error);
+          LOG.error(
+              "net.es.lookup.api.BulkRenewService  "
+                  + "Failed to secure lease for record uri: "
+                  + uri);
+          continue;
+        }
+
+        serviceLeaseRenewalRequest.add(
+            ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_RENEW);
+
+        bulkUpdateRequests.put(uri, serviceLeaseRenewalRequest);
+      }
+
+      // db call
+      Message renewResponse = db.bulkUpdate(bulkUpdateRequests);
+      notifyPublisher(bulkUpdateRequests);
+
+      JsonBulkRenewResponse jsonBulkRenewResponse =
+          formatJsonBulkRenewResponse(allRecordUris.size(), renewResponse, failedUris);
+      return jsonBulkRenewResponse;
+
+    } catch (DatabaseException e) {
+
+      LOG.fatal("DatabaseException: Error renewing services." + e.getMessage());
+      LOG.info("RenewService status: FAILED; exiting");
+      throw new InternalErrorException("Database error\n");
+    }
+  }
+
+  private Message updateTtl(Message serviceRecord, String ttl) {
+    Map<String, Object> serviceMap = serviceRecord.getMap();
+
+    if (ttl != null && !ttl.isEmpty()) {
+
+      serviceMap.put(ReservedKeys.RECORD_TTL, ttl);
+    } else {
+
+      serviceMap.put(ReservedKeys.RECORD_TTL, new ArrayList());
+    }
+
+    return new Message(serviceMap);
+  }
+
+  private Message createErrorRecord(int failureCode) {
 
     Message error = new Message();
     if (failureCode == ResponseCodes.ERROR_BULK_NOTFOUND) {
       error.add(ReservedKeys.ERROR_CODE, ResponseCodes.ERROR_BULK_NOTFOUND);
       error.add(ReservedKeys.ERROR_MESSAGE, ReservedValues.RECORD_BULKRENEW_NOTFOUND_ERRORMESSAGE);
     } else if (failureCode == ResponseCodes.ERROR_BULK_EXPIRED) {
-      error.setError(ResponseCodes.ERROR_BULK_EXPIRED);
-      error.setErrorMessage(ReservedValues.RECORD_BULKRENEW_EXPIRED_ERRORMESSAGE);
+      error.add(ReservedKeys.ERROR_CODE, ResponseCodes.ERROR_BULK_EXPIRED);
+      error.add(ReservedKeys.ERROR_MESSAGE, ReservedValues.RECORD_BULKRENEW_EXPIRED_ERRORMESSAGE);
     }
     return error;
   }
 
-  private void notifyPublisher(Map<String, Message> updates){
+  private void notifyPublisher(Map<String, Message> updates) {
     if (PublishService.isServiceOn()) {
 
       Publisher publisher = Publisher.getInstance();
@@ -72,80 +162,13 @@ public class BulkRenewService {
     }
   }
 
-  private void renewRecords(String dbname, JsonBulkRenewRequest jsonBulkRenewRequest){
-    // renew
-    Map<String, Message> failedUris = new HashMap<>();
+  private JsonBulkRenewResponse formatJsonBulkRenewResponse(
+      int totalRecords, Message renewResponse, Map<String, Message> failedUris) {
 
-    try {
-      ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
-      if (db == null) {
-
-        LOG.error(("Error accessing database object"));
-        throw new InternalErrorException("Error accessing database");
-      }
-
-      String[] allRecordUris =
-          (String[]) jsonBulkRenewRequest.getKey(ReservedKeys.RECORD_BULK_URIS);
-      Map<String, Message> bulkUpdateRequests = new HashMap<>();
-
-      for (String uri : allRecordUris) {
-
-        Message serviceRecord = db.getRecordByURI(uri);
-
-        if (serviceRecord == null) {
-
-          Message error = getErrorRecord(ResponseCodes.ERROR_BULK_NOTFOUND);
-          failedUris.put(uri, error);
-          LOG.error("net.es.lookup.api.BulkRenewService Record uri not found: " + uri);
-          continue;
-        }
-
-        Map<String, Object> serviceMap = serviceRecord.getMap();
-
-        if (jsonBulkRenewRequest.getTTL() != null && !jsonBulkRenewRequest.getTTL().isEmpty()) {
-
-          serviceMap.put(ReservedKeys.RECORD_TTL, jsonBulkRenewRequest.getTTL());
-        } else {
-
-          serviceMap.put(ReservedKeys.RECORD_TTL, new ArrayList());
-        }
-
-        Message newRequest = new Message(serviceMap);
-        boolean gotLease = LeaseManager.getInstance().requestLease(newRequest);
-
-        if (!gotLease) {
-
-          Message error = getErrorRecord(ResponseCodes.ERROR_BULK_EXPIRED);
-          failedUris.put(uri, error);
-          LOG.error(
-              "net.es.lookup.api.BulkRenewService  "
-                  + "Failed to secure lease for record uri: "
-                  + uri);
-          continue;
-        }
-
-        newRequest.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_RENEW);
-
-        bulkUpdateRequests.put(uri, newRequest);
-      }
-
-      // db call
-      Map<String, Message> renewResponse = db.bulkUpdate(bulkUpdateRequests);
-
-      notifyPublisher(renewResponse);
-
-      List<String> renewedUris = new ArrayList<>(renewResponse.keySet());
-
-      JsonBulkRenewResponse jsonBulkRenewResponse = new JsonBulkRenewResponse();
-      jsonBulkRenewResponse.addTotalRecordsCount(allRecordUris.length);
-      jsonBulkRenewResponse.updateFailures(failedUris);
-      jsonBulkRenewResponse.updateRenewed(renewedUris);
-
-    } catch (DatabaseException e) {
-
-      LOG.fatal("DatabaseException: The database is out of service." + e.getMessage());
-      LOG.info("RenewService status: FAILED; exiting");
-      throw new InternalErrorException("Database error\n");
-    }
+    JsonBulkRenewResponse jsonBulkRenewResponse = new JsonBulkRenewResponse();
+    jsonBulkRenewResponse.addTotalRecordsCount(totalRecords);
+    jsonBulkRenewResponse.updateFailures(failedUris);
+    jsonBulkRenewResponse.updateRenewedCount(renewResponse);
+    return jsonBulkRenewResponse;
   }
 }

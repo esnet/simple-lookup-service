@@ -9,18 +9,22 @@ import com.mongodb.MongoCommandException;
 import com.mongodb.MongoException;
 import com.mongodb.MongoWriteConcernException;
 import com.mongodb.MongoWriteException;
+import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.BulkWriteOptions;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.ReturnDocument;
+import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.result.DeleteResult;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
@@ -518,9 +522,36 @@ public class ServiceDaoMongoDb {
   }
 
   // Bulk API
-  public Map<String, Message> bulkUpdate(Map<String, Message> records) throws DatabaseException {
+  public Message bulkUpdate(Map<String, Message> records) throws DatabaseException {
 
-    return null;
+    List<UpdateOneModel> bulkUpdateOperations = new ArrayList<>();
+    for (Entry<String, Message> recordEntry: records.entrySet()){
+      String recordId = recordEntry.getKey();
+      Message fullRecord = recordEntry.getValue();
+
+      Document query = new Document();
+      query.put(ReservedKeys.RECORD_URI, recordId);
+
+      Message mongoTimestampedMessage = addTimestamp(fullRecord);
+
+      Document updateObject = new Document("$set", new Document(mongoTimestampedMessage.getMap()));
+
+      UpdateOneModel updateOperation = new UpdateOneModel(query, updateObject);
+      bulkUpdateOperations.add(updateOperation);
+    }
+
+
+    Message response = new Message();
+
+    if(bulkUpdateOperations.size()>0){
+
+      BulkWriteResult bulkUpdateResult = coll.bulkWrite(bulkUpdateOperations, new BulkWriteOptions().ordered(false));
+      if(bulkUpdateResult.getUpserts().size() < bulkUpdateOperations.size()) throw new DatabaseException("Error updating records");
+      response.add(ReservedKeys.RECORD_BULKRENEW_RENEWEDCOUNT ,bulkUpdateResult.getUpserts().size());
+    }
+
+    return response;
+
   }
 
   public List<Message> bulkDelete() throws DatabaseException {
@@ -536,7 +567,6 @@ public class ServiceDaoMongoDb {
     List<Message> result = new ArrayList<Message>();
 
     try {
-      // System.out.println("MongoDB query:"+query.toJson());
       FindIterable resultIterator =
           coll.find(and(gt("_lastUpdated", start), lte("_lastUpdated", end)));
       MongoCursor cursor = resultIterator.iterator();

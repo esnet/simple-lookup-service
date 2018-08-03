@@ -24,13 +24,6 @@ public class BulkRenewResponse extends Message {
   }
 
 
-  public void updateRenewed(List<String> renewedUris) {
-
-    this.add(ReservedKeys.RECORD_BULKRENEW_RENEWEDCOUNT, String.valueOf(renewedUris.size()));
-
-    this.add(ReservedKeys.RECORD_BULKRENEW_RENEWEDURIS, renewedUris);
-  }
-
   /**
    * This method populates the error codes and message for the failed uris
    * */
@@ -54,4 +47,8 @@ public class BulkRenewResponse extends Message {
     this.add(ReservedKeys.ERROR_MESSAGE, errorMessages);
   }
 
+  public void updateRenewedCount(Message renewResponse) {
+
+    this.add(ReservedKeys.RECORD_BULKRENEW_RENEWEDCOUNT, String.valueOf(renewResponse.getKey(ReservedKeys.RECORD_BULKRENEW_RENEWEDCOUNT)));
+  }
 }

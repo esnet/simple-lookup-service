@@ -1,5 +1,6 @@
 package net.es.lookup.protocol.json;
 
+import java.util.List;
 import net.es.lookup.common.BulkRenewRequest;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
