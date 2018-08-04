@@ -17,7 +17,7 @@ public class FakeServiceDaoMongo extends MockUp<ServiceDaoMongoDb> {
   }
 
   @Mock
-  public Message getRecordByURI(String uri) throws DatabaseException {
+  public Message getRecordByUri(String uri) throws DatabaseException {
     Message message = new Message();
     message.add("type", "host");
     message.add("uri", uri);

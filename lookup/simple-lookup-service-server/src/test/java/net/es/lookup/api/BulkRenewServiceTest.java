@@ -20,13 +20,14 @@ public class BulkRenewServiceTest {
 
   @BeforeClass
   public static void setUp() throws DatabaseException {
-    new FakeServiceDaoMongo();
     ServiceDaoMongoDb db = new ServiceDaoMongoDb("lookup", "records");
+    new FakeServiceDaoMongo();
 
   }
 
   @Test
   public void bulkRenewTest() throws Exception {
+
     System.out.println("Testing Bulk Renew Service Base Test");
 
     BulkRenewService bulkRenewService = new BulkRenewService();
@@ -51,6 +52,7 @@ public class BulkRenewServiceTest {
       }
     };
 
+
     BulkRenewService bulkRenewService = new BulkRenewService();
     String bulkRenewalRequest =
         "{'record-uris':['lookup/host/72384638-b79c-4a51-8f0b-aca9f974203b','lookup/host/72384638-b79c-4a51-8f0b-abcd5g8kj'], 'ttl': 'PT2H'}";
@@ -58,13 +60,11 @@ public class BulkRenewServiceTest {
   }
 
 
-
-
   @Test
   public void bulkRenewExpiredRecords() {
     System.out.println("Testing Bulk Renew Service- Expired records");
     new FakeServiceDaoMongo() {
-      public Message getRecordByURI(String uri) throws DatabaseException {
+      public Message getRecordByUri(String uri) throws DatabaseException {
         Message message = new Message();
         message.add("type", "host");
         message.add("uri", uri);
@@ -96,7 +96,7 @@ public class BulkRenewServiceTest {
     System.out.println("Testing Bulk Renew Service- Not found records");
     new FakeServiceDaoMongo() {
       @Mock
-      public Message getRecordByURI(String uri) throws DatabaseException {
+      public Message getRecordByUri(String uri) throws DatabaseException {
         return null;
       }
 
@@ -124,7 +124,7 @@ public class BulkRenewServiceTest {
     System.out.println("Testing Bulk Renew Service - Partial Failures");
     new FakeServiceDaoMongo() {
       @Mock
-      public Message getRecordByURI(String uri) throws DatabaseException {
+      public Message getRecordByUri(String uri) throws DatabaseException {
         if(uri.contains("lookup/host/72384638-b79c-4a51-8f0b-aca9f974203b")){
           Message message = new Message();
           message.add("type", "host");
@@ -158,7 +158,6 @@ public class BulkRenewServiceTest {
     assert bulkRenewalResponse.contains("\"failure\":\"2\"");
     assert bulkRenewalResponse.contains("\"error-code\":[\"21\",\"22\"]");
   }
-
 
 }
 
