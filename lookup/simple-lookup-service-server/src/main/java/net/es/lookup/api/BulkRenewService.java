@@ -26,7 +26,12 @@ import org.apache.log4j.Logger;
 public class BulkRenewService {
   private static Logger LOG = Logger.getLogger(BulkRenewService.class);
 
-  /** The method bulk renews records. */
+  /**
+   * The method bulk renews records.
+   * @param renewRequests Request containing list of uris.
+   * @return String Json message as a string.
+   *
+   * */
   public String bulkRenew(String renewRequests) {
 
     // parse records
@@ -58,7 +63,8 @@ public class BulkRenewService {
     } catch (DataFormatException e) {
       LOG.error(("net.es.lookup.api.BulkRenewService: Error formatting result"));
       throw new InternalErrorException(
-          "Error formatting result. Ask administrator to check logs to confirm status of renew operation");
+          "Error formatting result. Ask administrator to check logs "
+              + "to confirm status of renew operation");
     }
 
     // convert to json response and send
@@ -77,9 +83,9 @@ public class BulkRenewService {
 
       for (String uri : allRecordUris) {
 
-        Message serviceRecord = db.getRecordByURI(uri);
+        Message serviceRecord = db.getRecordByUri(uri);
 
-        if (serviceRecord == null ) {
+        if (serviceRecord == null) {
 
           Message error = createErrorRecord(ResponseCodes.ERROR_BULK_NOTFOUND);
           failedUris.put(uri, error);

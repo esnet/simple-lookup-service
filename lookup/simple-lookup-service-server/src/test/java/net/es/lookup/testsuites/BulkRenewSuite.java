@@ -9,11 +9,8 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    JsonBulkRenewRequestTest.class,
-    JsonBulkRenewResponseTest.class,
-    BulkRenewServiceTest.class
+  JsonBulkRenewRequestTest.class,
+  JsonBulkRenewResponseTest.class,
+  BulkRenewServiceTest.class
 })
-
-public class BulkRenewSuite {
-
-}
+public class BulkRenewSuite {}

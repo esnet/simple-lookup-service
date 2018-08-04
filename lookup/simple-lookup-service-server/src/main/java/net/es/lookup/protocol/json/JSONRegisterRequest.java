@@ -1,15 +1,12 @@
 package net.es.lookup.protocol.json;
 
-import com.sun.org.apache.xpath.internal.FoundIndex;
+import java.util.ArrayList;
+import java.util.List;
 import net.es.lookup.common.RegisterRequest;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import net.sf.json.util.JSONTokener;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 public class JSONRegisterRequest extends RegisterRequest {
 

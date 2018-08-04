@@ -17,13 +17,12 @@ public class JsonBulkRenewResponseTest {
 
   @Test
   public void testJsonBulkRenewResponseSuccess() {
-    System.out.println("Testing JSON Bulk Renew Response - Success Message");
+    System.out.println("Testing JSON Bulk Renew Response Creation - Success Message");
     String bulkRenewal =
         "{'record-uris':['lookup/psmetadata/72384638-b79c-4a51-8f0b-aca9f974203b','lookup/host/72384638-b79c-4a51-8f0b-abcd5g8kj'], 'ttl': 'PT2H'}";
 
     JsonBulkRenewRequest jsonBulkRenewRequest = new JsonBulkRenewRequest(bulkRenewal);
-    List<String> allRecordUris =
-        (List) jsonBulkRenewRequest.getKey(ReservedKeys.RECORD_BULK_URIS);
+    List<String> allRecordUris = (List) jsonBulkRenewRequest.getKey(ReservedKeys.RECORD_BULK_URIS);
 
     Message renewedUris = new Message();
     renewedUris.add(ReservedKeys.RECORD_BULKRENEW_RENEWEDCOUNT, allRecordUris.size());
@@ -67,10 +66,9 @@ public class JsonBulkRenewResponseTest {
         ((List) jsonBulkRenewResponse.getKey(ReservedKeys.ERROR_MESSAGE)).size());
   }
 
-
   @Test
   public void testJsonBulkRenewResponseAllFailures() {
-    System.out.println("Testing JSON Bulk Renew Response - All failures Message");
+    System.out.println("Testing JSON Bulk Renew Response Creation- All failures Message");
     String bulkRenewal =
         "{'record-uris':['lookup/psmetadata/72384638-b79c-4a51-8f0b-aca9f974203b','lookup/host/72384638-b79c-4a51-8f0b-abcd5g8kj'], 'ttl': 'PT2H'}";
 
@@ -81,7 +79,8 @@ public class JsonBulkRenewResponseTest {
     Map<String, Message> failedUris = new HashMap<>();
     Message errorMessage = new Message();
     errorMessage.add(ReservedKeys.ERROR_CODE, 21);
-    errorMessage.add(ReservedKeys.ERROR_MESSAGE, ReservedValues.RECORD_BULKRENEW_EXPIRED_ERRORMESSAGE);
+    errorMessage.add(
+        ReservedKeys.ERROR_MESSAGE, ReservedValues.RECORD_BULKRENEW_EXPIRED_ERRORMESSAGE);
     for (int i = 0; i < allRecordUris.size(); i++) {
       failedUris.put(allRecordUris.get(i), errorMessage);
     }
@@ -119,12 +118,11 @@ public class JsonBulkRenewResponseTest {
         Integer.parseInt(
             (String) jsonBulkRenewResponse.getKey(ReservedKeys.RECORD_BULKRENEW_FAILURECOUNT)),
         ((List) jsonBulkRenewResponse.getKey(ReservedKeys.ERROR_MESSAGE)).size());
-
   }
 
   @Test
   public void testJsonBulkRenewResponsePartialFailures() {
-    System.out.println("Testing JSON Bulk Renew Response - Partial Failures");
+    System.out.println("Testing JSON Bulk Renew Response Creation - Partial Failures");
     String bulkRenewal =
         "{'record-uris':['lookup/psmetadata/72384638-b79c-4a51-8f0b-aca9f974203b','lookup/host/72384638-b79c-4a51-8f0b-abcd5g8kj'], 'ttl': 'PT2H'}";
 
@@ -138,9 +136,9 @@ public class JsonBulkRenewResponseTest {
     Map<String, Message> failedUris = new HashMap<>();
     Message errorMessage = new Message();
     errorMessage.add(ReservedKeys.ERROR_CODE, 21);
-    errorMessage.add(ReservedKeys.ERROR_MESSAGE, ReservedValues.RECORD_BULKRENEW_EXPIRED_ERRORMESSAGE);
+    errorMessage.add(
+        ReservedKeys.ERROR_MESSAGE, ReservedValues.RECORD_BULKRENEW_EXPIRED_ERRORMESSAGE);
     failedUris.put(allRecordUris.get(1), errorMessage);
-
 
     JsonBulkRenewResponse jsonBulkRenewResponse = new JsonBulkRenewResponse();
     jsonBulkRenewResponse.addTotalRecordsCount(allRecordUris.size());
@@ -172,6 +170,5 @@ public class JsonBulkRenewResponseTest {
         Integer.parseInt(
             (String) jsonBulkRenewResponse.getKey(ReservedKeys.RECORD_BULKRENEW_FAILURECOUNT)),
         ((List) jsonBulkRenewResponse.getKey(ReservedKeys.ERROR_MESSAGE)).size());
-
   }
 }

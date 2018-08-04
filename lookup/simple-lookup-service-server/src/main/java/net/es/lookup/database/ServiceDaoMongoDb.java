@@ -72,8 +72,13 @@ public class ServiceDaoMongoDb {
     return ServiceDaoMongoDb.instance;
   }
 
-  // uses default url and port - mongodb running on localhost and default port - 27017
-  // creates a new one if it cannot find one
+  /**
+   * Constructor uses default url and port - mongodb running on localhost and default port - 27017.
+   * Creates a new connection if it cannot find one
+   *
+   * @param dbname Name of the Mongo database
+   * @param collname Name of the Mongo collection
+   */
   public ServiceDaoMongoDb(String dbname, String collname) throws DatabaseException {
 
     this.dbname = dbname;
@@ -81,7 +86,15 @@ public class ServiceDaoMongoDb {
     init();
   }
 
-  // retrieves the db and collection(table); creates a new one if it cannot find one
+  /**
+   * Constructor to create a new db connection if it cannot find one If db connection is found, it
+   * retrieves the db and collection(table).
+   *
+   * @param dburl the url to connect to database
+   * @param dbport DB port
+   * @param dbname Name of the Mongo database
+   * @param collname Name of the Mongo collection
+   */
   public ServiceDaoMongoDb(String dburl, int dbport, String dbname, String collname)
       throws DatabaseException {
 
@@ -123,15 +136,12 @@ public class ServiceDaoMongoDb {
    * @param queryRequest Query to check if the record already exists
    * @param operators The operation (ALL|ANY) to be performed on the query. Default is ALL
    * @return Returns the record that was inserted as a Message
-   * @throws DatabaseException
-   * @throws DuplicateEntryException
+   * @throws DatabaseException if error while writing to database
+   * @throws DuplicateEntryException if record is already present
    */
   public Message queryAndPublishService(Message message, Message queryRequest, Message operators)
       throws DatabaseException, DuplicateEntryException {
 
-    Message response;
-
-    // check for duplicates
     try {
       List<Message> dupEntries = this.query(message, queryRequest, operators);
       if (dupEntries.size() > 0) {
@@ -161,8 +171,7 @@ public class ServiceDaoMongoDb {
       throw new DatabaseException("Error inserting record. Database exception:" + me.getMessage());
     }
 
-    response = toMessage(doc);
-    return response;
+    return toMessage(doc);
   }
 
   /**
@@ -171,7 +180,7 @@ public class ServiceDaoMongoDb {
    * @param serviceid The unique service identifier
    * @param updateRequest The fields to be modified
    * @return The record that was modified (after modification) as a Message
-   * @throws DatabaseException
+   * @throws DatabaseException if error updating record
    */
   public Message updateService(String serviceid, Message updateRequest) throws DatabaseException {
 
@@ -209,11 +218,19 @@ public class ServiceDaoMongoDb {
   public List<Message> query(Message message, Message queryRequest, Message operators)
       throws DatabaseException {
 
-    return this.query(message, queryRequest, operators, 0, 0);
+    return this.query(message, queryRequest, operators, 0);
   }
 
+  /**
+   * Method to query records from database.
+   * @param message original query request
+   * @param queryRequest query keywords extracted from the priginal request
+   * @param operators operators like ANY, ALL that specifies how query keywords should be applied
+   * @param maxResults max results to be returned. not implemented
+   * @return List of all the records
+   * */
   public List<Message> query(
-      Message message, Message queryRequest, Message operators, int maxResults, int skip)
+      Message message, Message queryRequest, Message operators, int maxResults)
       throws DatabaseException {
 
     Document query;
@@ -245,6 +262,10 @@ public class ServiceDaoMongoDb {
     return result;
   }
 
+  /**
+   * Method to query all the records from the database.
+   * @return list of all records.
+   * */
   public List<Message> queryAll() throws DatabaseException {
 
     Message msg = new Message();
@@ -374,13 +395,13 @@ public class ServiceDaoMongoDb {
   }
 
   /**
-   * This method retrieves the record from the database using the record uri
+   * This method retrieves the record from the database using the record uri.
    *
    * @param recorduri the uri of the record
    * @return Entire record as a Message object
-   * @throws DatabaseException
+   * @throws DatabaseException thrown if error accessing the record.
    */
-  public Message getRecordByURI(String recorduri) throws DatabaseException {
+  public Message getRecordByUri(String recorduri) throws DatabaseException {
 
     Document query = new Document();
     query.put(ReservedKeys.RECORD_URI, recorduri);
@@ -406,10 +427,10 @@ public class ServiceDaoMongoDb {
   }
 
   /**
-   * Inserts the given record into the database
+   * Inserts the given record into the database.
    *
    * @param message The record to be added to the database
-   * @throws DatabaseException
+   * @throws DatabaseException thrown if error writing to database
    */
   public void publishService(Message message) throws DatabaseException {
 
@@ -425,10 +446,10 @@ public class ServiceDaoMongoDb {
   }
 
   /**
-   * Returns the number of records in the database
+   * Returns the number of records in the database.
    *
    * @return number of records in the database
-   * @throws DatabaseException
+   * @throws DatabaseException thrown if error accessing database
    */
   public long getCount() throws DatabaseException {
 
@@ -440,11 +461,11 @@ public class ServiceDaoMongoDb {
   }
 
   /**
-   * This method deletes the record for given uri
+   * This method deletes the record for given uri.
    *
-   * @param recorduri
+   * @param recorduri uri of the record
    * @return Message - returns the deleted record as a Message object
-   * @throws DatabaseException
+   * @throws DatabaseException thrown if error deleting record
    */
   public Message deleteRecord(String recorduri) throws DatabaseException, RecordNotFoundException {
 
@@ -452,7 +473,7 @@ public class ServiceDaoMongoDb {
     query.put(ReservedKeys.RECORD_URI, recorduri);
 
     // retrieve the record to send it back in the response
-    Message response = getRecordByURI(recorduri);
+    Message response = getRecordByUri(recorduri);
 
     if (response != null && response.getMap() != null && !response.getMap().isEmpty()) {
       try {
@@ -477,7 +498,7 @@ public class ServiceDaoMongoDb {
    *
    * @param datetime All records that have _timestamp before "datetime" are deleted
    * @return number of records deleted
-   * @throws DatabaseException
+   * @throws DatabaseException thrown if error deleting records from database
    */
   public long deleteExpiredRecords(Date datetime) throws DatabaseException {
 
@@ -494,7 +515,7 @@ public class ServiceDaoMongoDb {
    * This method deletes all the content in the DB and returns number of records deleted.
    *
    * @return long - number of records deleted
-   * @throws DatabaseException
+   * @throws DatabaseException thrown if error deleting records
    */
   public long deleteAllRecords() throws DatabaseException {
 
@@ -521,11 +542,16 @@ public class ServiceDaoMongoDb {
     return result;
   }
 
-  // Bulk API
+  /**
+   * This method handles updates to multiple records.
+   * @param records Map of uri and the record to be updates
+   * @return Message returns a message with the number of records updated
+   * @throws DatabaseException exception is thrown if error updating database
+   * */
   public Message bulkUpdate(Map<String, Message> records) throws DatabaseException {
 
     List<UpdateOneModel> bulkUpdateOperations = new ArrayList<>();
-    for (Entry<String, Message> recordEntry: records.entrySet()){
+    for (Entry<String, Message> recordEntry : records.entrySet()) {
       String recordId = recordEntry.getKey();
       Message fullRecord = recordEntry.getValue();
 
@@ -540,27 +566,33 @@ public class ServiceDaoMongoDb {
       bulkUpdateOperations.add(updateOperation);
     }
 
-
     Message response = new Message();
 
-    if(bulkUpdateOperations.size()>0){
+    if (bulkUpdateOperations.size() > 0) {
 
-      BulkWriteResult bulkUpdateResult = coll.bulkWrite(bulkUpdateOperations, new BulkWriteOptions().ordered(false));
-      if(bulkUpdateResult.getUpserts().size() < bulkUpdateOperations.size()) throw new DatabaseException("Error updating records");
-      response.add(ReservedKeys.RECORD_BULKRENEW_RENEWEDCOUNT ,bulkUpdateResult.getUpserts().size());
+      BulkWriteResult bulkUpdateResult =
+          coll.bulkWrite(bulkUpdateOperations, new BulkWriteOptions().ordered(false));
+      int modifiedRecordsCount = 0;
+      if (bulkUpdateResult.isModifiedCountAvailable()) {
+        modifiedRecordsCount = bulkUpdateResult.getModifiedCount();
+      }
+
+      if (modifiedRecordsCount < bulkUpdateOperations.size()) {
+
+        throw new DatabaseException("Error updating records");
+      }
+
+      response.add(ReservedKeys.RECORD_BULKRENEW_RENEWEDCOUNT, modifiedRecordsCount);
     }
 
     return response;
-
   }
 
-  public List<Message> bulkDelete() throws DatabaseException {
-
-    return null;
-  }
-
-  /*
-   * Finds records that were updated between start and end date
+  /**
+   * Finds records that were updated between start and end date.
+   * @param start Start timestamp as Date object
+   * @params end End timestamp as Date object
+   * @return List list of records that are between the start and end time
    * */
   public List<Message> findRecordsInTimeRange(Date start, Date end) throws DatabaseException {
 

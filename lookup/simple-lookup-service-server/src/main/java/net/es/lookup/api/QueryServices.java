@@ -1,5 +1,7 @@
 package net.es.lookup.api;
 
+import java.util.List;
+import java.util.Map;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
@@ -12,152 +14,139 @@ import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
 import org.apache.log4j.Logger;
 
-import java.util.List;
-import java.util.Map;
-
-
 public class QueryServices {
 
-    private static Logger LOG = Logger.getLogger(QueryServices.class);
-    private String params;
+  private static Logger LOG = Logger.getLogger(QueryServices.class);
+  private String params;
 
-    public static boolean QUERY_ALL_FLAG=false;
+  public static boolean QUERY_ALL_FLAG = false;
 
+  /**
+   * Method to query for records using the request.
+   * @param request Request containing keywords and operators
+   * @param maxResult maxResults to be returned .not yet implemeted
+   * */
+  public String query(Message request, int maxResult) {
 
-    //constructs query and operator messages and calls the DB function
-    public String query(Message request, int maxResult, int skip) {
+    // TODO: Implement maxResult and skip
+    LOG.info("Processing queryService...");
+    LOG.info("Received message: " + request.getMap());
+    String response;
 
-        //TODO: Implement maxResult and skip
-        LOG.info("Processing queryService...");
-        LOG.info("Received message: " + request.getMap());
-        String response;
+    Message queryParameters = getQueryParameters(request);
+    Message operators = getOperators(request, queryParameters);
 
-        Message queryParameters = getQueryParameters(request);
-        Message operators = getOperators(request, queryParameters);
+    // Query DB
+    try {
+      ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
 
-        // Query DB
-        try {
-            ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
+      if (db != null) {
 
-            if(db != null){
+        List<Message> res = db.query(request, queryParameters, operators, maxResult);
+        // Build response
+        response = JSONMessage.toString(res);
+        res = null;
+        LOG.info("Query status: SUCCESS;");
 
-                List<Message> res = db.query(request, queryParameters, operators, maxResult, skip);
-                // Build response
-                response = JSONMessage.toString(res);
-                res = null;
-                LOG.info("Query status: SUCCESS;");
-
-                if(queryParameters.getMap().size()==0){
-                    QUERY_ALL_FLAG = true;
-
-                }
-                LOG.debug("Sending response");
-                return response;
-            }else{
-                throw new NotFoundException("Cannot access database");
-            }
-
-        } catch (DatabaseException e) {
-
-            LOG.fatal("Error retrieving results:" + e.getMessage());
-            LOG.info("Query status: FAILED; exiting");
-            throw new InternalErrorException("Error retrieving results");
-
-        } catch (DataFormatException e) {
-
-            LOG.error("Data formatting exception");
-            LOG.info("Query status: FAILED; exiting");
-            throw new InternalErrorException("Error formatting elements");
-
-        }catch(OutOfMemoryError e){
-
-            LOG.error("The response was too large so ran out of memory");
-            LOG.info("Query status: FAILED; exiting");
-            throw new ServiceUnavailableTemporarilyException("Server is unable to process large query requests at this time. Please try later");
-
+        if (queryParameters.getMap().size() == 0) {
+          QUERY_ALL_FLAG = true;
         }
-        catch(Exception e){
+        LOG.debug("Sending response");
+        return response;
+      } else {
+        throw new NotFoundException("Cannot access database");
+      }
 
-            LOG.error("Unexpected exception: "+e.getMessage());
-            LOG.info("Query status: FAILED; exiting");
-            throw new ServiceUnavailableTemporarilyException("Server is unable to process the request at this time. Please try later");
+    } catch (DatabaseException e) {
 
-        }
+      LOG.fatal("Error retrieving results:" + e.getMessage());
+      LOG.info("Query status: FAILED; exiting");
+      throw new InternalErrorException("Error retrieving results");
 
+    } catch (DataFormatException e) {
+
+      LOG.error("Data formatting exception");
+      LOG.info("Query status: FAILED; exiting");
+      throw new InternalErrorException("Error formatting elements");
+
+    } catch (OutOfMemoryError e) {
+
+      LOG.error("The response was too large so ran out of memory");
+      LOG.info("Query status: FAILED; exiting");
+      throw new ServiceUnavailableTemporarilyException(
+          "Server is unable to process large query requests at this time. Please try later");
+
+    } catch (Exception e) {
+
+      LOG.error("Unexpected exception: " + e.getMessage());
+      LOG.info("Query status: FAILED; exiting");
+      throw new ServiceUnavailableTemporarilyException(
+          "Server is unable to process the request at this time. Please try later");
+    }
+  }
+
+  private Message getQueryParameters(Message request) {
+
+    Map<String, Object> requestMap = request.getMap();
+    int size = requestMap.size();
+    LOG.debug("Total number of parameters passed in requestUrl=" + size);
+    LOG.info("requestUrl:" + request.getMap().toString());
+    Message queryParameters = new Message();
+
+    for (Map.Entry<String, Object> entry : requestMap.entrySet()) {
+
+      String key = entry.getKey();
+      Object value = entry.getValue();
+
+      LOG.debug("key= " + key);
+
+      // generate the operator map
+      if (!key.contains(ReservedKeys.RECORD_OPERATOR_SUFFIX)) {
+        queryParameters.add(key, value);
+      }
     }
 
+    return queryParameters;
+  }
 
-    private Message getQueryParameters(Message request) {
+  private Message getOperators(Message request, Message queryParameters) {
 
-        Map<String, Object> requestMap = request.getMap();
-        int size = requestMap.size();
-        LOG.debug("Total number of parameters passed in requestUrl=" + size);
-        LOG.info("requestUrl:" + request.getMap().toString());
-        Message queryParameters = new Message();
+    Message operators = new Message();
+    Map<String, Object> queryParametersMap = queryParameters.getMap();
+    Map<String, Object> requestMap = request.getMap();
 
-        for (Map.Entry<String, Object> entry : requestMap.entrySet()) {
+    if (request.getOperator() != null) {
 
-            String key = entry.getKey();
-            Object value = entry.getValue();
+      String mainOp = request.getOperator();
+      operators.add(ReservedKeys.RECORD_OPERATOR, mainOp);
 
-            LOG.debug("key= " + key);
+    } else {
 
-            //generate the operator map
-            if (!key.contains(ReservedKeys.RECORD_OPERATOR_SUFFIX)) {
-                queryParameters.add(key, value);
-            }
-
-        }
-
-        return queryParameters;
-
+      String mainOp = ReservedValues.RECORD_OPERATOR_DEFAULT;
+      operators.add(ReservedKeys.RECORD_OPERATOR, mainOp);
     }
 
+    for (Map.Entry<String, Object> entry : queryParametersMap.entrySet()) {
 
-    private Message getOperators(Message request, Message queryParameters) {
+      String key = entry.getKey();
+      Object value = entry.getValue();
 
-        Message operators = new Message();
-        Map<String, Object> queryParametersMap = queryParameters.getMap();
-        Map<String, Object> requestMap = request.getMap();
+      LOG.debug("key= " + key);
+      String opKey = key + "-" + ReservedKeys.RECORD_OPERATOR_SUFFIX;
 
-        if (request.getOperator() != null) {
+      if (requestMap.containsKey(opKey)) {
 
-            String mainOp = request.getOperator();
-            operators.add(ReservedKeys.RECORD_OPERATOR, mainOp);
+        operators.add(key, requestMap.get(opKey));
 
-        } else {
+      } else {
 
-            String mainOp = ReservedValues.RECORD_OPERATOR_DEFAULT;
-            operators.add(ReservedKeys.RECORD_OPERATOR, mainOp);
+        // add default
+        operators.add(key, ReservedValues.RECORD_OPERATOR_DEFAULT);
+      }
 
-        }
-
-        for (Map.Entry<String, Object> entry : queryParametersMap.entrySet()) {
-
-            String key = entry.getKey();
-            Object value = entry.getValue();
-
-            LOG.debug("key= " + key);
-            String opKey = key + "-" + ReservedKeys.RECORD_OPERATOR_SUFFIX;
-
-            if (requestMap.containsKey(opKey)) {
-
-                operators.add(key, requestMap.get(opKey));
-
-            } else {
-
-                //add default
-                operators.add(key, ReservedValues.RECORD_OPERATOR_DEFAULT);
-
-            }
-
-            LOG.debug("operators::" + operators.getMap());
-
-        }
-
-        return operators;
-
+      LOG.debug("operators::" + operators.getMap());
     }
 
-
+    return operators;
+  }
 }

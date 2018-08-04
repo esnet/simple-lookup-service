@@ -11,42 +11,23 @@ import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.internal.DatabaseException;
+import net.es.lookup.database.FakeServiceDaoMongo;
 import net.es.lookup.database.ServiceDaoMongoDb;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class BulkRenewServiceTest {
 
-  public static class FakeServiceDaoMongo extends MockUp<ServiceDaoMongoDb> {
-    @Mock
-    void $init(Invocation invocation, String dbname, String collname) {
-      ServiceDaoMongoDb dbcontext = invocation.getInvokedInstance();
-      Deencapsulation.setField(ServiceDaoMongoDb.class, "instance", dbcontext);
-    }
+  @BeforeClass
+  public static void setUp() throws DatabaseException {
+    new FakeServiceDaoMongo();
+    ServiceDaoMongoDb db = new ServiceDaoMongoDb("lookup", "records");
 
-    @Mock
-    public Message getRecordByURI(String uri) throws DatabaseException {
-      Message message = new Message();
-      message.add("type", "host");
-      message.add("uri", uri);
-      return message;
-    }
-
-    @Mock
-    public Message bulkUpdate(Map<String, Message> records) throws DatabaseException {
-      Message message = new Message();
-      message.add(ReservedKeys.RECORD_BULKRENEW_RENEWEDCOUNT, 2);
-      return message;
-    }
   }
-
-
 
   @Test
   public void bulkRenewTest() throws Exception {
-    System.out.println("Executing Bulk Renew Base Test");
-
-    new FakeServiceDaoMongo();
-    ServiceDaoMongoDb db = new ServiceDaoMongoDb("lookup", "records");
+    System.out.println("Testing Bulk Renew Service Base Test");
 
     BulkRenewService bulkRenewService = new BulkRenewService();
     String bulkRenewalRequest =
@@ -62,7 +43,7 @@ public class BulkRenewServiceTest {
 
   @Test(expected = InternalErrorException.class)
   public void bulkRenewDbFailure() {
-    System.out.println("Executing Bulk Renew - DB Failure");
+    System.out.println("Testing Bulk Renew Service- DB Failure");
     new FakeServiceDaoMongo() {
       @Mock
       public Message bulkUpdate(Map<String, Message> records) throws DatabaseException {
@@ -81,7 +62,7 @@ public class BulkRenewServiceTest {
 
   @Test
   public void bulkRenewExpiredRecords() {
-    System.out.println("Executing Bulk Renew - Expired records");
+    System.out.println("Testing Bulk Renew Service- Expired records");
     new FakeServiceDaoMongo() {
       public Message getRecordByURI(String uri) throws DatabaseException {
         Message message = new Message();
@@ -112,7 +93,7 @@ public class BulkRenewServiceTest {
 
   @Test
   public void bulkRenewNotFoundRecords() {
-    System.out.println("Executing Bulk Renew - Not found records");
+    System.out.println("Testing Bulk Renew Service- Not found records");
     new FakeServiceDaoMongo() {
       @Mock
       public Message getRecordByURI(String uri) throws DatabaseException {
@@ -140,7 +121,7 @@ public class BulkRenewServiceTest {
 
   @Test
   public void bulkRenewPartialFailure() {
-    System.out.println("Executing Bulk Renew - Partial Failures");
+    System.out.println("Testing Bulk Renew Service - Partial Failures");
     new FakeServiceDaoMongo() {
       @Mock
       public Message getRecordByURI(String uri) throws DatabaseException {

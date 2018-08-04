@@ -1,22 +1,11 @@
 package net.es.lookup.service;
 
-import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
-import com.sun.jersey.api.core.ClassNamesResourceConfig;
-import com.sun.jersey.api.core.ResourceConfig;
-
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 import javax.ws.rs.core.UriBuilder;
-import net.es.lookup.resources.KeyResource;
-import net.es.lookup.resources.RecordResource;
-import net.es.lookup.resources.RegisterQueryResource;
 import org.apache.log4j.Logger;
 import org.glassfish.grizzly.http.server.HttpServer;
-
-
+import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.server.ResourceConfig;
 
 /**
  * This class contains the method to start the lookup service NOTE: All the resource classes (ie.,
@@ -82,9 +71,7 @@ public class LookupService {
     LookupService.instance = this;
   }
 
-  /**
-   * Default constructor for LookupService.
-   * **/
+  /** Default constructor for LookupService. * */
   public LookupService() {
 
     // Default port is 8080 and default host is localhost
@@ -93,19 +80,14 @@ public class LookupService {
     init();
   }
 
-
-  /**
-   * Constructor to configure lookup service on localhost and specified port.
-   * */
+  /** Constructor to configure lookup service on localhost and specified port. */
   public LookupService(int port) {
 
     this.port = port;
     init();
   }
 
-  /**
-   * This constructor will configure both host and port.
-   * */
+  /** This constructor will configure both host and port. */
   public LookupService(String host, int port) {
 
     this.host = host;
@@ -113,58 +95,30 @@ public class LookupService {
     init();
   }
 
-
-  /**
-   * This method starts the lookup service with the specified list of services.
-   * */
-  public void startService(List<String> services) {
-
-    List<String> resources = new LinkedList<String>();
-    if (services.size() == 0 || services.size() > MAX_SERVICES) {
-      LOG.info("Too many or too little services");
-      System.exit(0);
-
-    } else {
-
-      resources.add(RecordResource.class.getName());
-      resources.add(KeyResource.class.getName());
-      resources.add(RegisterQueryResource.class.getName());
-    }
-
-    Object[] resourcesObject = resources.toArray();
-    String[] resourcesAsString = new String[resourcesObject.length];
-    for (int i = 0; i < resourcesAsString.length; i++) {
-      resourcesAsString[i] = (String) resourcesObject[i];
-    }
+  /** This method starts the lookup service with the specified list of services. */
+  public void startService() {
 
     LOG.info("Starting HTTP server");
     try {
 
-      this.httpServer = this.startServer(resourcesAsString);
-
+      this.httpServer = this.startServer();
     } catch (IOException e) {
 
       LOG.info("IOEXception Failed to start HTTP server: " + e);
     }
   }
 
-  protected HttpServer startServer(String[] serviceResources) throws IOException {
+  protected HttpServer startServer() throws IOException {
 
     LOG.info("Creating Resource...");
 
-    ResourceConfig rc = new ClassNamesResourceConfig(serviceResources);
-    Set set = rc.getRootResourceClasses();
-    Iterator iter = set.iterator();
-
-    while (iter.hasNext()) {
-      LOG.debug(iter.next());
-    }
+    final ResourceConfig rc = new ResourceConfig().packages("net.es.lookup.resources");
 
     LOG.info("Starting grizzly...");
     String hosturl = "http://" + this.host + "/";
 
     HttpServer server =
-        GrizzlyServerFactory.createHttpServer(
+        GrizzlyHttpServerFactory.createHttpServer(
             UriBuilder.fromUri(hosturl).port(this.port).build(), rc);
 
     return server;

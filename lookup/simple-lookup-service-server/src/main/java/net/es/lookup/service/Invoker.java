@@ -23,8 +23,6 @@ import org.apache.log4j.Logger;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 
-
-
 public class Invoker {
 
   private static int port = 8080;
@@ -57,8 +55,6 @@ public class Invoker {
 
     StdOutErrToLog.redirectStdOutErrToLog();
 
-
-
     LOG = Logger.getLogger(Invoker.class);
 
     LookupServiceConfigReader.init(configPath + lookupservicecfg);
@@ -69,8 +65,6 @@ public class Invoker {
 
     port = lookupServiceConfigReader.getPort();
     host = lookupServiceConfigReader.getHost();
-
-
 
     LOG.info("starting ServiceDaoMongoDb");
 
@@ -96,7 +90,7 @@ public class Invoker {
     Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
 
     // Start the service
-    Invoker.lookupService.startService(services);
+    Invoker.lookupService.startService();
 
     // DB Pruning
     Scheduler scheduler = Scheduler.getInstance();
@@ -168,7 +162,6 @@ public class Invoker {
 
     OptionParser parser = new OptionParser();
     parser.acceptsAll(asList("h", "?"), "show help then exit");
-
 
     OptionSet options = parser.parse(args);
 

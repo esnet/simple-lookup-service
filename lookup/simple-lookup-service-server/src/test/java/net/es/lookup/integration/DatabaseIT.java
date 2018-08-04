@@ -1,7 +1,11 @@
 package net.es.lookup.integration;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
+import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.common.exception.internal.RecordNotFoundException;
@@ -36,10 +40,10 @@ public class DatabaseIT {
     String collection = "records";
 
     try {
-      if (ServiceDaoMongoDb.getInstance() != null){
+      if (ServiceDaoMongoDb.getInstance() != null) {
         database = ServiceDaoMongoDb.getInstance();
 
-      }else{
+      } else {
         database = new ServiceDaoMongoDb(host, port, dbname, collection);
       }
 
@@ -59,7 +63,6 @@ public class DatabaseIT {
     }
     System.out.println("Cleared database");
   }
-
 
   @Test
   public void publishData() {
@@ -88,8 +91,6 @@ public class DatabaseIT {
 
     System.out.println("Publish a record without checking for Duplicates test - \tPASS\t");
   }
-
-
 
   @Test
   public void removesOneRecord() {
@@ -154,7 +155,7 @@ public class DatabaseIT {
     }
 
     try {
-      Message response = database.getRecordByURI(uuid);
+      Message response = database.getRecordByUri(uuid);
       assertEquals(uuid, response.getURI());
       assertEquals("test", response.getRecordType());
     } catch (DatabaseException e) {
@@ -568,5 +569,58 @@ public class DatabaseIT {
     }
 
     System.out.println("Queried for records in time range - \tPASS\t");
+  }
+
+  @Test
+  public void bulkUpdates() {
+    Map<String, Message> recordsToUpdate = new HashMap<>();
+
+    for (int i = 0; i < 500; i++) {
+      Message message = new Message();
+      message.add("type", "test");
+
+      String uuid = UUID.randomUUID().toString();
+      message.add("uri", uuid);
+
+      message.add("test-id", String.valueOf(1));
+
+      message.add("ttl", "PT10M");
+
+      leaseManager.requestLease(message);
+
+      DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+      DateTime dt = fmt.parseDateTime(message.getExpires());
+
+      Date timestamp = dt.toDate();
+      message.add("_timestamp", timestamp);
+
+      try {
+        Message publishedMessage = database.queryAndPublishService(message, message, new Message());
+        recordsToUpdate.put(message.getURI(), publishedMessage);
+      } catch (DatabaseException e) {
+        fail("Database exception: " + e.getMessage());
+      } catch (DuplicateEntryException e) {
+        fail("Invalid duplicate entry exception");
+      }
+    }
+
+    for (Entry<String, Message> record : recordsToUpdate.entrySet()) {
+      String key = record.getKey();
+      Message tmpMessage = record.getValue();
+      leaseManager.requestLease(tmpMessage);
+      recordsToUpdate.put(key, tmpMessage);
+    }
+    Message response = new Message();
+    try {
+      response = database.bulkUpdate(recordsToUpdate);
+
+    } catch (DatabaseException e) {
+      fail("Database exception: " + e.getMessage());
+    }
+    System.out.println(ReservedKeys.RECORD_BULKRENEW_RENEWEDCOUNT);
+    assertEquals(
+        response.getKey(ReservedKeys.RECORD_BULKRENEW_RENEWEDCOUNT), recordsToUpdate.size());
+
+    System.out.println("Bulk Update Record - \tPASS\t");
   }
 }

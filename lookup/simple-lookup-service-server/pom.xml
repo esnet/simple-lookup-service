@@ -15,21 +15,42 @@
             <url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
         </pluginRepository>
     </pluginRepositories>
+
+  <properties>
+    <jersey-version>2.27</jersey-version>
+  </properties>
     
     
      <!-- jersey -->
     <dependencies>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-server</artifactId>
-            <version>1.19.1</version>
-        </dependency>
+      <!-- https://mvnrepository.com/artifact/org.glassfish.jersey.containers/jersey-container-grizzly2-http -->
+      <dependency>
+        <groupId>org.glassfish.jersey.containers</groupId>
+        <artifactId>jersey-container-grizzly2-http</artifactId>
+        <version>${jersey-version}</version>
+      </dependency>
 
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-grizzly2</artifactId>
-            <version>1.19.1</version>
-        </dependency>
+      <!-- https://mvnrepository.com/artifact/org.glassfish.grizzly/grizzly-http-server -->
+      <dependency>
+        <groupId>org.glassfish.grizzly</groupId>
+        <artifactId>grizzly-http-server</artifactId>
+        <version>2.4.3</version>
+      </dependency>
+
+
+      <!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-server -->
+      <dependency>
+        <groupId>org.glassfish.jersey.core</groupId>
+        <artifactId>jersey-server</artifactId>
+        <version>${jersey-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish.jersey.inject</groupId>
+        <artifactId>jersey-hk2</artifactId>
+        <version>${jersey-version}</version>
+      </dependency>
+
+
 
          <!-- json -->
         <dependency>
@@ -135,12 +156,6 @@
             <version>2.2-SNAPSHOT</version>
 
         </dependency>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-core</artifactId>
-            <version>1.19.1</version>
-        </dependency>
-
 
 
     </dependencies>
