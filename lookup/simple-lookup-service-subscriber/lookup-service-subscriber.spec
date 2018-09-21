@@ -56,8 +56,12 @@ mvn -DskipTests --projects %{mvn_project_list} install
 mkdir -p %{buildroot}/%{install_base}/target
 mkdir -p %{buildroot}/%{install_base}/bin
 mkdir -p %{buildroot}/%{config_base}
-mkdir -p %{buildroot}/etc/init.d
 mkdir -p %{buildroot}/etc/httpd/conf.d
+%if 0%{?el7}
+mkdir -p %{buildroot}%{_unitdir}
+%else
+mkdir -p %{buildroot}/etc/init.d
+%endif
 
 #Copy jar files and scripts
 cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/target/*.jar %{buildroot}/%{install_base}/target/
