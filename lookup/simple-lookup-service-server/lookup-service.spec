@@ -22,10 +22,13 @@ BuildRequires:  java-openjdk >= 1.6.0
 BuildRequires:  sed 
 BuildArch:      noarch
 Requires:       java-openjdk >= 1.6.0
+
 %if 0%{?el7}
 BuildRequires: systemd
+BuildRequires:  maven
 %{?systemd_requires: %systemd_requires}
 %else
+BuildRequires:  apache-maven
 Requires:		chkconfig
 %endif
 Requires:	mongodb-org-server

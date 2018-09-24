@@ -25,8 +25,10 @@ Requires:       elasticsearch >= 5.0
 Requires(post): httpd
 %if 0%{?el7}
 BuildRequires: systemd
+BuildRequires:  maven
 %{?systemd_requires: %systemd_requires}
 %else
+BuildRequires:  apache-maven
 Requires:		chkconfig
 %endif
 BuildRequires:  java-openjdk >= 1.6.0
