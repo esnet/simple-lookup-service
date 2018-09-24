@@ -10,7 +10,7 @@
 
 Name:           %{package_name}
 Version:        2.2
-Release:        %{version}-%{relnum}
+Release:        %{version}.%{relnum}
 Summary:        Lookup Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries

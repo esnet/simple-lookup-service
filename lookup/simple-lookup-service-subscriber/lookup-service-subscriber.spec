@@ -11,7 +11,7 @@
 
 Name:           %{package_name}
 Version:        2.2
-Release:        %{relnum}
+Release:        %{version}.%{relnum}
 Summary:        Lookup Service
 License:        BSD
 Group:          Development/Libraries
