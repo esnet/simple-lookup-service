@@ -63,10 +63,11 @@ mkdir -p %{buildroot}/etc/init.d
 #Copy jar files and scripts
 cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/target/*.jar %{buildroot}/%{install_base}/target/
 install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/bin/* %{buildroot}/%{install_base}/bin/
+
 %if 0%{?el7}
-install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/scripts/lookup-service %{buildroot}/%{_unitdir}/%{init_script}.service
+install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}/scripts/lookup-service %{buildroot}/%{_unitdir}/%{init_script}.service
 %else
-install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/scripts/lookup-service %{buildroot}/etc/init.d/%{init_script}
+install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}/scripts/lookup-service %{buildroot}/etc/init.d/%{init_script}
 %endif
 
 # Copy default config file
