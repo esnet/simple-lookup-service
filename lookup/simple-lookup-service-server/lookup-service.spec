@@ -7,7 +7,7 @@
 %define run_dir /var/run/%{package_name}
 %define data_dir /var/lib/%{package_name}
 %define init_script lookup-service
-%define relnum 3
+%define relnum 9
 
 Name:           %{package_name}
 Version:        2.2
@@ -15,14 +15,19 @@ Release:        %{version}.%{relnum}
 Summary:        Lookup Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
-URL:            http://code.google.com/p/esnet-perfsonar
-Source0:        %{mvn_project_name}.tar.gz
+URL:            https://github.com/esnet/simple-lookup-service
+Source0:        %{mvn_project_name}-%{version}.%{relnum}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  java-openjdk >= 1.6.0
 BuildRequires:  sed 
 BuildArch:      noarch
 Requires:       java-openjdk >= 1.6.0
-Requires:       chkconfig
+%if 0%{?el7}
+BuildRequires: systemd
+%{?systemd_requires: %systemd_requires}
+%else
+Requires:		chkconfig
+%endif
 Requires:	mongodb-org-server
 
 %description
