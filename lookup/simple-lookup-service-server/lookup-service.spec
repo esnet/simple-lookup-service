@@ -10,12 +10,12 @@
 
 Name:           %{package_name}
 Version:        2.2
-Release:        %{relnum}
+Release:        %{version}-%{relnum}
 Summary:        Lookup Service
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://code.google.com/p/esnet-perfsonar
-Source0:        %{mvn_project_name}-%{version}.tar.gz
+Source0:        %{mvn_project_name}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  java-openjdk >= 1.6.0
 BuildRequires:  sed 
@@ -71,6 +71,10 @@ cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/process.yaml 
 #Update log locations
 sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/log4j.properties > %{buildroot}/%{config_base}/log4j.properties
 
+
+# Copy LICENSE file
+cp %{_builddir}/%{mvn_project_name}/LICENSE %{buildroot}/%{install_base}/LICENSE
+
 %post
 #Create directory for PID files
 mkdir -p %{run_dir}
@@ -114,6 +118,7 @@ chown lookup:lookup %{install_base}/target/%{package_name}-server.one-jar.jar
 %{install_base}/target/*
 %{install_base}/bin/*
 /etc/init.d/%{package_name}
+%%license %{install_base}/LICENSE
 
 %preun
 if [ $1 == 0 ]; then

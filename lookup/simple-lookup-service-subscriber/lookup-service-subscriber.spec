@@ -16,7 +16,7 @@ Summary:        Lookup Service
 License:        BSD
 Group:          Development/Libraries
 URL:            https://github.com/esnet/simple-lookup-service
-Source0:        %{mvn_project_name}-%{version}.tar.gz
+Source0:        %{mvn_project_name}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:       java-openjdk >= 1.6.0
@@ -75,8 +75,10 @@ install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/s
 install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/scripts/lookup-service-subscriber %{buildroot}/etc/init.d/%{init_script}
 %endif
 
-# Copy default config file
+# Copy LICENSE file
 cp %{_builddir}/%{mvn_project_name}/LICENSE %{buildroot}/%{install_base}/LICENSE
+
+# Copy default config file
 #cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/etc/subscriber.yaml %{buildroot}/%{config_base}/subscriber.yaml
 cp -r %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/etc/* %{buildroot}/%{config_base}/
 #Update log locations
