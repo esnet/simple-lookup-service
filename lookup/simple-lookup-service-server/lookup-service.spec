@@ -73,7 +73,7 @@ cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/target/*.jar %{bu
 install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/bin/* %{buildroot}/%{install_base}/bin/
 
 %if 0%{?el7}
-install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scripts/%{init_script}.service %{buildroot}/%{_unitdir}/%{init_script}.service
+install -m 644 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scripts/%{init_script}.service %{buildroot}/%{_unitdir}/%{init_script}.service
 %else
 install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scripts/lookup-service %{buildroot}/etc/init.d/%{init_script}
 %endif

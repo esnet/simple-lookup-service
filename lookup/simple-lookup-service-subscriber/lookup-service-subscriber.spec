@@ -72,7 +72,7 @@ install -D -m 0644 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscrib
 rm -f %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/etc/%{apacheconf}
 
 %if 0%{?el7}
-install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/scripts/lookup-service-subscriber.service %{buildroot}/%{_unitdir}/%{init_script}.service
+install -m 644 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/scripts/lookup-service-subscriber.service %{buildroot}/%{_unitdir}/%{init_script}.service
 %else
 install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-subscriber/scripts/lookup-service-subscriber %{buildroot}/etc/init.d/%{init_script}
 %endif
