@@ -1,0 +1,17 @@
+[Unit]
+Description=Lookup Service Server
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/lookup-service/lookup-service.pid
+ExecStartPre=/bin/mkdir -p /var/run/lookup-service
+ExecStartPre=/bin/chown lookup:lookup /var/run/lookup-service
+ExecStartPre=/bin/chown -R lookup:lookup /var/log/lookup-service
+User=lookup
+PermissionsStartOnly=true
+ExecStart=/bin/sh -c '/usr/lib/lookup-service/bin/startServer.sh /var/run/lookup-service/lookup-service.pid /usr/lib/lookup-service/target/lookup-service-server.one-jar.jar -c /etc/lookup-service/ -l /etc/lookup-service/log4j.properties >/var/log/lookup-service/lookup-service.out.out 2>&1'
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target
