@@ -17,7 +17,7 @@ License:        BSD
 Group:          Development/Libraries
 URL:            https://github.com/esnet/simple-lookup-service
 Source0:        %{mvn_project_name}-%{version}.%{relnum}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRoot:      %{_tmppath}/%{name}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:       java-openjdk >= 1.6.0
 Requires:       chkconfig
