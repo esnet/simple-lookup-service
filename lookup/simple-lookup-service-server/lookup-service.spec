@@ -1,7 +1,7 @@
 %define package_name lookup-service
 %define mvn_project_name simple-lookup-service
 %define mvn_project_list %{mvn_project_name}-common,%{mvn_project_name}-client,%{mvn_project_name}-server
-%define install_base /opt/%{package_name}
+%define install_base /usr/lib/%{package_name}
 %define config_base /etc/%{package_name}
 %define log_dir /var/log/%{package_name}
 %define run_dir /var/run/%{package_name}
