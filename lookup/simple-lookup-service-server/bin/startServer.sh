@@ -2,14 +2,14 @@
 
 pidfile=$1
 jarfile=$2
-shift 3
+shift 2
 vers="2.0"
 shortname=lookup-service
 
 #include variables
 currdir="$(dirname "$0")"
 if [ -f "${currdir}/lookup-service.env" ]; then
-    source ${currdir}/maddash-server.env
+    source ${currdir}/lookup-service.env
 fi
 
 if [ -z "$pidfile" ]; then
