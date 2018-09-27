@@ -43,7 +43,7 @@ via REST interface.
 /usr/sbin/useradd -g lookup -r -s /sbin/nologin -c "Lookup Service User" -d /tmp lookup 2> /dev/null || :
 
 %prep
-%setup -q -n  %{mvn_project_name}-%{version}-%{relnum}
+%setup -q -n  %{mvn_project_name}
 
 %clean
 rm -rf %{buildroot}
