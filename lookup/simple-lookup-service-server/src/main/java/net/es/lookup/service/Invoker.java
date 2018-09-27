@@ -162,6 +162,12 @@ public class Invoker {
 
     OptionParser parser = new OptionParser();
     parser.acceptsAll(asList("h", "?"), "show help then exit");
+    OptionSpec<String> argPort = parser.accepts("p", "server port").withRequiredArg().ofType(String.class);
+    OptionSpec<String> argHost = parser.accepts("h", "host").withRequiredArg().ofType(String.class);
+    OptionSpec<String> argConfigPath =
+        parser.accepts("c", "configPath").withRequiredArg().ofType(String.class);
+    OptionSpec<String> argLogPath =
+        parser.accepts("l", "logConfig").withRequiredArg().ofType(String.class);
 
     OptionSet options = parser.parse(args);
 
@@ -170,27 +176,23 @@ public class Invoker {
       parser.printHelpOn(System.out);
       System.exit(0);
     }
-    OptionSpec<String> argPort =
-        parser.accepts("p", "server port").withRequiredArg().ofType(String.class);
 
     if (options.has(argPort)) {
 
       port = Integer.parseInt(options.valueOf(argPort));
     }
-    OptionSpec<String> argHost = parser.accepts("h", "host").withRequiredArg().ofType(String.class);
+
     if (options.has(argHost)) {
       host = options.valueOf(argHost);
     }
 
-    OptionSpec<String> argConfigPath =
-        parser.accepts("c", "configPath").withRequiredArg().ofType(String.class);
+
     if (options.has(argConfigPath)) {
       configPath = options.valueOf(argConfigPath);
       System.out.println("Config files Path:" + configPath);
     }
 
-    OptionSpec<String> argLogPath =
-        parser.accepts("l", "logConfig").withRequiredArg().ofType(String.class);
+
     if (options.has(argLogPath)) {
 
       logConfig = options.valueOf(argLogPath);
