@@ -10,7 +10,7 @@ ExecStartPre=/bin/chown lookup:lookup /var/run/lookup-service-subscriber
 ExecStartPre=/bin/chown -R lookup:lookup /var/log/lookup-service-subscriber
 User=lookup
 PermissionsStartOnly=true
-ExecStart=/bin/sh -c '/usr/lib/lookup-service-subscriber/bin/startServer.sh /var/run/lookup-service-subscriber/lookup-service-subscriber.pid /usr/lib/lookup-service-subscriber/target/lookup-service-subscriber.one-jar.jar -c /etc/lookup-service-subscriber/ -l /etc/lookup-service-subscriber/log4j.properties >/var/log/lookup-service-subscriber/lookup-service-subscriber.out 2>&1'
+ExecStart=/bin/sh -c '/usr/lib/lookup-service-subscriber/bin/startSubscriber.sh /var/run/lookup-service-subscriber/lookup-service-subscriber.pid /usr/lib/lookup-service-subscriber/target/lookup-service-subscriber.one-jar.jar -c /etc/lookup-service-subscriber/ -l /etc/lookup-service-subscriber/log4j.properties >/var/log/lookup-service-subscriber/lookup-service-subscriber.out 2>&1'
 SuccessExitStatus=143
 
 [Install]

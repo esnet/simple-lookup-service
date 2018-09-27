@@ -126,6 +126,10 @@ fi
 if [ $1 == 0 ]; then
     /sbin/chkconfig --del %{init_script}
     /sbin/service %{package_name} stop
+fi
+%endif
+
+if [ $1 == 0 ]; then
     if [ -L %{install_base}/target/%{package_name}.one-jar.jar ]; then
         unlink %{install_base}/target/%{package_name}.one-jar.jar
     fi
@@ -133,7 +137,6 @@ if [ $1 == 0 ]; then
         unlink %{install_base}/target/%{package_name}.one-jar.jar
     fi
 fi
-%endif
 
 %files
 %defattr(-,lookup,lookup,-)
@@ -146,7 +149,7 @@ fi
 
 
 %if 0%{?el7}
-%attr(0644,root,root) %{_unitdir}/%{init_script}.service
+%attr(0644,lookup,lookup) %{_unitdir}/%{init_script}.service
 %else
 %attr(0755,lookup,lookup) /etc/init.d/%{init_script}
 %endif
