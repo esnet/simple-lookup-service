@@ -142,6 +142,9 @@ fi
 if [ $1 == 0 ]; then
     /sbin/chkconfig --del %{package_name}
     /sbin/service %{package_name} stop
+fi
+%endif
+if [ $1 == 0 ]; then
     if [ -L %{install_base}/target/%{package_name}-server.one-jar.jar ]; then
         unlink %{install_base}/target/%{package_name}-server.one-jar.jar
     fi
@@ -149,7 +152,8 @@ if [ $1 == 0 ]; then
         unlink %{install_base}/target/%{package_name}.one-jar.jar
     fi
 fi
-%endif
+
+
 
 %files
 %defattr(-,lookup,lookup,-)
