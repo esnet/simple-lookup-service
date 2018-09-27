@@ -81,7 +81,6 @@ install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scrip
 # Copy default config file
 cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/lookupservice.yaml %{buildroot}/%{config_base}/lookupservice.yaml
 cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/queueservice.yaml %{buildroot}/%{config_base}/queueservice.yaml
-cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/process.yaml %{buildroot}/%{config_base}/process.yaml
 #Update log locations
 sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/log4j.properties > %{buildroot}/%{config_base}/log4j.properties
 
