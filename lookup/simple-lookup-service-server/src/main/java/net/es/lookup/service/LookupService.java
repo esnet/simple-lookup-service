@@ -20,7 +20,6 @@ public class LookupService {
   private String datadirectory = "../elements";
   private HttpServer httpServer = null;
   private static LookupService instance = null;
-  private static final int MAX_SERVICES = 10;
   public static final String LOOKUP_SERVICE = "lookup";
 
   private static Logger LOG = Logger.getLogger(LookupService.class);
@@ -112,14 +111,19 @@ public class LookupService {
 
     LOG.info("Creating Resource...");
 
-    final ResourceConfig rc = new ResourceConfig().packages("net.es.lookup.resources");
+    final ResourceConfig rc = new ResourceConfig();
+    rc.register(net.es.lookup.resources.KeyResource.class);
+    rc.register(net.es.lookup.resources.MainResource.class);
+    rc.register(net.es.lookup.resources.RecordResource.class);
 
+    LOG.info("Creating Resource..."+rc.getResources().toString());
     LOG.info("Starting grizzly...");
     String hosturl = "http://" + this.host + "/";
 
     HttpServer server =
         GrizzlyHttpServerFactory.createHttpServer(
             UriBuilder.fromUri(hosturl).port(this.port).build(), rc);
+
 
     return server;
   }
