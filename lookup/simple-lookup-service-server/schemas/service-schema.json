@@ -1,0 +1,71 @@
+{
+  "$id": "http://www.perfsonar.net/interface-schema#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "perfSONAR Lookup Service Host Record Schema",
+  "allOf": [
+    {
+      "$ref": "ls-record-schema.json#record"
+    },
+    {
+      "$ref": "ls-record-schema.json#location"
+    },
+    {
+      "$ref": "ls-record-schema.json#group"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "service-name": {
+          "description": "Service Name",
+          "type": "string"
+        },
+        "service-type": {
+          "description": "Service Type",
+          "type": "string"
+        },
+        "service-version": {
+          "description": "Service Version",
+          "type": "string"
+        },
+        "service-locator": {
+          "description": "service locator uris",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "service-host": {
+          "description": "Host record uri of the service",
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "psservice-eventtypes": {
+          "description": "Service Eventtypes",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "packet-count-sent",
+              "histogram-ttl",
+              "packet-duplicates-bidir",
+              "packet-duplicates",
+              "path-mtu",
+              "packet-loss-rate-bidir",
+              "histogram-rtt",
+              "packet-count-lost-bidir",
+              "packet-trace",
+              "histogram-owdelay",
+              "failures",
+              "packet-loss-rate",
+              "time-error-estimates",
+              "packet-reorders-bidir",
+              "histogram-ttl-reverse",
+              "packet-count-lost"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

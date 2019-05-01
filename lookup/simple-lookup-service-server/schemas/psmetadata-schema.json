@@ -1,0 +1,92 @@
+{
+  "$id": "http://www.perfsonar.net/psmetadata-schema#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "perfSONAR Lookup Service PS Metadata Record Schema",
+  "allOf": [
+    {
+      "$ref": "ls-record-schema.json#record"
+    },
+    {
+      "$ref": "ls-record-schema.json#group"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "psmetadata-tool-name": {
+          "description": "ps test tool name",
+          "type": "string"
+        },
+        "psmetadata-src-address": {
+          "description": "source address of the test",
+          "type": "string",
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "ipv4"
+            },
+            {
+              "type": "string",
+              "format": "ipv6"
+            }
+          ]
+        },
+        "psmetadata-dst-address": {
+          "description": "destination address of the test",
+          "type": "string",
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "ipv4"
+            },
+            {
+              "type": "string",
+              "format": "ipv6"
+            }
+          ]
+        },
+        "psmetadata-ma-locator": {
+          "description": "perfsonar MA locator uris",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "psmetadata-eventtypes": {
+          "description": "Event types for which results are available in MA",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "packet-trace",
+              "path-mtu",
+              "pscheduler-run-href",
+              "time-error-estimates",
+              "packet-duplicates",
+              "histogram-ttl",
+              "packet-count-sent",
+              "packet-count-lost",
+              "histogram-owdelay",
+              "failures",
+              "packet-loss-rate",
+              "packet-reorders-bidir",
+              "packet-loss-rate-bidir",
+              "packet-retransmits",
+              "packet-retransmits-subintervals",
+              "histogram-rtt",
+              "histogram-ttl-reverse",
+              "packet-count-lost-bidir",
+              "packet-duplicates-bidir",
+              "packet-reorders",
+              "throughput-subintervals",
+              "throughput"
+
+            ]
+          }
+        }
+      }
+    }
+
+  ]
+}
+

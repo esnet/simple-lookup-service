@@ -1,0 +1,53 @@
+{
+  "$id": "http://www.perfsonar.net/interface-schema#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "perfSONAR Lookup Service Interface Record Schema",
+  "allOf": [
+    {
+      "$ref": "ls-record-schema.json#record"
+    },
+    {
+      "$ref": "ls-record-schema.json#location"
+    },
+    {
+      "$ref": "ls-record-schema.json#group"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "interface-name": {
+          "description": "interface name",
+          "type": "string"
+        },
+        "interface-addresses": {
+          "description": "interface addresses",
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "ipv4"
+              },
+              {
+                "type": "string",
+                "format": "ipv6"
+              }
+            ]
+          },
+          "interface-mtu": {
+            "description": "Interface MTU",
+            "type": "number"
+          },
+          "interface-mac": {
+            "description": "Interface mac address",
+            "type": "string"
+          },
+          "interface-capacity": {
+            "description": "Interface capacity",
+            "type": "number"
+          }
+        }
+      }
+    }
+  ]
+}

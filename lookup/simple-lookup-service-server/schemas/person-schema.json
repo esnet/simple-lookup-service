@@ -1,0 +1,41 @@
+{
+  "$id": "http://www.perfsonar.net/person-schema#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "perfSONAR Lookup Service Person Record Schema",
+  "allOf": [
+    {
+      "$ref": "ls-record-schema.json#record"
+    },
+    {
+      "$ref": "ls-record-schema.json#location"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "person-name": {
+          "description": "perfsonar host admin name",
+          "type": "string"
+        },
+        "person-emails": {
+          "description": "perfsonar host admin emails",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "email"
+          },
+          "person-organization": {
+            "description": "Admin's organization",
+            "type": "string"
+          },
+          "person-phonenumbers": {
+            "description": "perfsonar host admin contact numbers",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

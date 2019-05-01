@@ -1,0 +1,128 @@
+{
+  "$id": "http://www.perfsonar.net/interface-schema#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "perfSONAR Lookup Service Host Record Schema",
+  "allOf": [
+    {
+      "$ref": "ls-record-schema.json#record"
+    },
+    {
+      "$ref": "ls-record-schema.json#location"
+    },
+    {
+      "$ref": "ls-record-schema.json#group"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "host-name": {
+          "description": "perfsonar host name(s)",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "host-administrators": {
+          "description": "perfsonar admin record ids",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri-reference"
+          }
+        },
+        "host-vm": {
+          "description": "is host a VM?",
+          "type": "boolean"
+        },
+        "host-hardware-memory": {
+          "description": "memory in bytes",
+          "type": "number"
+        },
+        "host-hardware-processorcount": {
+          "description": "number of processors",
+          "type": "number"
+        },
+        "host-hardware-processorspeed": {
+          "description": "processors speed in Hz",
+          "type": "number"
+        },
+        "host-hardware-processorcore": {
+          "description": "number of cores",
+          "type": "number"
+        },
+        "host-os-name": {
+          "description": "Host OS name",
+          "type": "string"
+        },
+        "host-os-kernel": {
+          "description": "OS kernel",
+          "type": "string"
+        },
+        "host-os-version": {
+          "description": "OS version",
+          "type": "string"
+        },
+        "host-os-architecture": {
+          "description": "OS architecture",
+          "type": "string"
+        },
+        "host-net-ipv6-enabled": {
+          "description": "is ipv6 enabled?",
+          "type": "boolean"
+        },
+        "host-net-tcp-congestionalgorithm": {
+          "description": "TCP congestion control algorithm",
+          "type": "string"
+        },
+        "host-net-tcp-autotunemaxbuffer-recv": {
+          "description": "TCP autotune max buffer in bytes",
+          "type": "number"
+        },
+        "host-net-tcp-autotunemaxbuffer-send": {
+          "description": "TCP autotune max buffer in bytes",
+          "type": "number"
+        },
+        "host-net-tcp-maxbuffer-recv": {
+          "description": "TCP  max buffer in bytes",
+          "type": "number"
+        },
+        "host-net-tcp-maxbuffer-send": {
+          "description": "TCP max buffer in bytes",
+          "type": "number"
+        },
+        "host-net-interfaces": {
+          "description": "perfsonar interface record ids",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri-reference"
+          }
+        },
+        "pshost-bundle": {
+          "description": "type of perfsonar installation",
+          "type": "string"
+        },
+        "pshost-role": {
+          "description": "Role of this perfsonar host. Regional, intra-testing, etc",
+          "type": "string"
+        },
+        "pshost-access-policy": {
+          "description": "access policy for the host. In other words, this defines who can run tests to the host",
+          "type": "string"
+        },
+        "pshost-toolkitversion": {
+          "description": "Toolkit version",
+          "type": "string"
+        },
+        "pshost-bundle-version": {
+          "description": "Bundle version",
+          "type": "string"
+        },
+        "pshost-install-method": {
+          "description": "installation method",
+          "type": "string"
+        }
+      }
+    }
+  ]
+}
