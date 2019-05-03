@@ -19,7 +19,20 @@
           "description": "perfsonar host name(s)",
           "type": "array",
           "items": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "hostname"
+              },
+              {
+                "type": "string",
+                "format": "ipv4"
+              },
+              {
+                "type": "string",
+                "format": "ipv6"
+              }
+            ]
           }
         },
         "host-administrators": {
@@ -30,17 +43,29 @@
             "format": "uri-reference"
           }
         },
+        "host-manufacturer":{
+          "description": "Host Manufacturer",
+          "type": "string"
+        },
+        "host-productname":{
+          "description": "Host Product Name",
+          "type": "string"
+        },
         "host-vm": {
           "description": "is host a VM?",
           "type": "boolean"
         },
+        "host-hardware-cpuid": {
+          "description": "CPU Id",
+          "type": "string"
+        },
         "host-hardware-memory": {
           "description": "memory in bytes",
-          "type": "number"
+          "type": "integer"
         },
         "host-hardware-processorcount": {
           "description": "number of processors",
-          "type": "number"
+          "type": "integer"
         },
         "host-hardware-processorspeed": {
           "description": "processors speed in Hz",
@@ -48,7 +73,7 @@
         },
         "host-hardware-processorcore": {
           "description": "number of cores",
-          "type": "number"
+          "type": "integer"
         },
         "host-os-name": {
           "description": "Host OS name",
@@ -90,6 +115,14 @@
           "description": "TCP max buffer in bytes",
           "type": "number"
         },
+        "host-net-tcp-maxbacklog": {
+          "description": "TCP max backlog",
+          "type": "integer"
+        },
+        "host-net-tcp-maxachievable": {
+          "description": "TCP max achievable",
+          "type": "integer"
+        },
         "host-net-interfaces": {
           "description": "perfsonar interface record ids",
           "type": "array",
@@ -100,19 +133,38 @@
         },
         "pshost-bundle": {
           "description": "type of perfsonar installation",
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "test-point",
+            "perfsonar-core",
+            "perfsonar-complete",
+            "perfsonar-toolkit"
+          ]
         },
         "pshost-role": {
-          "description": "Role of this perfsonar host. Regional, intra-testing, etc",
-          "type": "string"
+          "description": "Role of this perfsonar host. Regional, science-dmz, etc",
+          "type": "string",
+          "enum": [
+            "nren",
+            "regional",
+            "site-border",
+            "site-internal",
+            "science-dmz",
+            "exchange-point",
+            "test-host",
+            "default-path",
+            "backup-path"
+          ]
         },
         "pshost-access-policy": {
           "description": "access policy for the host. In other words, this defines who can run tests to the host",
-          "type": "string"
-        },
-        "pshost-toolkitversion": {
-          "description": "Toolkit version",
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "public",
+            "private",
+            "research-education",
+            "limited"
+          ]
         },
         "pshost-bundle-version": {
           "description": "Bundle version",
@@ -120,9 +172,11 @@
         },
         "pshost-install-method": {
           "description": "installation method",
-          "type": "string"
+          "type": "string",
+          "enum": ["fullinstall-iso","netinstall-iso"]
         }
       }
     }
   ]
 }
+

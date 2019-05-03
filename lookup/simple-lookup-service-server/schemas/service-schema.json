@@ -64,6 +64,22 @@
               "packet-count-lost"
             ]
           }
+        },
+        "pscheduler-tests":{
+          "description": "Pscheduler tests enabled in the host",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+
+        },
+        "pscheduler-tools":{
+          "description": "PScheduler tools installed",
+          "type": "array",
+          "items": {
+            "type": "string",
+          }
+
         }
       }
     }

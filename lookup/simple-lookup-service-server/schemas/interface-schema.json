@@ -46,6 +46,14 @@
             "description": "Interface capacity",
             "type": "number"
           }
+        },
+        "pscheduler-tests":{
+          "description": "Pscheduler tests",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+
         }
       }
     }
