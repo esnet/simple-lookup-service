@@ -8,6 +8,10 @@
       "type": "object",
       "$id": "#record",
       "properties": {
+        "schemaVersion": {
+          "description": "LS schema version",
+          "type": "string"
+        },
         "type": {
           "description": "record type",
           "type": "string",
@@ -124,8 +128,8 @@
     "location": {
       "$id": "#location",
       "anyOf": [
-          {"$ref": "#latlong"},
-          {"$ref": "#address"}
+          {"$ref": "https://github.com/esnet/simple-lookup-service/blob/json-schemas/lookup/simple-lookup-service-server/schemas/record-schema.json/#latlong"},
+          {"$ref": "https://github.com/esnet/simple-lookup-service/blob/json-schemas/lookup/simple-lookup-service-server/schemas/record-schema.json/#address"}
         ]
     },
     "group": {
