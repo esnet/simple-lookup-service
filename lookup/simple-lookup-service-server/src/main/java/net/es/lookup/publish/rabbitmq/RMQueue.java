@@ -21,7 +21,7 @@ import java.util.concurrent.TimeoutException;
  * Date: 3/3/16
  * Time: 11:17 AM
  */
-
+@Deprecated
 public class RMQueue extends Queue {
 
     private ConnectionFactory factory;

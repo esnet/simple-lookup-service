@@ -36,7 +36,7 @@ public class Invoker {
 
   private static String configPath = "etc/";
   private static final String lookupservicecfg = "lookupservice.yaml";
-  private static final String queuecfg = "queueservice.yaml";
+  //private static final String queuecfg = "queueservice.yaml";
 
   private static String logConfig = "./etc/log4j2.properties";
 
@@ -58,13 +58,13 @@ public class Invoker {
 
 
     LOG = LogManager.getLogger(Invoker.class.getName());
-    StdOutErrToLog.redirectStdOutErrToLog();
+    //StdOutErrToLog.redirectStdOutErrToLog();
 
     LookupServiceConfigReader.init(configPath + lookupservicecfg);
-   QueueServiceConfigReader.init(configPath + queuecfg);
+   //QueueServiceConfigReader.init(configPath + queuecfg);
 
     lookupServiceConfigReader = LookupServiceConfigReader.getInstance();
-    queueServiceConfigReader = QueueServiceConfigReader.getInstance();
+    //queueServiceConfigReader = QueueServiceConfigReader.getInstance();
 
     port = lookupServiceConfigReader.getPort();
     host = lookupServiceConfigReader.getHost();
@@ -121,7 +121,7 @@ public class Invoker {
 
     scheduler.schedule(job, trigger);
 
-      if (queueServiceConfigReader != null && queueServiceConfigReader.isServiceOn()) {
+   /*   if (queueServiceConfigReader != null && queueServiceConfigReader.isServiceOn()) {
 
       PublishService publishService = PublishService.getInstance();
       publishService.setMaxPushEvents(queueServiceConfigReader.getBatchSize());
@@ -136,7 +136,7 @@ public class Invoker {
       publishService.setExchangeType(queueServiceConfigReader.getExchangeType());
       publishService.setExchangeDurability(queueServiceConfigReader.getExchangeDurability());
       publishService.startService();
-    }
+    }*/
 
     JobDetail gcInvoker =
         newJob(MemoryManager.class).withIdentity("gc", "MemoryManagement").build();

@@ -12,7 +12,7 @@ import java.util.Date;
  * Date: 3/8/16
  * Time: 2:00 PM
  */
-
+@Deprecated
 class PublishTask implements Runnable {
 
     public final static String PUBLISHER= "publisher" ;

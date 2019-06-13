@@ -14,7 +14,6 @@
         <module>simple-lookup-service-common</module>
         <module>simple-lookup-service-client</module>
         <module>simple-lookup-service-server</module>
-        <module>simple-lookup-service-subscriber</module>
     </modules>
     <build>
         <pluginManagement>

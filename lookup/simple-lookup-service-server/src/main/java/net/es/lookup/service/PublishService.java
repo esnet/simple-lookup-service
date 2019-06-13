@@ -22,6 +22,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
  * Date: 3/17/16
  * Time: 11:58 AM
  */
+@Deprecated
 public class PublishService {
 
     private static PublishService instance = null;

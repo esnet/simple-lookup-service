@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
  * Date: 3/1/16
  * Time: 2:52 PM
  */
-
+@Deprecated
 public class PublisherScheduler implements Job {
     private static Logger LOG = LogManager.getLogger(PublisherScheduler.class);
 
