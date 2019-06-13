@@ -2,7 +2,8 @@ package net.es.lookup.database;
 
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import org.quartz.Job;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public class MongoDBMaintenanceJob implements Job {
 
-    private static Logger LOG = Logger.getLogger(MongoDBMaintenanceJob.class);
+    private static Logger LOG = LogManager.getLogger(MongoDBMaintenanceJob.class);
     private ServiceDaoMongoDb db;
     public static String PRUNE_THRESHOLD = "prune_threshold"; //parameter will be set during run time
     public static final String DBNAME = "db_name"; //parameter will be set during run time

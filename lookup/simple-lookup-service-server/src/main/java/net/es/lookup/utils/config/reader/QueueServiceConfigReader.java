@@ -1,6 +1,7 @@
 package net.es.lookup.utils.config.reader;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import java.util.Map;
  * Date: 3/26/13
  * Time: 11:14 AM
  */
+
 public class QueueServiceConfigReader {
 
     private static QueueServiceConfigReader instance;
@@ -45,7 +47,7 @@ public class QueueServiceConfigReader {
     private String exchangeType;
     private boolean exchangeDurability;
 
-    private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
+    private static Logger LOG = LogManager.getLogger(BaseConfigReader.class);
     
 
     /**

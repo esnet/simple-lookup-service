@@ -4,7 +4,8 @@ import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -20,8 +21,9 @@ import java.util.concurrent.Executors;
  * Date: 3/1/16
  * Time: 2:52 PM
  */
+
 public class PublisherScheduler implements Job {
-    private static Logger LOG = Logger.getLogger(PublisherScheduler.class);
+    private static Logger LOG = LogManager.getLogger(PublisherScheduler.class);
 
     private static final int DEFAULT_BATCHSIZE = 100;
 

@@ -3,7 +3,8 @@ package net.es.lookup.utils.config.reader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Singleton to store database configuration.
@@ -36,7 +37,7 @@ public class LookupServiceConfigReader {
   private int pruneInterval = MINIMUM_INTERVAL;
   private int pruneThreshold = MINIMUM_THRESHOLD;
 
-  private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
+  private static Logger LOG = LogManager.getLogger(BaseConfigReader.class);
 
   /** Constructor - private because this is a Singleton. */
   private LookupServiceConfigReader() {}

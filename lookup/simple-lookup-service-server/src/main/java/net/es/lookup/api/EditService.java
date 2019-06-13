@@ -21,12 +21,13 @@ import net.es.lookup.protocol.json.JSONRenewRequest;
 import net.es.lookup.protocol.json.JSONRenewResponse;
 import net.es.lookup.publish.Publisher;
 import net.es.lookup.service.PublishService;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /** Author: sowmya. Date: 10/29/13 Time: 3:24 PM */
 public class EditService {
 
-  private static Logger LOG = Logger.getLogger(AccessService.class);
+  private static Logger LOG = LogManager.getLogger(AccessService.class);
 
   /**
    * Method to renew record.

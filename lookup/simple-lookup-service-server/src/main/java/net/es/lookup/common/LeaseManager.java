@@ -1,7 +1,8 @@
 package net.es.lookup.common;
 
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;
 import org.joda.time.Duration;
@@ -20,7 +21,7 @@ public class LeaseManager {
     private static LeaseManager instance = null;
     private DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
     private LookupServiceConfigReader lcfg;
-    private static Logger LOG = Logger.getLogger(LeaseManager.class);
+    private static Logger LOG = LogManager.getLogger(LeaseManager.class);
 
     static {
 

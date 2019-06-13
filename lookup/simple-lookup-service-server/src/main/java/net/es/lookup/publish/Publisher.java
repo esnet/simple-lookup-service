@@ -16,7 +16,6 @@ import java.util.HashMap;
  * A publisher class that manages all queues and queries.
  * This class is singleton. Each sLS instance should have only one publisher instance
  */
-
 public class Publisher {
 
     public static final int DEFAULT_MAX_PUSHEVENTS = 100;

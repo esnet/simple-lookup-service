@@ -2,7 +2,8 @@ package net.es.lookup.cache.dispatch;
 
 import net.es.lookup.utils.config.reader.SubscriberConfigReader;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,7 +29,7 @@ public class DispatchService {
     private static DispatchService instance = null;
     public static final int DEFAULT_POOL = 100;
     private int clientPool=DEFAULT_POOL;
-    private static Logger LOG = Logger.getLogger(DispatchService.class);
+    private static Logger LOG = LogManager.getLogger(DispatchService.class);
 
     //private constructor as it is a singleton instance
     private DispatchService(){

@@ -18,8 +18,8 @@ import net.es.lookup.timer.Scheduler;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import net.es.lookup.utils.log.StdOutErrToLog;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 
@@ -37,7 +37,7 @@ public class Invoker {
   private static final String lookupservicecfg = "lookupservice.yaml";
   private static final String queuecfg = "queueservice.yaml";
 
-  private static String logConfig = "./etc/log4j.properties";
+  private static String logConfig = "./etc/log4j2.properties";
 
   private static Logger LOG;
 
@@ -51,14 +51,14 @@ public class Invoker {
 
     parseArgs(args);
     // set log config
-    System.setProperty("log4j.configuration", "file:" + logConfig);
+    System.setProperty("log4j.configurationFile", "file:" + logConfig);
 
     StdOutErrToLog.redirectStdOutErrToLog();
 
-    LOG = Logger.getLogger(Invoker.class);
+    LOG = LogManager.getLogger(Invoker.class);
 
     LookupServiceConfigReader.init(configPath + lookupservicecfg);
-    QueueServiceConfigReader.init(configPath + queuecfg);
+   QueueServiceConfigReader.init(configPath + queuecfg);
 
     lookupServiceConfigReader = LookupServiceConfigReader.getInstance();
     queueServiceConfigReader = QueueServiceConfigReader.getInstance();
@@ -118,7 +118,7 @@ public class Invoker {
 
     scheduler.schedule(job, trigger);
 
-    if (queueServiceConfigReader != null && queueServiceConfigReader.isServiceOn()) {
+    /*  if (queueServiceConfigReader != null && queueServiceConfigReader.isServiceOn()) {
 
       PublishService publishService = PublishService.getInstance();
       publishService.setMaxPushEvents(queueServiceConfigReader.getBatchSize());
@@ -133,7 +133,7 @@ public class Invoker {
       publishService.setExchangeType(queueServiceConfigReader.getExchangeType());
       publishService.setExchangeDurability(queueServiceConfigReader.getExchangeDurability());
       publishService.startService();
-    }
+    }*/
 
     JobDetail gcInvoker =
         newJob(MemoryManager.class).withIdentity("gc", "MemoryManagement").build();
@@ -162,7 +162,8 @@ public class Invoker {
 
     OptionParser parser = new OptionParser();
     parser.acceptsAll(asList("h", "?"), "show help then exit");
-    OptionSpec<String> argPort = parser.accepts("p", "server port").withRequiredArg().ofType(String.class);
+    OptionSpec<String> argPort =
+        parser.accepts("p", "server port").withRequiredArg().ofType(String.class);
     OptionSpec<String> argHost = parser.accepts("h", "host").withRequiredArg().ofType(String.class);
     OptionSpec<String> argConfigPath =
         parser.accepts("c", "configPath").withRequiredArg().ofType(String.class);
@@ -186,12 +187,10 @@ public class Invoker {
       host = options.valueOf(argHost);
     }
 
-
     if (options.has(argConfigPath)) {
       configPath = options.valueOf(argConfigPath);
       System.out.println("Config files Path:" + configPath);
     }
-
 
     if (options.has(argLogPath)) {
 

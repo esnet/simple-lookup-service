@@ -76,10 +76,8 @@ public class ServiceDaoMongoDb {
    * Constructor uses default url and port - mongodb running on localhost and default port - 27017.
    * Creates a new connection if it cannot find one
    *
-   * @param dbname Name of the Mongo database
-   * @param collname Name of the Mongo collection
    */
-  public ServiceDaoMongoDb(String dbname, String collname) throws DatabaseException {
+  public ServiceDaoMongoDb() throws DatabaseException {
 
     this.dbname = dbname;
     this.collname = collname;

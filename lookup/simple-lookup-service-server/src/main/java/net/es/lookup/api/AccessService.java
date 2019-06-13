@@ -10,12 +10,13 @@ import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.protocol.json.JSONGetServiceResponse;
 import net.es.lookup.protocol.json.JSONMessage;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 
 public class AccessService {
 
-  private static Logger LOG = Logger.getLogger(AccessService.class);
+  private static Logger LOG = LogManager.getLogger(AccessService.class);
 
   /**
    * Method to retrieve the record.
