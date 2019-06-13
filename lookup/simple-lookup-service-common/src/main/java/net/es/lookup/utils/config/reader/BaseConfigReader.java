@@ -14,7 +14,7 @@ import java.util.Map;
 public class BaseConfigReader {
 
     private static BaseConfigReader instance;
-    private static Logger LOG = LogManager.getLogger(BaseConfigReader.class);
+    private static Logger LOG = LogManager.getLogger(BaseConfigReader.class);;
 
     public static BaseConfigReader getInstance() {
 
@@ -29,7 +29,6 @@ public class BaseConfigReader {
     }
 
     private BaseConfigReader() {
-
     }
 
 

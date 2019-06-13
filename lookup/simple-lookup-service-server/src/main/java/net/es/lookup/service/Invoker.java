@@ -5,6 +5,7 @@ import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import joptsimple.OptionParser;
@@ -51,11 +52,13 @@ public class Invoker {
 
     parseArgs(args);
     // set log config
-    System.setProperty("log4j.configurationFile", "file:" + logConfig);
+    System.setProperty("log4j2.warn", "true");
+    System.setProperty("log4j.configurationFile", logConfig);
 
+
+
+    LOG = LogManager.getLogger(Invoker.class.getName());
     StdOutErrToLog.redirectStdOutErrToLog();
-
-    LOG = LogManager.getLogger(Invoker.class);
 
     LookupServiceConfigReader.init(configPath + lookupservicecfg);
    QueueServiceConfigReader.init(configPath + queuecfg);
@@ -118,7 +121,7 @@ public class Invoker {
 
     scheduler.schedule(job, trigger);
 
-    /*  if (queueServiceConfigReader != null && queueServiceConfigReader.isServiceOn()) {
+      if (queueServiceConfigReader != null && queueServiceConfigReader.isServiceOn()) {
 
       PublishService publishService = PublishService.getInstance();
       publishService.setMaxPushEvents(queueServiceConfigReader.getBatchSize());
@@ -133,7 +136,7 @@ public class Invoker {
       publishService.setExchangeType(queueServiceConfigReader.getExchangeType());
       publishService.setExchangeDurability(queueServiceConfigReader.getExchangeDurability());
       publishService.startService();
-    }*/
+    }
 
     JobDetail gcInvoker =
         newJob(MemoryManager.class).withIdentity("gc", "MemoryManagement").build();

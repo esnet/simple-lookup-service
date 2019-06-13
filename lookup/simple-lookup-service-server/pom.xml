@@ -98,24 +98,7 @@
   <build>
 
     <plugins>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <systemPropertyVariables>
-            <!-- At least one of the following needs to be set: -->
-            <coverage-output>html
-            </coverage-output>     <!-- or: html-nocp, serial, serial-append -->
-            <coverage-metrics>all</coverage-metrics>    <!-- or: line, path, data -->
-            <coverage-classes>loaded</coverage-classes> <!-- or a "*" expression for class names -->
 
-            <!-- Other properties, if needed: -->
-            <!-- default: target/coverage-report <coverage-outputDir>my-dir</coverage-outputDir>  -->
-            <!-- default: all "src" directories <coverage-srcDirs>sources</coverage-srcDirs>           -->
-            <!-- <coverage-excludes>some.package.*</coverage-excludes>  default: empty -->
-            <!-- <coverage-check>80</coverage-check>                    default: no checks -->
-          </systemPropertyVariables>
-        </configuration>
-      </plugin>
       <!--  Maven Exec Plug-In: http://mojo.codehaus.org/exec-maven-plugin/  -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -198,9 +181,5 @@
     </plugins>
 
   </build>
-
-  <profiles>
-
-  </profiles>
 
 </project>
