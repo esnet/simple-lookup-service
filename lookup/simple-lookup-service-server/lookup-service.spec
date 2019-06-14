@@ -7,10 +7,10 @@
 %define run_dir /var/run/%{package_name}
 %define data_dir /var/lib/%{package_name}
 %define init_script lookup-service
-%define relnum 9
+%define relnum 0
 
 Name:           %{package_name}
-Version:        2.2
+Version:        2.3
 Release:        %{relnum}%{?dist}
 Summary:        Lookup Service
 License:        distributable, see LICENSE
