@@ -1,6 +1,7 @@
 package net.es.lookup.utils.config.reader;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,7 @@ public class SubscriberConfigReader {
     private List<Map> queues;
     private List<Map> destination;
 
-    private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
+    private static Logger LOG = LogManager.getLogger(BaseConfigReader.class);
     private int threadPool;
 
     /**

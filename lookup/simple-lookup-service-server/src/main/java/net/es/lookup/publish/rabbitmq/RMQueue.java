@@ -8,7 +8,8 @@ import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.PubSubQueueException;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.publish.Queue;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 import java.util.Date;
@@ -20,6 +21,7 @@ import java.util.concurrent.TimeoutException;
  * Date: 3/3/16
  * Time: 11:17 AM
  */
+@Deprecated
 public class RMQueue extends Queue {
 
     private ConnectionFactory factory;
@@ -31,7 +33,7 @@ public class RMQueue extends Queue {
 
     public static final String QUERY = "all";
 
-    private static Logger LOG = Logger.getLogger(RMQueue.class);
+    private static Logger LOG = LogManager.getLogger(RMQueue.class);
 
     /**
      * Default constructor with max Events=25 and timeInterval between push set to 60s

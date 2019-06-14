@@ -12,11 +12,12 @@ import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.protocol.json.JSONMessage;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class QueryServices {
 
-  private static Logger LOG = Logger.getLogger(QueryServices.class);
+  private static Logger LOG = LogManager.getLogger(QueryServices.class);
   private String params;
 
   public static boolean QUERY_ALL_FLAG = false;

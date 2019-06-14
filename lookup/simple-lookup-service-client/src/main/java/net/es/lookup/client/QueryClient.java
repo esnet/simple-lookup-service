@@ -8,7 +8,8 @@ import net.es.lookup.protocol.json.JSONParser;
 import net.es.lookup.queries.Query;
 import net.es.lookup.records.Record;
 import net.sf.json.JSONArray;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class QueryClient {
     private String baseUrl = "lookup/records/";
     private String relativeUrl;
 
-    private static Logger LOG = Logger.getLogger(QueryClient.class);
+    private static Logger LOG = LogManager.getLogger(QueryClient.class);
 
     public QueryClient(SimpleLS server) throws LSClientException {
 

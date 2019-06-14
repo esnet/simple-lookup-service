@@ -12,6 +12,7 @@ import java.util.List;
  * Date: 2/28/13
  * Time: 1:25 PM
  */
+@Deprecated
 public abstract class Queue {
 
 

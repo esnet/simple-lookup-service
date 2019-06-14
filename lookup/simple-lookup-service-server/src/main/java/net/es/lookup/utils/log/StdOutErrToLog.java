@@ -1,8 +1,9 @@
 package net.es.lookup.utils.log;
 
-        import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
-        import java.io.PrintStream;
+import java.io.PrintStream;
 
 /**
  * Author: sowmya
@@ -11,7 +12,7 @@ package net.es.lookup.utils.log;
  */
 public class StdOutErrToLog {
 
-        private static Logger LOG = Logger.getLogger(StdOutErrToLog.class);
+        private static Logger LOG = LogManager.getLogger(StdOutErrToLog.class);
 
         public static void redirectStdOutErrToLog(){
             System.setOut(createLoggingPrintStream(System.out));

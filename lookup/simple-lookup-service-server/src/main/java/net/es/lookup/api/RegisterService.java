@@ -23,12 +23,12 @@ import net.es.lookup.protocol.json.JSONRegisterResponse;
 import net.es.lookup.publish.Publisher;
 import net.es.lookup.service.LookupService;
 import net.es.lookup.service.PublishService;
-import org.apache.log4j.Logger;
-
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class RegisterService {
 
-  private static Logger LOG = Logger.getLogger(RegisterService.class);
+  private static Logger LOG = LogManager.getLogger(RegisterService.class);
   private String params;
 
   /**

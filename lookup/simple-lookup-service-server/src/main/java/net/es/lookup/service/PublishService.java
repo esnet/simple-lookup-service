@@ -6,7 +6,8 @@ import net.es.lookup.publish.Publisher;
 import net.es.lookup.publish.PublisherScheduler;
 import net.es.lookup.publish.rabbitmq.RMQueue;
 import net.es.lookup.timer.Scheduler;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 
@@ -21,6 +22,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
  * Date: 3/17/16
  * Time: 11:58 AM
  */
+@Deprecated
 public class PublishService {
 
     private static PublishService instance = null;
@@ -48,7 +50,7 @@ public class PublishService {
 
     private int pollingInterval =DEFAULT_SCHEDULER_INTERVAL;
 
-    private static Logger LOG = Logger.getLogger(PublishService.class);
+    private static Logger LOG = LogManager.getLogger(PublishService.class);
 
     private PublishService(){
     }

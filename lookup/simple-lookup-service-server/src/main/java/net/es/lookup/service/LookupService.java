@@ -2,7 +2,8 @@ package net.es.lookup.service;
 
 import java.io.IOException;
 import javax.ws.rs.core.UriBuilder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -22,7 +23,7 @@ public class LookupService {
   private static LookupService instance = null;
   public static final String LOOKUP_SERVICE = "lookup";
 
-  private static Logger LOG = Logger.getLogger(LookupService.class);
+  private static Logger LOG = LogManager.getLogger(LookupService.class);
 
   public int getPort() {
 

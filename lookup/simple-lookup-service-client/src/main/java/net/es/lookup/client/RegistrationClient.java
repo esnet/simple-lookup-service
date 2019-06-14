@@ -7,7 +7,8 @@ import net.es.lookup.common.exception.RecordException;
 import net.es.lookup.protocol.json.JSONParser;
 import net.es.lookup.records.ErrorRecord;
 import net.es.lookup.records.Record;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Author: sowmya
@@ -21,7 +22,7 @@ public class RegistrationClient {
     private String connectionType = "POST";
     private String relativeUrl = "lookup/records";
 
-    private static Logger LOG = Logger.getLogger(RegistrationClient.class);
+    private static Logger LOG = LogManager.getLogger(RegistrationClient.class);
 
     public RegistrationClient(SimpleLS server) throws LSClientException {
 

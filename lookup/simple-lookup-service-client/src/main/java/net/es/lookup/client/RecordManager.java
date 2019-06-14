@@ -10,7 +10,8 @@ import net.es.lookup.protocol.json.JSONParser;
 import net.es.lookup.records.ErrorRecord;
 import net.es.lookup.records.Record;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,7 +27,7 @@ public class RecordManager {
     private String baseUrl = "lookup/";
     private String relativeUrl = baseUrl;
 
-    private static Logger LOG = Logger.getLogger(RecordManager.class);
+    private static Logger LOG = LogManager.getLogger(RecordManager.class);
 
     public RecordManager(SimpleLS server) throws LSClientException {
 

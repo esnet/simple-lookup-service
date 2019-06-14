@@ -1,6 +1,7 @@
 package net.es.lookup.utils.config.reader;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.ho.yaml.Yaml;
 
 import java.io.File;
@@ -13,7 +14,7 @@ import java.util.Map;
 public class BaseConfigReader {
 
     private static BaseConfigReader instance;
-    private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
+    private static Logger LOG = LogManager.getLogger(BaseConfigReader.class);;
 
     public static BaseConfigReader getInstance() {
 
@@ -28,7 +29,6 @@ public class BaseConfigReader {
     }
 
     private BaseConfigReader() {
-
     }
 
 

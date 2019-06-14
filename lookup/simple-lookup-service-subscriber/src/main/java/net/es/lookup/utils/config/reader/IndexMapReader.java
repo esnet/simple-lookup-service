@@ -1,6 +1,7 @@
 package net.es.lookup.utils.config.reader;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.*;
 
@@ -15,7 +16,7 @@ import java.io.*;
 public class IndexMapReader {
 
     private static IndexMapReader instance;
-    private static Logger LOG = Logger.getLogger(BaseConfigReader.class);
+    private static Logger LOG = LogManager.getLogger(BaseConfigReader.class);
 
     /**
      * Returns the instance of this class. If there isn't one, it creates a new instance

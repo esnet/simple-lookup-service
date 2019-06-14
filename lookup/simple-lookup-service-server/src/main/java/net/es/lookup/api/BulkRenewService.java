@@ -21,10 +21,11 @@ import net.es.lookup.protocol.json.JsonBulkRenewRequest;
 import net.es.lookup.protocol.json.JsonBulkRenewResponse;
 import net.es.lookup.publish.Publisher;
 import net.es.lookup.service.PublishService;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class BulkRenewService {
-  private static Logger LOG = Logger.getLogger(BulkRenewService.class);
+  private static Logger LOG = LogManager.getLogger(BulkRenewService.class);
 
   /**
    * The method bulk renews records.

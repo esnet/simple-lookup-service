@@ -12,7 +12,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -42,7 +43,7 @@ public class ElasticEndPoint implements EndPoint,Runnable {
     private String writeIndex;
     private String searchIndex;
     private String documentType;
-    private static Logger LOG = Logger.getLogger(ElasticEndPoint.class);
+    private static Logger LOG = LogManager.getLogger(ElasticEndPoint.class);
 
 
     /**

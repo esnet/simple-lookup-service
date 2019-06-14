@@ -2,7 +2,8 @@ package net.es.lookup.publish;
 
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.PubSubQueueException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.Date;
 
@@ -11,12 +12,13 @@ import java.util.Date;
  * Date: 3/8/16
  * Time: 2:00 PM
  */
+@Deprecated
 class PublishTask implements Runnable {
 
     public final static String PUBLISHER= "publisher" ;
     public final static String QUEUE = "queue";
     public final static String MESSAGE = "message";
-    private static Logger LOG = Logger.getLogger(PublishTask.class);
+    private static Logger LOG = LogManager.getLogger(PublishTask.class);
 
     private Queue queue;
 

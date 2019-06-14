@@ -4,7 +4,8 @@ import com.rabbitmq.client.*;
 import net.es.lookup.cache.dispatch.DispatchService;
 import net.es.lookup.cache.dispatch.EndPoint;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -26,7 +27,7 @@ public class SlsSubscriber implements Subscriber {
     private int port;
     private List<String> queries;
     private List<EndPoint> endpoints;
-    private static Logger LOG = Logger.getLogger(SlsSubscriber.class);
+    private static Logger LOG = LogManager.getLogger(SlsSubscriber.class);
 
     //RMQ Connection fields
     private Connection connection;
