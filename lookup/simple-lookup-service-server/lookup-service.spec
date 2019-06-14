@@ -82,7 +82,7 @@ install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scrip
 cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/lookupservice.yaml %{buildroot}/%{config_base}/lookupservice.yaml
 #cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/queueservice.yaml %{buildroot}/%{config_base}/queueservice.yaml
 #Update log locations
-sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/log4j.properties > %{buildroot}/%{config_base}/log4j.properties
+sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/log4j2.properties > %{buildroot}/%{config_base}/log4j2.properties
 
 
 # Copy LICENSE file
@@ -169,7 +169,7 @@ fi
 
 
 %changelog
-* Thu Jun 13 2019 sowmya@es.net 2.3-beta
+* Thu Jun 13 2019 sowmya@es.net 2.3-alpha
 - Updated spec file to remove queue config file
 * Mon Sep 24 2018 sowmya@es.net 2.2-9
 - Updated spec file to support Centos 7
