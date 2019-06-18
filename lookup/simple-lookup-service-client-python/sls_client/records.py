@@ -4,8 +4,8 @@ import json
 from voluptuous import Schema
 from voluptuous import Extra, Required
 
-from constants import *
-from validators import *
+from sls_client.constants import *
+from sls_client.validators import *
 
 class Record(object):
     """Base class for record objects"""

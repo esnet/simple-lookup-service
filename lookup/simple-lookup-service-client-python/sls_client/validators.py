@@ -8,7 +8,7 @@ from isodate import datetime_isoformat, duration_isoformat
 from voluptuous import All, Any, Length, Range
 from voluptuous import Invalid, MultipleInvalid
 
-from constants import *
+from sls_client.constants import *
 
 LS_MAC_ADDRESS_FORMAT = re.compile(r"^([0-9A-F]{2}[-]){5}([0-9A-F]{2})$|^([0-9A-F]{2}[:]){5}([0-9A-F]{2})$", re.IGNORECASE)
 LS_COUNTRY_FORMAT = re.compile(r"^[A-Z]{2}$", re.IGNORECASE)
