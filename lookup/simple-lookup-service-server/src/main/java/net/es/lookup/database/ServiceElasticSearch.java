@@ -20,6 +20,8 @@ import org.elasticsearch.action.search.ClearScrollResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -143,7 +145,7 @@ public class ServiceElasticSearch {
      * This method deletes all the records in a given Db and returns the number of records deleted.
      *
      * @return number of records deleted
-     *         returns 0 if the database doesn't exist yet
+     * returns 0 if the database doesn't exist yet
      * @throws IOException Thrown if error deleting the records
      */
     public long deleteAllRecords() throws IOException {
@@ -161,7 +163,7 @@ public class ServiceElasticSearch {
                 throw new IOException();
             }
             return count;
-        }catch (ElasticsearchStatusException e){
+        } catch (ElasticsearchStatusException e) {
             System.out.println("index doesn't exist yet");
             return 0;
         }
@@ -172,6 +174,7 @@ public class ServiceElasticSearch {
      *
      * @param recordURI URI of the record needed to be returned
      * @return Entire record as a message object
+     * null if record doesn't exist
      * @throws IOException thrown if error accessing the record
      */
     public Message getRecordByURI(String recordURI) throws IOException {
@@ -184,11 +187,30 @@ public class ServiceElasticSearch {
         return new Message(getResponse.getSourceAsMap());
     }
 
+    public Message updateService(String serviceId, Message updateRequest) throws DatabaseException, IOException {
+        try {
+        if (serviceId != null && !serviceId.isEmpty()) {
+            Message timeStampedMessage = addTimestamp(updateRequest);
+            UpdateRequest request = new UpdateRequest(this.indexName, serviceId);
+            Gson gson = new Gson();
+            String updateString = gson.toJson(timeStampedMessage);
+            request.doc(updateString, XContentType.JSON);
+            UpdateResponse updateResponse = client.update(request, RequestOptions.DEFAULT);
+            return getRecordByURI(serviceId);
+        } else {
+            throw new DatabaseException("Record URI not specified");
+        }
+        }catch (ElasticsearchStatusException e){
+            throw new DatabaseException("Record URI does not exist");
+        }
+    }
+
     /**
      * Checks if the document already exists in the database
      * !Very expensive method might need to optimize
+     *
      * @param queryRequest document to check existence of
-     * @throws IOException Error searching the database
+     * @throws IOException             Error searching the database
      * @throws DuplicateEntryException If there is a duplicate entry in the database
      */
     private void exists(Message queryRequest) throws IOException, DuplicateEntryException {
@@ -217,6 +239,7 @@ public class ServiceElasticSearch {
                 searchMap.remove("ttl");
                 searchMap.remove("_timestamp");
                 searchMap.remove("test-id");
+
                 queryMap.remove("expires");
                 queryMap.remove("_lastUpdated");
                 queryMap.remove("ttl");
