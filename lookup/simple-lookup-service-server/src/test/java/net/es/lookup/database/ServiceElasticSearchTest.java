@@ -177,4 +177,50 @@ public class ServiceElasticSearchTest {
         }
     }
 
+    @Test
+    public void publishServiceNotExistingTest() throws IOException {
+        Message message = new Message();
+        message.add("type", "test");
+
+        String uuid = UUID.randomUUID().toString();
+        message.add("uri", "2"); // 2nd param should be uuid but for testing purposes was assigned a number
+
+        message.add("test-id", String.valueOf(2));
+
+        message.add("ttl", "PT10M");
+
+        DateTime dateTime = new DateTime();
+        message.add("expires", dateTime.toString());
+        client.publishService(message);
+        Message response = client.getRecordByURI("2");
+        assertNotNull(response.getMap());
+    }
+
+    @Test
+    public void publishServiceExistingTest() throws IOException {
+        Message message = new Message();
+        message.add("type", "test");
+
+        String uuid = UUID.randomUUID().toString();
+        message.add("uri", "2"); // 2nd param should be uuid but for testing purposes was assigned a number
+
+        message.add("test-id", String.valueOf(2));
+
+        message.add("ttl", "PT10M");
+
+        DateTime dateTime = new DateTime();
+        message.add("expires", dateTime.toString());
+
+        client.publishService(message);
+        client.publishService(message);
+        Message response = client.getRecordByURI("2");
+        assertNotNull(response.getMap());
+    }
+
+    @Test
+    public void bulkUpdateNonExisting(){
+
+        
+    }
+
 }
