@@ -235,7 +235,7 @@ public class ServiceElasticSearch {
         for (String URI : records.keySet()) {
             Message timeStampedMessage = addTimestamp(records.get(URI));
             String updateString = gson.toJson(timeStampedMessage);
-            bulkRequest.add(new UpdateRequest(this.indexName, URI).doc(XContentType.JSON, updateString));
+            bulkRequest.add(new UpdateRequest(this.indexName, URI).doc(updateString, XContentType.JSON));
             count++;
         }
         BulkResponse bulkResponse = client.bulk(bulkRequest, RequestOptions.DEFAULT);

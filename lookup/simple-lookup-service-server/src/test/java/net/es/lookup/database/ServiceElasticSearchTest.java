@@ -9,6 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
@@ -88,7 +90,7 @@ public class ServiceElasticSearchTest {
         Message status = null;
         try {
             status = client.deleteRecord("3");
-        }catch (IOException e){
+        } catch (IOException e) {
             System.out.println("Couldn't find URI, test pass");
         }
         assertNull(status);
@@ -98,15 +100,15 @@ public class ServiceElasticSearchTest {
     @Test
     public void getExistingRecord() throws IOException, DuplicateEntryException {
         this.queryAndPublishService();
-            Message response = client.getRecordByURI("2");
-            assertNotNull(response.getMap());
+        Message response = client.getRecordByURI("2");
+        assertNotNull(response.getMap());
     }
 
     @Test
     public void getNonExistingRecord() throws IOException, DuplicateEntryException {
         this.queryAndPublishService();
-            Message response = client.getRecordByURI("4");
-            assertNull(response.getMap());
+        Message response = client.getRecordByURI("4");
+        assertNull(response.getMap());
     }
 
     @Test
@@ -147,9 +149,9 @@ public class ServiceElasticSearchTest {
 
         try {
             Message response = client.updateService("3", message);
-        }catch (DatabaseException e){
+        } catch (DatabaseException e) {
             System.out.println("Test passed, database exception was thrown for missing service ID in database");
-            assert(true);
+            assert (true);
         }
     }
 
@@ -171,9 +173,9 @@ public class ServiceElasticSearchTest {
 
         try {
             Message response = client.updateService(null, message);
-        }catch (DatabaseException e){
+        } catch (DatabaseException e) {
             System.out.println("Test passed, database exception was thrown for empty service ID");
-            assert(true);
+            assert (true);
         }
     }
 
@@ -218,9 +220,108 @@ public class ServiceElasticSearchTest {
     }
 
     @Test
-    public void bulkUpdateNonExisting(){
+    public void bulkUpdateAllExisting() throws IOException {
+        Message message1 = new Message();
+        message1.add("type", "test");
 
-        
+        message1.add("uri", "1"); // 2nd param should be uuid but for testing purposes was assigned a number
+
+        message1.add("test-id", String.valueOf(1));
+
+        message1.add("ttl", "PT10M");
+
+        DateTime dateTime = new DateTime();
+        message1.add("expires", dateTime.toString());
+
+
+        Message message2 = new Message();
+        message1.add("type", "test");
+
+        message2.add("uri", "2"); // 2nd param should be uuid but for testing purposes was assigned a number
+
+        message2.add("test-id", String.valueOf(2));
+
+        message2.add("ttl", "PT10M");
+
+        message2.add("expires", dateTime.toString());
+
+
+        Message message3 = new Message();
+        message3.add("type", "test");
+
+        message3.add("uri", "3"); // 2nd param should be uuid but for testing purposes was assigned a number
+
+        message3.add("test-id", String.valueOf(3));
+
+        message3.add("ttl", "PT10M");
+
+        message3.add("expires", dateTime.toString());
+
+        client.publishService(message1);
+        client.publishService(message2);
+        client.publishService(message3);
+
+        Map<String, Message> messages = new HashMap<String, Message>();
+        messages.put("1", message2);
+        messages.put("2", message3);
+        messages.put("3", message1);
+
+        Message count = client.bulkUpdate(messages);
+        assertEquals(count.getMap().get("renewed"), 3);
+    }
+
+    @Test
+    public void bulkUpdateNotExisting() throws IOException {
+        Message message1 = new Message();
+        message1.add("type", "test");
+
+        message1.add("uri", "1"); // 2nd param should be uuid but for testing purposes was assigned a number
+
+        message1.add("test-id", String.valueOf(1));
+
+        message1.add("ttl", "PT10M");
+
+        DateTime dateTime = new DateTime();
+        message1.add("expires", dateTime.toString());
+
+
+        Message message2 = new Message();
+        message1.add("type", "test");
+
+        message2.add("uri", "2"); // 2nd param should be uuid but for testing purposes was assigned a number
+
+        message2.add("test-id", String.valueOf(2));
+
+        message2.add("ttl", "PT10M");
+
+        message2.add("expires", dateTime.toString());
+
+
+        Message message3 = new Message();
+        message3.add("type", "test");
+
+        message3.add("uri", "3"); // 2nd param should be uuid but for testing purposes was assigned a number
+
+        message3.add("test-id", String.valueOf(3));
+
+        message3.add("ttl", "PT10M");
+
+        message3.add("expires", dateTime.toString());
+
+        client.publishService(message1);
+        client.publishService(message2);
+        client.publishService(message3);
+
+        Map<String, Message> messages = new HashMap<String, Message>();
+        messages.put("1", message2);
+        messages.put("2", message3);
+        messages.put("4", message1);
+
+        try {
+            Message count = client.bulkUpdate(messages);
+        } catch (IOException e) {
+            System.out.println("error updating due to incorrect URI; Passed test");
+        }
     }
 
 }
