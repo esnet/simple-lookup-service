@@ -221,6 +221,13 @@ public class ServiceElasticSearch {
         insert(timestampedMessage, queryRequest); //inserting the timestamped message
     }
 
+    /**
+     * this update handles updates to multiple records
+     *
+     * @param records Map of the uri and record to be updated
+     * @return Message returns a message with the number of records updated
+     * @throws IOException error is thrown if error updating database
+     */
     public Message bulkUpdate(Map<String, Message> records) throws IOException {
         BulkRequest bulkRequest = new BulkRequest();
         Gson gson = new Gson();
@@ -237,6 +244,7 @@ public class ServiceElasticSearch {
         }
         Message response = new Message();
         response.add("renewed", count);
+        return response;
     }
 
     /**
