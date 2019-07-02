@@ -1,0 +1,6 @@
+for register http://localhost:8090/lookup/records
+
+
+lookup/interface/b73f0558-ad33-4aae-907c-81cf363d066b
+
+for renew
