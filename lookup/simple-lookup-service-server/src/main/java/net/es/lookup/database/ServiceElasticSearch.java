@@ -32,7 +32,12 @@ import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -41,11 +46,14 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.Map;
+
+import static org.elasticsearch.index.query.QueryBuilders.rangeQuery;
 
 public class ServiceElasticSearch {
 
@@ -248,6 +256,23 @@ public class ServiceElasticSearch {
     }
 
     /**
+     * This method deletes expired records from the DB and returns the number of docs deleted
+     *
+     * @param dateTime All records that have _timestamp before "datetime" are deleted
+     * @return number of all records deleted
+     * @throws IOException thrown if error deleting records from database
+     */
+    public long deleteExpiredRecords(DateTime dateTime) throws IOException{
+
+        RangeQueryBuilder rangeQueryBuilder = new RangeQueryBuilder("keyValues._timestamp").lte(dateTime);
+        DeleteByQueryRequest request =
+                new DeleteByQueryRequest(this.indexName).setQuery(rangeQueryBuilder);
+        BulkByScrollResponse bulkResponse =
+                client.deleteByQuery(request, RequestOptions.DEFAULT);
+        return bulkResponse.getDeleted();
+    }
+
+    /**
      * Checks if the document already exists in the database
      * !Very expensive method might need to optimize
      *
@@ -310,7 +335,6 @@ public class ServiceElasticSearch {
         String json = gson.toJson(message);
         request.source(json, XContentType.JSON);
         IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
-        //System.out.println(indexResponse.getResult());
     }
 
     private Message addTimestamp(Message message) {

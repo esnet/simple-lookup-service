@@ -9,9 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -322,6 +320,55 @@ public class ServiceElasticSearchTest {
         } catch (IOException e) {
             System.out.println("error updating due to incorrect URI; Passed test");
         }
+    }
+
+    @Test
+    public void deleteExpired() throws IOException, InterruptedException {
+        Message message1 = new Message();
+        message1.add("type", "test");
+
+        message1.add("uri", "1"); // 2nd param should be uuid but for testing purposes was assigned a number
+
+        message1.add("test-id", String.valueOf(1));
+
+        message1.add("ttl", "PT10M");
+
+        DateTime dateTime = new DateTime();
+        message1.add("expires", dateTime.toString());
+
+
+        Message message2 = new Message();
+        message1.add("type", "test");
+
+        message2.add("uri", "2"); // 2nd param should be uuid but for testing purposes was assigned a number
+
+        message2.add("test-id", String.valueOf(2));
+
+        message2.add("ttl", "PT10M");
+
+        message2.add("expires", dateTime.toString());
+
+
+        Message message3 = new Message();
+        message3.add("type", "test");
+
+        message3.add("uri", "3"); // 2nd param should be uuid but for testing purposes was assigned a number
+
+        message3.add("test-id", String.valueOf(3));
+
+        message3.add("ttl", "PT10M");
+
+        message3.add("expires", dateTime.toString());
+
+        client.publishService(message1);
+        client.publishService(message2);
+        client.publishService(message3);
+
+        Thread.sleep(2000);
+
+        DateTime dt = new DateTime();
+        dt.plus(20000);
+        assertEquals(client.deleteExpiredRecords(dt),3);
     }
 
 }
