@@ -9,6 +9,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
@@ -189,20 +191,52 @@ public class ServiceElasticSearch {
 
     public Message updateService(String serviceId, Message updateRequest) throws DatabaseException, IOException {
         try {
-        if (serviceId != null && !serviceId.isEmpty()) {
-            Message timeStampedMessage = addTimestamp(updateRequest);
-            UpdateRequest request = new UpdateRequest(this.indexName, serviceId);
-            Gson gson = new Gson();
-            String updateString = gson.toJson(timeStampedMessage);
-            request.doc(updateString, XContentType.JSON);
-            UpdateResponse updateResponse = client.update(request, RequestOptions.DEFAULT);
-            return getRecordByURI(serviceId);
-        } else {
-            throw new DatabaseException("Record URI not specified");
-        }
-        }catch (ElasticsearchStatusException e){
+            if (serviceId != null && !serviceId.isEmpty()) {
+                Message timeStampedMessage = addTimestamp(updateRequest);
+                UpdateRequest request = new UpdateRequest(this.indexName, serviceId);
+                Gson gson = new Gson();
+                String updateString = gson.toJson(timeStampedMessage);
+                request.doc(updateString, XContentType.JSON);
+                UpdateResponse updateResponse = client.update(request, RequestOptions.DEFAULT);
+                return getRecordByURI(serviceId);
+            } else {
+                throw new DatabaseException("Record URI not specified");
+            }
+        } catch (ElasticsearchStatusException e) {
             throw new DatabaseException("Record URI does not exist");
         }
+    }
+
+    /**
+     * Inserts the given record into the database
+     *
+     * @param message Record to be added to the database
+     * @throws IOException Thrown if error writing to the database
+     */
+    public void publishService(Message message) throws IOException {
+        Message queryRequest = new Message();
+        queryRequest.add("URI", message.getURI());
+        queryRequest.add("type", message.getRecordType());
+        Message timestampedMessage = addTimestamp(message); //adding a timestamp to the message
+        insert(timestampedMessage, queryRequest); //inserting the timestamped message
+    }
+
+    public Message bulkUpdate(Map<String, Message> records) throws IOException {
+        BulkRequest bulkRequest = new BulkRequest();
+        Gson gson = new Gson();
+        int count = 0;
+        for (String URI : records.keySet()) {
+            Message timeStampedMessage = addTimestamp(records.get(URI));
+            String updateString = gson.toJson(timeStampedMessage);
+            bulkRequest.add(new UpdateRequest(this.indexName, URI).doc(XContentType.JSON, updateString));
+            count++;
+        }
+        BulkResponse bulkResponse = client.bulk(bulkRequest, RequestOptions.DEFAULT);
+        if (bulkResponse.hasFailures()) {
+            throw new IOException("Error updating records");
+        }
+        Message response = new Message();
+        response.add("renewed", count);
     }
 
     /**
