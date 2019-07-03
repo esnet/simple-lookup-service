@@ -274,17 +274,15 @@ public class ServiceElasticSearch {
     public List<Message> findRecordsInTimeRange(DateTime start, DateTime end) throws IOException {
 
         List<Message> result = new ArrayList<Message>();
-        //RangeQueryBuilder rangeQueryBuilder = new RangeQueryBuilder("keyValues._lastUpdated").lte(end).gt(start);
 
         SearchRequest searchRequest = new SearchRequest(this.indexName);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(QueryBuilders.rangeQuery("keyValues._timestamp").gt(start));
-        searchSourceBuilder.query(QueryBuilders.rangeQuery("keyValues._timestamp").lte(end));
+        searchSourceBuilder.query(QueryBuilders.rangeQuery("keyValues._lastUpdated").gt(start));
+        searchSourceBuilder.query(QueryBuilders.rangeQuery("keyValues._lastUpdated").lte(end));
         searchRequest.source(searchSourceBuilder);
 
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        System.out.println(searchResponse.toString());
         SearchHit[] searchHits = searchResponse.getHits().getHits();
 
         for (SearchHit search : searchHits) {
@@ -351,6 +349,12 @@ public class ServiceElasticSearch {
         }
     }
 
+    /**
+     * Inserts message into database
+     * @param message message to be inserted into database
+     * @param queryRequest message with the URI of where the message is to be added
+     * @throws IOException if insertion of message is unsuccessful
+     */
     private void insert(Message message, Message queryRequest) throws IOException {
         IndexRequest request = new IndexRequest(indexName);
         request.id(queryRequest.getKey("URI").toString());
