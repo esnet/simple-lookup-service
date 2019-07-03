@@ -32,10 +32,8 @@ import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.Scroll;
@@ -50,10 +48,11 @@ import org.joda.time.format.ISODateTimeFormat;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+import java.util.List;
 
-import static org.elasticsearch.index.query.QueryBuilders.rangeQuery;
 
 public class ServiceElasticSearch {
 
@@ -270,6 +269,30 @@ public class ServiceElasticSearch {
         BulkByScrollResponse bulkResponse =
                 client.deleteByQuery(request, RequestOptions.DEFAULT);
         return bulkResponse.getDeleted();
+    }
+
+    public List<Message> findRecordsInTimeRange(DateTime start, DateTime end) throws IOException {
+
+        List<Message> result = new ArrayList<Message>();
+        //RangeQueryBuilder rangeQueryBuilder = new RangeQueryBuilder("keyValues._lastUpdated").lte(end).gt(start);
+
+        SearchRequest searchRequest = new SearchRequest(this.indexName);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(QueryBuilders.rangeQuery("keyValues._timestamp").gt(start));
+        searchSourceBuilder.query(QueryBuilders.rangeQuery("keyValues._timestamp").lte(end));
+        searchRequest.source(searchSourceBuilder);
+
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        System.out.println(searchResponse.toString());
+        SearchHit[] searchHits = searchResponse.getHits().getHits();
+
+        for (SearchHit search : searchHits) {
+            // Get result as a map
+            Map<String, Object> searchMap = search.getSourceAsMap();
+            result.add(new Message(searchMap));
+        }
+        return result;
     }
 
     /**
