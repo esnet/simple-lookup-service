@@ -7,6 +7,7 @@ import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.Document;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -61,7 +62,7 @@ public class ServiceElasticSearch {
     private URI location;
     private int port1;
     private int port2;
-    private String indexName;
+    private String indexName = "post";
     //private String documentId;
 
     private static Logger LOG = LogManager.getLogger(ServiceElasticSearch.class);
@@ -130,7 +131,7 @@ public class ServiceElasticSearch {
         exists(queryRequest); //checking if message already exists in the index
         Message timestampedMessage = addTimestamp(message); //adding a timestamp to the message
         insert(timestampedMessage, queryRequest); //inserting the timestamped message
-        return timestampedMessage; //return the message that was added to the index
+        return toMessage(timestampedMessage); //return the message that was added to the index
     }
 
     /**
@@ -296,6 +297,7 @@ public class ServiceElasticSearch {
     /**
      * Checks if the document already exists in the database
      * !Very expensive method might need to optimize
+     * Todo fix
      *
      * @param queryRequest document to check existence of
      * @throws IOException             Error searching the database
@@ -327,11 +329,13 @@ public class ServiceElasticSearch {
                 searchMap.remove("ttl");
                 searchMap.remove("_timestamp");
                 searchMap.remove("test-id");
+                searchMap.remove("uri");
 
                 queryMap.remove("expires");
                 queryMap.remove("_lastUpdated");
                 queryMap.remove("ttl");
                 queryMap.remove("_timestamp");
+                queryMap.remove("uri");
                 // Check equality of both maps
                 if (searchMap.toString().equalsIgnoreCase(queryMap.toString())) {
                     throw new DuplicateEntryException("Record already exists");
@@ -378,6 +382,18 @@ public class ServiceElasticSearch {
         message.add("_timestamp", timestamp);
         message.add("_lastUpdated", new Date());
         return message;
+    }
+
+    private Message toMessage(Message message) {
+        Map<String, Object> messageMap = message.getMap();
+        if (messageMap != null) {
+            messageMap.remove("_timestamp");
+            messageMap.remove("_id");
+            messageMap.remove("_lastUpdated");
+            return new Message(messageMap);
+        } else {
+            return new Message();
+        }
     }
 
 }

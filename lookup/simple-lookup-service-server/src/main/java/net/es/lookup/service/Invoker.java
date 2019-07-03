@@ -15,6 +15,7 @@ import net.es.lookup.common.MemoryManager;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.database.ServiceDaoMongoDb;
+import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.timer.Scheduler;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
@@ -80,7 +81,8 @@ public class Invoker {
 
     // Initialize services
     try {
-      new ServiceDaoMongoDb(dburl, dbport, dbname, collname);
+      //new ServiceDaoMongoDb(dburl, dbport, dbname, collname);
+      new ServiceElasticSearch("127.0.0.1", 9200, 9201, "post"); //Todo
       services.add(LookupService.LOOKUP_SERVICE);
 
     } catch (DatabaseException e) {
