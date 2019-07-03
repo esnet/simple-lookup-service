@@ -364,6 +364,11 @@ public class ServiceElasticSearch {
         IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
     }
 
+    /**
+     * Adds a timestamp and a lastupdated field to a given message
+     * @param message message which timestamp is to be added to
+     * @return message with the timestamp and lastupdated field
+     */
     private Message addTimestamp(Message message) {
 
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
