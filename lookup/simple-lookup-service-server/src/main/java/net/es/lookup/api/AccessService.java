@@ -43,7 +43,7 @@ public class AccessService {
           response = new JSONGetServiceResponse(serviceMap);
           try {
 
-            LOG.info("GetService status: SUCCESS; exiting");
+            LOG.info("GetService status: SUCCESS; exiting ");
             return JSONMessage.toString(response);
 
           } catch (DataFormatException e) {
