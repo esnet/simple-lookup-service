@@ -23,7 +23,6 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -64,7 +63,7 @@ public class ServiceElasticSearch {
     private String indexName;
     //private String documentId;
 
-    private static Logger LOG = LogManager.getLogger(ServiceElasticSearch.class);
+    private static Logger Log = LogManager.getLogger(ServiceElasticSearch.class);
 
     private RestHighLevelClient client;
 
@@ -172,7 +171,7 @@ public class ServiceElasticSearch {
             }
             return count;
         } catch (ElasticsearchStatusException e) {
-            System.out.println("index doesn't exist yet");
+            Log.error("Index doesn't exist");
             return 0;
         }
     }
@@ -349,7 +348,7 @@ public class ServiceElasticSearch {
             boolean succeeded = clearScrollResponse.isSucceeded();
         } catch (ElasticsearchStatusException e) {
             // In case index doesn't exist
-            System.out.println("Creating index");
+            Log.info("Creating index");
         }
     }
 
