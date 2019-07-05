@@ -7,7 +7,6 @@ import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bson.Document;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -62,7 +61,7 @@ public class ServiceElasticSearch {
     private URI location;
     private int port1;
     private int port2;
-    private String indexName = "post";
+    private String indexName;
     //private String documentId;
 
     private static Logger LOG = LogManager.getLogger(ServiceElasticSearch.class);
@@ -102,9 +101,8 @@ public class ServiceElasticSearch {
     /**
      * initializes the database
      *
-     * @throws DatabaseException
      */
-    private void init() throws DatabaseException {
+    private void init() {
         client =
                 new RestHighLevelClient(
                         RestClient.builder(
@@ -194,23 +192,25 @@ public class ServiceElasticSearch {
         FetchSourceContext fetchSourceContext = new FetchSourceContext(true, includes, excludes);
         getRequest.fetchSourceContext(fetchSourceContext);
         GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
-        return new Message(getResponse.getSourceAsMap());
+        Map<String, Object> responseMap;
+        try {
+            responseMap = (Map<String, Object>) getResponse.getSourceAsMap().get("keyValues");
+        }catch (NullPointerException e){
+            return null;
+        }
+        return new Message(responseMap);
     }
 
-    public Message updateService(String serviceId, Message updateRequest) throws DatabaseException, IOException {
+    public Message updateService(String serviceId, Message updateRequest) throws DatabaseException {
         try {
             if (serviceId != null && !serviceId.isEmpty()) {
-                Message timeStampedMessage = addTimestamp(updateRequest);
-                UpdateRequest request = new UpdateRequest(this.indexName, serviceId);
-                Gson gson = new Gson();
-                String updateString = gson.toJson(timeStampedMessage);
-                request.doc(updateString, XContentType.JSON);
-                UpdateResponse updateResponse = client.update(request, RequestOptions.DEFAULT);
+                deleteRecord(serviceId); // Deletes previous record
+                publishService(updateRequest); // Creates a new record with updated message
                 return getRecordByURI(serviceId);
             } else {
                 throw new DatabaseException("Record URI not specified");
             }
-        } catch (ElasticsearchStatusException e) {
+        } catch (ElasticsearchStatusException | IOException e) {
             throw new DatabaseException("Record URI does not exist");
         }
     }
@@ -360,7 +360,7 @@ public class ServiceElasticSearch {
      * @throws IOException if insertion of message is unsuccessful
      */
     private void insert(Message message, Message queryRequest) throws IOException {
-        IndexRequest request = new IndexRequest(indexName);
+        IndexRequest request = new IndexRequest(this.indexName);
         request.id(queryRequest.getKey("URI").toString());
         Gson gson = new Gson();
         String json = gson.toJson(message);

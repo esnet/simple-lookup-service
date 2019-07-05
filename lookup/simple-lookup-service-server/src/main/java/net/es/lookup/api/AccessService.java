@@ -1,5 +1,7 @@
 package net.es.lookup.api;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import net.es.lookup.common.Message;
@@ -8,6 +10,7 @@ import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.ServiceDaoMongoDb;
+import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.protocol.json.JSONGetServiceResponse;
 import net.es.lookup.protocol.json.JSONMessage;
 import org.apache.logging.log4j.Logger;
@@ -29,42 +32,36 @@ public class AccessService {
 
     JSONGetServiceResponse response;
     Message serviceRecord;
-
     try {
-      ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
-      if (db != null) {
-        serviceRecord = db.getRecordByUri(serviceid);
+      ServiceElasticSearch db = new ServiceElasticSearch("127.0.0.1", 9200, 9201, "post");
+      serviceRecord = db.getRecordByURI(serviceid);
 
-        if (serviceRecord != null) {
+      if (serviceRecord != null) {
 
-          LOG.debug("servicerecord not null");
-          Map<String, Object> serviceMap = serviceRecord.getMap();
+        LOG.debug("servicerecord not null");
+        Map<String, Object> serviceMap = serviceRecord.getMap();
 
-          response = new JSONGetServiceResponse(serviceMap);
-          try {
+        response = new JSONGetServiceResponse(serviceMap);
+        try {
 
-            LOG.info("GetService status: SUCCESS; exiting ");
-            return JSONMessage.toString(response);
+          LOG.info("GetService status: SUCCESS; exiting ");
+          return JSONMessage.toString(response);
 
-          } catch (DataFormatException e) {
+        } catch (DataFormatException e) {
 
-            LOG.error("Data formating exception.");
-            LOG.info("GetService status: FAILED; exiting");
-            throw new InternalErrorException("Data formatting exception");
-          }
-
-        } else {
-
-          LOG.error("ServiceRecord Not Found in DB.");
+          LOG.error("Data formating exception.");
           LOG.info("GetService status: FAILED; exiting");
-          throw new NotFoundException("ServiceRecord Not Found in DB\n");
+          throw new InternalErrorException("Data formatting exception");
         }
+
       } else {
-        LOG.error("DB could not be accessed.");
-        throw new InternalErrorException("Cannot access database");
+
+        LOG.error("ServiceRecord Not Found in DB.");
+        LOG.info("GetService status: FAILED; exiting");
+        throw new NotFoundException("ServiceRecord Not Found in DB\n");
       }
 
-    } catch (DatabaseException e) {
+    } catch (DatabaseException | URISyntaxException | IOException e) {
 
       LOG.fatal("DatabaseException: The database is out of service." + e.getMessage());
       LOG.info("GetService status: FAILED; exiting");

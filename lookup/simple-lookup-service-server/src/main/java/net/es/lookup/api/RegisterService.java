@@ -78,7 +78,7 @@ public class RegisterService {
                 }
 
                 try {
-                    ServiceElasticSearch db = new ServiceElasticSearch("127.0.0.1", 9200, 9201, "post");;
+                    ServiceElasticSearch db = new ServiceElasticSearch("127.0.0.1", 9200, 9201, "post");
                     Message res = db.queryAndPublishService(request);
                     response = new JSONRegisterResponse(res.getMap());
                     String responseString;

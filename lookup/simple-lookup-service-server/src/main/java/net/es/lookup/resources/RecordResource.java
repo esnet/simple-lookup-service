@@ -25,7 +25,7 @@ public class RecordResource {
 
   /**
    * Get handler to retrieve record details.
-   * **/
+   * */
   @GET
   @Produces("application/json")
   public String getHandler(
@@ -33,8 +33,7 @@ public class RecordResource {
       @PathParam("record") String record,
       @PathParam("recordid") String recordid) {
     String dbname = path;
-
-    String serviceuri = path + "/" + record + "/" + recordid;
+    String serviceuri = record + "/" + recordid;
     return this.accessService.getService(serviceuri);
   }
 
@@ -51,7 +50,7 @@ public class RecordResource {
     if (!path.equals(recordPrefix)) {
       throw new NotSupportedException("Operation not supported");
     }
-    String serviceuri = path + "/" + record + "/" + recordid;
+    String serviceuri = record + "/" + recordid;
     return this.editService.renewService(serviceuri, message);
   }
 
@@ -68,7 +67,7 @@ public class RecordResource {
     if (!path.equals(recordPrefix)) {
       throw new NotSupportedException("Operation not supported");
     }
-    String serviceuri = path + "/" + record + "/" + recordid;
+    String serviceuri = record + "/" + recordid;
     return this.editService.deleteService(serviceuri, service);
   }
 }

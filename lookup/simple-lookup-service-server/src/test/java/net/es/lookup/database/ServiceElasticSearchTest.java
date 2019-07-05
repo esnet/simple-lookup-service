@@ -52,6 +52,7 @@ public class ServiceElasticSearchTest {
     }
 
     @Test
+    //Fix exists
     public void queryAndPublishExists() {
         boolean checkSecond = false;
         try {
@@ -106,7 +107,7 @@ public class ServiceElasticSearchTest {
     public void getNonExistingRecord() throws IOException, DuplicateEntryException {
         this.queryAndPublishService();
         Message response = client.getRecordByURI("4");
-        assertNull(response.getMap());
+        assertNull(response);
     }
 
     @Test
