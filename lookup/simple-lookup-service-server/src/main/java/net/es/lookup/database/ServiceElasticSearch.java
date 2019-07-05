@@ -47,10 +47,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
-import java.util.List;
+import java.util.*;
 
 
 public class ServiceElasticSearch {
@@ -98,7 +95,6 @@ public class ServiceElasticSearch {
 
     /**
      * initializes the database
-     *
      */
     private void init() {
         client =
@@ -127,9 +123,9 @@ public class ServiceElasticSearch {
      */
     public Message queryAndPublishService(Message message) throws DuplicateEntryException, IOException {
         Message queryRequest = new Message();
-        queryRequest.add("URI", message.getURI());
+        queryRequest.add("uri", message.getURI());
         queryRequest.add("type", message.getRecordType());
-        exists(queryRequest); //checking if message already exists in the index
+        exists(message); //checking if message already exists in the index
         Message timestampedMessage = addTimestamp(message); //adding a timestamp to the message
         insert(timestampedMessage, queryRequest); //inserting the timestamped message
         return toMessage(timestampedMessage); //return the message that was added to the index
@@ -198,16 +194,16 @@ public class ServiceElasticSearch {
         Map<String, Object> responseMap;
         try {
             responseMap = (Map<String, Object>) getResponse.getSourceAsMap().get("keyValues");
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             return null;
         }
         return new Message(responseMap);
     }
 
     /**
-     *
      * This method updates a given request in the database
-     * @param serviceId The unique service identifier
+     *
+     * @param serviceId     The unique service identifier
      * @param updateRequest the fields to be modified
      * @return The record that was modified (after modification) as a Message
      * @throws DatabaseException if error updating record
@@ -234,7 +230,7 @@ public class ServiceElasticSearch {
      */
     public void publishService(Message message) throws IOException {
         Message queryRequest = new Message();
-        queryRequest.add("URI", message.getURI());
+        queryRequest.add("uri", message.getURI());
         queryRequest.add("type", message.getRecordType());
         Message timestampedMessage = addTimestamp(message); //adding a timestamp to the message
         insert(timestampedMessage, queryRequest); //inserting the timestamped message
@@ -273,7 +269,7 @@ public class ServiceElasticSearch {
      * @return number of all records deleted
      * @throws IOException thrown if error deleting records from database
      */
-    public long deleteExpiredRecords(DateTime dateTime) throws IOException{
+    public long deleteExpiredRecords(DateTime dateTime) throws IOException {
 
         RangeQueryBuilder rangeQueryBuilder = new RangeQueryBuilder("keyValues._timestamp").lte(dateTime);
         DeleteByQueryRequest request =
@@ -316,6 +312,7 @@ public class ServiceElasticSearch {
      */
     private void exists(Message queryRequest) throws IOException, DuplicateEntryException {
         try {
+
             // Getting all records in the database
             final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(1L));
             SearchRequest searchRequest = new SearchRequest(this.indexName);
@@ -327,13 +324,18 @@ public class ServiceElasticSearch {
             SearchHit[] searchHits = searchResponse.getHits().getHits();
 
             //Getting the document to search for in map form
-            Map<String, Object> queryMap = queryRequest.getMap();
+            Map<String, Object> queryMap = new TreeMap<>();
+            queryMap.putAll(queryRequest.getMap());
+
             // For each result we got
             for (SearchHit search : searchHits) {
+
                 // Get result as a map
-                Map<String, Object> searchMap = search.getSourceAsMap();
+                Map<String, Object> searchMap = new TreeMap<>();
+                // searchMap.putAll(search.getSourceAsMap());
+
                 // Remove internally added keys from both maps
-                searchMap = (Map) searchMap.get("keyValues");
+                searchMap.putAll((Map) search.getSourceAsMap().get("keyValues"));
                 searchMap.remove("expires");
                 searchMap.remove("error_Message");
                 searchMap.remove("_lastUpdated");
@@ -341,14 +343,19 @@ public class ServiceElasticSearch {
                 searchMap.remove("_timestamp");
                 searchMap.remove("test-id");
                 searchMap.remove("uri");
+                System.out.println("search:");
+                System.out.println(searchMap.toString().replace("\"", "").replace(" ", ""));
 
                 queryMap.remove("expires");
                 queryMap.remove("_lastUpdated");
                 queryMap.remove("ttl");
                 queryMap.remove("_timestamp");
                 queryMap.remove("uri");
+                System.out.println("query");
+                System.out.println(queryMap.toString().replace("\"", "").replace(" ", ""));
+
                 // Check equality of both maps
-                if (searchMap.toString().equalsIgnoreCase(queryMap.toString())) {
+                if (searchMap.toString().replace("\"", "").replace(" ", "").equalsIgnoreCase(queryMap.toString().replace("\"", "").replace(" ", ""))) {
                     throw new DuplicateEntryException("Record already exists");
                 }
 
@@ -366,13 +373,14 @@ public class ServiceElasticSearch {
 
     /**
      * Inserts message into database
-     * @param message message to be inserted into database
+     *
+     * @param message      message to be inserted into database
      * @param queryRequest message with the URI of where the message is to be added
      * @throws IOException if insertion of message is unsuccessful
      */
     private void insert(Message message, Message queryRequest) throws IOException {
         IndexRequest request = new IndexRequest(this.indexName);
-        request.id(queryRequest.getKey("URI").toString());
+        request.id(queryRequest.getURI());
         Gson gson = new Gson();
         String json = gson.toJson(message);
         request.source(json, XContentType.JSON);
@@ -381,6 +389,7 @@ public class ServiceElasticSearch {
 
     /**
      * Adds a timestamp and a lastupdated field to a given message
+     *
      * @param message message which timestamp is to be added to
      * @return message with the timestamp and lastupdated field
      */

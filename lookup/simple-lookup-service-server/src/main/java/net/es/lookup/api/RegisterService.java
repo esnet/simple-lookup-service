@@ -40,7 +40,6 @@ public class RegisterService {
             Log.error("Incorrect Json Data format");
             throw new BadRequestException("Error parsing Json elements.");
         }
-
         Log.debug("valid?" + this.isValid(request));
         if (this.isValid(request) && this.isAuthed(request)) {
             //Requesting a lease
