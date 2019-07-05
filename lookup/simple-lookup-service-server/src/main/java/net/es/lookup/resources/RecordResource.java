@@ -1,15 +1,10 @@
 package net.es.lookup.resources;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import net.es.lookup.api.AccessService;
 import net.es.lookup.api.EditService;
 import net.es.lookup.common.exception.api.NotSupportedException;
 
+import javax.ws.rs.*;
 
 /**
  * This class and other similar resource classes need to be explicitly loaded in the

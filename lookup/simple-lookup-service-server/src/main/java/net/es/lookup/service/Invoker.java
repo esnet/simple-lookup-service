@@ -6,6 +6,8 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 import joptsimple.OptionParser;
@@ -85,7 +87,7 @@ public class Invoker {
       new ServiceElasticSearch("127.0.0.1", 9200, 9201, "post"); //Todo
       services.add(LookupService.LOOKUP_SERVICE);
 
-    } catch (DatabaseException e) {
+    } catch (URISyntaxException e) {
 
       LOG.info("Error connecting to database; Please check if MongoDB is running");
       System.exit(1);

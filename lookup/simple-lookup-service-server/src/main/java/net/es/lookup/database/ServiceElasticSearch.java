@@ -55,29 +55,29 @@ import java.util.List;
 
 public class ServiceElasticSearch {
 
-    private static final long INDEX_INTERVAL = 3600;
-    private static final long MAX_INDEX = 24;
+    // URl to connect to the databse
     private URI location;
+    // Port-1 of the database
     private int port1;
+    // Port-2 of the databse
     private int port2;
+    // Name of the database
     private String indexName;
-    //private String documentId;
 
     private static Logger Log = LogManager.getLogger(ServiceElasticSearch.class);
 
     private RestHighLevelClient client;
 
-
     /**
-     * default initialization for the database
+     * default initialization for the database for testing on localhost
      *
-     * @throws DatabaseException
-     * @throws URISyntaxException
+     * @throws URISyntaxException for incorrect dburl
      */
-    public ServiceElasticSearch() throws DatabaseException, URISyntaxException {
+    public ServiceElasticSearch() throws URISyntaxException {
         this.port1 = 9200;
         this.port2 = 9201;
         this.location = new URI("127.0.0.1");
+        this.indexName = "post";
         init();
     }
 
@@ -86,10 +86,9 @@ public class ServiceElasticSearch {
      * @param dbport1 Port 1 of the Database
      * @param dbport2 Port 2 of the Database
      * @param dbname  Name of the Database
-     * @throws DatabaseException  for attempting to create a second instance of the database
      * @throws URISyntaxException for incorrect dburl
      */
-    public ServiceElasticSearch(String dburl, int dbport1, int dbport2, String dbname) throws DatabaseException, URISyntaxException {
+    public ServiceElasticSearch(String dburl, int dbport1, int dbport2, String dbname) throws URISyntaxException {
         this.location = new URI(dburl);
         this.port1 = dbport1;
         this.port2 = dbport2;
@@ -108,6 +107,11 @@ public class ServiceElasticSearch {
                                 new HttpHost(this.location.toString(), this.port1, "http"), new HttpHost(location.toString(), port2, "http")));
     }
 
+    /**
+     * Closes the connection to the group
+     *
+     * @throws IOException If there is an error closing the connection
+     */
     public void closeConnection() throws IOException {
         client.close();
     }
@@ -200,6 +204,14 @@ public class ServiceElasticSearch {
         return new Message(responseMap);
     }
 
+    /**
+     *
+     * This method updates a given request in the database
+     * @param serviceId The unique service identifier
+     * @param updateRequest the fields to be modified
+     * @return The record that was modified (after modification) as a Message
+     * @throws DatabaseException if error updating record
+     */
     public Message updateService(String serviceId, Message updateRequest) throws DatabaseException {
         try {
             if (serviceId != null && !serviceId.isEmpty()) {

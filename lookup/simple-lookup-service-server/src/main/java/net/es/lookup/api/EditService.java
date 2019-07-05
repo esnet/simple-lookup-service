@@ -1,10 +1,5 @@
 package net.es.lookup.api;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Map;
-
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
@@ -15,18 +10,19 @@ import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.common.exception.internal.RecordNotFoundException;
-import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.protocol.json.JSONDeleteRequest;
-import net.es.lookup.protocol.json.JSONDeleteResponse;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRenewRequest;
-import net.es.lookup.protocol.json.JSONRenewResponse;
 import net.es.lookup.publish.Publisher;
 import net.es.lookup.service.PublishService;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Author: sowmya. Date: 10/29/13 Time: 3:24 PM
@@ -201,7 +197,7 @@ public class EditService {
 
                 }
 
-            } catch (DatabaseException | URISyntaxException e) {
+            } catch (URISyntaxException e) {
 
                 LOG.fatal("DatabaseException: The database is out of service." + e.getMessage());
                 LOG.info("DeleteService status: FAILED; exiting");
