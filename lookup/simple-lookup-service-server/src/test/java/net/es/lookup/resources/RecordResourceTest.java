@@ -122,25 +122,8 @@ public class RecordResourceTest {
   public void renewHandlerExists() throws IOException, DuplicateEntryException {
     this.queryAndPublishService();
     RecordResource request = new RecordResource();
-    Message message = new Message();
-    message.add("type", "test");
 
-    String uuid = UUID.randomUUID().toString();
-    message.add(
-        "uri",
-        "lookup/interface/2"); // 2nd param should be uuid but for testing purposes was assigned a
-    // number
-
-    message.add("test-id", String.valueOf(1));
-
-    message.add("ttl", "PT10M");
-
-    DateTime dateTime = new DateTime();
-    message.add("expires", dateTime.toString());
-    Gson gson = new Gson();
-    String jsonMessage = gson.toJson(message.getMap());
-
-    String output = request.renewHandler("lookup", "interface", "2", jsonMessage);
+    String output = request.renewHandler("lookup", "interface", "2", jsonMessage());
 
     assertNotNull(output);
   }
@@ -155,6 +138,34 @@ public class RecordResourceTest {
   public void renewHandlerNotExists() throws IOException, DuplicateEntryException {
     this.queryAndPublishService();
     RecordResource request = new RecordResource();
+
+    try {
+      String output = request.renewHandler("lookup", "interface", "3", jsonMessage());
+    } catch (NotFoundException e) {
+      Log.info("URI not found, test passed");
+    }
+  }
+
+  @Test
+  public void deleteHandlerExists() throws IOException, DuplicateEntryException {
+    this.queryAndPublishService();
+    RecordResource request = new RecordResource();
+    String response = request.deleteHandler("lookup", "interface", "2", jsonMessage());
+    assertNotNull(response);
+  }
+
+  @Test
+  public void deleteHandlerNotExists() throws IOException, DuplicateEntryException {
+    this.queryAndPublishService();
+    RecordResource request = new RecordResource();
+    try {
+      String response = request.deleteHandler("lookup", "interface", "3", jsonMessage());
+    } catch (NotFoundException e) {
+      Log.info("URI not found, test passed");
+    }
+  }
+
+  private String jsonMessage() {
     Message message = new Message();
     message.add("type", "test");
 
@@ -171,15 +182,6 @@ public class RecordResourceTest {
     DateTime dateTime = new DateTime();
     message.add("expires", dateTime.toString());
     Gson gson = new Gson();
-    String jsonMessage = gson.toJson(message.getMap());
-
-    try {
-      String output = request.renewHandler("lookup", "interface", "3", jsonMessage);
-    } catch (NotFoundException e) {
-      Log.info("URI not found, test passed");
-    }
+    return gson.toJson(message.getMap());
   }
-
-  @Test
-  public void deleteHandler() {}
 }
