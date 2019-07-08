@@ -109,7 +109,7 @@ public class EditService {
           throw new NotFoundException("ServiceRecord Not Found in DB\n");
         }
 
-      } catch (DatabaseException | URISyntaxException | IOException e) {
+      } catch (URISyntaxException | IOException e) {
 
         LOG.fatal("DatabaseException: The database is out of service." + e.getMessage());
         LOG.info("RenewService status: FAILED; exiting");

@@ -205,19 +205,19 @@ public class ServiceElasticSearch {
    * @param serviceId The unique service identifier
    * @param updateRequest the fields to be modified
    * @return The record that was modified (after modification) as a Message
-   * @throws DatabaseException if error updating record
+   * @throws IOException if error updating record
    */
-  public Message updateService(String serviceId, Message updateRequest) throws DatabaseException {
+  public Message updateService(String serviceId, Message updateRequest) throws IOException {
     try {
       if (serviceId != null && !serviceId.isEmpty()) {
         deleteRecord(serviceId); // Deletes previous record
         publishService(updateRequest); // Creates a new record with updated message
         return getRecordByURI(serviceId);
       } else {
-        throw new DatabaseException("Record URI not specified");
+        throw new IOException("Record URI not specified");
       }
     } catch (ElasticsearchStatusException | IOException e) {
-      throw new DatabaseException("Record URI does not exist");
+      throw new IOException("Record URI does not exist");
     }
   }
 
