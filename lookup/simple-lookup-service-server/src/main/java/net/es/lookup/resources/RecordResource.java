@@ -28,7 +28,7 @@ public class RecordResource {
       @PathParam("record") String record,
       @PathParam("recordid") String recordid) {
     String dbname = path;
-    String serviceuri = record + "/" + recordid;
+    String serviceuri = dbname + "/" + record + "/" + recordid;
     return this.accessService.getService(serviceuri);
   }
 
@@ -45,7 +45,7 @@ public class RecordResource {
     if (!path.equals(recordPrefix)) {
       throw new NotSupportedException("Operation not supported");
     }
-    String serviceuri = record + "/" + recordid;
+    String serviceuri = path + "/" + record + "/" + recordid;
     return this.editService.renewService(serviceuri, message);
   }
 
@@ -62,7 +62,7 @@ public class RecordResource {
     if (!path.equals(recordPrefix)) {
       throw new NotSupportedException("Operation not supported");
     }
-    String serviceuri = record + "/" + recordid;
+    String serviceuri = path + "/" + record + "/" + recordid;
     return this.editService.deleteService(serviceuri, service);
   }
 }

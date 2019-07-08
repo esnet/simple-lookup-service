@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -17,8 +18,13 @@ import static org.junit.Assert.*;
 public class ServiceElasticSearchTest {
   private ServiceElasticSearch client;
 
+  /**
+   * Connects to the database an deletes all records if any exist
+   * @throws URISyntaxException for incorrect server name
+   * @throws IOException for error in deleting all records
+   */
   @Before
-  public void setUp() throws Exception {
+  public void setUp() throws URISyntaxException, IOException {
     client =
         new ServiceElasticSearch(
             DatabaseConnectionKeys.server,
@@ -28,11 +34,20 @@ public class ServiceElasticSearchTest {
     client.deleteAllRecords();
   }
 
+  /**
+   * closes the connection with the database
+   * @throws IOException if error in closing connection to the database
+   */
   @After
-  public void tearDown() throws Exception {
+  public void tearDown() throws IOException {
     client.closeConnection();
   }
 
+  /**
+   * creates a message and adds it to the database
+   * @throws IOException If error entering data into the database
+   * @throws DuplicateEntryException If message being added already exists in the database
+   */
   private void queryAndPublishService() throws IOException, DuplicateEntryException {
     Message message = new Message();
     message.add("type", "test");
@@ -52,19 +67,26 @@ public class ServiceElasticSearchTest {
     // System.out.println(addedMessage.getMap().toString());
   }
 
+  /**
+   * Test to add a single record to the database
+   * @throws IOException If error inserting message into database
+   * @throws DuplicateEntryException If the record already exists in the database
+   */
   @Test
   public void queryAndPublishSingle() throws IOException, DuplicateEntryException {
     queryAndPublishService();
   }
 
+  /**
+   * Check if duplicate entry exception is thrown when 2 dame records are added to the dastabase
+   */
   @Test
-  // Fix exists
   public void queryAndPublishExists() {
     boolean checkSecond = false;
     try {
       queryAndPublishService();
       checkSecond = true;
-      Thread.sleep(1000);
+      Thread.sleep(1000); // Buffer time for adding record to
       queryAndPublishService();
       fail();
     } catch (DuplicateEntryException e) {

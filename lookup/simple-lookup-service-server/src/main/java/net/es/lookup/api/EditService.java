@@ -175,7 +175,11 @@ public class EditService {
 
     if (this.isValid(request) && this.isAuthed(serviceid, request)) {
       try {
-        ServiceElasticSearch db = new ServiceElasticSearch("127.0.0.1", 9200, 9201, "post");
+        ServiceElasticSearch db = new ServiceElasticSearch(
+                DatabaseConnectionKeys.server,
+                DatabaseConnectionKeys.DatabasePort1,
+                DatabaseConnectionKeys.DatabasePort2,
+                DatabaseConnectionKeys.DatabaseName);
 
         Message serviceRecord = db.deleteRecord(serviceid);
         if (serviceRecord == null) {

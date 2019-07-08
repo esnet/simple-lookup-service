@@ -330,7 +330,6 @@ public class ServiceElasticSearch {
 
         // Get result as a map
         Map<String, Object> searchMap = new TreeMap<>();
-        // searchMap.putAll(search.getSourceAsMap());
 
         // Remove internally added keys from both maps
         searchMap.putAll((Map) search.getSourceAsMap().get("keyValues"));
@@ -346,6 +345,7 @@ public class ServiceElasticSearch {
         queryMap.remove("_lastUpdated");
         queryMap.remove("ttl");
         queryMap.remove("_timestamp");
+        queryMap.remove("test-id");
         queryMap.remove("uri");
 
         // Check equality of both maps

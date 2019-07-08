@@ -153,7 +153,7 @@ public class RegisterService {
 
     if (recordType != null && !recordType.isEmpty()) {
       String uri =
-          LookupService.SERVICE_URI_PREFIX + "/" + recordType + UUID.randomUUID().toString();
+          LookupService.SERVICE_URI_PREFIX + "/" + recordType + "/" + UUID.randomUUID().toString();
       return uri;
     } else {
       Log.error("Error creating URI: Record Type not found");
