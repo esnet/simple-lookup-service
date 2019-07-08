@@ -107,6 +107,7 @@ public class RecordResourceTest {
     RecordResource request = new RecordResource();
     try {
       String output = request.getHandler("lookup", "interface", "3");
+      fail();
     } catch (NotFoundException e) {
       Log.info("Record not found, test passed");
     }
@@ -141,11 +142,17 @@ public class RecordResourceTest {
 
     try {
       String output = request.renewHandler("lookup", "interface", "3", jsonMessage());
+      fail();
     } catch (NotFoundException e) {
       Log.info("URI not found, test passed");
     }
   }
 
+  /**
+   * Curl request for deleting existing URI
+   * @throws IOException Error in adding or looking up the record
+   * @throws DuplicateEntryException Record already exists before test
+   */
   @Test
   public void deleteHandlerExists() throws IOException, DuplicateEntryException {
     this.queryAndPublishService();
@@ -154,17 +161,27 @@ public class RecordResourceTest {
     assertNotNull(response);
   }
 
+  /**
+   * Curl request for deleting non existing URI
+   * @throws IOException Error in adding or looking up the record
+   * @throws DuplicateEntryException Record already exists before test
+   */
   @Test
   public void deleteHandlerNotExists() throws IOException, DuplicateEntryException {
     this.queryAndPublishService();
     RecordResource request = new RecordResource();
     try {
       String response = request.deleteHandler("lookup", "interface", "3", jsonMessage());
+      fail();
     } catch (NotFoundException e) {
       Log.info("URI not found, test passed");
     }
   }
 
+  /**
+   * Creates a json message
+   * @return json Message as string
+   */
   private String jsonMessage() {
     Message message = new Message();
     message.add("type", "test");
