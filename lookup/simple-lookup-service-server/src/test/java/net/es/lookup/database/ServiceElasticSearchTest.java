@@ -2,9 +2,7 @@ package net.es.lookup.database;
 
 import net.es.lookup.common.DatabaseConnectionKeys;
 import net.es.lookup.common.Message;
-import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
-import net.es.lookup.protocol.json.JSONGetServiceResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
@@ -257,8 +255,7 @@ public class ServiceElasticSearchTest {
   }
 
   /**
-   * Attempts to add a record that doesn't already exist to database
-   * Shouldn't check for duplicates
+   * Attempts to add a record that doesn't already exist to database Shouldn't check for duplicates
    *
    * @throws IOException Error adding record
    */
@@ -283,8 +280,7 @@ public class ServiceElasticSearchTest {
   }
 
   /**
-   * Attempts to add a record that already exists to database
-   * shouldn't check for duplicates
+   * Attempts to add a record that already exists to database shouldn't check for duplicates
    *
    * @throws IOException Error adding record to database
    */
@@ -423,7 +419,7 @@ public class ServiceElasticSearchTest {
     try {
       Message count = client.bulkUpdate(messages);
     } catch (IOException e) {
-      System.out.println("error updating due to incorrect URI; Passed test");
+      Log.info("error updating due to incorrect URI; Passed test");
     }
   }
 
