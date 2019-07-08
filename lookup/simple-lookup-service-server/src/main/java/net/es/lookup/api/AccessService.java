@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+
+import net.es.lookup.common.DatabaseConnectionKeys;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
@@ -33,7 +35,11 @@ public class AccessService {
     JSONGetServiceResponse response;
     Message serviceRecord;
     try {
-      ServiceElasticSearch db = new ServiceElasticSearch("127.0.0.1", 9200, 9201, "post");
+      ServiceElasticSearch db = new ServiceElasticSearch(
+              DatabaseConnectionKeys.server,
+              DatabaseConnectionKeys.DatabasePort1,
+              DatabaseConnectionKeys.DatabasePort2,
+              DatabaseConnectionKeys.DatabaseName);
       serviceRecord = db.getRecordByURI(serviceid);
 
       if (serviceRecord != null) {
