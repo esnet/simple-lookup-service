@@ -1,5 +1,6 @@
 package net.es.lookup.resources;
 
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -93,7 +94,7 @@ public class MainResource {
   @PUT
   @Consumes("application/json")
   @Produces("application/json")
-  public String bulkRenewHandler(String message) {
+  public String bulkRenewHandler(String message) throws URISyntaxException {
     return bulkRenewService.bulkRenew(message);
   }
 }
