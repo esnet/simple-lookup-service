@@ -27,7 +27,7 @@ public class ServiceElasticSearchTest {
         client.closeConnection();
     }
 
-    //@Test
+
     private void queryAndPublishService() throws IOException, DuplicateEntryException {
         Message message = new Message();
         message.add("type", "test");
@@ -369,7 +369,7 @@ public class ServiceElasticSearchTest {
 
         DateTime dt = new DateTime();
         dt.plus(20000);
-        assertEquals(client.deleteExpiredRecords(dt),3);
+        assertEquals(client.deleteExpiredRecords(dt), 3);
     }
 
     @Test
