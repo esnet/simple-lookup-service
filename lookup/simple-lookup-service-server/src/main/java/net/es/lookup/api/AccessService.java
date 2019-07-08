@@ -18,15 +18,16 @@ import net.es.lookup.protocol.json.JSONMessage;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-
 public class AccessService {
 
   private static Logger LOG = LogManager.getLogger(AccessService.class);
 
   /**
    * Method to retrieve the record.
+   *
    * @param serviceid id of the record (uri)
-   * @return String Json message of the record as string */
+   * @return String Json message of the record as string
+   */
   public String getService(String serviceid) {
 
     LOG.info("Processing getService...");
@@ -35,7 +36,8 @@ public class AccessService {
     JSONGetServiceResponse response;
     Message serviceRecord;
     try {
-      ServiceElasticSearch db = new ServiceElasticSearch(
+      ServiceElasticSearch db =
+          new ServiceElasticSearch(
               DatabaseConnectionKeys.server,
               DatabaseConnectionKeys.DatabasePort1,
               DatabaseConnectionKeys.DatabasePort2,
@@ -77,10 +79,11 @@ public class AccessService {
 
   /**
    * Method to retrieve a particular key and value from the record.
+   *
    * @param serviceid id of the record (uri)
    * @param key the key of the key-value to be retrieved
    * @return String Json message of the key-value expressed as string
-   * */
+   */
   public String getKeyService(String serviceid, String key) {
 
     LOG.info("Processing getServiceKey...");

@@ -82,16 +82,10 @@ public class Invoker {
     List<String> services = new LinkedList<>();
 
     // Initialize services
-    try {
-      //new ServiceDaoMongoDb(dburl, dbport, dbname, collname);
-      new ServiceElasticSearch("127.0.0.1", 9200, 9201, "post"); //Todo
-      services.add(LookupService.LOOKUP_SERVICE);
+    //new ServiceDaoMongoDb(dburl, dbport, dbname, collname);
+    //new ServiceElasticSearch("127.0.0.1", 9200, 9201, "post"); //Todo
+    services.add(LookupService.LOOKUP_SERVICE);
 
-    } catch (URISyntaxException e) {
-
-      LOG.info("Error connecting to database; Please check if MongoDB is running");
-      System.exit(1);
-    }
     LOG.info("starting Lookup Service");
     // Create the REST service
     Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
