@@ -175,7 +175,8 @@ public class EditService {
 
     if (this.isValid(request) && this.isAuthed(serviceid, request)) {
       try {
-        ServiceElasticSearch db = new ServiceElasticSearch(
+        ServiceElasticSearch db =
+            new ServiceElasticSearch(
                 DatabaseConnectionKeys.server,
                 DatabaseConnectionKeys.DatabasePort1,
                 DatabaseConnectionKeys.DatabasePort2,
