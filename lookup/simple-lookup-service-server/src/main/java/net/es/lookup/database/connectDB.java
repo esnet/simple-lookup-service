@@ -7,15 +7,23 @@ import java.net.URISyntaxException;
 
 public class connectDB {
 
-    public static ServiceElasticSearch connect() throws FileNotFoundException, URISyntaxException {
-        LookupServiceConfigReader.init("etc/lookupservice.yaml");
-        LookupServiceConfigReader config = LookupServiceConfigReader.getInstance();
+  private static boolean initialized = false;
+  private static String server;
+  private static int port1;
+  private static int port2;
+  private static String dbName;
 
-        String server = config.getElasticServer();
-        int port1 = config.getElasticPort1();
-        int port2 = config.getElasticPort2();
-        String dbName = config.getElasticDbName();
+  public static ServiceElasticSearch connect() throws FileNotFoundException, URISyntaxException {
+    if (!initialized) {
+      LookupServiceConfigReader.init("etc/lookupservice.yaml");
+      LookupServiceConfigReader config = LookupServiceConfigReader.getInstance();
 
-        return new ServiceElasticSearch(server, port1, port2, dbName);
+      server = config.getElasticServer();
+      port1 = config.getElasticPort1();
+      port2 = config.getElasticPort2();
+      dbName = config.getElasticDbName();
+      initialized = true;
     }
+    return new ServiceElasticSearch(server, port1, port2, dbName);
+  }
 }
