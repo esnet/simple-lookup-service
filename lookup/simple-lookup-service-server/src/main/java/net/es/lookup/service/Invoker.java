@@ -1,31 +1,25 @@
 package net.es.lookup.service;
 
-import static java.util.Arrays.asList;
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
-import static org.quartz.TriggerBuilder.newTrigger;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.LinkedList;
-import java.util.List;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.es.lookup.common.MemoryManager;
-import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.database.MongoDBMaintenanceJob;
-import net.es.lookup.database.ServiceDaoMongoDb;
-import net.es.lookup.database.ServiceElasticSearch;
+import net.es.lookup.database.ElasticSearchMaintenanceJob;
 import net.es.lookup.timer.Scheduler;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
-import net.es.lookup.utils.log.StdOutErrToLog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import static java.util.Arrays.asList;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 public class Invoker {
 
@@ -72,7 +66,7 @@ public class Invoker {
     port = lookupServiceConfigReader.getPort();
     host = lookupServiceConfigReader.getHost();
 
-    LOG.info("starting ServiceDaoMongoDb");
+    LOG.info("starting ServiceElasticSearch");
 
     String dburl = lookupServiceConfigReader.getDbUrl();
     int dbport = lookupServiceConfigReader.getDbPort();
@@ -98,11 +92,11 @@ public class Invoker {
     int dbpruneInterval = lookupServiceConfigReader.getPruneInterval();
     long prunethreshold = lookupServiceConfigReader.getPruneThreshold();
     JobDetail job =
-        newJob(MongoDBMaintenanceJob.class)
+        newJob(ElasticSearchMaintenanceJob.class)
             .withIdentity(LookupService.LOOKUP_SERVICE + "clean", "DBMaintenance")
             .build();
-    job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
-    job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, dbname);
+    job.getJobDataMap().put(ElasticSearchMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
+    job.getJobDataMap().put(ElasticSearchMaintenanceJob.DBNAME, dbname);
 
     // Trigger the job to run now, and then every dbpruneInterval seconds
     Trigger trigger =
