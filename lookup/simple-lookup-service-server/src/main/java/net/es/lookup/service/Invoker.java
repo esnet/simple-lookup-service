@@ -26,7 +26,6 @@ public class Invoker {
   private static int port = 8080;
   private static LookupService lookupService = null;
 
-  // private static ServiceDaoMongoDb dao = null;
   private static String host = "localhost";
   private static LookupServiceConfigReader lookupServiceConfigReader;
   private static QueueServiceConfigReader queueServiceConfigReader;

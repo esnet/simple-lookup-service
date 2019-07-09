@@ -16,7 +16,7 @@ database:
     DBCollName: 'services'
     username: 'lookup'
     password: 'abc123'
-    pruneInterval: 300 
+    pruneInterval: 300
     pruneThreshold: 120
 
 elastic:

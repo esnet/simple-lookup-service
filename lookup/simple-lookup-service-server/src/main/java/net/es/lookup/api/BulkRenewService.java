@@ -1,20 +1,9 @@
 package net.es.lookup.api;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import net.es.lookup.common.*;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.internal.DataFormatException;
-import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.database.connectDB;
 import net.es.lookup.protocol.json.JSONMessage;
@@ -23,8 +12,17 @@ import net.es.lookup.protocol.json.JsonBulkRenewRequest;
 import net.es.lookup.protocol.json.JsonBulkRenewResponse;
 import net.es.lookup.publish.Publisher;
 import net.es.lookup.service.PublishService;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class BulkRenewService {
   private static Logger LOG = LogManager.getLogger(BulkRenewService.class);

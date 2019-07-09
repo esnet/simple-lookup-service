@@ -336,6 +336,7 @@ public class ServiceElasticSearch {
       SearchRequest searchRequest = new SearchRequest(this.indexName);
       searchRequest.scroll(scroll);
       SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+      searchSourceBuilder.query(QueryBuilders.termQuery("keyValues.type", queryRequest.getMap().get("type")));
       searchRequest.source(searchSourceBuilder);
       SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
       String scrollId = searchResponse.getScrollId();
