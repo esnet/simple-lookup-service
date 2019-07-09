@@ -1,5 +1,6 @@
 package net.es.lookup.api;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.database.ServiceElasticSearch;
+import net.es.lookup.database.connectDB;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRenewRequest;
 import net.es.lookup.protocol.json.JsonBulkRenewRequest;
@@ -33,7 +35,7 @@ public class BulkRenewService {
    * @return String Json message as a string.
    *
    * */
-  public String bulkRenew(String renewRequests) throws URISyntaxException {
+  public String bulkRenew(String renewRequests) throws URISyntaxException, FileNotFoundException {
 
     // parse records
     JsonBulkRenewRequest jsonBulkRenewRequest = new JsonBulkRenewRequest(renewRequests);
@@ -50,11 +52,7 @@ public class BulkRenewService {
       throw new BadRequestException("Request is invalid. Please edit the request and resend.");
     }
 
-    ServiceElasticSearch db = new ServiceElasticSearch(
-            DatabaseConnectionKeys.server,
-            DatabaseConnectionKeys.DatabasePort1,
-            DatabaseConnectionKeys.DatabasePort2,
-            DatabaseConnectionKeys.DatabaseName);
+    ServiceElasticSearch db = connectDB.connect();
 
     JsonBulkRenewResponse renewResponse = checkAndRenewRecords(db, jsonBulkRenewRequest);
     String formattedRenewResponse = "";
@@ -177,4 +175,5 @@ public class BulkRenewService {
     jsonBulkRenewResponse.updateRenewedCount(renewResponse);
     return jsonBulkRenewResponse;
   }
+
 }

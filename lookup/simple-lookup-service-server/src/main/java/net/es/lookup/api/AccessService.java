@@ -1,17 +1,20 @@
 package net.es.lookup.api;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import net.es.lookup.common.DatabaseConnectionKeys;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.database.ServiceElasticSearch;
+import net.es.lookup.database.connectDB;
 import net.es.lookup.protocol.json.JSONGetServiceResponse;
 import net.es.lookup.protocol.json.JSONMessage;
+import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -33,12 +36,7 @@ public class AccessService {
     JSONGetServiceResponse response;
     Message serviceRecord;
     try {
-      ServiceElasticSearch db =
-          new ServiceElasticSearch(
-              DatabaseConnectionKeys.server,
-              DatabaseConnectionKeys.DatabasePort1,
-              DatabaseConnectionKeys.DatabasePort2,
-              DatabaseConnectionKeys.DatabaseName);
+      ServiceElasticSearch db = connectDB.connect();
       serviceRecord = db.getRecordByURI(serviceid);
 
       if (serviceRecord != null) {
@@ -90,12 +88,7 @@ public class AccessService {
     Message serviceRecord;
 
     try {
-      ServiceElasticSearch db =
-          new ServiceElasticSearch(
-              DatabaseConnectionKeys.server,
-              DatabaseConnectionKeys.DatabasePort1,
-              DatabaseConnectionKeys.DatabasePort2,
-              DatabaseConnectionKeys.DatabaseName);
+      ServiceElasticSearch db = connectDB.connect();
       serviceRecord = db.getRecordByURI(serviceid);
 
       if (serviceRecord != null) {
@@ -140,4 +133,5 @@ public class AccessService {
       throw new InternalErrorException("Record URI not found");
     }
   }
+
 }

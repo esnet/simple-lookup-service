@@ -1,16 +1,19 @@
 package net.es.lookup.database;
 
 import net.es.lookup.common.DatabaseConnectionKeys;
+import net.es.lookup.common.LookupService;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
+import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.yaml.snakeyaml.Yaml;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.util.*;
 
@@ -29,12 +32,7 @@ public class ServiceElasticSearchTest {
    */
   @Before
   public void setUp() throws URISyntaxException, IOException {
-    client =
-        new ServiceElasticSearch(
-            DatabaseConnectionKeys.server,
-            DatabaseConnectionKeys.DatabasePort1,
-            DatabaseConnectionKeys.DatabasePort2,
-            DatabaseConnectionKeys.DatabaseName);
+    client = connectDB.connect();
     client.deleteAllRecords();
   }
 

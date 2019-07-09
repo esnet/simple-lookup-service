@@ -19,3 +19,8 @@ database:
     pruneInterval: 300 
     pruneThreshold: 120
 
+elastic:
+    DBUrl: '127.0.0.1'
+    DBPort1: 9200
+    DBPort2: 9201
+    ElasticDBName: 'lookup'

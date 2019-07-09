@@ -8,6 +8,7 @@ import net.es.lookup.common.exception.api.UnauthorizedException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.ServiceElasticSearch;
+import net.es.lookup.database.connectDB;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
@@ -74,12 +75,7 @@ public class RegisterService {
         }
 
         try {
-          ServiceElasticSearch db =
-              new ServiceElasticSearch(
-                  DatabaseConnectionKeys.server,
-                  DatabaseConnectionKeys.DatabasePort1,
-                  DatabaseConnectionKeys.DatabasePort2,
-                  DatabaseConnectionKeys.DatabaseName);
+          ServiceElasticSearch db = connectDB.connect();
           Message res = db.queryAndPublishService(request);
           response = new JSONRegisterResponse(res.getMap());
           String responseString;

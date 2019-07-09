@@ -3,12 +3,13 @@ package net.es.lookup.database;
 import com.google.gson.Gson;
 import net.es.lookup.common.DatabaseConnectionKeys;
 import net.es.lookup.common.Message;
-import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchStatusException;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -70,6 +71,7 @@ public class ServiceElasticSearch {
    * @throws URISyntaxException for incorrect dburl
    */
   public ServiceElasticSearch() throws URISyntaxException {
+    //Todo
     this.port1 = DatabaseConnectionKeys.DatabasePort1;
     this.port2 = DatabaseConnectionKeys.DatabasePort2;
     this.location = new URI(DatabaseConnectionKeys.server);
@@ -99,7 +101,7 @@ public class ServiceElasticSearch {
         new RestHighLevelClient(
             RestClient.builder(
                 new HttpHost(this.location.toString(), this.port1, "http"),
-                new HttpHost(location.toString(), port2, "http")));
+                new HttpHost(this.location.toString(), this.port2, "http")));
   }
 
   /**
@@ -366,6 +368,8 @@ public class ServiceElasticSearch {
     } catch (ElasticsearchStatusException e) {
       // In case index doesn't exist
       Log.info("Creating index");
+      CreateIndexRequest create = new CreateIndexRequest(this.indexName.toLowerCase());
+      CreateIndexResponse createIndexResponse = client.indices().create(create, RequestOptions.DEFAULT);
     }
   }
 

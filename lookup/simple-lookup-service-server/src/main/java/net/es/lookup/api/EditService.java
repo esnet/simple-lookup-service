@@ -8,6 +8,7 @@ import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.ServiceElasticSearch;
+import net.es.lookup.database.connectDB;
 import net.es.lookup.protocol.json.JSONDeleteRequest;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRenewRequest;
@@ -57,12 +58,7 @@ public class EditService {
     if (this.isValid(request) && this.isAuthed(serviceid, request)) {
 
       try {
-        ServiceElasticSearch db =
-            new ServiceElasticSearch(
-                DatabaseConnectionKeys.server,
-                DatabaseConnectionKeys.DatabasePort1,
-                DatabaseConnectionKeys.DatabasePort2,
-                DatabaseConnectionKeys.DatabaseName);
+        ServiceElasticSearch db = connectDB.connect();
         Message serviceRecord = db.getRecordByURI(serviceid);
         if (serviceRecord != null) {
 
@@ -175,12 +171,7 @@ public class EditService {
 
     if (this.isValid(request) && this.isAuthed(serviceid, request)) {
       try {
-        ServiceElasticSearch db =
-            new ServiceElasticSearch(
-                DatabaseConnectionKeys.server,
-                DatabaseConnectionKeys.DatabasePort1,
-                DatabaseConnectionKeys.DatabasePort2,
-                DatabaseConnectionKeys.DatabaseName);
+        ServiceElasticSearch db = connectDB.connect();
 
         Message serviceRecord = db.deleteRecord(serviceid);
         if (serviceRecord == null) {

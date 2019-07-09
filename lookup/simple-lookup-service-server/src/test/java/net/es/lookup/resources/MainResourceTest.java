@@ -6,6 +6,7 @@ import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.ServiceElasticSearch;
+import net.es.lookup.database.connectDB;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
@@ -33,12 +34,7 @@ public class MainResourceTest {
    */
   @Before
   public void setUp() throws URISyntaxException, IOException {
-    client =
-        new ServiceElasticSearch(
-            DatabaseConnectionKeys.server,
-            DatabaseConnectionKeys.DatabasePort1,
-            DatabaseConnectionKeys.DatabasePort2,
-            DatabaseConnectionKeys.DatabaseName);
+    client = connectDB.connect();
     client.deleteAllRecords();
   }
 
