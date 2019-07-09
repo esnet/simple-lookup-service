@@ -1,5 +1,6 @@
 package net.es.lookup.resources;
 
+import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,7 +95,7 @@ public class MainResource {
   @PUT
   @Consumes("application/json")
   @Produces("application/json")
-  public String bulkRenewHandler(String message) throws URISyntaxException {
+  public String bulkRenewHandler(String message) throws URISyntaxException, FileNotFoundException {
     return bulkRenewService.bulkRenew(message);
   }
 }

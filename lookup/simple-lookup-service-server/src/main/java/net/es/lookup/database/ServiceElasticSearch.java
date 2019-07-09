@@ -1,7 +1,6 @@
 package net.es.lookup.database;
 
 import com.google.gson.Gson;
-import net.es.lookup.common.DatabaseConnectionKeys;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import org.apache.http.HttpHost;
@@ -72,10 +71,10 @@ public class ServiceElasticSearch {
    */
   public ServiceElasticSearch() throws URISyntaxException {
     //Todo
-    this.port1 = DatabaseConnectionKeys.DatabasePort1;
-    this.port2 = DatabaseConnectionKeys.DatabasePort2;
-    this.location = new URI(DatabaseConnectionKeys.server);
-    this.indexName = DatabaseConnectionKeys.DatabaseName;
+//    this.port1 = DatabaseConnectionKeys.DatabasePort1;
+//    this.port2 = DatabaseConnectionKeys.DatabasePort2;
+//    this.location = new URI(DatabaseConnectionKeys.server);
+//    this.indexName = DatabaseConnectionKeys.DatabaseName;
     init();
   }
 
@@ -102,6 +101,25 @@ public class ServiceElasticSearch {
             RestClient.builder(
                 new HttpHost(this.location.toString(), this.port1, "http"),
                 new HttpHost(this.location.toString(), this.port2, "http")));
+    GetRequest getRequest = new GetRequest(
+            this.indexName,
+            "1");
+    getRequest.fetchSourceContext(new FetchSourceContext(false));
+    getRequest.storedFields("_none_");
+    try {
+     client.get(getRequest, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      e.printStackTrace();
+    } catch (ElasticsearchStatusException e) {
+      // In case index doesn't exist
+      Log.info("Creating index");
+      CreateIndexRequest create = new CreateIndexRequest(this.indexName.toLowerCase());
+      try {
+        CreateIndexResponse createIndexResponse = client.indices().create(create, RequestOptions.DEFAULT);
+      } catch (IOException ex) {
+        Log.error("unable to create index!");
+      }
+    }
   }
 
   /**
@@ -366,10 +384,7 @@ public class ServiceElasticSearch {
           client.clearScroll(clearScrollRequest, RequestOptions.DEFAULT);
       boolean succeeded = clearScrollResponse.isSucceeded();
     } catch (ElasticsearchStatusException e) {
-      // In case index doesn't exist
-      Log.info("Creating index");
-      CreateIndexRequest create = new CreateIndexRequest(this.indexName.toLowerCase());
-      CreateIndexResponse createIndexResponse = client.indices().create(create, RequestOptions.DEFAULT);
+      Log.info("empty database");
     }
   }
 

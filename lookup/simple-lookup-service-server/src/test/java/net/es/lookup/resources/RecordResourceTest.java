@@ -1,18 +1,14 @@
 package net.es.lookup.resources;
 
 import com.google.gson.Gson;
-import net.es.lookup.common.DatabaseConnectionKeys;
-import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.ServiceElasticSearch;
-import net.es.lookup.database.ServiceElasticSearchTest;
 import net.es.lookup.database.connectDB;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
-import org.joda.time.Instant;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +17,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 public class RecordResourceTest {
 

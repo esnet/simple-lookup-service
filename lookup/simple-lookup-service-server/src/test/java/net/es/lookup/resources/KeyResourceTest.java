@@ -1,6 +1,5 @@
 package net.es.lookup.resources;
 
-import net.es.lookup.common.DatabaseConnectionKeys;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;

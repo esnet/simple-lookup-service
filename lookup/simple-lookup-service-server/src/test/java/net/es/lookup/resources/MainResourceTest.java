@@ -1,7 +1,6 @@
 package net.es.lookup.resources;
 
 import com.google.gson.Gson;
-import net.es.lookup.common.DatabaseConnectionKeys;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
