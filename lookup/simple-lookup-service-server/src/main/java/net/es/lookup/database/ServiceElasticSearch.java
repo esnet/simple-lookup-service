@@ -241,7 +241,7 @@ public class ServiceElasticSearch {
       } else {
         throw new IOException("Record URI not specified");
       }
-    } catch (ElasticsearchStatusException | IOException e) {
+    } catch (ElasticsearchStatusException | RecordNotFoundException e) {
       throw new IOException("Record URI does not exist");
     }
   }

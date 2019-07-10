@@ -2,6 +2,7 @@ package net.es.lookup.database;
 
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
+import net.es.lookup.common.exception.internal.RecordNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
@@ -112,7 +113,7 @@ public class ServiceElasticSearchTest {
    * @throws DuplicateEntryException The record already exists before testing
    */
   @Test
-  public void deleteExistingUri() throws IOException, DuplicateEntryException {
+  public void deleteExistingUri() throws IOException, DuplicateEntryException, RecordNotFoundException {
     this.queryAndPublishService();
     Message status = client.deleteRecord("2");
     assertNotNull(status.getMap());
@@ -125,12 +126,12 @@ public class ServiceElasticSearchTest {
    * @throws DuplicateEntryException Entry already exists before test
    */
   @Test
-  public void deleteNonExistingUri() throws IOException, DuplicateEntryException {
+  public void deleteNonExistingUri() throws IOException, DuplicateEntryException, RecordNotFoundException {
     this.queryAndPublishService();
     Message status = null;
     try {
       status = client.deleteRecord("3");
-    } catch (IOException e) {
+    } catch (RecordNotFoundException e) {
       Log.info("Couldn't find URI, test pass");
     }
     assertNull(status);
