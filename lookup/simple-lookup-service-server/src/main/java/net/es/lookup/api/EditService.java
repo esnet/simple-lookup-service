@@ -9,11 +9,10 @@ import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
+import net.es.lookup.common.exception.internal.RecordNotFoundException;
 import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.database.connectDB;
-import net.es.lookup.protocol.json.JSONDeleteRequest;
-import net.es.lookup.protocol.json.JSONMessage;
-import net.es.lookup.protocol.json.JSONRenewRequest;
+import net.es.lookup.protocol.json.*;
 import net.es.lookup.publish.Publisher;
 import net.es.lookup.service.PublishService;
 import org.apache.logging.log4j.LogManager;
@@ -41,7 +40,7 @@ public class EditService {
     LOG.info("Processing renewService...");
     LOG.info(" serviceid: " + serviceid);
 
-    Message response;
+    JSONRenewResponse response;
     Message errorResponse = new Message();
     JSONRenewRequest request = new JSONRenewRequest(service);
 
@@ -90,9 +89,9 @@ public class EditService {
               Publisher publisher = Publisher.getInstance();
               publisher.eventNotification(res);
             }
-            response = res;
+            response = new JSONRenewResponse(res.getMap());
 
-            return response.getMap().toString();
+            return JSONMessage.toString(response);
 
           } else {
 
@@ -113,6 +112,9 @@ public class EditService {
         LOG.fatal("DatabaseException: The database is out of service." + e.getMessage());
         LOG.info("RenewService status: FAILED; exiting");
         throw new InternalErrorException("Database error\n");
+      } catch (DataFormatException e) {
+        LOG.info("incorrect JSON format returned");
+        throw new InternalErrorException("incorrect JSON format returned" + e.getMessage());
       }
 
     } else {
@@ -156,7 +158,7 @@ public class EditService {
 
     LOG.info("Processing deleteRecord...");
     LOG.info("serviceid: " + serviceid);
-    Message response;
+    JSONDeleteResponse response;
 
     JSONDeleteRequest request = new JSONDeleteRequest(service);
 
@@ -189,11 +191,11 @@ public class EditService {
           // update state
           serviceRecord.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_DELETE);
 
-          response = serviceRecord;
+          response = new JSONDeleteResponse(serviceRecord.getMap());
 
           LOG.info("ServiceRecord Deleted");
           LOG.info("DeleteService status: SUCCESS; exiting");
-          return response.getMap().toString();
+          return JSONMessage.toString(response);
         }
 
       } catch (URISyntaxException e) {
@@ -203,7 +205,12 @@ public class EditService {
         throw new InternalErrorException("Database error\n");
 
       } catch (IOException e) {
-
+        LOG.info("Error connecting to database; exiting");
+        throw new NotFoundException("Unable to connect to database" + e.getMessage());
+      } catch (DataFormatException e) {
+        LOG.info("incorrect JSON format returned");
+        throw new InternalErrorException("incorrect JSON format returned" + e.getMessage());
+      } catch (RecordNotFoundException e) {
         LOG.info("Record Not found. DeleteService status: FAILED; exiting");
         throw new NotFoundException("Record does not exist");
       }

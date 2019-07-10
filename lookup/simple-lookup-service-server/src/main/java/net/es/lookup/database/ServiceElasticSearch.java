@@ -3,6 +3,7 @@ package net.es.lookup.database;
 import com.google.gson.Gson;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
+import net.es.lookup.common.exception.internal.RecordNotFoundException;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
 import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
@@ -163,12 +164,12 @@ public class ServiceElasticSearch {
    * @return Message - returns the deleted record as a Message Object
    * @throws IOException If error deleting record
    */
-  public Message deleteRecord(String recordURI) throws IOException {
+  public Message deleteRecord(String recordURI) throws RecordNotFoundException, IOException {
     DeleteRequest request = new DeleteRequest(this.indexName, recordURI);
     Message existingRecord = getRecordByURI(recordURI);
     DeleteResponse deleteResponse = client.delete(request, RequestOptions.DEFAULT);
     if (deleteResponse.status().getStatus() != 200) {
-      throw new IOException();
+      throw new RecordNotFoundException("Unable to find record");
     }
     return existingRecord;
   }

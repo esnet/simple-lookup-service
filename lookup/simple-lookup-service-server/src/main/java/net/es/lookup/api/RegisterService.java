@@ -21,6 +21,8 @@ import net.es.lookup.service.PublishService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
@@ -106,8 +108,11 @@ public class RegisterService {
           Log.error("FobiddenRequestException:" + e.getMessage());
           Log.info("Register status: FAILED due to Duplicate Entry; exiting");
           throw new ForbiddenRequestException(e.getMessage());
-        } catch (Exception e) {
-          e.printStackTrace(); // Todo
+        } catch (URISyntaxException e) {
+          e.printStackTrace();
+        } catch (IOException e) {
+          Log.error("Error connecting with database");
+          throw new InternalErrorException("Error connecting to database");
         }
       } else {
 
