@@ -109,9 +109,6 @@ public class MainResource {
     } catch (URISyntaxException e) {
       Log.error("URI incorrect");
       throw new InternalErrorException("Incorrect URI");
-    } catch (FileNotFoundException e) {
-      Log.error("Incorrect config file path");
-      throw new InternalErrorException("Incorrect config file path");
     }
   }
 }

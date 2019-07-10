@@ -37,7 +37,7 @@ public class BulkRenewService {
    * @param renewRequests Request containing list of uris.
    * @return String Json message as a string.
    */
-  public String bulkRenew(String renewRequests) throws URISyntaxException, FileNotFoundException {
+  public String bulkRenew(String renewRequests) throws URISyntaxException{
 
     // parse records
     JsonBulkRenewRequest jsonBulkRenewRequest = new JsonBulkRenewRequest(renewRequests);
