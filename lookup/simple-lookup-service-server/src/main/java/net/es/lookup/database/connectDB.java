@@ -4,7 +4,9 @@ import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 
 import java.net.URISyntaxException;
 
-//Todo add comments
+/**
+ * Class to create a connection to the database
+ */
 public class connectDB {
 
   private static boolean initialized = false;
@@ -13,6 +15,10 @@ public class connectDB {
   private static int port2;
   private static String dbName;
 
+  /**
+   * Reads the connection for database configurations
+   * Does nothing if file has already been read
+   */
   public connectDB() {
     if (!initialized) {
       LookupServiceConfigReader.init("etc/lookupservice.yaml");
@@ -26,6 +32,11 @@ public class connectDB {
     }
   }
 
+  /**
+   * Creates a new connection to the database
+   * @return Client for the database
+   * @throws URISyntaxException In case URI of database doesn't work
+   */
   public ServiceElasticSearch connect() throws URISyntaxException {
     return new ServiceElasticSearch(server, port1, port2, dbName);
   }
