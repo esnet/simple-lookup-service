@@ -5,6 +5,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.es.lookup.common.MemoryManager;
 import net.es.lookup.database.ElasticSearchMaintenanceJob;
+import net.es.lookup.database.connectDB;
 import net.es.lookup.timer.Scheduler;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
@@ -67,16 +68,12 @@ public class Invoker {
 
     LOG.info("starting ServiceElasticSearch");
 
-    String dburl = lookupServiceConfigReader.getDbUrl();
-    int dbport = lookupServiceConfigReader.getDbPort();
     String dbname = lookupServiceConfigReader.getDbName();
-    String collname = lookupServiceConfigReader.getCollName();
 
     List<String> services = new LinkedList<>();
 
     // Initialize services
-    //new ServiceDaoMongoDb(dburl, dbport, dbname, collname);
-    //new ServiceElasticSearch("127.0.0.1", 9200, 9201, "post"); //Todo
+    new connectDB();
     services.add(LookupService.LOOKUP_SERVICE);
 
     LOG.info("starting Lookup Service");
