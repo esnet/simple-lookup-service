@@ -2,7 +2,6 @@ package net.es.lookup.database;
 
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 
-import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 
 public class connectDB {
@@ -13,7 +12,7 @@ public class connectDB {
   private static int port2;
   private static String dbName;
 
-  public static ServiceElasticSearch connect() throws FileNotFoundException, URISyntaxException {
+  public static ServiceElasticSearch connect() throws URISyntaxException {
     if (!initialized) {
       LookupServiceConfigReader.init("etc/lookupservice.yaml");
       LookupServiceConfigReader config = LookupServiceConfigReader.getInstance();

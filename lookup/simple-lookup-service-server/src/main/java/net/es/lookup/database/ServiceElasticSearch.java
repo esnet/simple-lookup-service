@@ -149,6 +149,7 @@ public class ServiceElasticSearch {
     exists(message); // checking if message already exists in the index
     Message timestampedMessage = addTimestamp(message); // adding a timestamp to the message
     insert(timestampedMessage, queryRequest); // inserting the timestamped message
+    client.close();
     return toMessage(timestampedMessage); // return the message that was added to the index
   }
 

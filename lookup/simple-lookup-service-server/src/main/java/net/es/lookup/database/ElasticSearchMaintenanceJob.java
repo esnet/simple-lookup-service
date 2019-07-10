@@ -38,7 +38,7 @@ public class ElasticSearchMaintenanceJob implements Job {
 
     try {
       this.db = connectDB.connect();
-    } catch (FileNotFoundException | URISyntaxException e) {
+    } catch ( URISyntaxException e) {
       e.printStackTrace();
     }
 
