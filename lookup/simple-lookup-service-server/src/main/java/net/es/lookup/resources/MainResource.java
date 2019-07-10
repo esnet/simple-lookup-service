@@ -15,12 +15,17 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
+
 import net.es.lookup.api.BulkRenewService;
 import net.es.lookup.api.QueryServices;
 import net.es.lookup.api.RegisterService;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
+import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotSupportedException;
+import net.es.lookup.database.ElasticSearchMaintenanceJob;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class and other similar resource classes need to be explicitly loaded in the
@@ -33,6 +38,8 @@ public class MainResource {
   private RegisterService registerService = new RegisterService();
   private BulkRenewService bulkRenewService = new BulkRenewService();
   private String prefix = "lookup";
+
+  private static Logger Log = LogManager.getLogger(MainResource.class);
 
   /** Post handler to register records. */
   @POST
@@ -95,7 +102,16 @@ public class MainResource {
   @PUT
   @Consumes("application/json")
   @Produces("application/json")
-  public String bulkRenewHandler(String message) throws URISyntaxException, FileNotFoundException {
-    return bulkRenewService.bulkRenew(message);
+  public String bulkRenewHandler(String message) {
+
+    try {
+      return bulkRenewService.bulkRenew(message);
+    } catch (URISyntaxException e) {
+      Log.error("URI incorrect");
+      throw new InternalErrorException("Incorrect URI");
+    } catch (FileNotFoundException e) {
+      Log.error("Incorrect config file path");
+      throw new InternalErrorException("Incorrect config file path");
+    }
   }
 }

@@ -40,7 +40,7 @@ public class ElasticSearchMaintenanceJob implements Job {
       connectDB connect = new connectDB();
       ServiceElasticSearch db = connect.connect();
     } catch ( URISyntaxException e) {
-      e.printStackTrace();
+      LOG.error("Error in URI");
     }
 
     long prune_threshold = data.getLong(PRUNE_THRESHOLD);

@@ -39,8 +39,8 @@ public class LookupServiceConfigReader {
 
   private static Logger LOG = LogManager.getLogger(BaseConfigReader.class);
   private String elasticServer;
-  private int elasticPort1;
-  private int elasticPort2;
+  private int elasticServerPort;
+  private int elasticRestClientPort;
   private String elasticDbName;
 
   /** Constructor - private because this is a Singleton. */
@@ -132,20 +132,20 @@ public class LookupServiceConfigReader {
     this.elasticServer = elasticServer;
   }
 
-  public int getElasticPort1() {
-    return elasticPort1;
+  public int getElasticServerPort() {
+    return elasticServerPort;
   }
 
-  public void setElasticPort1(int elasticPort1) {
-    this.elasticPort1 = elasticPort1;
+  public void setElasticServerPort(int elasticServerPort) {
+    this.elasticServerPort = elasticServerPort;
   }
 
-  public int getElasticPort2() {
-    return elasticPort2;
+  public int getElasticRestClientPort() {
+    return elasticRestClientPort;
   }
 
-  public void setElasticPort2(int elasticPort2) {
-    this.elasticPort2 = elasticPort2;
+  public void setElasticRestClientPort(int elasticRestClientPort) {
+    this.elasticRestClientPort = elasticRestClientPort;
   }
 
   public String getElasticDbName() {
@@ -183,8 +183,8 @@ public class LookupServiceConfigReader {
 
       Map<String, Object> elasticMap = (HashMap) yamlMap.get("elastic");
       elasticServer = (String) elasticMap.get("DBUrl");
-      elasticPort1 = (Integer) elasticMap.get("DBPort1");
-      elasticPort2 = (Integer) elasticMap.get("DBPort2");
+      elasticServerPort = (Integer) elasticMap.get("DBPort1");
+      elasticRestClientPort = (Integer) elasticMap.get("DBPort2");
       elasticDbName = (String) elasticMap.get("ElasticDBName");
 
     } catch (Exception e) {

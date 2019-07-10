@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class ServiceElasticSearch {
 
@@ -340,6 +341,8 @@ public class ServiceElasticSearch {
       SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
       searchSourceBuilder.query(QueryBuilders.termQuery("keyValues.type", queryRequest.getMap().get("type")));
       searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+      searchSourceBuilder.size(Integer.MAX_VALUE);
+      searchSourceBuilder.timeout(new TimeValue(3, TimeUnit.SECONDS));
       //searchRequest.source(searchSourceBuilder);
       SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
       String scrollId = searchResponse.getScrollId();

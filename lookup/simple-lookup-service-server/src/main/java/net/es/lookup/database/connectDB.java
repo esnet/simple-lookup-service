@@ -19,8 +19,8 @@ public class connectDB {
       LookupServiceConfigReader config = LookupServiceConfigReader.getInstance();
 
       server = config.getElasticServer();
-      port1 = config.getElasticPort1();
-      port2 = config.getElasticPort2();
+      port1 = config.getElasticServerPort();
+      port2 = config.getElasticRestClientPort();
       dbName = config.getElasticDbName();
       initialized = true;
     }

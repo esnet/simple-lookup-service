@@ -1,6 +1,10 @@
 package net.es.lookup.api;
 
-import net.es.lookup.common.*;
+import net.es.lookup.common.LeaseManager;
+import net.es.lookup.common.Message;
+import net.es.lookup.common.ReservedKeys;
+import net.es.lookup.common.ReservedValues;
+import net.es.lookup.common.ResponseCodes;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.internal.DataFormatException;

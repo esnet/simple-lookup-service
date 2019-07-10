@@ -15,6 +15,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
@@ -57,9 +59,22 @@ public class MainResourceTest {
   @Test
   public void postHandlerNotExist() throws IOException, InterruptedException {
     MainResource request = new MainResource();
-    request.postHandler("lookup", jsonMessage());
+    String added = request.postHandler("lookup", jsonMessage());
+
+    // Remove extra characters from string
+    added = added.substring(1, added.length() - 1);
+    added = added.replaceAll("\"", "");
+
+    // Convert string to map
+    Map<String, String> map = new HashMap<String, String>();
+    for (final String entry : added.split(",")) {
+      final String[] parts = entry.split(":");
+      map.put(parts[0], parts[1]);
+    }
+
     Thread.sleep(1000);
-    client.getRecordByURI("lookup/interface/2");
+    Message result = client.getRecordByURI(map.get("uri"));
+    assertEquals("[1]", map.get("test-id"));
   }
 
   /**
@@ -71,13 +86,13 @@ public class MainResourceTest {
   @Test
   public void postHandlerExist() throws InterruptedException {
     MainResource request = new MainResource();
-    try{
-    request.postHandler("lookup", jsonMessage());
-    Thread.sleep(1000);
-    request.postHandler("lookup", jsonMessage());
-    Log.error("Should have given ForbiddenRequestException");
-    fail();
-    } catch (ForbiddenRequestException e){
+    try {
+      request.postHandler("lookup", jsonMessage());
+      Thread.sleep(1000);
+      request.postHandler("lookup", jsonMessage());
+      Log.error("Should have given ForbiddenRequestException");
+      fail();
+    } catch (ForbiddenRequestException e) {
       Log.info("Record already exists, pass");
     }
   }
@@ -113,31 +128,5 @@ public class MainResourceTest {
     message.add("expires", dateTime.plus(10000).toString());
     Gson gson = new Gson();
     return gson.toJson(message.getMap());
-  }
-
-  /**
-   * creates a message and adds it to the database
-   *
-   * @throws IOException If error entering data into the database
-   * @throws DuplicateEntryException If message being added already exists in the database
-   */
-  private void queryAndPublishService() throws IOException, DuplicateEntryException {
-    Message message = new Message();
-    message.add("type", "test");
-
-    String uuid = UUID.randomUUID().toString();
-    message.add(
-        "uri",
-        "lookup/interface/2"); // 2nd param should be uuid but for testing purposes was assigned a
-    // number
-
-    message.add("test-id", String.valueOf(1));
-
-    message.add("ttl", "PT10M");
-
-    DateTime dateTime = new DateTime();
-    message.add("expires", dateTime.plus(1000000).toString());
-
-    Message addedMessage = client.queryAndPublishService(message);
   }
 }
