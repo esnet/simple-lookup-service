@@ -1,12 +1,14 @@
 package net.es.lookup.api;
 
-import net.es.lookup.common.*;
+import net.es.lookup.common.LeaseManager;
+import net.es.lookup.common.Message;
+import net.es.lookup.common.ReservedKeys;
+import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
-import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.database.connectDB;
 import net.es.lookup.protocol.json.JSONDeleteRequest;
@@ -58,7 +60,8 @@ public class EditService {
     if (this.isValid(request) && this.isAuthed(serviceid, request)) {
 
       try {
-        ServiceElasticSearch db = connectDB.connect();
+        connectDB connect = new connectDB();
+        ServiceElasticSearch db = connect.connect();
         Message serviceRecord = db.getRecordByURI(serviceid);
         if (serviceRecord != null) {
 
@@ -171,9 +174,11 @@ public class EditService {
 
     if (this.isValid(request) && this.isAuthed(serviceid, request)) {
       try {
-        ServiceElasticSearch db = connectDB.connect();
+        connectDB connect = new connectDB();
+        ServiceElasticSearch db = connect.connect();
 
         Message serviceRecord = db.deleteRecord(serviceid);
+        db.closeConnection();
         if (serviceRecord == null) {
 
           LOG.error("ServiceRecord Not found");

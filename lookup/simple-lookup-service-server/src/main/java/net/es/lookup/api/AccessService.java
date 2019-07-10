@@ -1,11 +1,5 @@
 package net.es.lookup.api;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
@@ -14,9 +8,13 @@ import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.database.connectDB;
 import net.es.lookup.protocol.json.JSONGetServiceResponse;
 import net.es.lookup.protocol.json.JSONMessage;
-import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AccessService {
 
@@ -36,8 +34,10 @@ public class AccessService {
     JSONGetServiceResponse response;
     Message serviceRecord;
     try {
-      ServiceElasticSearch db = connectDB.connect();
+      connectDB connect = new connectDB();
+      ServiceElasticSearch db = connect.connect();
       serviceRecord = db.getRecordByURI(serviceid);
+      db.closeConnection();
 
       if (serviceRecord != null) {
 
@@ -88,9 +88,10 @@ public class AccessService {
     Message serviceRecord;
 
     try {
-      ServiceElasticSearch db = connectDB.connect();
+      connectDB connect = new connectDB();
+      ServiceElasticSearch db = connect.connect();
       serviceRecord = db.getRecordByURI(serviceid);
-
+      db.closeConnection();
       if (serviceRecord != null) {
 
         if (serviceRecord.getKey(key) == null) {

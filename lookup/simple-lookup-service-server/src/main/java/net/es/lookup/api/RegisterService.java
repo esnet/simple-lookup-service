@@ -75,8 +75,10 @@ public class RegisterService {
         }
 
         try {
-          ServiceElasticSearch db = connectDB.connect();
+          connectDB connect = new connectDB();
+          ServiceElasticSearch db = connect.connect();
           Message res = db.queryAndPublishService(request);
+          db.closeConnection();
           response = new JSONRegisterResponse(res.getMap());
           String responseString;
           try {

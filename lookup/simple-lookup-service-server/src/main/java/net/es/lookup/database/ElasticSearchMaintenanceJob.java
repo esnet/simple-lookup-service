@@ -37,7 +37,8 @@ public class ElasticSearchMaintenanceJob implements Job {
     JobDataMap data = context.getJobDetail().getJobDataMap();
 
     try {
-      this.db = connectDB.connect();
+      connectDB connect = new connectDB();
+      ServiceElasticSearch db = connect.connect();
     } catch ( URISyntaxException e) {
       e.printStackTrace();
     }

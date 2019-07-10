@@ -29,10 +29,10 @@ public class BulkRenewService {
 
   /**
    * The method bulk renews records.
+   *
    * @param renewRequests Request containing list of uris.
    * @return String Json message as a string.
-   *
-   * */
+   */
   public String bulkRenew(String renewRequests) throws URISyntaxException, FileNotFoundException {
 
     // parse records
@@ -50,10 +50,16 @@ public class BulkRenewService {
       throw new BadRequestException("Request is invalid. Please edit the request and resend.");
     }
 
-    ServiceElasticSearch db = connectDB.connect();
+    connectDB connect = new connectDB();
+    ServiceElasticSearch db = connect.connect();
 
     JsonBulkRenewResponse renewResponse = checkAndRenewRecords(db, jsonBulkRenewRequest);
     String formattedRenewResponse = "";
+    try {
+      db.closeConnection();
+    } catch (IOException e) {
+      throw new InternalErrorException("Error closing connection to database");
+    }
     try {
       formattedRenewResponse = JSONMessage.toString(renewResponse);
     } catch (DataFormatException e) {
@@ -173,5 +179,4 @@ public class BulkRenewService {
     jsonBulkRenewResponse.updateRenewedCount(renewResponse);
     return jsonBulkRenewResponse;
   }
-
 }

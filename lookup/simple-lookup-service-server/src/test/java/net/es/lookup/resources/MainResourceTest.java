@@ -33,7 +33,8 @@ public class MainResourceTest {
    */
   @Before
   public void setUp() throws URISyntaxException, IOException {
-    client = connectDB.connect();
+    connectDB connect = new connectDB();
+    client = connect.connect();
     client.deleteAllRecords();
   }
 
@@ -68,7 +69,7 @@ public class MainResourceTest {
    * @throws InterruptedException // Sleep interrupted
    */
   @Test
-  public void postHandlerExist() throws IOException, InterruptedException {
+  public void postHandlerExist() throws InterruptedException {
     MainResource request = new MainResource();
     try{
     request.postHandler("lookup", jsonMessage());

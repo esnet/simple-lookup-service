@@ -3,6 +3,7 @@ package net.es.lookup.database;
 import com.google.gson.Gson;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
+import net.es.lookup.protocol.json.JSONRegisterRequest;
 import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,6 +31,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.common.Strings;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -106,6 +108,7 @@ public class ServiceElasticSearch {
             "1");
     getRequest.fetchSourceContext(new FetchSourceContext(false));
     getRequest.storedFields("_none_");
+    //Checks if the current index exists and creates it if it doesn't
     try {
      client.get(getRequest, RequestOptions.DEFAULT);
     } catch (IOException e) {
@@ -149,7 +152,6 @@ public class ServiceElasticSearch {
     exists(message); // checking if message already exists in the index
     Message timestampedMessage = addTimestamp(message); // adding a timestamp to the message
     insert(timestampedMessage, queryRequest); // inserting the timestamped message
-    client.close();
     return toMessage(timestampedMessage); // return the message that was added to the index
   }
 
@@ -331,14 +333,14 @@ public class ServiceElasticSearch {
    */
   private void exists(Message queryRequest) throws IOException, DuplicateEntryException {
     try {
-
       // Getting all records in the database
       final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(1L));
       SearchRequest searchRequest = new SearchRequest(this.indexName);
       searchRequest.scroll(scroll);
       SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
       searchSourceBuilder.query(QueryBuilders.termQuery("keyValues.type", queryRequest.getMap().get("type")));
-      searchRequest.source(searchSourceBuilder);
+      searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+      //searchRequest.source(searchSourceBuilder);
       SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
       String scrollId = searchResponse.getScrollId();
       SearchHit[] searchHits = searchResponse.getHits().getHits();
