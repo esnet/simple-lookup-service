@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.common.exception.internal.RecordNotFoundException;
-import net.es.lookup.protocol.json.JSONRegisterRequest;
 import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,8 +19,6 @@ import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.ClearScrollRequest;
-import org.elasticsearch.action.search.ClearScrollResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
@@ -32,14 +29,13 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.common.Strings;
-import org.elasticsearch.common.unit.Fuzziness;
-import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
-import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
@@ -51,7 +47,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+
+import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
+
 
 public class ServiceElasticSearch {
 
@@ -74,11 +72,11 @@ public class ServiceElasticSearch {
    * @throws URISyntaxException for incorrect dburl
    */
   public ServiceElasticSearch() throws URISyntaxException {
-    //Todo
-//    this.port1 = DatabaseConnectionKeys.DatabasePort1;
-//    this.port2 = DatabaseConnectionKeys.DatabasePort2;
-//    this.location = new URI(DatabaseConnectionKeys.server);
-//    this.indexName = DatabaseConnectionKeys.DatabaseName;
+    // Todo
+    //    this.port1 = DatabaseConnectionKeys.DatabasePort1;
+    //    this.port2 = DatabaseConnectionKeys.DatabasePort2;
+    //    this.location = new URI(DatabaseConnectionKeys.server);
+    //    this.indexName = DatabaseConnectionKeys.DatabaseName;
     init();
   }
 
@@ -105,14 +103,12 @@ public class ServiceElasticSearch {
             RestClient.builder(
                 new HttpHost(this.location.toString(), this.port1, "http"),
                 new HttpHost(this.location.toString(), this.port2, "http")));
-    GetRequest getRequest = new GetRequest(
-            this.indexName,
-            "1");
+    GetRequest getRequest = new GetRequest(this.indexName, "1");
     getRequest.fetchSourceContext(new FetchSourceContext(false));
     getRequest.storedFields("_none_");
-    //Checks if the current index exists and creates it if it doesn't
+    // Checks if the current index exists and creates it if it doesn't
     try {
-     client.get(getRequest, RequestOptions.DEFAULT);
+      client.get(getRequest, RequestOptions.DEFAULT);
     } catch (IOException e) {
       e.printStackTrace();
     } catch (ElasticsearchStatusException e) {
@@ -120,7 +116,8 @@ public class ServiceElasticSearch {
       Log.info("Creating index");
       CreateIndexRequest create = new CreateIndexRequest(this.indexName.toLowerCase());
       try {
-        CreateIndexResponse createIndexResponse = client.indices().create(create, RequestOptions.DEFAULT);
+        CreateIndexResponse createIndexResponse =
+            client.indices().create(create, RequestOptions.DEFAULT);
       } catch (IOException ex) {
         Log.error("unable to create index!");
       }
@@ -326,74 +323,77 @@ public class ServiceElasticSearch {
   }
 
   /**
-   * Checks if the document already exists in the database Todo Very expensive method might need to
-   * optimize
+   * Checks if the document already exists in the database
    *
    * @param queryRequest document to check existence of
    * @throws IOException Error searching the database
    * @throws DuplicateEntryException If there is a duplicate entry in the database
    */
   private void exists(Message queryRequest) throws IOException, DuplicateEntryException {
+
+    // Getting the document to search for in map form
+    Map<String, Object> queryMap = new TreeMap<>();
+    queryMap.putAll(queryRequest.getMap());
+
+    // Removing objects that are not user generated
+    queryMap.remove("expires");
+    queryMap.remove("_lastUpdated");
+    queryMap.remove("ttl");
+    queryMap.remove("_timestamp");
+    queryMap.remove("test-id");
+    queryMap.remove("uri");
+
+    SearchRequest searchRequest = new SearchRequest(this.indexName);
+    SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+    BoolQueryBuilder builder = QueryBuilders.boolQuery();
+    // Creating query for all common items
+    for (String key : queryMap.keySet()) {
+
+          builder.must(matchQuery("keyValues." + key, removeBracketFrom(queryMap.get(key).toString())));
+
+    }
+
+    searchSourceBuilder.query(builder);
     try {
-      // Getting all records in the database
-      final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(1L));
-      SearchRequest searchRequest = new SearchRequest(this.indexName);
-      searchRequest.scroll(scroll);
-      SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-      searchSourceBuilder.query(QueryBuilders.termQuery("keyValues.type", queryRequest.getMap().get("type")));
-      searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-      searchSourceBuilder.size(Integer.MAX_VALUE);
-      searchSourceBuilder.timeout(new TimeValue(3, TimeUnit.SECONDS));
-      //searchRequest.source(searchSourceBuilder);
+
+      // Getting all records from the database
+      searchRequest.source(searchSourceBuilder);
       SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-      String scrollId = searchResponse.getScrollId();
       SearchHit[] searchHits = searchResponse.getHits().getHits();
 
-      // Getting the document to search for in map form
-      Map<String, Object> queryMap = new TreeMap<>();
-      queryMap.putAll(queryRequest.getMap());
-
-      // For each result we got
-      for (SearchHit search : searchHits) {
-
-        // Get result as a map
-        Map<String, Object> searchMap = new TreeMap<>();
-
-        // Remove internally added keys from both maps
-        searchMap.putAll((Map) search.getSourceAsMap().get("keyValues"));
-        searchMap.remove("expires");
-        searchMap.remove("error_Message");
-        searchMap.remove("_lastUpdated");
-        searchMap.remove("ttl");
-        searchMap.remove("_timestamp");
-        searchMap.remove("test-id");
-        searchMap.remove("uri");
-
-        queryMap.remove("expires");
-        queryMap.remove("_lastUpdated");
-        queryMap.remove("ttl");
-        queryMap.remove("_timestamp");
-        queryMap.remove("test-id");
-        queryMap.remove("uri");
-
-        // Check equality of both maps
-        if (searchMap
-            .toString()
-            .replace("\"", "")
-            .replace(" ", "")
-            .equalsIgnoreCase(queryMap.toString().replace("\"", "").replace(" ", ""))) {
-          throw new DuplicateEntryException("Record already exists");
+      if (searchHits.length > 0) {
+        for (SearchHit hit : searchHits) {
+          Map hitMap = hit.getSourceAsMap();
+          Map keyValuesMap = (Map) hitMap.get("keyValues");
+          keyValuesMap.remove("expires");
+          keyValuesMap.remove("_lastUpdated");
+          keyValuesMap.remove("ttl");
+          keyValuesMap.remove("_timestamp");
+          keyValuesMap.remove("test-id");
+          keyValuesMap.remove("uri");
+          if (keyValuesMap.size() == queryMap.size()) {
+            throw new DuplicateEntryException("Record already exists");
+          }
         }
       }
-      // Clearing the scroller created to get all documents
-      ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
-      clearScrollRequest.addScrollId(scrollId);
-      ClearScrollResponse clearScrollResponse =
-          client.clearScroll(clearScrollRequest, RequestOptions.DEFAULT);
-      boolean succeeded = clearScrollResponse.isSucceeded();
     } catch (ElasticsearchStatusException e) {
-      Log.info("empty database");
+      Log.info("Couldn't find record in database" + e.getMessage());
     }
+  }
+
+  /**
+   * Removes Square brackets from the start and end of a string
+   * eg: ["Hello"] -> "Hello"
+   *
+   * @param toRemove Object that can be converted to a string for which we want to remove brackets
+   * @return String with brackets removed
+   */
+  private String removeBracketFrom(String toRemove) {
+    String type = toRemove;
+    if (type.startsWith("[") && type.endsWith("]")) {
+      type = type.substring(type.indexOf("[") + 1, type.indexOf("]"));
+    }
+    return type;
   }
 
   /**
