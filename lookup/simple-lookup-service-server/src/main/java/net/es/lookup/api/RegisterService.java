@@ -84,6 +84,9 @@ public class RegisterService {
           ServiceElasticSearch db = connect.connect();
           Message res = db.queryAndPublishService(request);
           db.closeConnection();
+          connect = null;
+          db = null;
+          System.gc(); //Todo fix memory management
           response = new JSONRegisterResponse(res.getMap());
           String responseString;
           try {
