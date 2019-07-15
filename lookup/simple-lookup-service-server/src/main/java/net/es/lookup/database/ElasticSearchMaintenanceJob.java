@@ -38,7 +38,7 @@ public class ElasticSearchMaintenanceJob implements Job {
 
     try {
       connectDB connect = new connectDB();
-      ServiceElasticSearch db = connect.connect();
+      db = connect.connect();
     } catch ( URISyntaxException e) {
       LOG.error("Error in URI");
     }
@@ -52,6 +52,9 @@ public class ElasticSearchMaintenanceJob implements Job {
     try {
 
       count = db.deleteExpiredRecords(daterange);
+      db.closeConnection();
+      db = null;
+      System.gc();
       LOG.info("Record deleted: " + count);
 
     } catch (IOException e) {

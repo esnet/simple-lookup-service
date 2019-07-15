@@ -115,8 +115,7 @@ public class ServiceElasticSearch {
       Log.info("Creating index");
       CreateIndexRequest create = new CreateIndexRequest(this.indexName.toLowerCase());
       try {
-        CreateIndexResponse createIndexResponse =
-            client.indices().create(create, RequestOptions.DEFAULT);
+        client.indices().create(create, RequestOptions.DEFAULT);
       } catch (IOException ex) {
         Log.error("unable to create index!");
       }
@@ -130,6 +129,7 @@ public class ServiceElasticSearch {
    */
   public void closeConnection() throws IOException {
     client.close();
+    client = null;
   }
 
   /**
@@ -331,8 +331,7 @@ public class ServiceElasticSearch {
   private void exists(Message queryRequest) throws IOException, DuplicateEntryException {
 
     // Getting the document to search for in map form
-    Map<String, Object> queryMap = new TreeMap<>();
-    queryMap.putAll(queryRequest.getMap());
+    Map<String, Object> queryMap = new TreeMap<>(queryRequest.getMap());
 
     // Removing objects that are not user generated
     queryMap.remove("expires");
@@ -408,7 +407,7 @@ public class ServiceElasticSearch {
     Gson gson = new Gson();
     String json = gson.toJson(message);
     request.source(json, XContentType.JSON);
-    IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
+    client.index(request, RequestOptions.DEFAULT);
   }
 
   /**
