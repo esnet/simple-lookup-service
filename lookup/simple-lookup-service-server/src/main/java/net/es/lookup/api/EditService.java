@@ -62,6 +62,7 @@ public class EditService {
         connectDB connect = new connectDB();
         ServiceElasticSearch db = connect.connect();
         Message serviceRecord = db.getRecordByURI(serviceid);
+
         if (serviceRecord != null) {
 
           LOG.debug("servicerecord not null");
@@ -84,7 +85,7 @@ public class EditService {
 
             newRequest.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_RENEW);
             Message res = db.updateService(serviceid, newRequest);
-
+            db.closeConnection();
             if (PublishService.isServiceOn()) {
               Publisher publisher = Publisher.getInstance();
               publisher.eventNotification(res);
