@@ -49,6 +49,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
+import javax.ws.rs.InternalServerErrorException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -56,6 +57,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
+import static org.elasticsearch.index.query.QueryBuilders.regexpQuery;
 
 public class ServiceElasticSearch {
 
@@ -343,34 +345,6 @@ public class ServiceElasticSearch {
     String operator = (String) operators.getMap().get("operator");
 
     return allQuery(queryRequest.getMap(), maxResults, operator);
-
-    //    Document query;
-    //
-    //    if (queryRequest.getMap().isEmpty()) {
-    //      query = new Document();
-    //    } else {
-    //      query = buildQuery(queryRequest, operators);
-    //    }
-    //
-    //    ArrayList<Message> result = new ArrayList<Message>();
-    //
-    //    try {
-    //      FindIterable resultIterator = coll.find(query);
-    //      MongoCursor cursor = resultIterator.iterator();
-    //
-    //      while (cursor.hasNext()) {
-    //        Document tmp = (Document) cursor.next();
-    //        Message dbObjectMessage = toMessage(tmp);
-    //        result.add(dbObjectMessage);
-    //        tmp = null;
-    //      }
-    //
-    //    } catch (MongoException e) {
-    //
-    //      throw new DatabaseException("Error retrieving results");
-    //    }
-    //
-    //    return result;
   }
 
   private List<Message> allQuery(Map queryRequest, int maxResults, String operator) {
@@ -385,13 +359,20 @@ public class ServiceElasticSearch {
     if (operator.equalsIgnoreCase("all")) {
       for (Object key : queryRequest.keySet()) {
         String keyAsString = (String) key;
-        builder.must(matchQuery("keyValues." + keyAsString, queryRequest.get(keyAsString)));
+        if (!queryRequest.get(keyAsString).toString().contains("*")) {
+          builder.must(matchQuery("keyValues." + keyAsString, queryRequest.get(keyAsString)));
+        }else {
+          builder.must(regexpQuery("keyValues." + keyAsString, (String) queryRequest.get(keyAsString)));
+        }
       }
     } else {
       for (Object key : queryRequest.keySet()) {
         String keyAsString = (String) key;
-        builder.should(matchQuery("keyValues." + keyAsString, queryRequest.get(keyAsString)));
-      }
+        if (!queryRequest.get(keyAsString).toString().contains("*")) {
+          builder.should(matchQuery("keyValues." + keyAsString, queryRequest.get(keyAsString)));
+        }else {
+          builder.should(regexpQuery("keyValues." + keyAsString, (String) queryRequest.get(keyAsString)));
+        }      }
     }
     searchSourceBuilder.query(builder);
     try {
@@ -406,7 +387,8 @@ public class ServiceElasticSearch {
     } catch (ElasticsearchStatusException e) {
       Log.info("Couldn't find record in database" + e.getMessage());
     } catch (IOException e) {
-      e.printStackTrace();
+      Log.error("Internal server error" + e.getMessage());
+      throw new InternalServerErrorException(e.getMessage());
     }
     return result;
   }
