@@ -57,7 +57,6 @@ import java.util.regex.Pattern;
 
 import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 
-
 public class ServiceElasticSearch {
 
   // URl to connect to the databse
@@ -331,61 +330,68 @@ public class ServiceElasticSearch {
 
   /**
    * Method to query records from database.
+   *
    * @param message original query request
    * @param queryRequest query keywords extracted from the priginal request
    * @param operators operators like ANY, ALL that specifies how query keywords should be applied
    * @param maxResults max results to be returned. not implemented
    * @return List of all the records
-   * */
+   */
   public List<Message> query(
-          Message message, Message queryRequest, Message operators, int maxResults)
-          throws DatabaseException {
+      Message message, Message queryRequest, Message operators, int maxResults)
+      throws DatabaseException {
     String operator = (String) operators.getMap().get("operator");
 
-    if (operator.equalsIgnoreCase("all")){
-      return allQuery(queryRequest.getMap(), maxResults);
-    }
-    return new ArrayList<>();
+    return allQuery(queryRequest.getMap(), maxResults, operator);
 
-//    Document query;
-//
-//    if (queryRequest.getMap().isEmpty()) {
-//      query = new Document();
-//    } else {
-//      query = buildQuery(queryRequest, operators);
-//    }
-//
-//    ArrayList<Message> result = new ArrayList<Message>();
-//
-//    try {
-//      FindIterable resultIterator = coll.find(query);
-//      MongoCursor cursor = resultIterator.iterator();
-//
-//      while (cursor.hasNext()) {
-//        Document tmp = (Document) cursor.next();
-//        Message dbObjectMessage = toMessage(tmp);
-//        result.add(dbObjectMessage);
-//        tmp = null;
-//      }
-//
-//    } catch (MongoException e) {
-//
-//      throw new DatabaseException("Error retrieving results");
-//    }
-//
-//    return result;
+    //    Document query;
+    //
+    //    if (queryRequest.getMap().isEmpty()) {
+    //      query = new Document();
+    //    } else {
+    //      query = buildQuery(queryRequest, operators);
+    //    }
+    //
+    //    ArrayList<Message> result = new ArrayList<Message>();
+    //
+    //    try {
+    //      FindIterable resultIterator = coll.find(query);
+    //      MongoCursor cursor = resultIterator.iterator();
+    //
+    //      while (cursor.hasNext()) {
+    //        Document tmp = (Document) cursor.next();
+    //        Message dbObjectMessage = toMessage(tmp);
+    //        result.add(dbObjectMessage);
+    //        tmp = null;
+    //      }
+    //
+    //    } catch (MongoException e) {
+    //
+    //      throw new DatabaseException("Error retrieving results");
+    //    }
+    //
+    //    return result;
   }
 
-
-  private List<Message> allQuery(Map queryRequest, int maxResults){
+  private List<Message> allQuery(Map queryRequest, int maxResults, String operator) {
 
     SearchRequest searchRequest = new SearchRequest(this.indexName);
     SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+    if (maxResults != 0) {
+      searchSourceBuilder.size(maxResults);
+    }
     BoolQueryBuilder builder = QueryBuilders.boolQuery();
     List<Message> result = new ArrayList<>();
-    for (Object key : queryRequest.keySet()) {
-      String keyAsString = (String) key;
-      builder.must(matchQuery("keyValues." + keyAsString, queryRequest.get(keyAsString)));
+    if (operator.equalsIgnoreCase("all")) {
+      for (Object key : queryRequest.keySet()) {
+        String keyAsString = (String) key;
+        builder.must(matchQuery("keyValues." + keyAsString, queryRequest.get(keyAsString)));
+      }
+    } else {
+      for (Object key : queryRequest.keySet()) {
+        String keyAsString = (String) key;
+        builder.should(matchQuery("keyValues." + keyAsString, queryRequest.get(keyAsString)));
+      }
     }
     searchSourceBuilder.query(builder);
     try {
@@ -395,7 +401,7 @@ public class ServiceElasticSearch {
       SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
       SearchHit[] searchHits = searchResponse.getHits().getHits();
       for (SearchHit hit : searchHits) {
-          result.add(new Message((Map<String, Object>) hit.getSourceAsMap().get("keyValues")));
+        result.add(new Message((Map<String, Object>) hit.getSourceAsMap().get("keyValues")));
       }
     } catch (ElasticsearchStatusException e) {
       Log.info("Couldn't find record in database" + e.getMessage());
@@ -431,8 +437,7 @@ public class ServiceElasticSearch {
     // Creating query for all common items
     for (String key : queryMap.keySet()) {
 
-          builder.must(matchQuery("keyValues." + key, removeBracketFrom(queryMap.get(key).toString())));
-
+      builder.must(matchQuery("keyValues." + key, removeBracketFrom(queryMap.get(key).toString())));
     }
 
     searchSourceBuilder.query(builder);
@@ -464,8 +469,7 @@ public class ServiceElasticSearch {
   }
 
   /**
-   * Removes Square brackets from the start and end of a string
-   * eg: ["Hello"] -> "Hello"
+   * Removes Square brackets from the start and end of a string eg: ["Hello"] -> "Hello"
    *
    * @param toRemove Object that can be converted to a string for which we want to remove brackets
    * @return String with brackets removed
