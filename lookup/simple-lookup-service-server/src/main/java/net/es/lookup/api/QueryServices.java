@@ -9,6 +9,8 @@ import net.es.lookup.common.exception.api.ServiceUnavailableTemporarilyException
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.ServiceDaoMongoDb;
+import net.es.lookup.database.ServiceElasticSearch;
+import net.es.lookup.database.connectDB;
 import net.es.lookup.protocol.json.JSONMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,10 +39,10 @@ public class QueryServices {
 
     Message queryParameters = getQueryParameters(request);
     Message operators = getOperators(request, queryParameters);
-
     // Query DB
     try {
-      ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
+      connectDB connect = new connectDB();
+      ServiceElasticSearch db = connect.connect();
 
       if (db != null) {
 

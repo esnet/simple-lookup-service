@@ -1,12 +1,18 @@
 package net.es.lookup.database;
 
 import com.google.gson.Gson;
+import com.mongodb.MongoException;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
 import net.es.lookup.common.Message;
+import net.es.lookup.common.ReservedValues;
+import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.common.exception.internal.RecordNotFoundException;
 import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.Document;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
@@ -47,6 +53,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 
@@ -318,6 +325,82 @@ public class ServiceElasticSearch {
       // Get result as a map
       Map<String, Object> searchMap = search.getSourceAsMap();
       result.add(new Message(searchMap));
+    }
+    return result;
+  }
+
+  /**
+   * Method to query records from database.
+   * @param message original query request
+   * @param queryRequest query keywords extracted from the priginal request
+   * @param operators operators like ANY, ALL that specifies how query keywords should be applied
+   * @param maxResults max results to be returned. not implemented
+   * @return List of all the records
+   * */
+  public List<Message> query(
+          Message message, Message queryRequest, Message operators, int maxResults)
+          throws DatabaseException {
+    String operator = (String) operators.getMap().get("operator");
+
+    if (operator.equalsIgnoreCase("all")){
+      return allQuery(queryRequest.getMap(), maxResults);
+    }
+    return new ArrayList<>();
+
+//    Document query;
+//
+//    if (queryRequest.getMap().isEmpty()) {
+//      query = new Document();
+//    } else {
+//      query = buildQuery(queryRequest, operators);
+//    }
+//
+//    ArrayList<Message> result = new ArrayList<Message>();
+//
+//    try {
+//      FindIterable resultIterator = coll.find(query);
+//      MongoCursor cursor = resultIterator.iterator();
+//
+//      while (cursor.hasNext()) {
+//        Document tmp = (Document) cursor.next();
+//        Message dbObjectMessage = toMessage(tmp);
+//        result.add(dbObjectMessage);
+//        tmp = null;
+//      }
+//
+//    } catch (MongoException e) {
+//
+//      throw new DatabaseException("Error retrieving results");
+//    }
+//
+//    return result;
+  }
+
+
+  private List<Message> allQuery(Map queryRequest, int maxResults){
+
+    SearchRequest searchRequest = new SearchRequest(this.indexName);
+    SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+    BoolQueryBuilder builder = QueryBuilders.boolQuery();
+    List<Message> result = new ArrayList<>();
+    for (Object key : queryRequest.keySet()) {
+      String keyAsString = (String) key;
+      builder.must(matchQuery("keyValues." + keyAsString, queryRequest.get(keyAsString)));
+    }
+    searchSourceBuilder.query(builder);
+    try {
+
+      // Getting all records from the database
+      searchRequest.source(searchSourceBuilder);
+      SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+      SearchHit[] searchHits = searchResponse.getHits().getHits();
+      for (SearchHit hit : searchHits) {
+          result.add(new Message((Map<String, Object>) hit.getSourceAsMap().get("keyValues")));
+      }
+    } catch (ElasticsearchStatusException e) {
+      Log.info("Couldn't find record in database" + e.getMessage());
+    } catch (IOException e) {
+      e.printStackTrace();
     }
     return result;
   }

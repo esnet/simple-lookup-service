@@ -58,7 +58,6 @@ public class MainResource {
   @GET
   @Produces("application/json")
   public String getHandler(@Context UriInfo ui, @PathParam("sls") String sls) {
-
     MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
     Message message = new Message();
     int maxResults = 0;
@@ -94,7 +93,6 @@ public class MainResource {
         }
       }
     }
-
     return this.queryServices.query(message, maxResults);
   }
 
