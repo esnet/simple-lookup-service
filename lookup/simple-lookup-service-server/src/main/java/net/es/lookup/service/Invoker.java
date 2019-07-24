@@ -121,23 +121,6 @@ public class Invoker {
 
     scheduler.schedule(job, trigger);
 
-   /*   if (queueServiceConfigReader != null && queueServiceConfigReader.isServiceOn()) {
-
-      PublishService publishService = PublishService.getInstance();
-      publishService.setMaxPushEvents(queueServiceConfigReader.getBatchSize());
-      publishService.setMaxInterval(queueServiceConfigReader.getPushInterval());
-      publishService.setHost(queueServiceConfigReader.getHost());
-      publishService.setPort(queueServiceConfigReader.getPort());
-      publishService.setUserName(queueServiceConfigReader.getUserName());
-      publishService.setPassword(queueServiceConfigReader.getPassword());
-      publishService.setVhost(queueServiceConfigReader.getVhost());
-      publishService.setPollingInterval(queueServiceConfigReader.getPollingInterval());
-      publishService.setExchangeName(queueServiceConfigReader.getExchangeName());
-      publishService.setExchangeType(queueServiceConfigReader.getExchangeType());
-      publishService.setExchangeDurability(queueServiceConfigReader.getExchangeDurability());
-      publishService.startService();
-    }*/
-
     JobDetail gcInvoker =
         newJob(MemoryManager.class).withIdentity("gc", "MemoryManagement").build();
 
