@@ -46,7 +46,6 @@ public class MainResource {
   @Consumes("application/json")
   @Produces("application/json")
   public String postHandler(@PathParam("sls") String sls, String message) {
-
     if (sls.equalsIgnoreCase(prefix)) {
       return this.registerService.registerService(message);
     } else {

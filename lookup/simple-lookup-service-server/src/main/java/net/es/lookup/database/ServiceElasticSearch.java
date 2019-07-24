@@ -332,7 +332,7 @@ public class ServiceElasticSearch {
 
   /**
    * Method to query records from database.
-   *
+   * // Todo fix documentation
    * @param message original query request
    * @param queryRequest query keywords extracted from the priginal request
    * @param operators operators like ANY, ALL that specifies how query keywords should be applied

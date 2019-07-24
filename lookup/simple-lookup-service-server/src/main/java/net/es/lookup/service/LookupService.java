@@ -116,6 +116,7 @@ public class LookupService {
     rc.register(net.es.lookup.resources.KeyResource.class);
     rc.register(net.es.lookup.resources.MainResource.class);
     rc.register(net.es.lookup.resources.RecordResource.class);
+    
 
     LOG.info("Creating Resource..."+rc.getResources().toString());
     LOG.info("Starting grizzly...");
@@ -124,7 +125,6 @@ public class LookupService {
     HttpServer server =
         GrizzlyHttpServerFactory.createHttpServer(
             UriBuilder.fromUri(hosturl).port(this.port).build(), rc);
-
 
     return server;
   }
