@@ -139,6 +139,7 @@ public class ServiceElasticSearch {
   public void closeConnection() throws IOException {
     client.close();
     client = null;
+    System.gc();
   }
 
   /**

@@ -1,10 +1,19 @@
 package net.es.lookup.service;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.http.server.ServerConfiguration;
+import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
+import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
+import org.glassfish.grizzly.strategies.SameThreadIOStrategy;
+import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -116,7 +125,6 @@ public class LookupService {
     rc.register(net.es.lookup.resources.KeyResource.class);
     rc.register(net.es.lookup.resources.MainResource.class);
     rc.register(net.es.lookup.resources.RecordResource.class);
-    
 
     LOG.info("Creating Resource..."+rc.getResources().toString());
     LOG.info("Starting grizzly...");

@@ -78,35 +78,41 @@ public class RegisterService {
             query.add(pairs.getKey(), pairs.getValue());
           }
         }
-
         try {
           connectDB connect = new connectDB();
           ServiceElasticSearch db = connect.connect();
-          Message res = db.queryAndPublishService(request);
-          db.closeConnection();
-          connect = null;
-          db = null;
-          System.gc(); //Todo fix memory management
-          response = new JSONRegisterResponse(res.getMap());
-          String responseString;
           try {
-            responseString = JSONMessage.toString(response);
-          } catch (DataFormatException e) {
+            Message res = db.queryAndPublishService(request);
+            db.closeConnection();
+            connect = null;
+            db = null;
+            System.gc(); // Todo fix memory management
+            response = new JSONRegisterResponse(res.getMap());
+            String responseString;
+            try {
+              responseString = JSONMessage.toString(response);
+            } catch (DataFormatException e) {
 
-            Log.fatal("Data formatting exception");
-            Log.info("Register status: FAILED due to Data formatting error; exiting");
-            throw new InternalErrorException(
-                "Error in creating response. Data formatting exception at server.");
-          }
-          Log.info("Register status: SUCCESS; exiting");
-          Log.debug("response:" + responseString);
+              Log.fatal("Data formatting exception");
+              Log.info("Register status: FAILED due to Data formatting error; exiting");
+              throw new InternalErrorException(
+                  "Error in creating response. Data formatting exception at server.");
+            }
+            Log.info("Register status: SUCCESS; exiting");
+            Log.debug("response:" + responseString);
 
-          // Todo deprecated?
-          if (PublishService.isServiceOn()) {
-            Publisher publisher = Publisher.getInstance();
-            publisher.eventNotification(res);
+            // Todo deprecated?
+            if (PublishService.isServiceOn()) {
+              Publisher publisher = Publisher.getInstance();
+              publisher.eventNotification(res);
+            }
+            return responseString;
+          } catch (Exception e) {
+            db.closeConnection();
+            connect = null;
+            db = null;
+            throw e;
           }
-          return responseString;
         } catch (DuplicateEntryException e) {
           Log.error("FobiddenRequestException:" + e.getMessage());
           Log.info("Register status: FAILED due to Duplicate Entry; exiting");
