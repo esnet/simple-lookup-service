@@ -163,6 +163,23 @@ public class ServiceElasticSearch {
     return toMessage(timestampedMessage); // return the message that was added to the index
   }
 
+  public Message bulkQueryAndPublishService(Queue<Message> messages)
+          throws DuplicateEntryException, IOException {
+
+    BulkRequest request = new BulkRequest();
+    Gson gson = new Gson();
+    for (Message message : messages) {
+      Message queryRequest = new Message();
+      queryRequest.add("uri", message.getURI());
+      queryRequest.add("type", message.getRecordType());
+      Message timestampedMessage = addTimestamp(message);
+      request.add(new IndexRequest(this.indexName).id(message.getURI())
+              .source(gson.toJson(message), XContentType.JSON));
+    }
+    BulkResponse bulkResponse = client.bulk(request, RequestOptions.DEFAULT);
+    return new Message(); // todo return the message that was added to the index
+  }
+
   /**
    * Deletes the record for a given URI
    *
