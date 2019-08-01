@@ -16,6 +16,9 @@ import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.MongoDBMaintenanceJob;
 import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.timer.Scheduler;
+import net.es.lookup.utils.config.LookupServiceConfigParser;
+import net.es.lookup.utils.config.entity.DatabaseConfig;
+import net.es.lookup.utils.config.entity.LookupServiceConfig;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import net.es.lookup.utils.log.StdOutErrToLog;
@@ -31,8 +34,10 @@ public class Invoker {
 
   // private static ServiceDaoMongoDb dao = null;
   private static String host = "localhost";
-  private static LookupServiceConfigReader lookupServiceConfigReader;
-  private static QueueServiceConfigReader queueServiceConfigReader;
+  //private static LookupServiceConfigReader lookupServiceConfigReader;
+  //private static QueueServiceConfigReader queueServiceConfigReader;
+
+  private static LookupServiceConfig lsConfig;
 
   private static String configPath = "etc/";
   private static final String lookupservicecfg = "lookupservice.yaml";
@@ -60,27 +65,22 @@ public class Invoker {
     LOG = LogManager.getLogger(Invoker.class.getName());
     //StdOutErrToLog.redirectStdOutErrToLog();
 
-    LookupServiceConfigReader.init(configPath + lookupservicecfg);
-   //QueueServiceConfigReader.init(configPath + queuecfg);
+    LookupServiceConfigParser configParser = new LookupServiceConfigParser(configPath+lookupservicecfg);
+    configParser.parse();
+    lsConfig = configParser.getLookupServiceConfig();
 
-    lookupServiceConfigReader = LookupServiceConfigReader.getInstance();
-    //queueServiceConfigReader = QueueServiceConfigReader.getInstance();
-
-    port = lookupServiceConfigReader.getPort();
-    host = lookupServiceConfigReader.getHost();
+    port = lsConfig.getWebservice().getPort();
+    host = lsConfig.getWebservice().getHost();
 
     LOG.info("starting ServiceDaoMongoDb");
 
-    String dburl = lookupServiceConfigReader.getDbUrl();
-    int dbport = lookupServiceConfigReader.getDbPort();
-    String dbname = lookupServiceConfigReader.getDbName();
-    String collname = lookupServiceConfigReader.getCollName();
+    DatabaseConfig dbConfig = lsConfig.getDatabase();
 
     List<String> services = new LinkedList<>();
 
     // Initialize services
     try {
-      new ServiceDaoMongoDb(dburl, dbport, dbname, collname);
+      new ServiceDaoMongoDb(dbConfig.getDBUrl(), dbConfig.getDBPort(), dbConfig.getDBName(), dbConfig.getDBCollName());
       services.add(LookupService.LOOKUP_SERVICE);
 
     } catch (DatabaseException e) {
@@ -92,19 +92,20 @@ public class Invoker {
     // Create the REST service
     Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
 
+
     // Start the service
     Invoker.lookupService.startService();
 
     // DB Pruning
     Scheduler scheduler = Scheduler.getInstance();
-    int dbpruneInterval = lookupServiceConfigReader.getPruneInterval();
-    long prunethreshold = lookupServiceConfigReader.getPruneThreshold();
+    long dbpruneInterval = dbConfig.getPruneInterval();
+    long prunethreshold = dbConfig.getPruneThreshold();
     JobDetail job =
         newJob(MongoDBMaintenanceJob.class)
             .withIdentity(LookupService.LOOKUP_SERVICE + "clean", "DBMaintenance")
             .build();
     job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
-    job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, dbname);
+    job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, dbConfig.getDBName());
 
     // Trigger the job to run now, and then every dbpruneInterval seconds
     Trigger trigger =
@@ -113,7 +114,7 @@ public class Invoker {
             .startNow()
             .withSchedule(
                 simpleSchedule()
-                    .withIntervalInSeconds(dbpruneInterval)
+                    .withIntervalInSeconds((int)dbpruneInterval)
                     .repeatForever()
                     .withMisfireHandlingInstructionIgnoreMisfires())
             .withPriority(Thread.MAX_PRIORITY)

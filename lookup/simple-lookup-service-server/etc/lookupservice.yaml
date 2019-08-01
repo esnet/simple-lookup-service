@@ -1,12 +1,12 @@
 ---
 #Lookup Service settings
-lookupservice:
+webservice:
     host: 'localhost'
     port: 8090
     lease:
-        max: 2592000
-        default: 7200
-        min: 30
+        maxVal: 2592000
+        defaultVal: 7200
+        minVal: 30
 
 #Database settings  
 database:
