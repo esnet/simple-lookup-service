@@ -16,6 +16,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
+import net.es.lookup.api.BulkRegisterService;
 import net.es.lookup.api.BulkRenewService;
 import net.es.lookup.api.QueryServices;
 import net.es.lookup.api.RegisterService;
@@ -47,7 +48,9 @@ public class MainResource {
   @Produces("application/json")
   public String postHandler(@PathParam("sls") String sls, String message) {
     if (sls.equalsIgnoreCase(prefix)) {
-      return this.registerService.registerService(message);
+      BulkRegisterService b = new BulkRegisterService();
+      return b.bulkRegister(message);
+      //return this.registerService.registerService(message);
     } else {
       throw new NotSupportedException("Register Operation not supported");
     }

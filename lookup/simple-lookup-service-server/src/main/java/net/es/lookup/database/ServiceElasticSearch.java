@@ -18,6 +18,7 @@ import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
@@ -163,9 +164,10 @@ public class ServiceElasticSearch {
     return toMessage(timestampedMessage); // return the message that was added to the index
   }
 
-  public Message bulkQueryAndPublishService(Queue<Message> messages)
-          throws DuplicateEntryException, IOException {
+  public List<String> bulkQueryAndPublishService(Queue<Message> messages)
+          throws IOException {
 
+    List<String> failed = new ArrayList<>();
     BulkRequest request = new BulkRequest();
     Gson gson = new Gson();
     for (Message message : messages) {
@@ -177,7 +179,16 @@ public class ServiceElasticSearch {
               .source(gson.toJson(message), XContentType.JSON));
     }
     BulkResponse bulkResponse = client.bulk(request, RequestOptions.DEFAULT);
-    return new Message(); // todo return the message that was added to the index
+    if(bulkResponse.hasFailures()){
+      Iterator<BulkItemResponse> responses = bulkResponse.iterator();
+      while (responses.hasNext()){
+        BulkItemResponse response = responses.next();
+        if(response.isFailed()){
+          failed.add(response.getId());
+        }
+      }
+    }
+    return failed; // todo return the message that was added to the index
   }
 
   /**
