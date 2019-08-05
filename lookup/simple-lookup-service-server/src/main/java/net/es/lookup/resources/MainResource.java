@@ -38,6 +38,7 @@ public class MainResource {
   private QueryServices queryServices = new QueryServices();
   private RegisterService registerService = new RegisterService();
   private BulkRenewService bulkRenewService = new BulkRenewService();
+  private BulkRegisterService b = new BulkRegisterService();
   private String prefix = "lookup";
 
   private static Logger Log = LogManager.getLogger(MainResource.class);
@@ -48,8 +49,9 @@ public class MainResource {
   @Produces("application/json")
   public String postHandler(@PathParam("sls") String sls, String message) {
     if (sls.equalsIgnoreCase(prefix)) {
-      BulkRegisterService b = new BulkRegisterService();
-      return b.bulkRegister(message);
+
+      String str = this.b.bulkRegister(message);
+      return str;
       //return this.registerService.registerService(message);
     } else {
       throw new NotSupportedException("Register Operation not supported");

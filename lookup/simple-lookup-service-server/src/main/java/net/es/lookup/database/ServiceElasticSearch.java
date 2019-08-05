@@ -158,34 +158,50 @@ public class ServiceElasticSearch {
     Message queryRequest = new Message();
     queryRequest.add("uri", message.getURI());
     queryRequest.add("type", message.getRecordType());
-    exists(message); // checking if message already exists in the index
+    if(exists(message)){
+      throw new DuplicateEntryException("Record already exists");
+    } // checking if message already exists in the index
     Message timestampedMessage = addTimestamp(message); // adding a timestamp to the message
     insert(timestampedMessage, queryRequest); // inserting the timestamped message
     return toMessage(timestampedMessage); // return the message that was added to the index
   }
 
-  public List<String> bulkQueryAndPublishService(Queue<Message> messages)
-          throws IOException, DuplicateEntryException {
+  public List<Message> bulkQueryAndPublishService(Queue<Message> messages)
+          throws IOException {
 
-    List<String> failed = new ArrayList<>();
+    List<Message> failed = new ArrayList<>();
     BulkRequest request = new BulkRequest();
+    Map<String, Message> messageMap = new HashMap<>();
     Gson gson = new Gson();
+
     for (Message message : messages) {
-      exists(message);
-      Message queryRequest = new Message();
-      queryRequest.add("uri", message.getURI());
-      queryRequest.add("type", message.getRecordType());
-      Message timestampedMessage = addTimestamp(message);
-      request.add(new IndexRequest(this.indexName).id(message.getURI())
-              .source(gson.toJson(timestampedMessage), XContentType.JSON));
+        if(exists(message)){
+          message.setErrorMessage("");
+          Map<String, Object> errorMessageMap = message.getMap();
+          errorMessageMap.put("error", "Document already exists");
+          Message errorMessage = new Message(errorMessageMap);
+          failed.add(errorMessage);
+        } else {
+          Message timestampedMessage = addTimestamp(message);
+          request.add(
+              new IndexRequest(this.indexName)
+                  .id(message.getURI())
+                  .source(gson.toJson(timestampedMessage), XContentType.JSON));
+          messageMap.put(message.getURI(), message);
+        }
     }
-    BulkResponse bulkResponse = client.bulk(request, RequestOptions.DEFAULT);
-    if(bulkResponse.hasFailures()){
-      Iterator<BulkItemResponse> responses = bulkResponse.iterator();
-      while (responses.hasNext()){
-        BulkItemResponse response = responses.next();
-        if(response.isFailed()){
-          failed.add(response.getId());
+    if (request.numberOfActions() != 0) {
+      BulkResponse bulkResponse = client.bulk(request, RequestOptions.DEFAULT);
+      if (bulkResponse.hasFailures()) {
+        Iterator<BulkItemResponse> responses = bulkResponse.iterator();
+        while (responses.hasNext()) {
+          BulkItemResponse response = responses.next();
+          if (response.isFailed()) {
+            Map<String, Object> errorMessageMap = messageMap.get(response.getId()).getMap();
+            errorMessageMap.put("error", response.getFailureMessage());
+            Message errorMessage = new Message(errorMessageMap);
+            failed.add(errorMessage);
+          }
         }
       }
     }
@@ -430,7 +446,7 @@ public class ServiceElasticSearch {
    * @throws IOException Error searching the database
    * @throws DuplicateEntryException If there is a duplicate entry in the database
    */
-  private void exists(Message queryRequest) throws IOException, DuplicateEntryException {
+  private boolean exists(Message queryRequest) throws IOException {
 
     // Getting the document to search for in map form
     Map<String, Object> queryMap = new TreeMap<>(queryRequest.getMap());
@@ -471,13 +487,15 @@ public class ServiceElasticSearch {
           keyValuesMap.remove("test-id");
           keyValuesMap.remove("uri");
           if (keyValuesMap.size() == queryMap.size()) {
-            throw new DuplicateEntryException("Record already exists");
+            return true;
+            //throw new DuplicateEntryException("Record already exists");
           }
         }
       }
     } catch (ElasticsearchStatusException e) {
       Log.info("Couldn't find record in database" + e.getMessage());
     }
+    return false;
   }
 
   /**

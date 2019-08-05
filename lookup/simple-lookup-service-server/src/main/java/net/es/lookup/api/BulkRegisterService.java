@@ -9,7 +9,6 @@ import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.database.connectDB;
-import net.es.lookup.protocol.json.JSONRenewRequest;
 import net.es.lookup.protocol.json.JsonBulkRegisterRequest;
 import net.es.lookup.service.LookupService;
 import org.apache.logging.log4j.LogManager;
@@ -23,6 +22,11 @@ public class BulkRegisterService {
 
   private static Logger LOG = LogManager.getLogger(BulkRegisterService.class);
 
+  /**
+   * Takes a JSON string of messages and returns the list of failed messages
+   * @param messages JSON String
+   * @return String of all messages that were failed; {} if nothing failed
+   */
   public String bulkRegister(String messages) {
 
     JsonBulkRegisterRequest jsonBulkRegisterRequest = new JsonBulkRegisterRequest();
@@ -32,20 +36,19 @@ public class BulkRegisterService {
       throw new BadRequestException("Request cannot be empty");
     }
 
-    if (jsonBulkRegisterRequest.getStatus() == JSONRenewRequest.INCORRECT_FORMAT) {
+    if (jsonBulkRegisterRequest.getStatus() == JsonBulkRegisterRequest.INCORRECT_FORMAT) {
 
-      LOG.error("net.es.lookup.api.BulkRenewService: Request format is invalid.");
+      LOG.error("net.es.lookup.api.BulkRegisterService: Request format is invalid.");
       throw new BadRequestException("Request is invalid. Please edit the request and resend.");
     }
-
-    List<Message> messageList = jsonBulkRegisterRequest.parseJson(messages);
-    List<String> failed = new ArrayList<>();
+    List<Message> messageList =
+        jsonBulkRegisterRequest.parseJson(
+            messages); // List of messages to be added after parsing json
+    List<Message> failed;
     Queue<Message> messageQueue = new LinkedList<>(messageList);
-    connectDB connect = new connectDB();
 
     for (Message message : messageQueue) {
       boolean gotLease = LeaseManager.getInstance().requestLease(message);
-      // System.out.println(message.getMap());
       if (gotLease) {
 
         String recordType = message.getRecordType();
@@ -59,17 +62,25 @@ public class BulkRegisterService {
       }
     }
     try {
+
+      connectDB connect = new connectDB();
+
       ServiceElasticSearch db = connect.connect();
-      failed.addAll(db.bulkQueryAndPublishService(messageQueue));
+      failed = db.bulkQueryAndPublishService(messageQueue);
+      db.closeConnection();
+
     } catch (URISyntaxException e) {
-      throw new InternalErrorException("Incorrect URI for bulkRegisterService" + e.getMessage());
+      throw new InternalErrorException("Incorrect URI for bulkRegisterService: " + e.getMessage());
     } catch (IOException e) {
-      throw new InternalErrorException("Error connecting to database" + e.getMessage());
-    } catch (DuplicateEntryException e) {
-      throw new InternalErrorException(
-          "Attempt to insert duplicate record using bulkRegisterService" + e.getMessage());
+      throw new InternalErrorException("Error connecting to database: " + e.getMessage());
     }
-    return failed.toString();
+    StringBuilder failedStrings = new StringBuilder();
+    failedStrings.append("failures: [");
+    for (Message fail : failed) {
+        failedStrings.append(fail.getMap()).append("\n\n");
+    }
+    failedStrings.append(']');
+    return failedStrings.toString();
   }
 
   private String newUri(String recordType) {
