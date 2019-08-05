@@ -165,18 +165,19 @@ public class ServiceElasticSearch {
   }
 
   public List<String> bulkQueryAndPublishService(Queue<Message> messages)
-          throws IOException {
+          throws IOException, DuplicateEntryException {
 
     List<String> failed = new ArrayList<>();
     BulkRequest request = new BulkRequest();
     Gson gson = new Gson();
     for (Message message : messages) {
+      exists(message);
       Message queryRequest = new Message();
       queryRequest.add("uri", message.getURI());
       queryRequest.add("type", message.getRecordType());
       Message timestampedMessage = addTimestamp(message);
       request.add(new IndexRequest(this.indexName).id(message.getURI())
-              .source(gson.toJson(message), XContentType.JSON));
+              .source(gson.toJson(timestampedMessage), XContentType.JSON));
     }
     BulkResponse bulkResponse = client.bulk(request, RequestOptions.DEFAULT);
     if(bulkResponse.hasFailures()){

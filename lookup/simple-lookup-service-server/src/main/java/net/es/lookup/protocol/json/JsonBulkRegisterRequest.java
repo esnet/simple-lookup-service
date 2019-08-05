@@ -1,15 +1,19 @@
 package net.es.lookup.protocol.json;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import net.es.lookup.common.Message;
 import org.json.JSONArray;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONException;
 
 public class JsonBulkRegisterRequest extends Message {
 
@@ -19,55 +23,23 @@ public class JsonBulkRegisterRequest extends Message {
   public List<Message> parseJson(String message) {
 
     List<Message> messages = new ArrayList<Message>();
-    message = message.replace("{", "");
-    message = message.substring(0, message.lastIndexOf("}"));
-    message = message.substring(message.indexOf("[") + 1);
-    String[] items =
-        message.replaceAll("\\s", "").split("},");
 
+    Map<String, Object> allMessageMap =
+        new Gson().fromJson(message, new TypeToken<HashMap<String, Object>>() {}.getType());
+    ArrayList messageList = (ArrayList) allMessageMap.get("items");
     try {
+      ObjectMapper oMapper = new ObjectMapper();
+      for (Object list : messageList) {
+        Map<String, Object> map = oMapper.convertValue(list, Map.class);
 
-      for (int i = 0; i < items.length; i++) {
-        Map<String, Object> messageMap = new HashMap<>();
-        // System.out.println(items[i].replace("{", "").replace("}", "")+ "\n");
-
-        String keys[] = items[i].split(",");
-
-        String lastKey = "";
-        String lastValue = "";
-        for (String item : keys) {
-          //System.out.println(item);
-          String innerKeys[] = item.split(",");
-
-
-          for (String inner : innerKeys) {
-            //System.out.println(inner);
-            String keyVal[] = new String[2];
-            if(!inner.contains(":")){
-              lastValue += ","+inner;
-              if(inner.contains("]"));{
-                messageMap.put(lastKey, lastValue);
-              }
-            } else {
-              keyVal = inner.split(":");
-              lastKey = keyVal[0].replace("\"", "");
-              lastValue = keyVal[1].replace("\"", "");
-              messageMap.put(lastKey, lastValue);
-            }
-          }
-
-        }
-        //System.out.println(messageMap.get("type"));
-        messages.add(new Message(messageMap));
-
+        Message m = new Message(map);
+        messages.add(m);
       }
-
     } catch (Exception e) {
-      e.printStackTrace();
+      this.status = INCORRECT_FORMAT;
+      //throw new JSONException("Json not formatted correctly:" + e.getMessage());
     }
-
-    // return stringArray;
-
+    this.status = VALID;
     return messages;
   }
 }
