@@ -6,9 +6,9 @@ import net.es.lookup.client.RecordManager;
 import net.es.lookup.client.RegistrationClient;
 import net.es.lookup.client.SimpleLS;
 import net.es.lookup.common.exception.LSClientException;
-import org.ho.yaml.Yaml;
 import org.junit.After;
 import org.junit.BeforeClass;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.net.ConnectException;
@@ -215,10 +215,11 @@ public class BaseIT {
 
         Map configuration;
         InputStream yamlFile = QueryClientIT.class.getClassLoader().getSystemResourceAsStream(configFile);
+        Yaml yaml = new Yaml();
 
         try {
 
-            configuration = (Map) Yaml.load(yamlFile);
+            configuration =  yaml.load(yamlFile);
         } catch (NullPointerException ex) {
 
             try {
@@ -230,7 +231,7 @@ public class BaseIT {
                 Assert.fail(configFile + " not found\n. Config file required to start tests");
             }
 
-            configuration = (Map) Yaml.load(yamlFile);
+            configuration = (Map) yaml.load(yamlFile);
         }
 
         return configuration;

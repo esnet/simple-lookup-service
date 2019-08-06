@@ -1,9 +1,9 @@
 package net.es.lookup.utils.config;
 
-import net.es.lookup.utils.config.entity.ConfigEntity;
+import java.io.IOException;
 
 public interface Parser {
 
-  public void parse();
+  public void parse() throws IOException;
 
 }

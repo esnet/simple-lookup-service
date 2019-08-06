@@ -2,6 +2,7 @@ package net.es.lookup.utils.config;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import net.es.lookup.utils.config.entity.ConfigEntity;
 import net.es.lookup.utils.config.entity.LookupServiceConfig;
@@ -17,7 +18,7 @@ public class LookupServiceConfigParser implements Parser {
 
   private String configFile;
 
-  private LookupServiceConfig lookupServiceConfig;
+  private LookupServiceConfig lookupServiceConfig = null;
 
   public LookupServiceConfig getLookupServiceConfig() {
     return lookupServiceConfig;
@@ -36,10 +37,10 @@ public class LookupServiceConfigParser implements Parser {
   }
 
   @Override
-  public void parse() {
+  public void parse() throws IOException {
     if (configFile.isEmpty()) {
       LOG.error("Config file not specified. Please specify config file and restart process");
-      System.exit(-1);
+      throw new IOException("Config file not specified");
     }
 
     Yaml yaml = new Yaml(new Constructor(LookupServiceConfig.class));
@@ -49,7 +50,7 @@ public class LookupServiceConfigParser implements Parser {
 
     } catch (FileNotFoundException e) {
       LOG.error("Config file not found. Please specify correct path.");
-      System.exit(-1);
+      throw new IOException("Config file not found");
     }
   }
 }

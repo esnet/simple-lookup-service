@@ -6,11 +6,13 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.MemoryManager;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.MongoDBMaintenanceJob;
@@ -18,9 +20,8 @@ import net.es.lookup.database.ServiceDaoMongoDb;
 import net.es.lookup.timer.Scheduler;
 import net.es.lookup.utils.config.LookupServiceConfigParser;
 import net.es.lookup.utils.config.entity.DatabaseConfig;
+import net.es.lookup.utils.config.entity.LeaseConfig;
 import net.es.lookup.utils.config.entity.LookupServiceConfig;
-import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
-import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import net.es.lookup.utils.log.StdOutErrToLog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,8 +35,6 @@ public class Invoker {
 
   // private static ServiceDaoMongoDb dao = null;
   private static String host = "localhost";
-  //private static LookupServiceConfigReader lookupServiceConfigReader;
-  //private static QueueServiceConfigReader queueServiceConfigReader;
 
   private static LookupServiceConfig lsConfig;
 
@@ -66,15 +65,24 @@ public class Invoker {
     //StdOutErrToLog.redirectStdOutErrToLog();
 
     LookupServiceConfigParser configParser = new LookupServiceConfigParser(configPath+lookupservicecfg);
+    try{
     configParser.parse();
+    }catch (IOException ie){
+      LOG.fatal("Error parsing config file. Service exiting"+ ie.getStackTrace());
+      System.exit(-1);
+    }
     lsConfig = configParser.getLookupServiceConfig();
+
+    DatabaseConfig dbConfig = lsConfig.getDatabase();
 
     port = lsConfig.getWebservice().getPort();
     host = lsConfig.getWebservice().getHost();
 
-    LOG.info("starting ServiceDaoMongoDb");
+    LOG.info("starting LeaseManager");
+    LeaseConfig leaseConfig = lsConfig.getWebservice().getLease();
+    new LeaseManager(leaseConfig.getMaxVal(), leaseConfig.getMinVal(), leaseConfig.getDefaultVal(), dbConfig.getPruneThreshold());
 
-    DatabaseConfig dbConfig = lsConfig.getDatabase();
+    LOG.info("starting ServiceDaoMongoDb");
 
     List<String> services = new LinkedList<>();
 

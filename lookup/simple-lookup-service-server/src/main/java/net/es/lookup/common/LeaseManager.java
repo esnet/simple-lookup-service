@@ -1,6 +1,5 @@
 package net.es.lookup.common;
 
-import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.joda.time.DateTime;
@@ -15,19 +14,15 @@ import org.joda.time.format.PeriodFormatter;
 
 public class LeaseManager {
 
-    private static long DEFAULT_LEASE = 2 * 60 * 60;
-    private static long MAX_LEASE = DEFAULT_LEASE;
-    private static long MIN_LEASE = 240;
+    private long defaultLease = 2 * 60 * 60;
+    private long maxLease = defaultLease;
+    private long minLease = 240;
+    private long pruneThreshold = 300;
+    private DateTimeFormatter fmt;
+
     private static LeaseManager instance = null;
-    private DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-    private LookupServiceConfigReader lcfg;
+
     private static Logger LOG = LogManager.getLogger(LeaseManager.class);
-
-    static {
-
-        LeaseManager.instance = new LeaseManager();
-
-    }
 
 
     public static LeaseManager getInstance() {
@@ -37,13 +32,16 @@ public class LeaseManager {
     }
 
 
-    private LeaseManager() {
+    public LeaseManager(long maxLease, long minLease, long defaultLease, long pruneThreshold) {
 
-        lcfg = LookupServiceConfigReader.getInstance();
-        MAX_LEASE = lcfg.getMaxLease();
-        MIN_LEASE = lcfg.getMinLease();
-        DEFAULT_LEASE = lcfg.getDefaultLease();
-
+    if (LeaseManager.instance == null) {
+      LeaseManager.instance = this;
+      fmt = ISODateTimeFormat.dateTime();
+      this.maxLease = maxLease;
+      this.minLease = minLease;
+      this.defaultLease = defaultLease;
+      this.pruneThreshold = pruneThreshold;
+        }
     }
 
 
@@ -66,7 +64,7 @@ public class LeaseManager {
 
         if (expires != null && !expires.isEmpty()) {
 
-            Instant pTime = now.minus(lcfg.getPruneThreshold());
+            Instant pTime = now.minus(pruneThreshold);
             DateTime pruneTime = pTime.toDateTime();
 
             DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
@@ -102,15 +100,15 @@ public class LeaseManager {
 
 
 
-            if (ttl == 0 || ttl > LeaseManager.MAX_LEASE || ttl < LeaseManager.MIN_LEASE) {
+            if (ttl == 0 || ttl > maxLease || ttl < minLease) {
 
-                ttl = LeaseManager.DEFAULT_LEASE;
+                ttl = defaultLease;
 
             }
 
         } else {
 
-            ttl = LeaseManager.DEFAULT_LEASE;
+            ttl = defaultLease;
 
         }
 
