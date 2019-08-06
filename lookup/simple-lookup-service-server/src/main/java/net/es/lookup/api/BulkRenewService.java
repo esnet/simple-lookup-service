@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
@@ -19,8 +18,6 @@ import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRenewRequest;
 import net.es.lookup.protocol.json.JsonBulkRenewRequest;
 import net.es.lookup.protocol.json.JsonBulkRenewResponse;
-import net.es.lookup.publish.Publisher;
-import net.es.lookup.service.PublishService;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -117,7 +114,6 @@ public class BulkRenewService {
 
       // db call
       Message renewResponse = db.bulkUpdate(bulkUpdateRequests);
-      notifyPublisher(bulkUpdateRequests);
 
       JsonBulkRenewResponse jsonBulkRenewResponse =
           formatJsonBulkRenewResponse(allRecordUris.size(), renewResponse, failedUris);
@@ -156,17 +152,6 @@ public class BulkRenewService {
       error.add(ReservedKeys.ERROR_MESSAGE, ReservedValues.RECORD_BULKRENEW_EXPIRED_ERRORMESSAGE);
     }
     return error;
-  }
-
-  private void notifyPublisher(Map<String, Message> updates) {
-    if (PublishService.isServiceOn()) {
-
-      Publisher publisher = Publisher.getInstance();
-      for (Entry<String, Message> renewedRecord : updates.entrySet()) {
-
-        publisher.eventNotification(renewedRecord.getValue());
-      }
-    }
   }
 
   private JsonBulkRenewResponse formatJsonBulkRenewResponse(

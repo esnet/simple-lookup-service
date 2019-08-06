@@ -19,8 +19,6 @@ import net.es.lookup.protocol.json.JSONDeleteResponse;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRenewRequest;
 import net.es.lookup.protocol.json.JSONRenewResponse;
-import net.es.lookup.publish.Publisher;
-import net.es.lookup.service.PublishService;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -91,10 +89,6 @@ public class EditService {
             newRequest.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_RENEW);
             Message res = db.updateService(serviceid, newRequest);
 
-            if (PublishService.isServiceOn()) {
-              Publisher publisher = Publisher.getInstance();
-              publisher.eventNotification(res);
-            }
             response = new JSONRenewResponse(res.getMap());
 
             try {
