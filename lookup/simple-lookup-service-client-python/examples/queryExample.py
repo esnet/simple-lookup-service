@@ -1,6 +1,8 @@
+from __future__ import print_function
+
 from sls_client.records import *
 from sls_client.query import *
-from sls_client.find_ps_ma import *
+from sls_client.find_ma import *
 
 ##query all  services
 #queryString = 'type=services'
@@ -15,7 +17,7 @@ queryString = 'type=host&group-domains=anl.gov'
 response = query(queryString)
 
 for record in response:
-	print record[u'host-name']
+	print(record[u'host-name'])
 
 
 #query for MA containing host data

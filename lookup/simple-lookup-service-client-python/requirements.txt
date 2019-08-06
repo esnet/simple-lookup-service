@@ -4,3 +4,4 @@ isodate==0.5.1
 futures==2.2.0
 requests>=2.20.0
 voluptuous==0.8.7
+six

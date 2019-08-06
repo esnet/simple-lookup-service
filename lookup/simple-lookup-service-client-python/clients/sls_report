@@ -9,8 +9,9 @@ import logging
 import pprint
 import socket
 import time
-import urlparse
 import warnings
+
+from six.moves.urllib.parse import urlparse
 
 from collections import OrderedDict
 from multiprocessing.dummy import Process, Value
@@ -271,7 +272,7 @@ class SlsHostList(SlsReportBase):
                 host=look, sec=round(time.time() - t_start, 2)))
 
             # count how many records we got for this host for report.
-            upar = urlparse.urlparse(look)
+            upar = urlparse(look)
             self._ls_count[upar.netloc] = count_per_lookup_host
 
             if self._options.single:
@@ -536,7 +537,7 @@ class SlsStatCapsule(SlsReportBase):
         self._counter('os', os_info)
 
         if architecture:
-            arch = architecture
+            arch = architecture[0]
         else:
             arch = kernel[0].split('.')[-1]
             arch = arch.split('-')[-1]
@@ -740,7 +741,7 @@ class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
         # default name/count/percent columns
         self._columns = """{{section}} ({{count}}):
                                                      count    percent
-{% for key, val in _dict.iteritems() %}  {{ key.ljust(52) }}{{ val[0].rjust(4) }}{{ val[1].rjust(9) }} %
+{% for key, val in _dict.items() %}  {{ key.ljust(52) }}{{ val[0].rjust(4) }}{{ val[1].rjust(9) }} %
 {% endfor %}"""
 
         self._column_template = jinja2.Template(self._columns)
@@ -779,7 +780,7 @@ class SlsReportFormatter(object):  # pylint: disable=too-few-public-methods
                 else:
                     break
             fmt += self._column_template.render(
-                section=k.replace('_', ' ').title(), _dict=trimmed_val, count=strcount).encode('utf-8')
+                section=k.replace('_', ' ').title(), _dict=trimmed_val, count=strcount)
             fmt += '\n'
 
         return fmt
@@ -827,7 +828,7 @@ def main():
     try:
         lookup_hosts = SlsHostList(options, _logger)
     except SlsReportException as ex:
-        print str(ex)
+        print(str(ex))
         return -1
 
     lookup_hosts.generate_host_list()
@@ -839,7 +840,7 @@ def main():
     _logger('main.end', 'completed in {sec} seconds'.format(sec=round(time.time() - t_start, 2)))
 
     formatter = SlsReportFormatter(report.get_report, report.host_count, report.duplicates, options.ntop)
-    print formatter
+    print(formatter)
 
 if __name__ == '__main__':
     main()
