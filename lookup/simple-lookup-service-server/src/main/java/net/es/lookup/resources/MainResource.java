@@ -50,9 +50,22 @@ public class MainResource {
   public String postHandler(@PathParam("sls") String sls, String message) {
     if (sls.equalsIgnoreCase(prefix)) {
 
-      String str = this.b.bulkRegister(message);
-      return str;
-      //return this.registerService.registerService(message);
+      return this.registerService.registerService(message);
+    } else {
+      throw new NotSupportedException("Register Operation not supported");
+    }
+  }
+
+  /** Post handler to register records in bulk. */
+  @POST
+  @Path("/bulk")
+  @Consumes("application/json")
+  @Produces("application/json")
+  public String postHandlerBulk(@PathParam("sls") String sls, String message) {
+    if (sls.equalsIgnoreCase(prefix)) {
+
+      return this.b.bulkRegister(message);
+
     } else {
       throw new NotSupportedException("Register Operation not supported");
     }
