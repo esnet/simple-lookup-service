@@ -28,12 +28,15 @@ public class JsonBulkRegisterRequest extends BulkRegisterRequest {
 
     Map<String, Object> allMessageMap =
         new Gson().fromJson(message, new TypeToken<HashMap<String, Object>>() {}.getType());
-    ArrayList messageList = (ArrayList) allMessageMap.get("items");
+    ArrayList messageList = (ArrayList) allMessageMap.get("records");
+    Object ttl = allMessageMap.get("ttl");
     try {
       ObjectMapper oMapper = new ObjectMapper();
       for (Object list : messageList) {
         Map<String, Object> map = oMapper.convertValue(list, Map.class);
-
+        if(ttl != null){
+          map.put("ttl", ttl);
+        }
         Message m = new Message(map);
         messages.add(m);
       }
