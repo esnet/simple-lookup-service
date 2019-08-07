@@ -267,11 +267,11 @@ public class ServiceElasticSearch {
     getRequest.fetchSourceContext(fetchSourceContext);
     GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
     Map<String, Object> responseMap;
-    try {
-      responseMap = (Map<String, Object>) getResponse.getSourceAsMap().get("keyValues");
-    } catch (NullPointerException e) {
+    responseMap = (Map<String, Object>) getResponse.getSourceAsMap();
+    if(responseMap == null){
       return null;
     }
+
     return new Message(responseMap);
   }
 
@@ -347,7 +347,7 @@ public class ServiceElasticSearch {
   public long deleteExpiredRecords(DateTime dateTime) throws IOException {
 
     RangeQueryBuilder rangeQueryBuilder =
-        new RangeQueryBuilder("keyValues._timestamp").lte(dateTime);
+        new RangeQueryBuilder("_timestampadded").lte(dateTime);
     DeleteByQueryRequest request =
         new DeleteByQueryRequest(this.indexName).setQuery(rangeQueryBuilder);
     BulkByScrollResponse bulkResponse = client.deleteByQuery(request, RequestOptions.DEFAULT);
@@ -361,8 +361,8 @@ public class ServiceElasticSearch {
     SearchRequest searchRequest = new SearchRequest(this.indexName);
 
     SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-    searchSourceBuilder.query(QueryBuilders.rangeQuery("keyValues._lastUpdated").gt(start));
-    searchSourceBuilder.query(QueryBuilders.rangeQuery("keyValues._lastUpdated").lte(end));
+    searchSourceBuilder.query(QueryBuilders.rangeQuery("_lastUpdated").gt(start));
+    searchSourceBuilder.query(QueryBuilders.rangeQuery("_lastUpdated").lte(end));
     searchRequest.source(searchSourceBuilder);
 
     SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
@@ -406,18 +406,18 @@ public class ServiceElasticSearch {
       for (Object key : queryRequest.keySet()) {
         String keyAsString = (String) key;
         if (!queryRequest.get(keyAsString).toString().contains("*")) {
-          builder.must(matchQuery("keyValues." + keyAsString, queryRequest.get(keyAsString)));
+          builder.must(matchQuery(keyAsString, queryRequest.get(keyAsString)));
         }else {
-          builder.must(regexpQuery("keyValues." + keyAsString, (String) queryRequest.get(keyAsString)));
+          builder.must(regexpQuery(keyAsString, (String) queryRequest.get(keyAsString)));
         }
       }
     } else {
       for (Object key : queryRequest.keySet()) {
         String keyAsString = (String) key;
         if (!queryRequest.get(keyAsString).toString().contains("*")) {
-          builder.should(matchQuery("keyValues." + keyAsString, queryRequest.get(keyAsString)));
+          builder.should(matchQuery(keyAsString, queryRequest.get(keyAsString)));
         }else {
-          builder.should(regexpQuery("keyValues." + keyAsString, (String) queryRequest.get(keyAsString)));
+          builder.should(regexpQuery(keyAsString, (String) queryRequest.get(keyAsString)));
         }      }
     }
     searchSourceBuilder.query(builder);
@@ -428,7 +428,7 @@ public class ServiceElasticSearch {
       SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
       SearchHit[] searchHits = searchResponse.getHits().getHits();
       for (SearchHit hit : searchHits) {
-        result.add(new Message((Map<String, Object>) hit.getSourceAsMap().get("keyValues")));
+        result.add(new Message((Map<String, Object>) hit.getSourceAsMap()));
       }
     } catch (ElasticsearchStatusException e) {
       Log.info("Couldn't find record in database" + e.getMessage());
@@ -455,7 +455,7 @@ public class ServiceElasticSearch {
     queryMap.remove("expires");
     queryMap.remove("_lastUpdated");
     queryMap.remove("ttl");
-    queryMap.remove("_timestamp");
+    queryMap.remove("_timestampadded");
     queryMap.remove("test-id");
     queryMap.remove("uri");
 
@@ -465,7 +465,7 @@ public class ServiceElasticSearch {
     // Creating query for all common items
     for (String key : queryMap.keySet()) {
 
-      builder.must(matchQuery("keyValues." + key, removeBracketFrom(queryMap.get(key).toString())));
+      builder.must(matchQuery(key, removeBracketFrom(queryMap.get(key).toString())));
     }
 
     searchSourceBuilder.query(builder);
@@ -478,12 +478,12 @@ public class ServiceElasticSearch {
 
       if (searchHits.length > 0) {
         for (SearchHit hit : searchHits) {
-          Map hitMap = hit.getSourceAsMap();
-          Map keyValuesMap = (Map) hitMap.get("keyValues");
+          Map keyValuesMap = hit.getSourceAsMap();
+          //Map keyValuesMap = (Map) hitMap.get("keyValues");
           keyValuesMap.remove("expires");
           keyValuesMap.remove("_lastUpdated");
           keyValuesMap.remove("ttl");
-          keyValuesMap.remove("_timestamp");
+          keyValuesMap.remove("_timestampadded");
           keyValuesMap.remove("test-id");
           keyValuesMap.remove("uri");
           if (keyValuesMap.size() == queryMap.size()) {
@@ -523,7 +523,7 @@ public class ServiceElasticSearch {
     IndexRequest request = new IndexRequest(this.indexName);
     request.id(queryRequest.getURI());
     Gson gson = new Gson();
-    String json = gson.toJson(message);
+    String json = gson.toJson(message.getMap());
     request.source(json, XContentType.JSON);
     client.index(request, RequestOptions.DEFAULT);
   }
@@ -540,7 +540,7 @@ public class ServiceElasticSearch {
     DateTime dt = fmt.parseDateTime(message.getExpires());
 
     Date timestamp = dt.toDate();
-    message.add("_timestamp", timestamp);
+    message.add("_timestampadded", timestamp);
     message.add("_lastUpdated", new Date());
     return message;
   }
