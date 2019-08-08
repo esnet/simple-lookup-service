@@ -548,7 +548,7 @@ public class ServiceElasticSearch {
   private Message toMessage(Message message) {
     Map<String, Object> messageMap = message.getMap();
     if (messageMap != null) {
-      messageMap.remove("_timestamp");
+      messageMap.remove("_timestampadded");
       messageMap.remove("_id");
       messageMap.remove("_lastUpdated");
       return new Message(messageMap);
