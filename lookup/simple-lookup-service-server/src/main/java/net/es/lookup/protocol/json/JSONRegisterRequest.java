@@ -1,7 +1,14 @@
 package net.es.lookup.protocol.json;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import net.es.lookup.common.Message;
 import net.es.lookup.common.RegisterRequest;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
@@ -29,7 +36,6 @@ public class JSONRegisterRequest extends RegisterRequest {
             obj = tokener.nextValue();
 
         } catch (JSONException e) {
-
             this.status = JSONRegisterRequest.INCORRECT_FORMAT;
             return;
 
@@ -51,16 +57,16 @@ public class JSONRegisterRequest extends RegisterRequest {
 
                     for(Object o: (List)value){
                         Object tmp = o;
-                        if(! (o instanceof String)){
-                            tmp = "";
-                        }
+//                        if(! (o instanceof String)){
+//                            tmp = "";
+//                        }
+                        //Todo made changes to this
                         jsonArray.add(tmp);
                     }
                     this.add(key.toString(), jsonArray);
                 }
             }
         } else {
-
             this.status = JSONRegisterRequest.INCORRECT_FORMAT;
             return;
         }

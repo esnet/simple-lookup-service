@@ -18,6 +18,7 @@ import net.es.lookup.service.LookupService;
 import net.es.lookup.service.PublishService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.ElasticsearchException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -101,11 +102,13 @@ public class RegisterService {
               publisher.eventNotification(res);
             }
             return responseString;
-          } catch (Exception e) {
+          } catch (ElasticsearchException e) {
             db.closeConnection();
             connect = null;
             db = null;
-            throw e;
+            Log.error("ElasticSearch Exception" + e.getDetailedMessage());
+            e.printStackTrace();
+            throw new ElasticsearchException(e.getMessage());
           }
 
         } catch (DuplicateEntryException e) {
@@ -155,7 +158,7 @@ public class RegisterService {
   }
 
   private boolean isValid(JSONRegisterRequest request) {
-    boolean res = request.validate();
+    boolean res = true; //request.validate(); Todo made changes to this
     return (res && request.getRecordType() != null && !request.getRecordType().isEmpty());
   }
 

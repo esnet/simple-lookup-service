@@ -36,7 +36,7 @@ public class JsonBulkRegisterRequest extends BulkRegisterRequest {
       ObjectMapper oMapper = new ObjectMapper();
       for (Object list : messageList) {
         Map<String, Object> map = oMapper.convertValue(list, Map.class);
-        if(ttl != null){
+        if (ttl != null) {
           map.put("ttl", ttl);
         }
         Message m = new Message(map);

@@ -521,6 +521,7 @@ public class ServiceElasticSearch {
    */
   private void insert(Message message, Message queryRequest) throws IOException {
     IndexRequest request = new IndexRequest(this.indexName);
+    //System.out.println(queryRequest.getMap());
     request.id(queryRequest.getURI());
     Gson gson = new Gson();
     String json = gson.toJson(message.getMap());

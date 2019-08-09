@@ -105,7 +105,8 @@ public class LeaseManager {
     LOG.info("Lease granted. ttl value: " + ttl);
 
     String convertedExpires = this.fmt.print(newExpires);
-    message.add(net.es.lookup.common.ReservedKeys.RECORD_EXPIRES, convertedExpires);
+    message.add(net.es.lookup.common.ReservedKeys.RECORD_EXPIRES, new DateTime().plus(ttl*1000).toString());
+    //message.add(net.es.lookup.common.ReservedKeys.RECORD_EXPIRES, convertedExpires);
 
     LOG.info("Lease granted. expires value: " + convertedExpires);
     return true;
