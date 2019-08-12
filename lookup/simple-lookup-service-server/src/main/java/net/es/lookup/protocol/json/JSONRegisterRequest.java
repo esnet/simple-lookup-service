@@ -57,10 +57,9 @@ public class JSONRegisterRequest extends RegisterRequest {
 
                     for(Object o: (List)value){
                         Object tmp = o;
-//                        if(! (o instanceof String)){
-//                            tmp = "";
-//                        }
-                        //Todo made changes to this
+                        if(! (o instanceof String)){
+                            tmp = "";
+                        }
                         jsonArray.add(tmp);
                     }
                     this.add(key.toString(), jsonArray);
