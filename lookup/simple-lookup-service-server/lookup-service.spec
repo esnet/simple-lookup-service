@@ -7,10 +7,10 @@
 %define run_dir /var/run/%{package_name}
 %define data_dir /var/lib/%{package_name}
 %define init_script lookup-service
-%define relnum 9
+%define relnum 0
 
 Name:           %{package_name}
-Version:        2.2
+Version:        3.0
 Release:        %{relnum}%{?dist}
 Summary:        Lookup Service
 License:        distributable, see LICENSE
@@ -18,10 +18,10 @@ Group:          Development/Libraries
 URL:            https://github.com/esnet/simple-lookup-service
 Source0:        %{mvn_project_name}-%{version}-%{relnum}.tar.gz
 BuildRoot:      %{_tmppath}/-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  java-openjdk >= 1.6.0
+BuildRequires:  java-openjdk >= 1.8.0
 BuildRequires:  sed 
 BuildArch:      noarch
-Requires:       java-openjdk >= 1.6.0
+Requires:       java-openjdk >= 1.8.0
 
 %if 0%{?el7}
 BuildRequires: systemd
@@ -31,7 +31,7 @@ BuildRequires:  maven
 BuildRequires:  apache-maven
 Requires:		chkconfig
 %endif
-Requires:	mongodb-org-server
+Requires:	elasticsearch
 
 %description
 Lookup Service is used to find registered services. 
@@ -80,7 +80,6 @@ install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scrip
 
 # Copy default config file
 cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/lookupservice.yaml %{buildroot}/%{config_base}/lookupservice.yaml
-#cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/queueservice.yaml %{buildroot}/%{config_base}/queueservice.yaml
 #Update log locations
 sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/log4j2.properties > %{buildroot}/%{config_base}/log4j2.properties
 
@@ -169,5 +168,7 @@ fi
 
 
 %changelog
+* Wed Oct 23 2019 sowmya@es.net 3.0-0
+- Updated spec file to support Centos 7
 * Mon Sep 24 2018 sowmya@es.net 2.2-9
 - Updated spec file to support Centos 7
