@@ -4,7 +4,7 @@
   <parent>
     <artifactId>SIMPLELOOKUPSERVICE</artifactId>
     <groupId>net.es.lookup</groupId>
-    <version>2.3-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.es.lookup</groupId>
@@ -80,14 +80,14 @@
     <dependency>
       <artifactId>simple-lookup-service-client</artifactId>
       <groupId>net.es.lookup</groupId>
-      <version>2.3-SNAPSHOT</version>
+      <version>3.0-SNAPSHOT</version>
     </dependency>
 
     <!-- lookup-service-centos keywords -->
     <dependency>
       <artifactId>simple-lookup-service-common</artifactId>
       <groupId>net.es.lookup</groupId>
-      <version>2.3-SNAPSHOT</version>
+      <version>3.0-SNAPSHOT</version>
 
     </dependency>
 
