@@ -81,6 +81,7 @@ install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scrip
 %endif
 
 #apache config file
+mkdir -p %{buildroot}/etc/httpd/conf.d
 install -D -m 0644 etc/%{apacheconf} %{buildroot}/etc/httpd/conf.d/%{apacheconf}
 rm -f %{buildroot}/%{install_base}/etc/{apacheconf}
 
