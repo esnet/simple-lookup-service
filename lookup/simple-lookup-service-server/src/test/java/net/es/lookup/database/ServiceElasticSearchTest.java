@@ -31,8 +31,7 @@ public class ServiceElasticSearchTest {
    */
   @Before
   public void setUp() throws URISyntaxException, IOException {
-    connectDB connect = new connectDB();
-    client = connect.connect();
+    client = ServiceElasticSearch.getInstance();
     client.deleteAllRecords();
   }
 

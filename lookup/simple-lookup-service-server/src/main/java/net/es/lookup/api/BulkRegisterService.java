@@ -6,9 +6,7 @@ import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
-import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.ServiceElasticSearch;
-import net.es.lookup.database.connectDB;
 import net.es.lookup.protocol.json.JsonBulkRegisterRequest;
 import net.es.lookup.service.LookupService;
 import org.apache.logging.log4j.LogManager;
@@ -63,14 +61,10 @@ public class BulkRegisterService {
     }
     try {
 
-      connectDB connect = new connectDB();
-
-      ServiceElasticSearch db = connect.connect();
+      ServiceElasticSearch db = ServiceElasticSearch.getInstance();
       failed = db.bulkQueryAndPublishService(messageQueue);
       db.closeConnection();
 
-    } catch (URISyntaxException e) {
-      throw new InternalErrorException("Incorrect URI for bulkRegisterService: " + e.getMessage());
     } catch (IOException e) {
       throw new InternalErrorException("Error connecting to database: " + e.getMessage());
     }

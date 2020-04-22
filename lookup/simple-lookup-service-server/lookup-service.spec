@@ -32,6 +32,7 @@ BuildRequires:  apache-maven
 Requires:		chkconfig
 %endif
 Requires:	elasticsearch
+Required: httpd
 
 %description
 Lookup Service is used to find registered services. 
@@ -80,6 +81,8 @@ install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scrip
 
 # Copy default config file
 cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/lookupservice.yaml %{buildroot}/%{config_base}/lookupservice.yaml
+cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/apache-lookup-service.conf %{buildroot}/etc/httpd/conf.d/apache-lookup-service.conf
+
 #Update log locations
 sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/log4j2.properties > %{buildroot}/%{config_base}/log4j2.properties
 

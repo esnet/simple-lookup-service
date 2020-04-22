@@ -5,7 +5,6 @@ import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.database.ServiceElasticSearch;
-import net.es.lookup.database.connectDB;
 import net.es.lookup.protocol.json.JSONGetServiceResponse;
 import net.es.lookup.protocol.json.JSONMessage;
 import org.apache.logging.log4j.LogManager;
@@ -34,8 +33,7 @@ public class AccessService {
     JSONGetServiceResponse response;
     Message serviceRecord;
     try {
-      connectDB connect = new connectDB();
-      ServiceElasticSearch db = connect.connect();
+      ServiceElasticSearch db = ServiceElasticSearch.getInstance();
       serviceRecord = db.getRecordByURI(serviceid);
       db.closeConnection();
 
@@ -64,7 +62,7 @@ public class AccessService {
         throw new NotFoundException("ServiceRecord Not Found in DB\n");
       }
 
-    } catch (URISyntaxException | IOException e) {
+    } catch ( IOException e) {
 
       LOG.fatal("DatabaseException: The database is out of service." + e.getMessage());
       LOG.info("GetService status: FAILED; exiting");
@@ -88,8 +86,7 @@ public class AccessService {
     Message serviceRecord;
 
     try {
-      connectDB connect = new connectDB();
-      ServiceElasticSearch db = connect.connect();
+      ServiceElasticSearch db = ServiceElasticSearch.getInstance();
       serviceRecord = db.getRecordByURI(serviceid);
       db.closeConnection();
       if (serviceRecord != null) {
@@ -124,11 +121,6 @@ public class AccessService {
         throw new NotFoundException("ServiceRecord Not Found in DB\n");
       }
 
-    } catch (URISyntaxException e) {
-
-      LOG.fatal("DatabaseException: The database is out of service." + e.getMessage());
-      LOG.info("GetServiceKey status: FAILED; exiting");
-      throw new InternalErrorException("Database error\n");
     } catch (IOException e) {
       LOG.error("unable to find record");
       throw new InternalErrorException("Record URI not found");

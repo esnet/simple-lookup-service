@@ -5,7 +5,6 @@ import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.ServiceElasticSearch;
-import net.es.lookup.database.connectDB;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
@@ -34,8 +33,7 @@ public class RecordResourceTest {
    */
   @Before
   public void setUp() throws URISyntaxException, IOException {
-    connectDB connect = new connectDB();
-    client = connect.connect();
+    client = ServiceElasticSearch.getInstance();
     client.deleteAllRecords();
   }
 

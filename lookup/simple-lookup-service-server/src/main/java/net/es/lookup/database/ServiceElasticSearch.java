@@ -1,9 +1,6 @@
 package net.es.lookup.database;
 
 import com.google.gson.Gson;
-import com.mongodb.MongoException;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCursor;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.internal.DatabaseException;
@@ -12,7 +9,6 @@ import net.es.lookup.common.exception.internal.RecordNotFoundException;
 import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bson.Document;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
@@ -27,8 +23,11 @@ import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.ClearScrollRequest;
+import org.elasticsearch.action.search.ClearScrollResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
@@ -37,6 +36,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.common.Strings;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -44,8 +44,11 @@ import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
+import org.elasticsearch.action.admin.indices.cache.clear.*;
+import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -56,6 +59,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.regex.Pattern;
+import org.quartz.DisallowConcurrentExecution;
 
 import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.regexpQuery;
@@ -73,40 +77,23 @@ public class ServiceElasticSearch {
 
   private static Logger Log = LogManager.getLogger(ServiceElasticSearch.class);
 
-  private RestHighLevelClient client;
+  private RestHighLevelClient client = null;
+  private static ServiceElasticSearch instance = null;
 
-  /**
-   * default initialization for the database for testing on localhost
-   *
-   * @throws URISyntaxException for incorrect dburl
-   */
-  public ServiceElasticSearch() throws URISyntaxException {
-    // Todo
-    //    this.port1 = DatabaseConnectionKeys.DatabasePort1;
-    //    this.port2 = DatabaseConnectionKeys.DatabasePort2;
-    //    this.location = new URI(DatabaseConnectionKeys.server);
-    //    this.indexName = DatabaseConnectionKeys.DatabaseName;
-    init();
+  public static ServiceElasticSearch getInstance() {
+
+    return ServiceElasticSearch.instance;
   }
 
-  /**
-   * @param dburl URl to connect to the database
-   * @param dbport1 Port 1 of the Database
-   * @param dbport2 Port 2 of the Database
-   * @param dbname Name of the Database
-   * @throws URISyntaxException for incorrect dburl
-   */
-  public ServiceElasticSearch(String dburl, int dbport1, int dbport2, String dbname)
-      throws URISyntaxException {
-    this.location = new URI(dburl);
-    this.port1 = dbport1;
-    this.port2 = dbport2;
-    this.indexName = dbname;
-    init();
-  }
+  private synchronized void init() throws DatabaseException {
 
-  /** initializes the database */
-  private void init() {
+    if (ServiceElasticSearch.instance != null) {
+
+      // An instance has been already created.
+      throw new DatabaseException("Attempt to create a second instance of ElasticSearch");
+    }
+
+    ServiceElasticSearch.instance = this;
     client =
         new RestHighLevelClient(
             RestClient.builder(
@@ -119,7 +106,8 @@ public class ServiceElasticSearch {
     try {
       client.get(getRequest, RequestOptions.DEFAULT);
     } catch (IOException e) {
-      e.printStackTrace();
+      Log.error(e.getMessage());
+      throw new DatabaseException(e.getMessage());
     } catch (ElasticsearchStatusException e) {
       // In case index doesn't exist
       Log.info("Creating index");
@@ -128,8 +116,39 @@ public class ServiceElasticSearch {
         client.indices().create(create, RequestOptions.DEFAULT);
       } catch (IOException ex) {
         Log.error("unable to create index!");
+        throw new DatabaseException(ex.getMessage());
       }
     }
+  }
+
+  /**
+   * default initialization for the database for testing on localhost
+   *
+   * @throws URISyntaxException for incorrect dburl
+   */
+  /*public ServiceElasticSearch() throws DatabaseException {
+    // Todo
+    //    this.port1 = DatabaseConnectionKeys.DatabasePort1;
+    //    this.port2 = DatabaseConnectionKeys.DatabasePort2;
+    //    this.location = new URI(DatabaseConnectionKeys.server);
+    //    this.indexName = DatabaseConnectionKeys.DatabaseName;
+    init();
+  }*/
+
+  /**
+   * @param dburl URl to connect to the database
+   * @param dbport1 Port 1 of the Database
+   * @param dbport2 Port 2 of the Database
+   * @param dbname Name of the Database
+   * @throws URISyntaxException for incorrect dburl
+   */
+  public ServiceElasticSearch(String dburl, int dbport1, int dbport2, String dbname)
+      throws URISyntaxException, DatabaseException {
+    this.location = new URI(dburl);
+    this.port1 = dbport1;
+    this.port2 = dbport2;
+    this.indexName = dbname;
+    init();
   }
 
   /**
@@ -138,9 +157,7 @@ public class ServiceElasticSearch {
    * @throws IOException If there is an error closing the connection
    */
   public void closeConnection() throws IOException {
-    client.close();
-    client = null;
-    System.gc();
+    // client.close();
   }
 
   /**
@@ -158,7 +175,7 @@ public class ServiceElasticSearch {
     Message queryRequest = new Message();
     queryRequest.add("uri", message.getURI());
     queryRequest.add("type", message.getRecordType());
-    if(exists(message)){
+    if (exists(message)) {
       throw new DuplicateEntryException("Record already exists");
     } // checking if message already exists in the index
     Message timestampedMessage = addTimestamp(message); // adding a timestamp to the message
@@ -166,8 +183,7 @@ public class ServiceElasticSearch {
     return toMessage(timestampedMessage); // return the message that was added to the index
   }
 
-  public List<Message> bulkQueryAndPublishService(Queue<Message> messages)
-          throws IOException {
+  public List<Message> bulkQueryAndPublishService(Queue<Message> messages) throws IOException {
 
     List<Message> failed = new ArrayList<>();
     BulkRequest request = new BulkRequest();
@@ -175,20 +191,20 @@ public class ServiceElasticSearch {
     Gson gson = new Gson();
 
     for (Message message : messages) {
-        if(exists(message)){
-          message.setErrorMessage("");
-          Map<String, Object> errorMessageMap = message.getMap();
-          errorMessageMap.put("error", "Document already exists");
-          Message errorMessage = new Message(errorMessageMap);
-          failed.add(errorMessage);
-        } else {
-          Message timestampedMessage = addTimestamp(message);
-          request.add(
-              new IndexRequest(this.indexName)
-                  .id(message.getURI())
-                  .source(gson.toJson(timestampedMessage), XContentType.JSON));
-          messageMap.put(message.getURI(), message);
-        }
+      if (exists(message)) {
+        message.setErrorMessage("");
+        Map<String, Object> errorMessageMap = message.getMap();
+        errorMessageMap.put("error", "Document already exists");
+        Message errorMessage = new Message(errorMessageMap);
+        failed.add(errorMessage);
+      } else {
+        Message timestampedMessage = addTimestamp(message);
+        request.add(
+            new IndexRequest(this.indexName)
+                .id(message.getURI())
+                .source(gson.toJson(timestampedMessage), XContentType.JSON));
+        messageMap.put(message.getURI(), message);
+      }
     }
     if (request.numberOfActions() != 0) {
       BulkResponse bulkResponse = client.bulk(request, RequestOptions.DEFAULT);
@@ -268,7 +284,7 @@ public class ServiceElasticSearch {
     GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
     Map<String, Object> responseMap;
     responseMap = (Map<String, Object>) getResponse.getSourceAsMap();
-    if(responseMap == null){
+    if (responseMap == null) {
       return null;
     }
 
@@ -346,8 +362,8 @@ public class ServiceElasticSearch {
    */
   public long deleteExpiredRecords(DateTime dateTime) throws IOException {
 
-    RangeQueryBuilder rangeQueryBuilder =
-        new RangeQueryBuilder("_timestampadded").lte(dateTime);
+    RangeQueryBuilder rangeQueryBuilder = new RangeQueryBuilder("_timestampadded").lte(dateTime);
+    // rangeQueryBuilder.gte(new DateTime(0));
     DeleteByQueryRequest request =
         new DeleteByQueryRequest(this.indexName).setQuery(rangeQueryBuilder);
     BulkByScrollResponse bulkResponse = client.deleteByQuery(request, RequestOptions.DEFAULT);
@@ -377,15 +393,15 @@ public class ServiceElasticSearch {
   }
 
   /**
-   * Method to query records from database.
-   * // Todo fix documentation
+   * Method to query records from database. // Todo fix documentation
+   *
    * @param message original query request
-   * @param queryRequest query keywords extracted from the priginal request
+   * @param queryRequest query keywords extracted from the original request
    * @param operators operators like ANY, ALL that specifies how query keywords should be applied
    * @param maxResults max results to be returned. not implemented
    * @return List of all the records
    */
-  public List<Message> query(
+  public synchronized List<Message> query(
       Message message, Message queryRequest, Message operators, int maxResults)
       throws DatabaseException {
     String operator = (String) operators.getMap().get("operator");
@@ -393,7 +409,9 @@ public class ServiceElasticSearch {
     return allQuery(queryRequest.getMap(), maxResults, operator);
   }
 
-  private List<Message> allQuery(Map queryRequest, int maxResults, String operator) {
+  private synchronized List<Message> allQuery(Map queryRequest, int maxResults, String operator) {
+
+    List<Message> finalSearchResults = new ArrayList<>();
 
     SearchRequest searchRequest = new SearchRequest(this.indexName);
     SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
@@ -401,13 +419,12 @@ public class ServiceElasticSearch {
       searchSourceBuilder.size(maxResults);
     }
     BoolQueryBuilder builder = QueryBuilders.boolQuery();
-    List<Message> result = new ArrayList<>();
     if (operator.equalsIgnoreCase("all")) {
       for (Object key : queryRequest.keySet()) {
         String keyAsString = (String) key;
         if (!queryRequest.get(keyAsString).toString().contains("*")) {
           builder.must(matchQuery(keyAsString, queryRequest.get(keyAsString)));
-        }else {
+        } else {
           builder.must(regexpQuery(keyAsString, (String) queryRequest.get(keyAsString)));
         }
       }
@@ -416,29 +433,57 @@ public class ServiceElasticSearch {
         String keyAsString = (String) key;
         if (!queryRequest.get(keyAsString).toString().contains("*")) {
           builder.should(matchQuery(keyAsString, queryRequest.get(keyAsString)));
-        }else {
+        } else {
           builder.should(regexpQuery(keyAsString, (String) queryRequest.get(keyAsString)));
-        }      }
-    }
-    searchSourceBuilder.query(builder);
-    try {
-
-      // Getting all records from the database
-      searchRequest.source(searchSourceBuilder);
-      SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-      SearchHit[] searchHits = searchResponse.getHits().getHits();
-      for (SearchHit hit : searchHits) {
-        result.add(new Message((Map<String, Object>) hit.getSourceAsMap()));
+        }
       }
-    } catch (ElasticsearchStatusException e) {
-      Log.info("Couldn't find record in database" + e.getMessage());
+    }
+
+    int scrollSize = 5000;
+    searchSourceBuilder.size(scrollSize);
+    searchRequest.source(searchSourceBuilder);
+    searchRequest.scroll(TimeValue.timeValueSeconds(60));
+    SearchResponse searchResponse = null;
+
+    try {
+      searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+      String scrollId = searchResponse.getScrollId();
+      SearchHits hits = searchResponse.getHits();
+      finalSearchResults.addAll(processSearchResponse(hits));
+
+      ClearScrollRequest clearScrollRequest =
+          new ClearScrollRequest(); // to eventually clean up the scrolls
+
+      do {
+        SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
+        scrollRequest.scroll(TimeValue.timeValueSeconds(10));
+        SearchResponse searchScrollResponse = client.scroll(scrollRequest, RequestOptions.DEFAULT);
+        scrollId = searchScrollResponse.getScrollId();
+        hits = searchScrollResponse.getHits();
+        if (hits.getHits().length > 0) {
+          finalSearchResults.addAll(processSearchResponse(hits));
+        }
+        clearScrollRequest.addScrollId(scrollId);
+      } while (hits.getHits().length != 0);
+      client.clearScroll(clearScrollRequest, RequestOptions.DEFAULT); //clearing the scrolls
     } catch (IOException e) {
       Log.error("Internal server error" + e.getMessage());
       throw new InternalServerErrorException(e.getMessage());
     }
-    return result;
+
+    return finalSearchResults;
   }
 
+  private List<Message> processSearchResponse(SearchHits searchHits) {
+    List<Message> result = new ArrayList<>();
+    for (SearchHit hit : searchHits.getHits()) {
+      Message tmpResult = new Message((Map<String, Object>) hit.getSourceAsMap());
+      if (tmpResult != null && tmpResult.getMap() != null) {
+        result.add(tmpResult);
+      }
+    }
+    return result;
+  }
   /**
    * Checks if the document already exists in the database
    *
@@ -479,7 +524,7 @@ public class ServiceElasticSearch {
       if (searchHits.length > 0) {
         for (SearchHit hit : searchHits) {
           Map keyValuesMap = hit.getSourceAsMap();
-          //Map keyValuesMap = (Map) hitMap.get("keyValues");
+          // Map keyValuesMap = (Map) hitMap.get("keyValues");
           keyValuesMap.remove("expires");
           keyValuesMap.remove("_lastUpdated");
           keyValuesMap.remove("ttl");
@@ -488,7 +533,7 @@ public class ServiceElasticSearch {
           keyValuesMap.remove("uri");
           if (keyValuesMap.size() == queryMap.size()) {
             return true;
-            //throw new DuplicateEntryException("Record already exists");
+            // throw new DuplicateEntryException("Record already exists");
           }
         }
       }
@@ -521,7 +566,6 @@ public class ServiceElasticSearch {
    */
   private void insert(Message message, Message queryRequest) throws IOException {
     IndexRequest request = new IndexRequest(this.indexName);
-    //System.out.println(queryRequest.getMap());
     request.id(queryRequest.getURI());
     Gson gson = new Gson();
     String json = gson.toJson(message.getMap());

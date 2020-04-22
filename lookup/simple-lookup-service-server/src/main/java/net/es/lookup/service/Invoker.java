@@ -4,8 +4,9 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.es.lookup.common.MemoryManager;
+import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.ElasticSearchMaintenanceJob;
-import net.es.lookup.database.connectDB;
+import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.timer.Scheduler;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
@@ -25,6 +26,9 @@ import static org.quartz.TriggerBuilder.newTrigger;
 public class Invoker {
 
   private static int port = 8080;
+  private static int elasticPort = 9300;
+  private static int restClientPort = 9301;
+  private static String elasticHost = "localhost";
   private static LookupService lookupService = null;
 
   private static String host = "localhost";
@@ -33,7 +37,7 @@ public class Invoker {
 
   private static String configPath = "etc/";
   private static final String lookupservicecfg = "lookupservice.yaml";
-  //private static final String queuecfg = "queueservice.yaml";
+  // private static final String queuecfg = "queueservice.yaml";
 
   private static String logConfig = "./etc/log4j2.properties";
 
@@ -52,28 +56,35 @@ public class Invoker {
     System.setProperty("log4j2.warn", "true");
     System.setProperty("log4j.configurationFile", logConfig);
 
-
-
     LOG = LogManager.getLogger(Invoker.class.getName());
-    //StdOutErrToLog.redirectStdOutErrToLog();
+    // StdOutErrToLog.redirectStdOutErrToLog();
 
     LookupServiceConfigReader.init(configPath + lookupservicecfg);
-   //QueueServiceConfigReader.init(configPath + queuecfg);
+    // QueueServiceConfigReader.init(configPath + queuecfg);
 
     lookupServiceConfigReader = LookupServiceConfigReader.getInstance();
-    //queueServiceConfigReader = QueueServiceConfigReader.getInstance();
+    // queueServiceConfigReader = QueueServiceConfigReader.getInstance();
 
     port = lookupServiceConfigReader.getPort();
+
     host = lookupServiceConfigReader.getHost();
+    restClientPort = lookupServiceConfigReader.getElasticRestClientPort();
+    elasticPort = lookupServiceConfigReader.getElasticServerPort();
+    elasticHost = lookupServiceConfigReader.getElasticServer();
 
     LOG.info("starting ServiceElasticSearch");
 
-    String dbname = lookupServiceConfigReader.getDbName();
+    String dbname = lookupServiceConfigReader.getElasticDbName();
 
     List<String> services = new LinkedList<>();
 
     // Initialize services
-    new connectDB();
+    try {
+      new ServiceElasticSearch(elasticHost, elasticPort, restClientPort, dbname);
+    } catch (DatabaseException e) {
+      LOG.fatal("Unable to initialize database" + e.getMessage());
+      System.exit(-1);
+    }
     services.add(LookupService.LOOKUP_SERVICE);
 
     LOG.info("starting Lookup Service");
@@ -87,7 +98,7 @@ public class Invoker {
     Scheduler scheduler = Scheduler.getInstance();
     int dbpruneInterval = lookupServiceConfigReader.getPruneInterval();
     long prunethreshold = lookupServiceConfigReader.getPruneThreshold();
-    JobDetail job =
+    /* JobDetail job =
         newJob(ElasticSearchMaintenanceJob.class)
             .withIdentity(LookupService.LOOKUP_SERVICE + "clean", "DBMaintenance")
             .build();
@@ -107,9 +118,9 @@ public class Invoker {
             .withPriority(Thread.MAX_PRIORITY)
             .build();
 
-    scheduler.schedule(job, trigger);
+    scheduler.schedule(job, trigger);*/
 
-   /*   if (queueServiceConfigReader != null && queueServiceConfigReader.isServiceOn()) {
+    /*   if (queueServiceConfigReader != null && queueServiceConfigReader.isServiceOn()) {
 
       PublishService publishService = PublishService.getInstance();
       publishService.setMaxPushEvents(queueServiceConfigReader.getBatchSize());

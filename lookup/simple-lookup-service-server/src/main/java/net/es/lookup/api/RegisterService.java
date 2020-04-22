@@ -8,11 +8,9 @@ import net.es.lookup.common.exception.api.UnauthorizedException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.ServiceElasticSearch;
-import net.es.lookup.database.connectDB;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
-import net.es.lookup.protocol.json.JsonBulkRenewRequest;
 import net.es.lookup.publish.Publisher;
 import net.es.lookup.service.LookupService;
 import net.es.lookup.service.PublishService;
@@ -74,13 +72,9 @@ public class RegisterService {
           }
         }
         try {
-          connectDB connect = new connectDB();
-          ServiceElasticSearch db = connect.connect();
+          ServiceElasticSearch db = ServiceElasticSearch.getInstance();
           try {
             Message res = db.queryAndPublishService(request);
-            db.closeConnection();
-            connect = null;
-            db = null;
             System.gc(); // Todo fix memory management
             response = new JSONRegisterResponse(res.getMap());
             String responseString;
@@ -101,26 +95,24 @@ public class RegisterService {
               Publisher publisher = Publisher.getInstance();
               publisher.eventNotification(res);
             }
+            db.closeConnection();
             return responseString;
           } catch (ElasticsearchException e) {
-            db.closeConnection();
-            connect = null;
-            db = null;
             Log.error("ElasticSearch Exception" + e.getDetailedMessage());
             e.printStackTrace();
             throw new ElasticsearchException(e.getMessage());
           }
 
+
         } catch (DuplicateEntryException e) {
           Log.error("FobiddenRequestException:" + e.getMessage());
           Log.info("Register status: FAILED due to Duplicate Entry; exiting");
           throw new ForbiddenRequestException(e.getMessage());
-        } catch (URISyntaxException e) {
-          e.printStackTrace();
         } catch (IOException e) {
           Log.error("Error connecting with database");
           throw new InternalErrorException("Error connecting to database");
         }
+
       } else {
 
         // Build response

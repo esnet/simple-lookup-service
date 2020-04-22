@@ -36,24 +36,17 @@ public class ElasticSearchMaintenanceJob implements Job {
     LOG.info("Running ElasticSearchPrune...");
     JobDataMap data = context.getJobDetail().getJobDataMap();
 
-    try {
-      connectDB connect = new connectDB();
-      db = connect.connect();
-    } catch ( URISyntaxException e) {
-      LOG.error("Error in URI");
-    }
-
+    db = ServiceElasticSearch.getInstance();
     long prune_threshold = data.getLong(PRUNE_THRESHOLD);
     Instant now = new Instant();
     Instant pTime = now.minus(prune_threshold);
     DateTime pruneTime = pTime.toDateTime();
 
-    DateTime daterange = pruneTime.toDateTime();
+    //DateTime daterange = pruneTime.toDateTime();
     try {
 
-      count = db.deleteExpiredRecords(daterange);
+      count = db.deleteExpiredRecords(pruneTime);
       db.closeConnection();
-      db = null;
       System.gc();
       LOG.info("Record deleted: " + count);
 

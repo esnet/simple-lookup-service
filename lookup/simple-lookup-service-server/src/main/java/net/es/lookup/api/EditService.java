@@ -11,7 +11,6 @@ import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.RecordNotFoundException;
 import net.es.lookup.database.ServiceElasticSearch;
-import net.es.lookup.database.connectDB;
 import net.es.lookup.protocol.json.*;
 import net.es.lookup.publish.Publisher;
 import net.es.lookup.service.PublishService;
@@ -59,8 +58,7 @@ public class EditService {
     if (this.isValid(request) && this.isAuthed(serviceid, request)) {
 
       try {
-        connectDB connect = new connectDB();
-        ServiceElasticSearch db = connect.connect();
+        ServiceElasticSearch db = ServiceElasticSearch.getInstance();
         Message serviceRecord = db.getRecordByURI(serviceid);
 
         if (serviceRecord != null) {
@@ -108,7 +106,7 @@ public class EditService {
           throw new NotFoundException("ServiceRecord Not Found in DB\n");
         }
 
-      } catch (URISyntaxException | IOException e) {
+      } catch ( IOException e) {
 
         LOG.fatal("DatabaseException: The database is out of service." + e.getMessage());
         LOG.info("RenewService status: FAILED; exiting");
@@ -130,8 +128,7 @@ public class EditService {
 
         LOG.error("The private-key is not authorized to access this service");
         LOG.info("RenewService status: FAILED; exiting");
-        throw new ForbiddenRequestException(
-            "The private-key is not authorized to access this service\n");
+        throw new ForbiddenRequestException("The private-key is not authorized to access this service\n");
       }
 
       try {
@@ -177,8 +174,7 @@ public class EditService {
 
     if (this.isValid(request) && this.isAuthed(serviceid, request)) {
       try {
-        connectDB connect = new connectDB();
-        ServiceElasticSearch db = connect.connect();
+        ServiceElasticSearch db = ServiceElasticSearch.getInstance();
 
         Message serviceRecord = db.deleteRecord(serviceid);
         db.closeConnection();
@@ -198,12 +194,6 @@ public class EditService {
           LOG.info("DeleteService status: SUCCESS; exiting");
           return JSONMessage.toString(response);
         }
-
-      } catch (URISyntaxException e) {
-
-        LOG.fatal("DatabaseException: The database is out of service." + e.getMessage());
-        LOG.info("DeleteService status: FAILED; exiting");
-        throw new InternalErrorException("Database error\n");
 
       } catch (IOException e) {
         LOG.info("Error connecting to database; exiting");

@@ -9,7 +9,6 @@ import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.database.ServiceElasticSearch;
-import net.es.lookup.database.connectDB;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRenewRequest;
 import net.es.lookup.protocol.json.JsonBulkRenewRequest;
@@ -19,7 +18,6 @@ import net.es.lookup.service.PublishService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -54,8 +52,7 @@ public class BulkRenewService {
       throw new BadRequestException("Request is invalid. Please edit the request and resend.");
     }
 
-    connectDB connect = new connectDB();
-    ServiceElasticSearch db = connect.connect();
+    ServiceElasticSearch db = ServiceElasticSearch.getInstance();
 
     JsonBulkRenewResponse renewResponse = checkAndRenewRecords(db, jsonBulkRenewRequest);
     String formattedRenewResponse = "";
