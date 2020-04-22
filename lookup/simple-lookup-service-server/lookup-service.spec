@@ -32,7 +32,7 @@ BuildRequires:  apache-maven
 Requires:		chkconfig
 %endif
 Requires:	elasticsearch
-Required: httpd
+Requires: httpd
 
 %description
 Lookup Service is used to find registered services. 
