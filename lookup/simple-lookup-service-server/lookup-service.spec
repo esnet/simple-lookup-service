@@ -7,7 +7,7 @@
 %define run_dir /var/run/%{package_name}
 %define data_dir /var/lib/%{package_name}
 %define init_script lookup-service
-%define relnum 0
+%define relnum 1
 
 Name:           %{package_name}
 Version:        3.0
@@ -63,6 +63,7 @@ mvn -DskipTests --projects %{mvn_project_list} install
 mkdir -p %{buildroot}/%{install_base}/target
 mkdir -p %{buildroot}/%{install_base}/bin
 mkdir -p %{buildroot}/%{config_base}
+mkdir -p %{buildroot}/etc/httpd/conf.d
 %if 0%{?el7}
 mkdir -p %{buildroot}%{_unitdir}
 %else
@@ -79,9 +80,12 @@ install -m 644 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scrip
 install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scripts/lookup-service %{buildroot}/etc/init.d/%{init_script}
 %endif
 
+#apache config file
+install -D -m 0644 etc/%{apacheconf} %{buildroot}/etc/httpd/conf.d/%{apacheconf}
+rm -f %{buildroot}/%{install_base}/etc/{apacheconf}
+
 # Copy default config file
 cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/lookupservice.yaml %{buildroot}/%{config_base}/lookupservice.yaml
-cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/apache-lookup-service.conf %{buildroot}/etc/httpd/conf.d/apache-lookup-service.conf
 
 #Update log locations
 sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/log4j2.properties > %{buildroot}/%{config_base}/log4j2.properties
@@ -124,6 +128,8 @@ fi
 chown lookup:lookup %{install_base}/target/%{package_name}-server.one-jar.jar
 #ln -s %{install_base}/target/%{mvn_project_name}-server-%{version}.jar %{install_base}/target/%{package_name}.jar
 
+service httpd restart &> /dev/null || :
+
 #Configure service to start when machine boots
 
 %if 0%{?el7}
@@ -155,8 +161,6 @@ if [ $1 == 0 ]; then
     fi
 fi
 
-
-
 %files
 %defattr(-,lookup,lookup,-)
 %config(noreplace) %{config_base}/*
@@ -168,9 +172,11 @@ fi
 %else
 %attr(0755,lookup,lookup) /etc/init.d/%{init_script}
 %endif
-
+/etc/httpd/conf.d/*
 
 %changelog
+* Wed Apr 22 2020 sowmya@es.net 3.0-1
+- Replacing backend with elasticsearch db
 * Wed Oct 23 2019 sowmya@es.net 3.0-0
 - Updated spec file to support Centos 7
 * Mon Sep 24 2018 sowmya@es.net 2.2-9
