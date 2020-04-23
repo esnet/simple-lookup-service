@@ -7,6 +7,7 @@
 %define run_dir /var/run/%{package_name}
 %define data_dir /var/lib/%{package_name}
 %define init_script lookup-service
+%define apacheconf apache-lookup-service.conf
 %define relnum 1
 
 Name:           %{package_name}
@@ -83,7 +84,7 @@ install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scrip
 #apache config file
 mkdir -p %{buildroot}/etc/httpd/conf.d
 install -D -m 0644 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/%{apacheconf} %{buildroot}/etc/httpd/conf.d/%{apacheconf}
-rm -f %{buildroot}/%{config_base}/etc/{apacheconf}
+rm -f %{buildroot}/%{config_base}/etc/%{apacheconf}
 
 # Copy default config file
 cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/lookupservice.yaml %{buildroot}/%{config_base}/lookupservice.yaml
