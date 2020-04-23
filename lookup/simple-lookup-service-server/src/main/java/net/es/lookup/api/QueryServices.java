@@ -44,7 +44,6 @@ public class QueryServices {
       if (db != null) {
 
           List<Message> res = db.query(request, queryParameters, operators, maxResult);
-          System.out.println("Result returned to query services"+res.size());
           // Build response
           response = JSONMessage.toString(res);
 
