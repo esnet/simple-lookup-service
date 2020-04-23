@@ -82,8 +82,8 @@ install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scrip
 
 #apache config file
 mkdir -p %{buildroot}/etc/httpd/conf.d
-install -D -m 0644 etc/%{apacheconf} %{buildroot}/etc/httpd/conf.d/%{apacheconf}
-rm -f %{buildroot}/%{install_base}/etc/{apacheconf}
+install -D -m 0644 %{buildroot}/%{config_base}/%{apacheconf} %{buildroot}/etc/httpd/conf.d/%{apacheconf}
+rm -f %{buildroot}/%{config_base}/etc/{apacheconf}
 
 # Copy default config file
 cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/lookupservice.yaml %{buildroot}/%{config_base}/lookupservice.yaml
