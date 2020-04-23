@@ -82,7 +82,7 @@ install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scrip
 
 #apache config file
 mkdir -p %{buildroot}/etc/httpd/conf.d
-install -D -m 0644 %{buildroot}/%{config_base}/%{apacheconf} %{buildroot}/etc/httpd/conf.d/%{apacheconf}
+install -D -m 0644 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/%{apacheconf} %{buildroot}/etc/httpd/conf.d/%{apacheconf}
 rm -f %{buildroot}/%{config_base}/etc/{apacheconf}
 
 # Copy default config file
