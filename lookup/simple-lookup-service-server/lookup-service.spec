@@ -8,7 +8,7 @@
 %define data_dir /var/lib/%{package_name}
 %define init_script lookup-service
 %define apacheconf apache-lookup-service.conf
-%define relnum 1
+%define relnum 2
 
 Name:           %{package_name}
 Version:        3.0
