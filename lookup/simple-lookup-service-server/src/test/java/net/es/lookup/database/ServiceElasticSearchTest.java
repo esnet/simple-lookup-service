@@ -1,6 +1,7 @@
 package net.es.lookup.database;
 
 import net.es.lookup.common.Message;
+import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.common.exception.internal.RecordNotFoundException;
 import org.apache.logging.log4j.LogManager;
@@ -8,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -29,8 +31,14 @@ public class ServiceElasticSearchTest {
    * @throws URISyntaxException for incorrect server name
    * @throws IOException for error in deleting all records
    */
+
+  @BeforeClass
+  public static void setUpDatabase() throws DatabaseException, URISyntaxException {
+     new ServiceElasticSearch("localhost", 9200, 9300, "lookup");
+  }
+
   @Before
-  public void setUp() throws URISyntaxException, IOException {
+  public void setUp() throws URISyntaxException, IOException, DatabaseException {
     client = ServiceElasticSearch.getInstance();
     client.deleteAllRecords();
   }

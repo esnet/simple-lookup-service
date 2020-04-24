@@ -80,6 +80,8 @@ public class ServiceElasticSearch {
   private RestHighLevelClient client = null;
   private static ServiceElasticSearch instance = null;
 
+  private int DEFAULT_RESULTS_SIZE = 5000;
+
   public static ServiceElasticSearch getInstance() {
 
     return ServiceElasticSearch.instance;
@@ -417,30 +419,34 @@ public class ServiceElasticSearch {
     SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
     if (maxResults != 0) {
       searchSourceBuilder.size(maxResults);
+    }else{
+      searchSourceBuilder.size(DEFAULT_RESULTS_SIZE);
     }
-    BoolQueryBuilder builder = QueryBuilders.boolQuery();
+    BoolQueryBuilder boolKeywordQueryBuilder = QueryBuilders.boolQuery();
+
+
     if (operator.equalsIgnoreCase("all")) {
       for (Object key : queryRequest.keySet()) {
         String keyAsString = (String) key;
         if (!queryRequest.get(keyAsString).toString().contains("*")) {
-          builder.must(matchQuery(keyAsString, queryRequest.get(keyAsString)));
+          boolKeywordQueryBuilder.must(matchQuery(keyAsString, queryRequest.get(keyAsString)));
         } else {
-          builder.must(regexpQuery(keyAsString, (String) queryRequest.get(keyAsString)));
+          boolKeywordQueryBuilder.must(regexpQuery(keyAsString, (String) queryRequest.get(keyAsString)));
         }
       }
     } else {
       for (Object key : queryRequest.keySet()) {
         String keyAsString = (String) key;
         if (!queryRequest.get(keyAsString).toString().contains("*")) {
-          builder.should(matchQuery(keyAsString, queryRequest.get(keyAsString)));
+          boolKeywordQueryBuilder.should(matchQuery(keyAsString, queryRequest.get(keyAsString)));
         } else {
-          builder.should(regexpQuery(keyAsString, (String) queryRequest.get(keyAsString)));
+          boolKeywordQueryBuilder.should(regexpQuery(keyAsString, (String) queryRequest.get(keyAsString)));
         }
       }
     }
 
-    int scrollSize = 5000;
-    searchSourceBuilder.size(scrollSize);
+    searchSourceBuilder.query(boolKeywordQueryBuilder);
+
     searchRequest.source(searchSourceBuilder);
     searchRequest.scroll(TimeValue.timeValueSeconds(60));
     SearchResponse searchResponse = null;
