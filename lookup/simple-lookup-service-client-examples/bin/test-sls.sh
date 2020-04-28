@@ -16,9 +16,10 @@ HEADER='Content-Type: application/json'
 record='record.json'
 
 # Registring a new entry
-echo "Registring a new entry ..."
-${CURL} -H "${HEADER}" -X POST -d @${record} ${sls}/lookup/records/
-echo -e "\n"
+echo "Registering a new entry ..."
+result=`${CURL} -H "${HEADER}" -X POST -d @${record} ${sls}/lookup/records/`
+echo $result
+echo "\n"
 
 # Getting the key from the entry
 echo "Getting key and TTL from new entry ..."
