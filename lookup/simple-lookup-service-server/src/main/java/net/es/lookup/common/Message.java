@@ -64,7 +64,6 @@ public class Message {
     public String getURI() {
 
         Object val = this.getMap().get(ReservedKeys.RECORD_URI);
-
         if(val instanceof String){
             return (String)val;
         }else if(val instanceof List){
