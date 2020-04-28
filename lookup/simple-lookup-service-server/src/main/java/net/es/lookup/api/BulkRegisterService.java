@@ -1,5 +1,10 @@
 package net.es.lookup.api;
 
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.UUID;
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
@@ -12,16 +17,13 @@ import net.es.lookup.service.LookupService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.*;
-
 public class BulkRegisterService {
 
   private static Logger LOG = LogManager.getLogger(BulkRegisterService.class);
 
   /**
-   * Takes a JSON string of messages and returns the list of failed messages
+   * Takes a JSON string of messages and returns the list of failed messages.
+   *
    * @param messages JSON String
    * @return String of all messages that were failed; {} if nothing failed
    */
@@ -63,7 +65,6 @@ public class BulkRegisterService {
 
       ServiceElasticSearch db = ServiceElasticSearch.getInstance();
       failed = db.bulkQueryAndPublishService(messageQueue);
-      db.closeConnection();
 
     } catch (IOException e) {
       throw new InternalErrorException("Error connecting to database: " + e.getMessage());
@@ -71,7 +72,7 @@ public class BulkRegisterService {
     StringBuilder failedStrings = new StringBuilder();
     failedStrings.append("failures: [");
     for (Message fail : failed) {
-        failedStrings.append(fail.getMap()).append("\n\n");
+      failedStrings.append(fail.getMap()).append("\n\n");
     }
     failedStrings.append(']');
     return failedStrings.toString();
@@ -80,9 +81,8 @@ public class BulkRegisterService {
   private String newUri(String recordType) {
 
     if (recordType != null && !recordType.isEmpty()) {
-      String uri =
+      return
           LookupService.SERVICE_URI_PREFIX + "/" + recordType + "/" + UUID.randomUUID().toString();
-      return uri;
     } else {
       LOG.error("Error creating URI: Record Type not found");
       throw new BadRequestException("Cannot create URI. Record Type not found");

@@ -83,7 +83,6 @@ public class EditService {
 
             newRequest.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_RENEW);
             Message res = db.updateService(serviceid, newRequest);
-            db.closeConnection();
             if (PublishService.isServiceOn()) {
               Publisher publisher = Publisher.getInstance();
               publisher.eventNotification(res);
@@ -177,7 +176,6 @@ public class EditService {
         ServiceElasticSearch db = ServiceElasticSearch.getInstance();
 
         Message serviceRecord = db.deleteRecord(serviceid);
-        db.closeConnection();
         if (serviceRecord == null) {
 
           LOG.error("ServiceRecord Not found");

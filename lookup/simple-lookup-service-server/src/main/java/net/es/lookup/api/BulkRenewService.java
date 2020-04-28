@@ -35,7 +35,7 @@ public class BulkRenewService {
    * @param renewRequests Request containing list of uris.
    * @return String Json message as a string.
    */
-  public String bulkRenew(String renewRequests) throws URISyntaxException{
+  public String bulkRenew(String renewRequests) {
 
     // parse records
     JsonBulkRenewRequest jsonBulkRenewRequest = new JsonBulkRenewRequest(renewRequests);
@@ -55,12 +55,7 @@ public class BulkRenewService {
     ServiceElasticSearch db = ServiceElasticSearch.getInstance();
 
     JsonBulkRenewResponse renewResponse = checkAndRenewRecords(db, jsonBulkRenewRequest);
-    String formattedRenewResponse = "";
-    try {
-      db.closeConnection();
-    } catch (IOException e) {
-      throw new InternalErrorException("Error closing connection to database");
-    }
+    String formattedRenewResponse;
     try {
       formattedRenewResponse = JSONMessage.toString(renewResponse);
     } catch (DataFormatException e) {

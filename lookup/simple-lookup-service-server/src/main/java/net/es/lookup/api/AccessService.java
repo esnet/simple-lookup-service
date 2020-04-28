@@ -1,5 +1,8 @@
 package net.es.lookup.api;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
@@ -9,11 +12,6 @@ import net.es.lookup.protocol.json.JSONGetServiceResponse;
 import net.es.lookup.protocol.json.JSONMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class AccessService {
 
@@ -35,7 +33,6 @@ public class AccessService {
     try {
       ServiceElasticSearch db = ServiceElasticSearch.getInstance();
       serviceRecord = db.getRecordByURI(serviceid);
-      db.closeConnection();
 
       if (serviceRecord != null) {
 
@@ -47,23 +44,17 @@ public class AccessService {
 
           LOG.info("GetService status: SUCCESS; exiting ");
           return JSONMessage.toString(response);
-
         } catch (DataFormatException e) {
-
           LOG.error("Data formating exception.");
           LOG.info("GetService status: FAILED; exiting");
           throw new InternalErrorException("Data formatting exception");
         }
-
       } else {
-
         LOG.error("ServiceRecord Not Found in DB.");
         LOG.info("GetService status: FAILED; exiting");
         throw new NotFoundException("ServiceRecord Not Found in DB\n");
       }
-
-    } catch ( IOException e) {
-
+    } catch (IOException e) {
       LOG.fatal("DatabaseException: The database is out of service." + e.getMessage());
       LOG.info("GetService status: FAILED; exiting");
       throw new InternalErrorException("Database error\n");
@@ -88,7 +79,6 @@ public class AccessService {
     try {
       ServiceElasticSearch db = ServiceElasticSearch.getInstance();
       serviceRecord = db.getRecordByURI(serviceid);
-      db.closeConnection();
       if (serviceRecord != null) {
 
         if (serviceRecord.getKey(key) == null) {
@@ -99,7 +89,7 @@ public class AccessService {
         }
 
         LOG.info("GetServiceKey status: SUCCESS");
-        Map<String, Object> keyValueMap = new HashMap<String, Object>();
+        Map<String, Object> keyValueMap = new HashMap<>();
         keyValueMap.put(key, serviceRecord.getKey(key));
         response = new JSONGetServiceResponse(keyValueMap);
 
@@ -126,5 +116,4 @@ public class AccessService {
       throw new InternalErrorException("Record URI not found");
     }
   }
-
 }

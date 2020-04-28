@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -29,7 +30,7 @@ public class ServiceElasticSearchTest {
    * Connects to the database an deletes all records if any exist
    *
    * @throws URISyntaxException for incorrect server name
-   * @throws IOException for error in deleting all records
+   * @throws DatabaseException if error connecting to database
    */
 
   @BeforeClass
@@ -38,19 +39,9 @@ public class ServiceElasticSearchTest {
   }
 
   @Before
-  public void setUp() throws URISyntaxException, IOException, DatabaseException {
+  public void setUp() throws IOException {
     client = ServiceElasticSearch.getInstance();
     client.deleteAllRecords();
-  }
-
-  /**
-   * closes the connection with the database
-   *
-   * @throws IOException if error in closing connection to the database
-   */
-  @After
-  public void tearDown() throws IOException {
-    client.closeConnection();
   }
 
   /**
@@ -133,7 +124,7 @@ public class ServiceElasticSearchTest {
    * @throws DuplicateEntryException Entry already exists before test
    */
   @Test
-  public void deleteNonExistingUri() throws IOException, DuplicateEntryException, RecordNotFoundException {
+  public void deleteNonExistingUri() throws IOException, DuplicateEntryException {
     this.queryAndPublishService();
     Message status = null;
     try {
@@ -359,7 +350,7 @@ public class ServiceElasticSearchTest {
     client.publishService(message2);
     client.publishService(message3);
 
-    Map<String, Message> messages = new HashMap<String, Message>();
+    Map<String, Message> messages = new HashMap<>();
     messages.put("1", message2);
     messages.put("2", message3);
     messages.put("3", message1);
@@ -416,7 +407,7 @@ public class ServiceElasticSearchTest {
     client.publishService(message2);
     client.publishService(message3);
 
-    Map<String, Message> messages = new HashMap<String, Message>();
+    Map<String, Message> messages = new HashMap<>();
     messages.put("1", message2);
     messages.put("2", message3);
     messages.put("4", message1);
@@ -552,7 +543,7 @@ public class ServiceElasticSearchTest {
     this.queryAndPublishService();
     Message record = client.getRecordByURI("2");
     String key = "test-id";
-    Map<String, Object> keyValueMap = new HashMap<String, Object>();
+    Map<String, Object> keyValueMap = new HashMap<>();
     keyValueMap.put(key, record.getKey(key));
     assertEquals("1", keyValueMap.get("test-id"));
   }
@@ -568,7 +559,7 @@ public class ServiceElasticSearchTest {
     this.queryAndPublishService();
     Message record = client.getRecordByURI("2");
     String key = "random";
-    Map<String, Object> keyValueMap = new HashMap<String, Object>();
+    Map<String, Object> keyValueMap = new HashMap<>();
     keyValueMap.put(key, record.getKey(key));
     assertNull(keyValueMap.get("random"));
   }

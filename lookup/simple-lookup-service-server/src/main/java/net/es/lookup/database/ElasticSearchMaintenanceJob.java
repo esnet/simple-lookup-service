@@ -29,7 +29,7 @@ public class ElasticSearchMaintenanceJob implements Job {
     LOG.info("Initializing ElasticSearchPrune...");
   }
 
-  public void execute(JobExecutionContext context) throws JobExecutionException {
+  public void execute(JobExecutionContext context) {
 
     List<Message> result = null;
     long count;
@@ -46,7 +46,6 @@ public class ElasticSearchMaintenanceJob implements Job {
     try {
 
       count = db.deleteExpiredRecords(pruneTime);
-      db.closeConnection();
       System.gc();
       LOG.info("Record deleted: " + count);
 

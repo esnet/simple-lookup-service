@@ -1,5 +1,6 @@
 package net.es.lookup.api;
 
+import java.util.Map.Entry;
 import net.es.lookup.common.*;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.ForbiddenRequestException;
@@ -58,11 +59,10 @@ public class RegisterService {
         Message operators = new Message();
 
         Map<String, Object> keyValues = request.getMap();
-        Iterator it = keyValues.entrySet().iterator();
 
-        while (it.hasNext()) {
+        for (Object o : keyValues.entrySet()) {
 
-          Map.Entry<String, Object> pairs = (Map.Entry) it.next();
+          Entry<String, Object> pairs = (Entry) o;
 
           if (!isIgnoreKey(pairs.getKey())) {
 
@@ -95,11 +95,9 @@ public class RegisterService {
               Publisher publisher = Publisher.getInstance();
               publisher.eventNotification(res);
             }
-            db.closeConnection();
             return responseString;
           } catch (ElasticsearchException e) {
             Log.error("ElasticSearch Exception" + e.getDetailedMessage());
-            e.printStackTrace();
             throw new ElasticsearchException(e.getMessage());
           }
 
@@ -157,9 +155,8 @@ public class RegisterService {
   private String newUri(String recordType) {
 
     if (recordType != null && !recordType.isEmpty()) {
-      String uri =
+      return
           LookupService.SERVICE_URI_PREFIX + "/" + recordType + "/" + UUID.randomUUID().toString();
-      return uri;
     } else {
       Log.error("Error creating URI: Record Type not found");
       throw new BadRequestException("Cannot create URI. Record Type not found");

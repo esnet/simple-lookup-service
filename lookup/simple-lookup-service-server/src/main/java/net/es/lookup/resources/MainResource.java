@@ -119,11 +119,6 @@ public class MainResource {
   @Produces("application/json")
   public String bulkRenewHandler(String message) {
 
-    try {
       return bulkRenewService.bulkRenew(message);
-    } catch (URISyntaxException e) {
-      Log.error("URI incorrect");
-      throw new InternalErrorException("Incorrect URI");
-    }
   }
 }

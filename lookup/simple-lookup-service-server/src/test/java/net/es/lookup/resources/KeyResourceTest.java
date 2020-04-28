@@ -2,13 +2,16 @@ package net.es.lookup.resources;
 
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.api.NotFoundException;
+import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.ServiceElasticSearch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -23,26 +26,20 @@ public class KeyResourceTest {
 
   private static Logger Log = LogManager.getLogger(KeyResourceTest.class);
 
-  /**
-   * Connects to the database an deletes all records if any exist
-   *
-   * @throws URISyntaxException for incorrect server name
-   * @throws IOException for error in deleting all records
-   */
-  @Before
-  public void setUp() throws URISyntaxException, IOException {
-    client = ServiceElasticSearch.getInstance();
-    client.deleteAllRecords();
+  @BeforeClass
+  public static void setUpDatabase() throws DatabaseException, URISyntaxException {
+    new ServiceElasticSearch("localhost", 9200, 9300, "lookup");
   }
 
   /**
-   * closes the connection with the database
+   * Connects to the database an deletes all records if any exist
    *
-   * @throws IOException if error in closing connection to the database
+   * @throws IOException for error in deleting all records
    */
-  @After
-  public void tearDown() throws IOException {
-    client.closeConnection();
+  @Before
+  public void setUp() throws IOException {
+    client = ServiceElasticSearch.getInstance();
+    client.deleteAllRecords();
   }
 
   /**
