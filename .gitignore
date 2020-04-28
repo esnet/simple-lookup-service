@@ -4,3 +4,6 @@ target
 *.out
 .idea/
 *.iml
+.DS_Store
+*.log
+*.log.gz

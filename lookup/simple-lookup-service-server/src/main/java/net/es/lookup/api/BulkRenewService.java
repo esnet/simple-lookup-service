@@ -1,10 +1,5 @@
 package net.es.lookup.api;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
@@ -13,26 +8,33 @@ import net.es.lookup.common.ResponseCodes;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.internal.DataFormatException;
-import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.database.ServiceDaoMongoDb;
+import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRenewRequest;
 import net.es.lookup.protocol.json.JsonBulkRenewRequest;
 import net.es.lookup.protocol.json.JsonBulkRenewResponse;
 import net.es.lookup.publish.Publisher;
 import net.es.lookup.service.PublishService;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class BulkRenewService {
   private static Logger LOG = LogManager.getLogger(BulkRenewService.class);
 
   /**
    * The method bulk renews records.
+   *
    * @param renewRequests Request containing list of uris.
    * @return String Json message as a string.
-   *
-   * */
+   */
   public String bulkRenew(String renewRequests) {
 
     // parse records
@@ -50,15 +52,10 @@ public class BulkRenewService {
       throw new BadRequestException("Request is invalid. Please edit the request and resend.");
     }
 
-    ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
-    if (db == null) {
-
-      LOG.error(("net.es.lookup.api.BulkRenewService: Error accessing database object"));
-      throw new InternalErrorException("Error accessing database");
-    }
+    ServiceElasticSearch db = ServiceElasticSearch.getInstance();
 
     JsonBulkRenewResponse renewResponse = checkAndRenewRecords(db, jsonBulkRenewRequest);
-    String formattedRenewResponse = "";
+    String formattedRenewResponse;
     try {
       formattedRenewResponse = JSONMessage.toString(renewResponse);
     } catch (DataFormatException e) {
@@ -73,7 +70,7 @@ public class BulkRenewService {
   }
 
   private JsonBulkRenewResponse checkAndRenewRecords(
-      ServiceDaoMongoDb db, JsonBulkRenewRequest jsonBulkRenewRequest) {
+      ServiceElasticSearch db, JsonBulkRenewRequest jsonBulkRenewRequest) {
     // renew
     Map<String, Message> failedUris = new HashMap<>();
 
@@ -84,7 +81,7 @@ public class BulkRenewService {
 
       for (String uri : allRecordUris) {
 
-        Message serviceRecord = db.getRecordByUri(uri);
+        Message serviceRecord = db.getRecordByURI(uri);
 
         if (serviceRecord == null) {
 
@@ -123,7 +120,7 @@ public class BulkRenewService {
           formatJsonBulkRenewResponse(allRecordUris.size(), renewResponse, failedUris);
       return jsonBulkRenewResponse;
 
-    } catch (DatabaseException e) {
+    } catch (IOException e) {
 
       LOG.fatal("DatabaseException: Error renewing services." + e.getMessage());
       LOG.info("RenewService status: FAILED; exiting");

@@ -1,10 +1,6 @@
 package net.es.lookup.api;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.Map.Entry;
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
@@ -14,47 +10,41 @@ import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.UnauthorizedException;
 import net.es.lookup.common.exception.internal.DataFormatException;
-import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
-import net.es.lookup.database.ServiceDaoMongoDb;
+import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
 import net.es.lookup.publish.Publisher;
 import net.es.lookup.service.LookupService;
 import net.es.lookup.service.PublishService;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.elasticsearch.ElasticsearchException;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.*;
 
 public class RegisterService {
 
-  private static Logger LOG = LogManager.getLogger(RegisterService.class);
-  private String params;
+  private static Logger Log = LogManager.getLogger(RegisterService.class);
 
-  /**
-   * Method to register the record.
-   * @param message record to be registered
-   * @return String registered record as Json message
-   * */
   public String registerService(String message) {
 
-    LOG.info(" Processing registerService.");
-    LOG.info(" Received message: " + message);
+    Log.info(" Processing register service.");
+    Log.info(" Received message: " + message);
     JSONRegisterResponse response;
     JSONRegisterRequest request = new JSONRegisterRequest(message);
 
     if (request.getStatus() == JSONRegisterRequest.INCORRECT_FORMAT) {
-
-      LOG.info("Register status: FAILED; exiting");
-      LOG.error("Incorrect JSON Data Format");
-      throw new BadRequestException("Error parsing JSON elements.");
+      Log.info("Register status: FAiled; exiting");
+      Log.error("Incorrect Json Data format");
+      throw new BadRequestException("Error parsing Json elements.");
     }
-
-    LOG.debug("valid?" + this.isValid(request));
-
+    Log.debug("valid?" + this.isValid(request));
     if (this.isValid(request) && this.isAuthed(request)) {
-
-      // Request a lease
+      // Requesting a lease
       boolean gotLease = LeaseManager.getInstance().requestLease(request);
 
       if (gotLease) {
@@ -67,88 +57,82 @@ public class RegisterService {
         // Add the state
         request.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_REGISTER);
 
-        // Build the matching query requestUrl that must fail for the service to be published
+        // Build the matching query requestURl that must fail for the service to be published
         Message query = new Message();
         Message operators = new Message();
-        List<String> list;
-        List<String> queryKeyList = new ArrayList();
 
         Map<String, Object> keyValues = request.getMap();
-        Iterator it = keyValues.entrySet().iterator();
 
-        while (it.hasNext()) {
+        for (Object o : keyValues.entrySet()) {
 
-          Map.Entry<String, Object> pairs = (Map.Entry) it.next();
+          Entry<String, Object> pairs = (Entry) o;
 
           if (!isIgnoreKey(pairs.getKey())) {
 
-            LOG.debug("key-value pair:" + pairs.getKey() + "=" + pairs.getValue());
+            Log.debug("key-value pair:" + pairs.getKey() + "=" + pairs.getValue());
             operators.add(pairs.getKey(), ReservedValues.RECORD_OPERATOR_ALL);
             query.add(pairs.getKey(), pairs.getValue());
           }
         }
-
         try {
-          ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
-          if (db != null) {
-            Message res = db.queryAndPublishService(request, query, operators);
+          ServiceElasticSearch db = ServiceElasticSearch.getInstance();
+          try {
+            Message res = db.queryAndPublishService(request);
+            System.gc(); // Todo fix memory management
             response = new JSONRegisterResponse(res.getMap());
-            String responseString = null;
+            String responseString;
             try {
               responseString = JSONMessage.toString(response);
             } catch (DataFormatException e) {
 
-              LOG.fatal("Data formatting exception");
-              LOG.info("Register status: FAILED due to Data formatting error; exiting");
+              Log.fatal("Data formatting exception");
+              Log.info("Register status: FAILED due to Data formatting error; exiting");
               throw new InternalErrorException(
                   "Error in creating response. Data formatting exception at server.");
             }
+            Log.info("Register status: SUCCESS; exiting");
+            Log.debug("response:" + responseString);
 
-            LOG.info("Register status: SUCCESS; exiting");
-            LOG.debug("response:" + responseString);
-
+            // Todo deprecated?
             if (PublishService.isServiceOn()) {
               Publisher publisher = Publisher.getInstance();
               publisher.eventNotification(res);
             }
-
             return responseString;
-          } else {
-            throw new InternalErrorException("Cannot access database");
+          } catch (ElasticsearchException e) {
+            Log.error("ElasticSearch Exception" + e.getDetailedMessage());
+            throw new ElasticsearchException(e.getMessage());
           }
 
+
         } catch (DuplicateEntryException e) {
-
-          LOG.error("FobiddenRequestException:" + e.getMessage());
-          LOG.info("Register status: FAILED due to Duplicate Entry; exiting");
+          Log.error("FobiddenRequestException:" + e.getMessage());
+          Log.info("Register status: FAILED due to Duplicate Entry; exiting");
           throw new ForbiddenRequestException(e.getMessage());
-
-        } catch (DatabaseException e) {
-
-          LOG.fatal("DatabaseException:" + e.getMessage());
-          LOG.info("Register status: FAILED due to Database Exception; exiting");
-          throw new InternalErrorException("Internal Server Error" + e.getMessage());
+        } catch (IOException e) {
+          Log.error("Error connecting with database");
+          throw new InternalErrorException("Error connecting to database");
         }
+
       } else {
 
         // Build response
-        LOG.fatal("Failed to secure lease for the registration record");
-        LOG.info("Register status: FAILED; exiting");
+        Log.fatal("Failed to secure lease for the registration record");
+        Log.info("Register status: FAILED; exiting");
         throw new ForbiddenRequestException("Failed to secure lease for the registration record");
       }
-
     } else {
 
       if (!this.isValid(request)) {
 
-        LOG.error("Invalid request");
-        LOG.info("Register status: FAILED due to Invalid Request; exiting");
+        Log.error("Invalid request");
+        Log.info("Register status: FAILED due to Invalid Request; exiting");
         throw new BadRequestException("Invalid request. Please check the key-value pairs");
 
       } else if (!this.isAuthed(request)) {
 
-        LOG.error("Not authorized to perform the request");
-        LOG.info("Register status: FAILED; exiting");
+        Log.error("Not authorized to perform the request");
+        Log.info("Register status: FAILED; exiting");
         throw new UnauthorizedException("Not authorized to perform the request");
       }
     }
@@ -167,31 +151,18 @@ public class RegisterService {
   }
 
   private boolean isValid(JSONRegisterRequest request) {
-
-    // Checks if ke "type" is present
-    boolean res = request.validate();
-
-    if (res) {
-
-      String recordType = request.getRecordType();
-
-      if ((recordType == null) || recordType.isEmpty()) {
-        return false;
-      }
-    }
-
-    return res;
+    boolean res = true; //request.validate(); Todo made changes to this
+    return (res && request.getRecordType() != null && !request.getRecordType().isEmpty());
   }
 
   private String newUri(String recordType) {
 
     if (recordType != null && !recordType.isEmpty()) {
-      String uri =
+      return
           LookupService.SERVICE_URI_PREFIX + "/" + recordType + "/" + UUID.randomUUID().toString();
-      return uri;
     } else {
-      LOG.error("Error creating URI: Record Type not found!");
-      throw new BadRequestException("Cannot create URI. Record Type not found.");
+      Log.error("Error creating URI: Record Type not found");
+      throw new BadRequestException("Cannot create URI. Record Type not found");
     }
   }
 
