@@ -98,6 +98,7 @@ public class Invoker {
     Scheduler scheduler = Scheduler.getInstance();
     int dbpruneInterval = lookupServiceConfigReader.getPruneInterval();
     long prunethreshold = lookupServiceConfigReader.getPruneThreshold();
+
      JobDetail job =
         newJob(ElasticSearchMaintenanceJob.class)
             .withIdentity(LookupService.LOOKUP_SERVICE + "clean", "DBMaintenance")

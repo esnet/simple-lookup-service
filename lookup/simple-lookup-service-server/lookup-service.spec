@@ -10,6 +10,7 @@
 %define apacheconf apache-lookup-service.conf
 %define relnum 3
 
+
 Name:           %{package_name}
 Version:        3.0
 Release:        %{relnum}%{?dist}
@@ -177,6 +178,8 @@ fi
 /etc/httpd/conf.d/*
 
 %changelog
+* Tue Apr 28 2020 sowmya@es.net 3.0-3
+- Enable elasticsearch cleanup job
 * Wed Apr 22 2020 sowmya@es.net 3.0-1
 - Replacing backend with elasticsearch db
 * Wed Oct 23 2019 sowmya@es.net 3.0-0
