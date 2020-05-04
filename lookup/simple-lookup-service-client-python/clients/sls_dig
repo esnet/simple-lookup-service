@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 """
 sls_dig - client to fetch host information from sLS
@@ -60,160 +61,160 @@ def main():
     )
     (options, args) = parser.parse_args()
     if (len(args)!= 1):
-        print "Please specify hostname"
+        print("Please specify hostname")
         sys.exit(1)
 
     hostname=args[0]
     if(options.output_type=="json"):
-        print sls_client.find_host_info.get_host_info_json(hostname)
+        print(sls_client.find_host_info.get_host_info_json(hostname))
+
     elif(options.output_type=="console"):
         result = sls_client.find_host_info.get_host_info(hostname)
         for host in result:
             interfaces=host[HOST_INTERFACE]
             core=1
             count=1
-            print "\n***** HOST HARDWARE *****",
-            print "\nMemory:",
+            print("\n***** HOST HARDWARE *****", end='')
+            print("\nMemory:", end='')
             for memory in host[HOST_HW_MEMORY]:
-                print memory,
+                print(memory, end='')
             if(host[HOST_HW_PROCESSORCORE]):
                 core = int(host[HOST_HW_PROCESSORCORE][0])
             if(host[HOST_HW_PROCESSORCOUNT]):
                 count = int(host[HOST_HW_PROCESSORCOUNT][0])
 
-            print "\nNumber of processors: ",
-            print str(count),
+            print("\nNumber of processors: {}".format(count))
 
             for i in range(0,count):
-                print "\nProcessor #"+str(i)+": ",
+                print("\nProcessor #"+str(i)+": ", end='')
                 cpp=core
                 if (count>1):
                     cpp = int(core/count)
-                print str(cpp)+" cores",
-                print "\nProcessor #"+str(i)+" Speed: ",
+                print(str(cpp)+" cores", end='')
+                print("\nProcessor #"+str(i)+" Speed: ", end='')
                 for speed in host[HOST_HW_PROCESSORSPEED]:
-                    print speed,
+                    print(speed, end='')
 
-            print "\n\n***** HOST OS *****",
-            print "\nOS: ",
+            print("\n\n***** HOST OS *****", end='')
+            print("\nOS: ", end='')
             for osname in host[HOST_OS_NAME]:
-                print osname,
+                print(osname, end='')
 
-            print "\nOS Version: ",
+            print("\nOS Version: ", end='')
             for osversion in host[HOST_OS_VERSION]:
-                print osversion,
+                print(osversion, end='')
 
-            print "\nOS Kernel: ",
+            print("\nOS Kernel: ", end='')
             for oskernel in host[HOST_OS_KERNEL]:
-                print oskernel
+                print(oskernel)
 
-            print "\n***** HOST NETWORKING *****\n",
+            print("\n***** HOST NETWORKING *****\n", end='')
             if (interfaces):
                 i=0
                 for interface in interfaces:
-                    print "\n*** INTERFACE "+str(i)+" ***" ,
+                    print("\n*** INTERFACE "+str(i)+" ***" , end='')
                     i+=1
-                    print "\n"+ INTERFACE_NAME+":",
+                    print("\n"+ INTERFACE_NAME+":", end='')
                     for ifname in interface[INTERFACE_NAME]:
-                        print ifname,
+                        print(ifname, end='')
 
-                    print "\n"+ INTERFACE_ADDRESS+":",
+                    print("\n"+ INTERFACE_ADDRESS+":", end='')
                     for ip in interface[INTERFACE_ADDRESS]:
-                        print ip,
+                        print(ip, end='')
 
-                    print "\n"+ INTERFACE_MAC+":",
+                    print("\n"+ INTERFACE_MAC+":", end='')
                     for mac in interface[INTERFACE_MAC]:
-                        print mac,
+                        print(mac, end='')
 
-                    print "\n"+ INTERFACE_CAPACITY+":",
+                    print("\n"+ INTERFACE_CAPACITY+":", end='')
                     for cap in interface[INTERFACE_CAPACITY]:
                         int_cap = int(cap)
                         c = _format_metrics(int_cap)
-                        print c+"bps",
+                        print(c+"bps", end='')
 
-                    print "\n"+ INTERFACE_MTU+":",
+                    print("\n"+ INTERFACE_MTU+":", end='')
                     for mtu in interface[INTERFACE_MTU]:
-                        print mtu
+                        print(mtu)
 
-            print "\n***** HOST TCP PARAMETERS *****",
-            print "\nCongestion Algorithm: ",
+            print("\n***** HOST TCP PARAMETERS *****", end='')
+            print("\nCongestion Algorithm: ", end='')
             for alg in host[HOST_NET_TCP_CONGESTIONALGORITHM]:
-                print alg,
-            print "\nRECV Autotunemaxbuffer",
+                print(alg, end='')
+            print("\nRECV Autotunemaxbuffer", end='')
             for buf in host[HOST_NET_TCP_AUTOTUNEMAXBUFFER_RECV]:
-                print buf,
-                print "\nRECV Maxbuffer: ",
+                print(buf, end='')
+                print("\nRECV Maxbuffer: ", end='')
             for buf in host[HOST_NET_TCP_MAXBUFFER_RECV]:
-                print buf,
-            print "\nSEND Autotunemaxbuffer: ",
+                print(buf, end='')
+            print("\nSEND Autotunemaxbuffer: ", end='')
             for buf in host[HOST_NET_TCP_AUTOTUNEMAXBUFFER_SEND]:
-                print buf,
-            print "\nSEND Maxbuffer: ",
+                print(buf, end='')
+            print("\nSEND Maxbuffer: ", end='')
             for buf in host[HOST_NET_TCP_MAXBUFFER_SEND]:
-                print buf
+                print(buf)
 
 
-            print "\n***** HOST LOCATION *****",
+            print("\n***** HOST LOCATION *****", end='')
 
             if( LOCATION_SITE in host and host[LOCATION_SITE]):
-                print "\nSite Name: ",
+                print("\nSite Name: ", end='')
                 for site in host[LOCATION_SITE]:
-                    print site,
+                    print(site, end='')
 
             if(LOCATION_CITY in host and host[LOCATION_CITY]):
-                print "\nCity: ",
+                print("\nCity: ", end='')
                 for city in host[LOCATION_CITY]:
-                    print city,
+                    print(city, end='')
 
             if(LOCATION_STATE in host and host[LOCATION_STATE]):
-                print "\nState: ",
+                print("\nState: ", end='')
                 for state in host[LOCATION_STATE]:
-                    print state,
+                    print(state, end='')
 
             if(LOCATION_COUNTRY in host and host[LOCATION_COUNTRY]):
-                print "\nCountry: ",
+                print("\nCountry: ", end='')
                 for country in host[LOCATION_COUNTRY]:
-                    print country,
+                    print(country, end='')
 
             if(LOCATION_LATITUDE in host and host[LOCATION_LATITUDE]):
-                print "\nLatitude: ",
+                print("\nLatitude: ", end='')
                 for lat in host[LOCATION_LATITUDE]:
                     latitude = float(lat)
-                    print ('%.2f' %latitude),
+                    print('%.2f' % latitude, end='')
 
             if(LOCATION_LONGITUDE in host and host[LOCATION_LONGITUDE]):
-                print "\nLongitude: ",
+                print("\nLongitude: ", end='')
                 for lo in host[LOCATION_LONGITUDE]:
                     longitude = float(lo)
                     print ('%.2f' %longitude)
 
-            print "\n***** HOST ADMIN *****",
+            print("\n***** HOST ADMIN *****", end='')
             admins=host[HOST_ADMINISTRATORS]
             for admin in admins:
-                print "\nAdmin Name: ",
+                print("\nAdmin Name: ", end='')
                 for name in admin[PERSON_NAME]:
-                    print name,
+                    print(name, end='')
 
-                print "\nAdmin Email: ",
+                print("\nAdmin Email: ", end='')
                 for email in admin[PERSON_EMAILS]:
-                    print email,
+                    print(email, end='')
 
-                print "\nCity :",
+                print("\nCity :", end='')
                 for city in admin[LOCATION_CITY]:
-                    print city,
+                    print(city, end='')
 
-                print "\n State: ",
+                print("\n State: ", end='')
                 for state in admin[LOCATION_STATE]:
-                    print state,
+                    print(state, end='')
 
-                print "\nCountry: ",
+                print("\nCountry: ", end='')
                 for country in admin[LOCATION_COUNTRY]:
-                    print country
+                    print(country)
 
 
 
     else:
-        print sls_client.find_host_info.get_host_info(hostname)
+        print(sls_client.find_host_info.get_host_info(hostname))
 
 
 def _format_metrics(capacity):
