@@ -4,11 +4,11 @@ from setuptools import setup
 
 setup(
     name="sls-client",
-    version="1.0.21",
+    version="2.0.4",
     description="A python client for the Simple Lookup Service",
     long_description=open("README.rst").read(),
-    author=["Andrew Sides", "Sowmya Balasubramanian", "Monte Goode"],
-    author_email=["asides@es.net", "sowmya@es.net", "mmgoode@lbl.gov"],
+    author="Sowmya Balasubramanian",
+    author_email="sowmya@es.net",
     url="https://github.com/esnet/python-sls-client",
     license="3-clause BSD License",
     package_data={
@@ -30,7 +30,7 @@ setup(
         "voluptuous",
         "IPy==0.83",
         "tldextract==1.7.4",
-        "Jinja2==2.8",
+        "Jinja2>=2.10.1",
         "elasticsearch>=5.0"
     ],
     zip_safe=False,
@@ -40,9 +40,7 @@ setup(
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.6",
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
         "Topic :: Software Development :: Libraries :: Application Frameworks",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: System :: Networking"

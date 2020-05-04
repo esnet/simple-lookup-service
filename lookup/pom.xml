@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.es.lookup</groupId>
     <artifactId>SIMPLELOOKUPSERVICE</artifactId>
-    <version>2.3-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Simple Lookup Service</name>
     <properties>
@@ -103,6 +103,13 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
             <version>4.4.11</version>
+        </dependency>
+
+        <!-- elasticsearch-rest-high-level-client -->
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>7.1.1</version>
         </dependency>
 
         <!-- testing -->

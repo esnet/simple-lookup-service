@@ -8,7 +8,7 @@ lookupservice:
         default: 7200
         min: 30
 
-#Database settings  
+#Database settings  (Mongodb settings will be deprecated and removed in future)
 database:
     DBUrl: '127.0.0.1'
     DBPort: 27017
@@ -16,6 +16,11 @@ database:
     DBCollName: 'services'
     username: 'lookup'
     password: 'abc123'
-    pruneInterval: 300 
-    pruneThreshold: 120
+    pruneInterval: 3600
+    pruneThreshold: 300
 
+elastic:
+    DBUrl: '127.0.0.1'
+    DBPort1: 9200
+    DBPort2: 9201
+    ElasticDBName: 'lookup'

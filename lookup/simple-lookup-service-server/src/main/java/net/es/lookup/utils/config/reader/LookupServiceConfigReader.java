@@ -38,6 +38,10 @@ public class LookupServiceConfigReader {
   private int pruneThreshold = MINIMUM_THRESHOLD;
 
   private static Logger LOG = LogManager.getLogger(BaseConfigReader.class);
+  private String elasticServer;
+  private int elasticServerPort;
+  private int elasticRestClientPort;
+  private String elasticDbName;
 
   /** Constructor - private because this is a Singleton. */
   private LookupServiceConfigReader() {}
@@ -53,8 +57,9 @@ public class LookupServiceConfigReader {
 
   /**
    * This method returns the Singleton instance of this class.
+   *
    * @return LookupServiceConfigReader
-   * */
+   */
   public static LookupServiceConfigReader getInstance() {
 
     if (LookupServiceConfigReader.instance == null) {
@@ -119,6 +124,38 @@ public class LookupServiceConfigReader {
     return this.pruneThreshold;
   }
 
+  public String getElasticServer() {
+    return elasticServer;
+  }
+
+  public void setElasticServer(String elasticServer) {
+    this.elasticServer = elasticServer;
+  }
+
+  public int getElasticServerPort() {
+    return elasticServerPort;
+  }
+
+  public void setElasticServerPort(int elasticServerPort) {
+    this.elasticServerPort = elasticServerPort;
+  }
+
+  public int getElasticRestClientPort() {
+    return elasticRestClientPort;
+  }
+
+  public void setElasticRestClientPort(int elasticRestClientPort) {
+    this.elasticRestClientPort = elasticRestClientPort;
+  }
+
+  public String getElasticDbName() {
+    return elasticDbName;
+  }
+
+  public void setElasticDbName(String elasticDbName) {
+    this.elasticDbName = elasticDbName;
+  }
+
   private void setInfo(String configPath) {
 
     BaseConfigReader cfg = BaseConfigReader.getInstance();
@@ -143,6 +180,13 @@ public class LookupServiceConfigReader {
       collname = (String) databaseMap.get("DBCollName");
       pruneThreshold = (Integer) databaseMap.get("pruneThreshold");
       pruneInterval = (Integer) databaseMap.get("pruneInterval");
+
+      Map<String, Object> elasticMap = (HashMap) yamlMap.get("elastic");
+      elasticServer = (String) elasticMap.get("DBUrl");
+      elasticServerPort = (Integer) elasticMap.get("DBPort1");
+      elasticRestClientPort = (Integer) elasticMap.get("DBPort2");
+      elasticDbName = (String) elasticMap.get("ElasticDBName");
+
     } catch (Exception e) {
       LOG.error("Error parsing config file. Please check config parameters " + e.toString());
       System.exit(1);

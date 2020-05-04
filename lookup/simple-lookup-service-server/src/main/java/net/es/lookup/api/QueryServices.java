@@ -1,7 +1,5 @@
 package net.es.lookup.api;
 
-import java.util.List;
-import java.util.Map;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
@@ -10,10 +8,13 @@ import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.api.ServiceUnavailableTemporarilyException;
 import net.es.lookup.common.exception.internal.DataFormatException;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.database.ServiceDaoMongoDb;
+import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.protocol.json.JSONMessage;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.List;
+import java.util.Map;
 
 public class QueryServices {
 
@@ -25,7 +26,7 @@ public class QueryServices {
   /**
    * Method to query for records using the request.
    * @param request Request containing keywords and operators
-   * @param maxResult maxResults to be returned .not yet implemeted
+   * @param maxResult maxResults to be returned not yet implemeted
    * */
   public String query(Message request, int maxResult) {
 
@@ -36,18 +37,19 @@ public class QueryServices {
 
     Message queryParameters = getQueryParameters(request);
     Message operators = getOperators(request, queryParameters);
-
     // Query DB
     try {
-      ServiceDaoMongoDb db = ServiceDaoMongoDb.getInstance();
+      ServiceElasticSearch db = ServiceElasticSearch.getInstance();
 
       if (db != null) {
 
-        List<Message> res = db.query(request, queryParameters, operators, maxResult);
-        // Build response
-        response = JSONMessage.toString(res);
-        res = null;
+          List<Message> res = db.query(request, queryParameters, operators, maxResult);
+          // Build response
+          response = JSONMessage.toString(res);
+
+
         LOG.info("Query status: SUCCESS;");
+        LOG.debug("Response is: "+ response);
 
         if (queryParameters.getMap().size() == 0) {
           QUERY_ALL_FLAG = true;
@@ -78,7 +80,7 @@ public class QueryServices {
           "Server is unable to process large query requests at this time. Please try later");
 
     } catch (Exception e) {
-
+      e.printStackTrace();
       LOG.error("Unexpected exception: " + e.getMessage());
       LOG.info("Query status: FAILED; exiting");
       throw new ServiceUnavailableTemporarilyException(
