@@ -37,10 +37,12 @@ public class ElasticSearchMaintenanceJob implements Job {
     JobDataMap data = context.getJobDetail().getJobDataMap();
 
     db = ServiceElasticSearch.getInstance();
-    long prune_threshold = data.getLong(PRUNE_THRESHOLD);
+    long prune_threshold = data.getLong(PRUNE_THRESHOLD) * 1000;
     Instant now = new Instant();
     Instant pTime = now.minus(prune_threshold);
     DateTime pruneTime = pTime.toDateTime();
+    LOG.info("Prune timestamp: "+now.toDateTime().toString());
+    LOG.info("Prune timestamp: "+pruneTime.toString());
 
     //DateTime daterange = pruneTime.toDateTime();
     try {

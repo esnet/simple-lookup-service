@@ -35,6 +35,7 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
+import org.elasticsearch.client.indices.PutMappingRequest;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -74,6 +75,7 @@ public class ServiceElasticSearch {
   private int port2;
   // Name of the database
   private String indexName;
+  private String indexMapping;
 
   private static Logger Log = LogManager.getLogger(ServiceElasticSearch.class);
 
@@ -116,6 +118,10 @@ public class ServiceElasticSearch {
       CreateIndexRequest create = new CreateIndexRequest(this.indexName.toLowerCase());
       try {
         client.indices().create(create, RequestOptions.DEFAULT);
+
+        PutMappingRequest mappingRequest = new PutMappingRequest(this.indexName.toLowerCase());
+        mappingRequest.source(this.indexMapping, XContentType.JSON);
+        client.indices().putMapping(mappingRequest, RequestOptions.DEFAULT);
       } catch (IOException ex) {
         Log.error("unable to create index!");
         throw new DatabaseException(ex.getMessage());
@@ -150,6 +156,17 @@ public class ServiceElasticSearch {
     this.port1 = dbport1;
     this.port2 = dbport2;
     this.indexName = dbname;
+    this.indexMapping = "";
+    init();
+  }
+
+  public ServiceElasticSearch(String dburl, int dbport1, int dbport2, String dbname, String indexMapping)
+      throws URISyntaxException, DatabaseException {
+    this.location = new URI(dburl);
+    this.port1 = dbport1;
+    this.port2 = dbport2;
+    this.indexName = dbname;
+    this.indexMapping = indexMapping;
     init();
   }
 
@@ -363,9 +380,10 @@ public class ServiceElasticSearch {
    * @throws IOException thrown if error deleting records from database
    */
   public long deleteExpiredRecords(DateTime dateTime) throws IOException {
+    findRecordsInTimeRange(new DateTime(0), dateTime);
+    RangeQueryBuilder rangeQueryBuilder = new RangeQueryBuilder("_expiresAsTimestamp").lt(dateTime);
 
-    RangeQueryBuilder rangeQueryBuilder = new RangeQueryBuilder("_timestampadded").lte(dateTime);
-    // rangeQueryBuilder.gte(new DateTime(0));
+    rangeQueryBuilder.gte(new DateTime(0));
     DeleteByQueryRequest request =
         new DeleteByQueryRequest(this.indexName).setQuery(rangeQueryBuilder);
     BulkByScrollResponse bulkResponse = client.deleteByQuery(request, RequestOptions.DEFAULT);
@@ -506,7 +524,7 @@ public class ServiceElasticSearch {
     queryMap.remove("expires");
     queryMap.remove("_lastUpdated");
     queryMap.remove("ttl");
-    queryMap.remove("_timestampadded");
+    queryMap.remove("_expiresAsTimestamp");
     queryMap.remove("test-id");
     queryMap.remove("uri");
 
@@ -534,7 +552,7 @@ public class ServiceElasticSearch {
           keyValuesMap.remove("expires");
           keyValuesMap.remove("_lastUpdated");
           keyValuesMap.remove("ttl");
-          keyValuesMap.remove("_timestampadded");
+          keyValuesMap.remove("_expiresAsTimestamp");
           keyValuesMap.remove("test-id");
           keyValuesMap.remove("uri");
           if (keyValuesMap.size() == queryMap.size()) {
@@ -591,7 +609,7 @@ public class ServiceElasticSearch {
     DateTime dt = fmt.parseDateTime(message.getExpires());
 
     Date timestamp = dt.toDate();
-    message.add("_timestampadded", timestamp);
+    message.add("_expiresAsTimestamp", timestamp.getTime());
     message.add("_lastUpdated", new Date());
     return message;
   }
@@ -599,7 +617,7 @@ public class ServiceElasticSearch {
   private Message toMessage(Message message) {
     Map<String, Object> messageMap = message.getMap();
     if (messageMap != null) {
-      messageMap.remove("_timestampadded");
+      messageMap.remove("_expiresAsTimestamp");
       messageMap.remove("_id");
       messageMap.remove("_lastUpdated");
       return new Message(messageMap);
