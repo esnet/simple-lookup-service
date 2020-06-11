@@ -2,7 +2,6 @@ package net.es.lookup.database;
 
 import com.google.gson.Gson;
 import net.es.lookup.common.Message;
-import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.common.exception.internal.RecordNotFoundException;
@@ -10,9 +9,7 @@ import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchStatusException;
-import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -22,9 +19,7 @@ import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.ClearScrollRequest;
-import org.elasticsearch.action.search.ClearScrollResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
@@ -48,8 +43,6 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
-import org.elasticsearch.action.admin.indices.cache.clear.*;
-import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -59,8 +52,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.regex.Pattern;
-import org.quartz.DisallowConcurrentExecution;
 
 import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.regexpQuery;
@@ -118,10 +109,12 @@ public class ServiceElasticSearch {
       CreateIndexRequest create = new CreateIndexRequest(this.indexName.toLowerCase());
       try {
         client.indices().create(create, RequestOptions.DEFAULT);
+        if (indexMapping != null && !indexMapping.isEmpty()){
+          PutMappingRequest mappingRequest = new PutMappingRequest(this.indexName.toLowerCase());
+          mappingRequest.source(this.indexMapping, XContentType.JSON);
+          client.indices().putMapping(mappingRequest, RequestOptions.DEFAULT);
+        }
 
-        PutMappingRequest mappingRequest = new PutMappingRequest(this.indexName.toLowerCase());
-        mappingRequest.source(this.indexMapping, XContentType.JSON);
-        client.indices().putMapping(mappingRequest, RequestOptions.DEFAULT);
       } catch (IOException ex) {
         Log.error("unable to create index!");
         throw new DatabaseException(ex.getMessage());
@@ -199,7 +192,7 @@ public class ServiceElasticSearch {
     } // checking if message already exists in the index
     Message timestampedMessage = addTimestamp(message); // adding a timestamp to the message
     insert(timestampedMessage, queryRequest); // inserting the timestamped message
-    return toMessage(timestampedMessage); // return the message that was added to the index
+    return removeLsAddedFields(timestampedMessage); // return the message that was added to the index
   }
 
   public List<Message> bulkQueryAndPublishService(Queue<Message> messages) throws IOException {
@@ -307,7 +300,9 @@ public class ServiceElasticSearch {
       return null;
     }
 
-    return new Message(responseMap);
+    Message responseAsMessage = removeLsAddedFields(new Message(responseMap));
+
+    return responseAsMessage;
   }
 
   /**
@@ -614,7 +609,7 @@ public class ServiceElasticSearch {
     return message;
   }
 
-  private Message toMessage(Message message) {
+  private Message removeLsAddedFields(Message message) {
     Map<String, Object> messageMap = message.getMap();
     if (messageMap != null) {
       messageMap.remove("_expiresAsTimestamp");

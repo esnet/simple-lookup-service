@@ -87,11 +87,14 @@ public class EditService {
 
             newRequest.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_RENEW);
             Message res = db.updateService(serviceid, newRequest);
+            LOG.debug("Renewed " + serviceid);
             if (PublishService.isServiceOn()) {
               Publisher publisher = Publisher.getInstance();
               publisher.eventNotification(res);
             }
             response = new JSONRenewResponse(res.getMap());
+            LOG.debug("Sending back response for " + serviceid);
+            LOG.debug("Response is " + JSONMessage.toString(response));
 
             return JSONMessage.toString(response);
 
