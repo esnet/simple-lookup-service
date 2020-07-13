@@ -1,5 +1,6 @@
 package net.es.lookup.database;
 
+import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
@@ -7,6 +8,7 @@ import net.es.lookup.common.exception.internal.RecordNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.Instant;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -438,10 +440,11 @@ public class ServiceElasticSearchTest {
     message1.add("ttl", "PT10M");
 
     DateTime dateTime = new DateTime();
-    message1.add("expires", dateTime.toString());
+    LeaseManager.getInstance().requestLease(message1);
+   // message1.add("expires", dateTime.toString());
 
     Message message2 = new Message();
-    message1.add("type", "test");
+    message2.add("type", "test");
 
     message2.add(
         "uri", "2"); // 2nd param should be uuid but for testing purposes was assigned a number
@@ -450,7 +453,8 @@ public class ServiceElasticSearchTest {
 
     message2.add("ttl", "PT10M");
 
-    message2.add("expires", dateTime.toString());
+    //message2.add("expires", dateTime.toString());
+    LeaseManager.getInstance().requestLease(message2);
 
     Message message3 = new Message();
     message3.add("type", "test");
@@ -462,7 +466,8 @@ public class ServiceElasticSearchTest {
 
     message3.add("ttl", "PT10M");
 
-    message3.add("expires", dateTime.toString());
+    //message3.add("expires", dateTime.toString());
+    LeaseManager.getInstance().requestLease(message3);
 
     client.publishService(message1);
     client.publishService(message2);
@@ -470,9 +475,12 @@ public class ServiceElasticSearchTest {
 
     Thread.sleep(2000);
 
-    DateTime dt = new DateTime();
-    dt.plus(20000);
-    assertEquals(client.deleteExpiredRecords(dt), 3);
+    //DateTime dt = new DateTime();
+    //dt.plus(20000);
+    Instant now = new Instant();
+    DateTime pruneTime = now.plus(600000).toDateTime();
+    System.out.println(pruneTime.toString());
+    assertEquals(client.deleteExpiredRecords(pruneTime), 3);
   }
 
   /**
@@ -497,7 +505,7 @@ public class ServiceElasticSearchTest {
     message1.add("expires", dateTime.toString());
 
     Message message2 = new Message();
-    message1.add("type", "test");
+    message2.add("type", "test");
 
     message2.add(
         "uri", "2"); // 2nd param should be uuid but for testing purposes was assigned a number

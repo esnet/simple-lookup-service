@@ -114,7 +114,7 @@ public class BulkRenewService {
 
       // db call
       Message renewResponse = db.bulkUpdate(bulkUpdateRequests);
-      notifyPublisher(bulkUpdateRequests);
+      //notifyPublisher(bulkUpdateRequests);
 
       JsonBulkRenewResponse jsonBulkRenewResponse =
           formatJsonBulkRenewResponse(allRecordUris.size(), renewResponse, failedUris);

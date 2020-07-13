@@ -1,6 +1,14 @@
 package net.es.lookup.database;
 
 import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.TreeMap;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
@@ -51,7 +59,7 @@ import javax.ws.rs.InternalServerErrorException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+
 
 import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.regexpQuery;
@@ -376,9 +384,7 @@ public class ServiceElasticSearch {
    */
   public long deleteExpiredRecords(DateTime dateTime) throws IOException {
     findRecordsInTimeRange(new DateTime(0), dateTime);
-    RangeQueryBuilder rangeQueryBuilder = new RangeQueryBuilder("_expiresAsTimestamp").lt(dateTime);
-
-    rangeQueryBuilder.gte(new DateTime(0));
+    RangeQueryBuilder rangeQueryBuilder = new RangeQueryBuilder("_expiresAsTimestamp").lte(dateTime.getMillis());
     DeleteByQueryRequest request =
         new DeleteByQueryRequest(this.indexName).setQuery(rangeQueryBuilder);
     BulkByScrollResponse bulkResponse = client.deleteByQuery(request, RequestOptions.DEFAULT);
