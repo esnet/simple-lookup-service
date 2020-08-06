@@ -1,0 +1,51 @@
+version: '3.7'
+
+services:
+  pselasticsearch:
+    image: elasticsearch:7.6.2
+    environment:
+      - discovery.type=single-node
+    ports:
+    - "9200:9200"
+    - "9300:9300"
+    networks:
+    - perfsonar
+  lookup-service:
+    image: perfsonar:lookup-service
+    ports:
+      - "8090:8090"
+    depends_on:
+      - "pselasticsearch"
+    volumes:
+      - .:/lookup-service
+    networks:
+      - perfsonar
+    links:
+      - "pselasticsearch:elasticsearch"
+    command: ["/lookup-service/docker-utils/wait-for-it.sh", "-t", "60", "pselasticsearch:9200", "--", "java", "-jar", "/lookup-service/simple-lookup-service-server/target/simple-lookup-service-server-3.0-SNAPSHOT.one-jar.jar", "-c", "/lookup-service/simple-lookup-service-server/etc/", "-l", "/lookup-service/simple-lookup-service-server/etc/log4j2.properties"]
+  logstash:
+    image: logstash:7.8.0
+    ports:
+    - "5044:5044"
+    - "9600:9600"
+    networks:
+    - perfsonar
+    depends_on:
+    - pselasticsearch
+    environment:
+    - monitoring.enabled=false
+    volumes:
+      - ./logstash_pipeline/:/usr/share/logstash/pipeline/
+    links:
+    - "pselasticsearch:elasticsearch"
+  ps_host:
+    image: perfsonar/testpoint:latest
+    volumes:
+    - ./perfsonar-client/lsregistrationdaemon.conf:/etc/perfsonar/lsregistrationdaemon.conf
+    networks:
+    - perfsonar
+    links:
+    - "lookup-service:sls"
+networks:
+  perfsonar:
+    driver: bridge

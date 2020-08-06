@@ -1,11 +1,11 @@
 ---
 #Lookup Service settings
 lookupservice:
-    host: 'localhost'
+    host: '0.0.0.0'
     port: 8090
     lease:
         max: 2592000
-        default: 7200
+        default: 300
         min: 30
 
 #Database settings  (Mongodb settings will be deprecated and removed in future)
@@ -16,11 +16,11 @@ database:
     DBCollName: 'services'
     username: 'lookup'
     password: 'abc123'
-    pruneInterval: 3600
-    pruneThreshold: 300
+    pruneInterval: 120
+    pruneThreshold: 60
 
 elastic:
-    DBUrl: '127.0.0.1'
+    DBUrl: 'elasticsearch'
     DBPort1: 9200
     DBPort2: 9201
     ElasticDBName: 'lookup'
