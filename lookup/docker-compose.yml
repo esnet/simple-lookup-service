@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   pselasticsearch:
-    image: elasticsearch:7.6.2
+    image: elasticsearch:7.8.1
     environment:
       - discovery.type=single-node
     ports:
@@ -46,6 +46,17 @@ services:
     - perfsonar
     links:
     - "lookup-service:sls"
+  kibana:
+    image: kibana:7.8.1
+    environment:
+      SERVER_NAME: kibana
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    links:
+    - "pselasticsearch:elasticsearch"
+    networks:
+      - perfsonar
 networks:
   perfsonar:
     driver: bridge
