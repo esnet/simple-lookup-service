@@ -58,7 +58,7 @@ public class LeaseManager {
 
     if (expires != null && !expires.isEmpty()) {
 
-      Instant pTime = now.minus(lcfg.getPruneThreshold());
+      Instant pTime = now.minus(lcfg.getPruneThreshold()*1000);
       DateTime pruneTime = pTime.toDateTime();
 
       DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
