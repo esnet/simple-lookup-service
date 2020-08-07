@@ -17,6 +17,7 @@ import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchStatusException;
+import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkItemResponse;
@@ -33,6 +34,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -42,6 +44,7 @@ import org.elasticsearch.client.indices.PutMappingRequest;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.get.GetResult;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
@@ -322,17 +325,49 @@ public class ServiceElasticSearch {
    * @throws IOException if error updating record
    */
   public Message updateService(String serviceId, Message updateRequest) throws IOException {
+    Message responseAsMessage = new Message();
     try {
       if (serviceId != null && !serviceId.isEmpty()) {
-        deleteRecord(serviceId); // Deletes previous record
+        GetRequest getRequest = new GetRequest(this.indexName, serviceId);
+        String[] includes = Strings.EMPTY_ARRAY;
+        String[] excludes = Strings.EMPTY_ARRAY;
+        FetchSourceContext fetchSourceContext = new FetchSourceContext(true, includes, excludes);
+        getRequest.fetchSourceContext(fetchSourceContext);
+        GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
+        String docId = getResponse.getId();
+        if(docId != null){
+          UpdateRequest updateElasticRequest = new UpdateRequest(this.indexName, docId);
+          updateElasticRequest.doc(updateRequest);
+          UpdateResponse updateResponse = client.update(
+              updateElasticRequest, RequestOptions.DEFAULT);
+          if (updateResponse.getResult() == DocWriteResponse.Result.UPDATED) {
+            GetResult result = updateResponse.getGetResult();
+            if (result.isExists()) {
+              String sourceAsString = result.sourceAsString();
+              Map<String, Object> sourceAsMap = result.sourceAsMap();
+              if(sourceAsMap == null){
+                return null;
+              }
+              responseAsMessage = removeLsAddedFields(new Message(sourceAsMap));
+
+              return responseAsMessage;
+            }
+          }else{
+            throw new IOException("Update operation error in Elasticsearch"+ updateResponse.getResult());
+          }
+
+        }
+
+       /* deleteRecord(serviceId); // Deletes previous record
         publishService(updateRequest); // Creates a new record with updated message
-        return getRecordByURI(serviceId);
+        return getRecordByURI(serviceId);*/
       } else {
         throw new IOException("Record URI not specified");
       }
-    } catch (ElasticsearchStatusException | RecordNotFoundException e) {
-      throw new IOException("Record URI does not exist");
+    } catch (ElasticsearchStatusException e) {
+      throw new IOException("Record URI does not exist"+e.getMessage());
     }
+    return null;
   }
 
   /**
