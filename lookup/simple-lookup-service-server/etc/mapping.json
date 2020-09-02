@@ -2,6 +2,31 @@
   "properties": {
     "_expiresAsTimestamp": {
       "type": "long"
+    },
+    "client-uuid": {
+      "type":  "keyword"
+    },
+    "type": {
+      "type": "keyword"
+    },
+    "state": {
+      "type": "keyword"
+    },
+    "uri": {
+      "type": "keyword"
+    },
+    "host-net-interfaces": {
+      "type": "keyword"
+    },
+    "host-name": {
+      "type": "keyword"
+    },
+    "interface-addresses": {
+      "type": "keyword"
+    },
+    "person-emails": {
+      "type": "keyword"
     }
+
   }
 }

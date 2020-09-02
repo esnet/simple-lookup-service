@@ -41,7 +41,7 @@ public class ElasticSearchMaintenanceJob implements Job {
     Instant now = new Instant();
     Instant pTime = now.minus(prune_threshold);
     DateTime pruneTime = pTime.toDateTime();
-    LOG.info("Prune timestamp: "+now.toDateTime().toString());
+    LOG.info("Prune timestamp range: "+now.toDateTime().toString());
     LOG.info("Prune timestamp: "+pruneTime.toString());
 
     //DateTime daterange = pruneTime.toDateTime();
