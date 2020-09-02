@@ -1,0 +1,26 @@
+{
+  "index_patterns": ["enriched-ls*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1
+    },
+    "mappings": {
+      "properties": {
+        "interface-addresses": {
+          "type": "ip"
+      },
+      "location": {
+        "type": "geo_point"
+    }
+      }
+    },
+    "aliases": {
+      "mydata": { }
+    }
+  },
+  "priority": 200,
+  "version": 3,
+  "_meta": {
+    "description": "lookup service index"
+  }
+}
