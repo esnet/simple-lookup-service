@@ -1,6 +1,5 @@
 package net.es.lookup.api;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -11,6 +10,7 @@ import net.es.lookup.common.ReservedKeys;
 import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
+import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.protocol.json.JsonBulkRegisterRequest;
 import net.es.lookup.service.LookupService;
@@ -66,7 +66,7 @@ public class BulkRegisterService {
       ServiceElasticSearch db = ServiceElasticSearch.getInstance();
       failed = db.bulkQueryAndPublishService(messageQueue);
 
-    } catch (IOException e) {
+    } catch (DatabaseException e) {
       throw new InternalErrorException("Error connecting to database: " + e.getMessage());
     }
     StringBuilder failedStrings = new StringBuilder();

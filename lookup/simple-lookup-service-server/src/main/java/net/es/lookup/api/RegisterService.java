@@ -10,6 +10,7 @@ import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.UnauthorizedException;
 import net.es.lookup.common.exception.internal.DataFormatException;
+import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.protocol.json.JSONMessage;
@@ -22,7 +23,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
 
@@ -109,7 +109,7 @@ public class RegisterService {
           Log.error("FobiddenRequestException:" + e.getMessage());
           Log.info("Register status: FAILED due to Duplicate Entry; exiting");
           throw new ForbiddenRequestException(e.getMessage());
-        } catch (IOException e) {
+        } catch (DatabaseException e) {
           Log.error("Error connecting with database");
           throw new InternalErrorException("Error connecting to database");
         }

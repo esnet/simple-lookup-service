@@ -9,6 +9,7 @@ import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
+import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.RecordNotFoundException;
 import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.protocol.json.JSONDeleteRequest;
@@ -95,7 +96,6 @@ public class EditService {
             response = new JSONRenewResponse(res.getMap());
             LOG.debug("Sending back response for " + serviceid);
             LOG.debug("Response is " + JSONMessage.toString(response));
-
             return JSONMessage.toString(response);
 
           } else {
@@ -112,9 +112,9 @@ public class EditService {
           throw new NotFoundException("ServiceRecord Not Found in DB\n");
         }
 
-      } catch ( IOException e) {
+      } catch ( DatabaseException e) {
 
-        LOG.fatal("DatabaseException: The database is out of service." + e.getMessage());
+        LOG.fatal("DatabaseException: " + e.getMessage());
         LOG.info("RenewService status: FAILED; exiting");
         throw new InternalErrorException("Database error\n");
       } catch (DataFormatException e) {
@@ -200,7 +200,7 @@ public class EditService {
           return JSONMessage.toString(response);
         }
 
-      } catch (IOException e) {
+      } catch (DatabaseException e) {
         LOG.info("Error connecting to database; exiting");
         throw new NotFoundException("Unable to connect to database" + e.getMessage());
       } catch (DataFormatException e) {

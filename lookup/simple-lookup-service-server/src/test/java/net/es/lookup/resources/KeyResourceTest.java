@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
@@ -26,18 +25,13 @@ public class KeyResourceTest {
 
   private static Logger Log = LogManager.getLogger(KeyResourceTest.class);
 
-  @BeforeClass
-  public static void setUpDatabase() throws DatabaseException, URISyntaxException {
-    new ServiceElasticSearch("localhost", 9200, 9300, "lookup");
-  }
-
   /**
    * Connects to the database an deletes all records if any exist
    *
-   * @throws IOException for error in deleting all records
+   * @throws DatabaseException for error in deleting all records
    */
   @Before
-  public void setUp() throws IOException {
+  public void setUp() throws DatabaseException {
     client = ServiceElasticSearch.getInstance();
     client.deleteAllRecords();
   }
@@ -45,10 +39,10 @@ public class KeyResourceTest {
   /**
    * creates a message and adds it to the database
    *
-   * @throws IOException If error entering data into the database
+   * @throws DatabaseException If error entering data into the database
    * @throws DuplicateEntryException If message being added already exists in the database
    */
-  private void queryAndPublishService() throws IOException, DuplicateEntryException {
+  private void queryAndPublishService() throws DatabaseException, DuplicateEntryException {
     Message message = new Message();
     message.add("type", "test");
 
@@ -70,11 +64,11 @@ public class KeyResourceTest {
 
   /**
    * Curl request for getKey where key exists
-   * @throws IOException Error reading or writing to database
+   * @throws DatabaseException Error reading or writing to database
    * @throws DuplicateEntryException Entry already exists before test
    */
   @Test
-  public void getHandlerKeyExists() throws IOException, DuplicateEntryException {
+  public void getHandlerKeyExists() throws DatabaseException, DuplicateEntryException {
     this.queryAndPublishService();
     KeyResource request = new KeyResource();
     String result = request.getHandler("lookup", "interface", "2", "test-id");
@@ -84,11 +78,11 @@ public class KeyResourceTest {
   /**
    * Curl request for getKey where key doesn't exists
    *
-   * @throws IOException Error reading or writing to database
+   * @throws DatabaseException Error reading or writing to database
    * @throws DuplicateEntryException Entry already exists before test
    */
   @Test
-  public void getHandlerKeyNotExists() throws IOException, DuplicateEntryException {
+  public void getHandlerKeyNotExists() throws DatabaseException, DuplicateEntryException {
     this.queryAndPublishService();
     KeyResource request = new KeyResource();
     try{
@@ -103,11 +97,11 @@ public class KeyResourceTest {
   /**
    * Curl request for getKey where index doesn't exist
    *
-   * @throws IOException Error reading or writing to database
+   * @throws DatabaseException Error reading or writing to database
    * @throws DuplicateEntryException Entry already exists before test
    */
   @Test
-  public void getHandlerURINotExists() throws IOException, DuplicateEntryException {
+  public void getHandlerURINotExists() throws DatabaseException, DuplicateEntryException {
     this.queryAndPublishService();
     KeyResource request = new KeyResource();
     try{

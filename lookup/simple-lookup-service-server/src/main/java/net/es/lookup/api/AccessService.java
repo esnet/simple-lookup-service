@@ -1,12 +1,12 @@
 package net.es.lookup.api;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DataFormatException;
+import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.protocol.json.JSONGetServiceResponse;
 import net.es.lookup.protocol.json.JSONMessage;
@@ -54,7 +54,7 @@ public class AccessService {
         LOG.info("GetService status: FAILED; exiting");
         throw new NotFoundException("ServiceRecord Not Found in DB\n");
       }
-    } catch (IOException e) {
+    } catch (DatabaseException e) {
       LOG.fatal("DatabaseException: The database is out of service." + e.getMessage());
       LOG.info("GetService status: FAILED; exiting");
       throw new InternalErrorException("Database error\n");
@@ -111,7 +111,7 @@ public class AccessService {
         throw new NotFoundException("ServiceRecord Not Found in DB\n");
       }
 
-    } catch (IOException e) {
+    } catch (DatabaseException e) {
       LOG.error("unable to find record");
       throw new InternalErrorException("Record URI not found");
     }

@@ -18,6 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.DocWriteResponse;
+import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkItemResponse;
@@ -184,17 +185,16 @@ public class ServiceElasticSearch {
   }
 
   /**
-   * Inserts record into database. The method checks if a record exists before inserting it into the
-   * database.
+   * Inserts record into database. The method checks if a record exists before
+   * inserting it into the database.
    *
    * @param message record to be added to the database
    * @return Message that was added to the database
-   * @throws DuplicateEntryException Thrown if database already contains the record that is trying
-   *     to be added
-   * @throws IOException Error in get request to the database
+   * @throws DuplicateEntryException Thrown if database already contains the
+   *                                 record that is trying to be added
+   * @throws DatabaseException
    */
-  public Message queryAndPublishService(Message message)
-      throws DuplicateEntryException, IOException {
+  public Message queryAndPublishService(Message message) throws DuplicateEntryException, DatabaseException {
     Message queryRequest = new Message();
     queryRequest.add("uri", message.getURI());
     queryRequest.add("type", message.getRecordType());
@@ -206,7 +206,7 @@ public class ServiceElasticSearch {
     return removeLsAddedFields(timestampedMessage); // return the message that was added to the index
   }
 
-  public List<Message> bulkQueryAndPublishService(Queue<Message> messages) throws IOException {
+  public List<Message> bulkQueryAndPublishService(Queue<Message> messages) throws DatabaseException {
 
     List<Message> failed = new ArrayList<>();
     BulkRequest request = new BulkRequest();
@@ -230,7 +230,13 @@ public class ServiceElasticSearch {
       }
     }
     if (request.numberOfActions() != 0) {
-      BulkResponse bulkResponse = client.bulk(request, RequestOptions.DEFAULT);
+      BulkResponse bulkResponse;
+      try {
+        bulkResponse = client.bulk(request, RequestOptions.DEFAULT);
+      } catch (IOException e) {
+        Log.error("Caught Elastic IOException"+e.getMessage());
+        throw new DatabaseException(e.getMessage());
+      }
       if (bulkResponse.hasFailures()) {
         Iterator<BulkItemResponse> responses = bulkResponse.iterator();
         while (responses.hasNext()) {
@@ -252,12 +258,18 @@ public class ServiceElasticSearch {
    *
    * @param recordURI URI of the record o be deleted
    * @return Message - returns the deleted record as a Message Object
-   * @throws IOException If error deleting record
+   * @throws DatabaseException
    */
-  public Message deleteRecord(String recordURI) throws RecordNotFoundException, IOException {
+  public Message deleteRecord(String recordURI) throws RecordNotFoundException, DatabaseException {
     DeleteRequest request = new DeleteRequest(this.indexName, recordURI);
     Message existingRecord = getRecordByURI(recordURI);
-    DeleteResponse deleteResponse = client.delete(request, RequestOptions.DEFAULT);
+    DeleteResponse deleteResponse;
+    try {
+      deleteResponse = client.delete(request, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      Log.error("Caught Elastic IOException"+e.getMessage());
+      throw new DatabaseException(e.getMessage());
+    }
     if (deleteResponse.status().getStatus() != 200) {
       throw new RecordNotFoundException("Unable to find record");
     }
@@ -265,12 +277,13 @@ public class ServiceElasticSearch {
   }
 
   /**
-   * This method deletes all the records in a given Db and returns the number of records deleted.
+   * This method deletes all the records in a given Db and returns the number of
+   * records deleted.
    *
    * @return number of records deleted returns 0 if the database doesn't exist yet
-   * @throws IOException Thrown if error deleting the records
+   * @throws DatabaseException
    */
-  public long deleteAllRecords() throws IOException {
+  public long deleteAllRecords() throws DatabaseException {
     try {
       DeleteIndexRequest request = new DeleteIndexRequest(this.indexName);
       CountRequest countRequest = new CountRequest();
@@ -288,6 +301,9 @@ public class ServiceElasticSearch {
     } catch (ElasticsearchStatusException e) {
       Log.error("Index doesn't exist");
       return 0;
+    } catch (IOException e) {
+      Log.error("Caught Elastic IOException"+e.getMessage());
+      throw new DatabaseException(e.getMessage());
     }
   }
 
@@ -296,15 +312,21 @@ public class ServiceElasticSearch {
    *
    * @param recordURI URI of the record needed to be returned
    * @return Entire record as a message object null if record doesn't exist
-   * @throws IOException thrown if error accessing the record
+   * @throws DatabaseException
    */
-  public Message getRecordByURI(String recordURI) throws IOException {
+  public Message getRecordByURI(String recordURI) throws DatabaseException {
     GetRequest getRequest = new GetRequest(this.indexName, recordURI);
     String[] includes = Strings.EMPTY_ARRAY;
     String[] excludes = Strings.EMPTY_ARRAY;
     FetchSourceContext fetchSourceContext = new FetchSourceContext(true, includes, excludes);
     getRequest.fetchSourceContext(fetchSourceContext);
-    GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
+    GetResponse getResponse;
+    try {
+      getResponse = client.get(getRequest, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      Log.error("Caught Elastic IOException"+e.getMessage());
+      throw new DatabaseException(e.getMessage());
+    }
     Map<String, Object> responseMap;
     responseMap = (Map<String, Object>) getResponse.getSourceAsMap();
     if (responseMap == null) {
@@ -319,53 +341,52 @@ public class ServiceElasticSearch {
   /**
    * This method updates a given request in the database
    *
-   * @param serviceId The unique service identifier
+   * @param serviceId     The unique service identifier
    * @param updateRequest the fields to be modified
    * @return The record that was modified (after modification) as a Message
-   * @throws IOException if error updating record
+   * @throws DatabaseException
+   * @throws IOException       if error updating record
    */
-  public Message updateService(String serviceId, Message updateRequest) throws IOException {
+  public Message updateService(String serviceId, Message updateRequest) throws DatabaseException {
     Message responseAsMessage = new Message();
+    Message receivedRequest = addTimestamp(updateRequest);
+    Log.debug("Inside updateService");
     try {
+      Log.debug("Processing updateService: "+ serviceId);
       if (serviceId != null && !serviceId.isEmpty()) {
-        GetRequest getRequest = new GetRequest(this.indexName, serviceId);
-        String[] includes = Strings.EMPTY_ARRAY;
-        String[] excludes = Strings.EMPTY_ARRAY;
-        FetchSourceContext fetchSourceContext = new FetchSourceContext(true, includes, excludes);
-        getRequest.fetchSourceContext(fetchSourceContext);
-        GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
-        String docId = getResponse.getId();
-        if(docId != null){
-          UpdateRequest updateElasticRequest = new UpdateRequest(this.indexName, docId);
-          updateElasticRequest.doc(updateRequest);
-          UpdateResponse updateResponse = client.update(
-              updateElasticRequest, RequestOptions.DEFAULT);
+          Log.debug(receivedRequest.getMap().toString());
+          UpdateRequest updateElasticRequest = new UpdateRequest(this.indexName, serviceId);
+          updateElasticRequest.doc(receivedRequest.getMap());
+          updateElasticRequest.fetchSource(true);
+          UpdateResponse updateResponse = null;
+		try {
+			updateResponse = client.update(updateElasticRequest, RequestOptions.DEFAULT);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Log.error("Update failed"+ e.getMessage());
+		}
+          Log.debug("Updated Response: "+ updateResponse.getResult());
           if (updateResponse.getResult() == DocWriteResponse.Result.UPDATED) {
             GetResult result = updateResponse.getGetResult();
             if (result.isExists()) {
-              String sourceAsString = result.sourceAsString();
               Map<String, Object> sourceAsMap = result.sourceAsMap();
               if(sourceAsMap == null){
                 return null;
               }
               responseAsMessage = removeLsAddedFields(new Message(sourceAsMap));
-
+              Log.info("Completed updateService");
               return responseAsMessage;
+            }else{
+              Log.debug("Empty result"+result.getId());
             }
           }else{
-            throw new IOException("Update operation error in Elasticsearch"+ updateResponse.getResult());
+            throw new DatabaseException("Update operation error in Elasticsearch"+ updateResponse.getResult());
           }
-
-        }
-
-       /* deleteRecord(serviceId); // Deletes previous record
-        publishService(updateRequest); // Creates a new record with updated message
-        return getRecordByURI(serviceId);*/
       } else {
-        throw new IOException("Record URI not specified");
+        throw new DatabaseException("Record URI not specified");
       }
     } catch (ElasticsearchStatusException e) {
-      throw new IOException("Record URI does not exist"+e.getMessage());
+      throw new DatabaseException("Record URI does not exist"+e.getMessage());
     }
     return null;
   }
@@ -374,9 +395,9 @@ public class ServiceElasticSearch {
    * Inserts the given record into the database
    *
    * @param message Record to be added to the database
-   * @throws IOException Thrown if error writing to the database
+   * @throws DatabaseException
    */
-  public void publishService(Message message) throws IOException {
+  public void publishService(Message message) throws DatabaseException {
     Message queryRequest = new Message();
     queryRequest.add("uri", message.getURI());
     queryRequest.add("type", message.getRecordType());
@@ -389,21 +410,26 @@ public class ServiceElasticSearch {
    *
    * @param records Map of the uri and record to be updated
    * @return Message returns a message with the number of records updated
-   * @throws IOException error is thrown if error updating database
+   * @throws DatabaseException
    */
-  public Message bulkUpdate(Map<String, Message> records) throws IOException {
+  public Message bulkUpdate(Map<String, Message> records) throws DatabaseException {
     BulkRequest bulkRequest = new BulkRequest();
-    Gson gson = new Gson();
     int count = 0;
-    for (String URI : records.keySet()) {
-      Message timeStampedMessage = addTimestamp(records.get(URI));
-      String updateString = gson.toJson(timeStampedMessage);
-      bulkRequest.add(new UpdateRequest(this.indexName, URI).doc(updateString, XContentType.JSON));
+    for (String recordUri : records.keySet()) {
+      Message timeStampedMessage = addTimestamp(records.get(recordUri));
+      bulkRequest.add(new UpdateRequest(this.indexName, recordUri).doc(timeStampedMessage.getMap()));
       count++;
     }
-    BulkResponse bulkResponse = client.bulk(bulkRequest, RequestOptions.DEFAULT);
+    BulkResponse bulkResponse;
+    try {
+      bulkResponse = client.bulk(bulkRequest, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      Log.error("Caught Elastic IOException"+e.getMessage());
+      throw new DatabaseException(e.getMessage());
+    }
     if (bulkResponse.hasFailures()) {
-      throw new IOException("Error updating records");
+      Log.error("Error updating records");
+      throw new DatabaseException("Error updating records");
     }
     Message response = new Message();
     response.add("renewed", count);
@@ -411,22 +437,30 @@ public class ServiceElasticSearch {
   }
 
   /**
-   * This method deletes expired records from the DB and returns the number of docs deleted
+   * This method deletes expired records from the DB and returns the number of
+   * docs deleted
    *
-   * @param dateTime All records that have _timestamp before "datetime" are deleted
+   * @param dateTime All records that have _timestamp before "datetime" are
+   *                 deleted
    * @return number of all records deleted
-   * @throws IOException thrown if error deleting records from database
+   * @throws DatabaseException thrown if error deleting records from database
    */
-  public long deleteExpiredRecords(DateTime dateTime) throws IOException {
+  public long deleteExpiredRecords(DateTime dateTime) throws DatabaseException {
     findRecordsInTimeRange(new DateTime(0), dateTime);
     RangeQueryBuilder rangeQueryBuilder = new RangeQueryBuilder("_expiresAsTimestamp").lte(dateTime.getMillis());
     DeleteByQueryRequest request =
         new DeleteByQueryRequest(this.indexName).setQuery(rangeQueryBuilder);
-    BulkByScrollResponse bulkResponse = client.deleteByQuery(request, RequestOptions.DEFAULT);
+    BulkByScrollResponse bulkResponse;
+    try {
+      bulkResponse = client.deleteByQuery(request, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      Log.error("Caught Elastic IOException"+e.getMessage());
+      throw new DatabaseException(e.getMessage());
+    }
     return bulkResponse.getDeleted();
   }
 
-  public List<Message> findRecordsInTimeRange(DateTime start, DateTime end) throws IOException {
+  public List<Message> findRecordsInTimeRange(DateTime start, DateTime end) throws DatabaseException {
 
     List<Message> result = new ArrayList<Message>();
 
@@ -437,7 +471,13 @@ public class ServiceElasticSearch {
     searchSourceBuilder.query(QueryBuilders.rangeQuery("_lastUpdated").lte(end));
     searchRequest.source(searchSourceBuilder);
 
-    SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+    SearchResponse searchResponse;
+    try {
+      searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      Log.error("Caught Elastic IOException"+e.getMessage());
+      throw new DatabaseException(e.getMessage());
+    }
     SearchHit[] searchHits = searchResponse.getHits().getHits();
 
     for (SearchHit search : searchHits) {
@@ -530,7 +570,6 @@ public class ServiceElasticSearch {
       Log.error("Internal server error" + e.getMessage());
       throw new InternalServerErrorException(e.getMessage());
     }
-
     return finalSearchResults;
   }
 
@@ -544,14 +583,15 @@ public class ServiceElasticSearch {
     }
     return result;
   }
+  
   /**
    * Checks if the document already exists in the database
    *
    * @param queryRequest document to check existence of
-   * @throws IOException Error searching the database
+   * @throws DatabaseException  Error searching the database
    * @throws DuplicateEntryException If there is a duplicate entry in the database
    */
-  private boolean exists(Message queryRequest) throws IOException {
+  private boolean exists(Message queryRequest) throws DatabaseException {
 
     // Getting the document to search for in map form
     Map<String, Object> queryMap = new TreeMap<>(queryRequest.getMap());
@@ -578,7 +618,13 @@ public class ServiceElasticSearch {
 
       // Getting all records from the database
       searchRequest.source(searchSourceBuilder);
-      SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+      SearchResponse searchResponse;
+      try {
+        searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+      } catch (IOException e) {
+        Log.error("Elasticsearch IOException"+ e.getMessage());
+        throw new DatabaseException(e.getMessage());
+      }
       SearchHit[] searchHits = searchResponse.getHits().getHits();
 
       if (searchHits.length > 0) {
@@ -620,17 +666,22 @@ public class ServiceElasticSearch {
   /**
    * Inserts message into database
    *
-   * @param message message to be inserted into database
+   * @param message      message to be inserted into database
    * @param queryRequest message with the URI of where the message is to be added
-   * @throws IOException if insertion of message is unsuccessful
+   * @throws DatabaseException if insertion is unsuccessful
    */
-  private void insert(Message message, Message queryRequest) throws IOException {
+  private void insert(Message message, Message queryRequest) throws DatabaseException {
     IndexRequest request = new IndexRequest(this.indexName);
     request.id(queryRequest.getURI());
     Gson gson = new Gson();
     String json = gson.toJson(message.getMap());
     request.source(json, XContentType.JSON);
-    client.index(request, RequestOptions.DEFAULT);
+    try {
+      client.index(request, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      Log.error("Throwing DatabaseException"+ e.getMessage());
+      throw new DatabaseException(e.getMessage());
+    }
   }
 
   /**
