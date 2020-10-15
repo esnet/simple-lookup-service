@@ -6,6 +6,7 @@ import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.ServiceElasticSearch;
+import net.es.lookup.common.ReservedValues;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
@@ -60,8 +61,15 @@ public class RecordResourceTest {
 
     DateTime dateTime = new DateTime();
     message.add("expires", dateTime.plus(1000000).toString());
+    Message query = new Message();
+    query.add("type", "test");
+    query.add("test-id", String.valueOf(1));
 
-    Message addedMessage = client.queryAndPublishService(message);
+    Message operators = new Message();
+    operators.add("type", ReservedValues.RECORD_OPERATOR_ALL);
+    operators.add("test-id", ReservedValues.RECORD_OPERATOR_ALL);
+
+    Message addedMessage = client.queryAndPublishService(message, query, operators);
   }
 
   /**

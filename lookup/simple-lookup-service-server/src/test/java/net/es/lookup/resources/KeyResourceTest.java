@@ -1,6 +1,7 @@
 package net.es.lookup.resources;
 
 import net.es.lookup.common.Message;
+import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
@@ -59,7 +60,15 @@ public class KeyResourceTest {
     DateTime dateTime = new DateTime();
     message.add("expires", dateTime.plus(1000000).toString());
 
-    Message addedMessage = client.queryAndPublishService(message);
+    Message query = new Message();
+    query.add("type", "test");
+    query.add("test-id", String.valueOf(1));
+
+    Message operators = new Message();
+    operators.add("type", ReservedValues.RECORD_OPERATOR_ALL);
+    operators.add("test-id", ReservedValues.RECORD_OPERATOR_ALL);
+
+    Message addedMessage = client.queryAndPublishService(message,query, operators);
   }
 
   /**

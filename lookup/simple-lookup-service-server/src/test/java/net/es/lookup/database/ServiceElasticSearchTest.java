@@ -2,6 +2,7 @@ package net.es.lookup.database;
 
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
+import net.es.lookup.common.ReservedValues;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.common.exception.internal.RecordNotFoundException;
@@ -53,8 +54,10 @@ public class ServiceElasticSearchTest {
    */
   private void queryAndPublishService() throws DatabaseException, DuplicateEntryException {
     Message message = new Message();
-    message.add("type", "test");
+    
 
+    message.add("type", "test");
+  
     String uuid = UUID.randomUUID().toString();
     message.add(
         "uri", "2"); // 2nd param should be uuid but for testing purposes was assigned a number
@@ -66,7 +69,15 @@ public class ServiceElasticSearchTest {
     DateTime dateTime = new DateTime();
     message.add("expires", dateTime.toString());
 
-    Message addedMessage = client.queryAndPublishService(message);
+    Message query = new Message();
+    query.add("type", "test");
+    query.add("test-id", String.valueOf(1));
+
+    Message operators = new Message();
+    operators.add("type", ReservedValues.RECORD_OPERATOR_ALL);
+    operators.add("test-id", ReservedValues.RECORD_OPERATOR_ALL);
+
+    Message addedMessage = client.queryAndPublishService(message, query, operators);
   }
 
   /**
