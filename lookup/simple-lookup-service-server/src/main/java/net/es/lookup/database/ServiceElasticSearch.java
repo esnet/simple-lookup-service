@@ -135,20 +135,6 @@ public class ServiceElasticSearch {
   }
 
   /**
-   * default initialization for the database for testing on localhost
-   *
-   * @throws URISyntaxException for incorrect dburl
-   */
-  /*public ServiceElasticSearch() throws DatabaseException {
-    // Todo
-    //    this.port1 = DatabaseConnectionKeys.DatabasePort1;
-    //    this.port2 = DatabaseConnectionKeys.DatabasePort2;
-    //    this.location = new URI(DatabaseConnectionKeys.server);
-    //    this.indexName = DatabaseConnectionKeys.DatabaseName;
-    init();
-  }*/
-
-  /**
    * @param dburl URl to connect to the database
    * @param dbport1 Port 1 of the Database
    * @param dbport2 Port 2 of the Database
@@ -194,64 +180,24 @@ public class ServiceElasticSearch {
    *                                 record that is trying to be added
    * @throws DatabaseException
    */
-  public Message queryAndPublishService(Message message) throws DuplicateEntryException, DatabaseException {
-    Message queryRequest = new Message();
-    queryRequest.add("uri", message.getURI());
-    queryRequest.add("type", message.getRecordType());
-    if (exists(message)) {
-      throw new DuplicateEntryException("Record already exists");
-    } // checking if message already exists in the index
+  public Message queryAndPublishService(Message message, Message queryRequest, Message operators) throws DuplicateEntryException, DatabaseException {
+    try {
+      Log.debug("Running query for duplicates");
+      for (Object key: operators.getMap().keySet()){
+        Log.debug("Printing keys in register message"+ key.toString());
+      }
+      List<Message> dupEntries = this.query(message, queryRequest, operators);
+      Log.debug("Checking for dups -"+ dupEntries.size() );
+      if (dupEntries.size() > 0) {
+        throw new DuplicateEntryException("Record already exists");
+      }
+    } catch (DatabaseException e) {
+      throw new DatabaseException("Error inserting record");
+    }
     Message timestampedMessage = addTimestamp(message); // adding a timestamp to the message
-    insert(timestampedMessage, queryRequest); // inserting the timestamped message
+    insert(timestampedMessage); // inserting the timestamped message
     return removeLsAddedFields(timestampedMessage); // return the message that was added to the index
-  }
-
-  public List<Message> bulkQueryAndPublishService(Queue<Message> messages) throws DatabaseException {
-
-    List<Message> failed = new ArrayList<>();
-    BulkRequest request = new BulkRequest();
-    Map<String, Message> messageMap = new HashMap<>();
-    Gson gson = new Gson();
-
-    for (Message message : messages) {
-      if (exists(message)) {
-        message.setErrorMessage("");
-        Map<String, Object> errorMessageMap = message.getMap();
-        errorMessageMap.put("error", "Document already exists");
-        Message errorMessage = new Message(errorMessageMap);
-        failed.add(errorMessage);
-      } else {
-        Message timestampedMessage = addTimestamp(message);
-        request.add(
-            new IndexRequest(this.indexName)
-                .id(message.getURI())
-                .source(gson.toJson(timestampedMessage), XContentType.JSON));
-        messageMap.put(message.getURI(), message);
-      }
-    }
-    if (request.numberOfActions() != 0) {
-      BulkResponse bulkResponse;
-      try {
-        bulkResponse = client.bulk(request, RequestOptions.DEFAULT);
-      } catch (IOException e) {
-        Log.error("Caught Elastic IOException"+e.getMessage());
-        throw new DatabaseException(e.getMessage());
-      }
-      if (bulkResponse.hasFailures()) {
-        Iterator<BulkItemResponse> responses = bulkResponse.iterator();
-        while (responses.hasNext()) {
-          BulkItemResponse response = responses.next();
-          if (response.isFailed()) {
-            Map<String, Object> errorMessageMap = messageMap.get(response.getId()).getMap();
-            errorMessageMap.put("error", response.getFailureMessage());
-            Message errorMessage = new Message(errorMessageMap);
-            failed.add(errorMessage);
-          }
-        }
-      }
-    }
-    return failed; // todo return the message that was added to the index
-  }
+   }
 
   /**
    * Deletes the record for a given URI
@@ -398,11 +344,8 @@ public class ServiceElasticSearch {
    * @throws DatabaseException
    */
   public void publishService(Message message) throws DatabaseException {
-    Message queryRequest = new Message();
-    queryRequest.add("uri", message.getURI());
-    queryRequest.add("type", message.getRecordType());
     Message timestampedMessage = addTimestamp(message); // adding a timestamp to the message
-    insert(timestampedMessage, queryRequest); // inserting the timestamped message
+    insert(timestampedMessage); // inserting the timestamped message */
   }
 
   /**
@@ -488,6 +431,12 @@ public class ServiceElasticSearch {
     return result;
   }
 
+  public List<Message> query(Message message, Message queryRequest, Message operators)
+      throws DatabaseException {
+
+    return this.query(message, queryRequest, operators, DEFAULT_RESULTS_SIZE);
+  }
+
   /**
    * Method to query records from database. // Todo fix documentation
    *
@@ -502,47 +451,9 @@ public class ServiceElasticSearch {
       throws DatabaseException {
     String operator = (String) operators.getMap().get("operator");
 
-    return allQuery(queryRequest.getMap(), maxResults, operator);
-  }
-
-  private synchronized List<Message> allQuery(Map queryRequest, int maxResults, String operator) {
-
     List<Message> finalSearchResults = new ArrayList<>();
-
-    SearchRequest searchRequest = new SearchRequest(this.indexName);
-    SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-    if (maxResults != 0) {
-      searchSourceBuilder.size(maxResults);
-    }else{
-      searchSourceBuilder.size(DEFAULT_RESULTS_SIZE);
-    }
-    BoolQueryBuilder boolKeywordQueryBuilder = QueryBuilders.boolQuery();
-
-
-    if (operator.equalsIgnoreCase("all")) {
-      for (Object key : queryRequest.keySet()) {
-        String keyAsString = (String) key;
-        if (!queryRequest.get(keyAsString).toString().contains("*")) {
-          boolKeywordQueryBuilder.must(matchQuery(keyAsString, queryRequest.get(keyAsString)));
-        } else {
-          boolKeywordQueryBuilder.must(regexpQuery(keyAsString, (String) queryRequest.get(keyAsString)));
-        }
-      }
-    } else {
-      for (Object key : queryRequest.keySet()) {
-        String keyAsString = (String) key;
-        if (!queryRequest.get(keyAsString).toString().contains("*")) {
-          boolKeywordQueryBuilder.should(matchQuery(keyAsString, queryRequest.get(keyAsString)));
-        } else {
-          boolKeywordQueryBuilder.should(regexpQuery(keyAsString, (String) queryRequest.get(keyAsString)));
-        }
-      }
-    }
-
-    searchSourceBuilder.query(boolKeywordQueryBuilder);
-
-    searchRequest.source(searchSourceBuilder);
-    searchRequest.scroll(TimeValue.timeValueSeconds(60));
+    SearchRequest searchRequest = buildElasticSearchRequest(queryRequest.getMap(), maxResults, operator);
+    Log.debug("Inside query: "+searchRequest.toString());
     SearchResponse searchResponse = null;
 
     try {
@@ -573,6 +484,95 @@ public class ServiceElasticSearch {
     return finalSearchResults;
   }
 
+  private synchronized SearchRequest buildElasticSearchRequest(Map queryRequest, int maxResults, String operator) {
+    
+    Log.info("Inside buildElasticSearchRequest method");
+    SearchRequest searchRequest = new SearchRequest(this.indexName);
+    SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+
+    if (maxResults != 0) {
+      searchSourceBuilder.size(maxResults);
+    }else{
+      searchSourceBuilder.size(DEFAULT_RESULTS_SIZE);
+    }
+    BoolQueryBuilder boolKeywordQueryBuilder = QueryBuilders.boolQuery();
+    if (operator.equalsIgnoreCase("all")) {
+      Log.info("Inside buildElasticSearchRequest ALL case");
+      for (Object key : queryRequest.keySet()) {
+        String keyAsString = (String) key;
+        Object value = queryRequest.get(keyAsString);
+        if (value instanceof String){
+          String valueString = (String) value;
+          if (valueString.contains("*")) {
+            String regexString = processWildCardPattern(valueString);
+            boolKeywordQueryBuilder.must(regexpQuery(keyAsString, regexString));
+            
+          } else {
+            boolKeywordQueryBuilder.must(matchQuery(keyAsString, valueString));
+          }
+        }else if(value instanceof List){
+          Log.debug("Query values are list - ALL case");
+          for (Object eachVal: (List)value ){
+            String eachValString = (String) eachVal;
+            if (eachValString.contains("*")) {
+              String regexString = processWildCardPattern(eachValString);
+              boolKeywordQueryBuilder.must(regexpQuery(keyAsString, eachValString));
+            } else {
+              
+              boolKeywordQueryBuilder.must(matchQuery(keyAsString, eachValString));
+            }
+          }
+        }
+        
+      }
+    } else {
+      Log.debug("Inside buildElasticSearchRequest ANY case");
+      for (Object key : queryRequest.keySet()) {
+        String keyAsString = (String) key;
+        Object value = queryRequest.get(keyAsString);
+        if (value instanceof String){
+          String valueString = (String) value;
+          if (valueString.contains("*")) {
+            String regexString = processWildCardPattern(valueString);
+            boolKeywordQueryBuilder.should(regexpQuery(keyAsString, regexString));
+          } else {
+            boolKeywordQueryBuilder.should(matchQuery(keyAsString, valueString));
+          }
+        }else if(value instanceof List){
+          for (Object eachVal: (List) value ){
+            String eachValString = (String) eachVal;
+            if (eachValString.contains("*")) {
+              String regexString = processWildCardPattern(eachValString);
+              boolKeywordQueryBuilder.should(regexpQuery(keyAsString, regexString));
+            } else {
+              boolKeywordQueryBuilder.should(matchQuery(keyAsString, eachValString));
+            }
+          }
+        }
+        
+      }
+
+    }
+    Log.debug(searchSourceBuilder.toString());
+    searchSourceBuilder.query(boolKeywordQueryBuilder);
+
+    searchRequest.source(searchSourceBuilder);
+    searchRequest.scroll(TimeValue.timeValueSeconds(60));
+    return searchRequest;
+  }
+
+private String processWildCardPattern(String searchTerm){
+  if(searchTerm == null || searchTerm.length()<1){
+    return searchTerm;
+  }
+  String regexpSearchTerm = searchTerm;
+  if (searchTerm.contains("*")){
+
+     regexpSearchTerm = searchTerm.toLowerCase().replace("*",".*");
+  }
+  return regexpSearchTerm;
+}
+
   private List<Message> processSearchResponse(SearchHits searchHits) {
     List<Message> result = new ArrayList<>();
     for (SearchHit hit : searchHits.getHits()) {
@@ -583,85 +583,6 @@ public class ServiceElasticSearch {
     }
     return result;
   }
-  
-  /**
-   * Checks if the document already exists in the database
-   *
-   * @param queryRequest document to check existence of
-   * @throws DatabaseException  Error searching the database
-   * @throws DuplicateEntryException If there is a duplicate entry in the database
-   */
-  private boolean exists(Message queryRequest) throws DatabaseException {
-
-    // Getting the document to search for in map form
-    Map<String, Object> queryMap = new TreeMap<>(queryRequest.getMap());
-
-    // Removing objects that are not user generated
-    queryMap.remove("expires");
-    queryMap.remove("_lastUpdated");
-    queryMap.remove("ttl");
-    queryMap.remove("_expiresAsTimestamp");
-    queryMap.remove("test-id");
-    queryMap.remove("uri");
-
-    SearchRequest searchRequest = new SearchRequest(this.indexName);
-    SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-    BoolQueryBuilder builder = QueryBuilders.boolQuery();
-    // Creating query for all common items
-    for (String key : queryMap.keySet()) {
-
-      builder.must(matchQuery(key, removeBracketFrom(queryMap.get(key).toString())));
-    }
-
-    searchSourceBuilder.query(builder);
-    try {
-
-      // Getting all records from the database
-      searchRequest.source(searchSourceBuilder);
-      SearchResponse searchResponse;
-      try {
-        searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-      } catch (IOException e) {
-        Log.error("Elasticsearch IOException"+ e.getMessage());
-        throw new DatabaseException(e.getMessage());
-      }
-      SearchHit[] searchHits = searchResponse.getHits().getHits();
-
-      if (searchHits.length > 0) {
-        for (SearchHit hit : searchHits) {
-          Map keyValuesMap = hit.getSourceAsMap();
-          // Map keyValuesMap = (Map) hitMap.get("keyValues");
-          keyValuesMap.remove("expires");
-          keyValuesMap.remove("_lastUpdated");
-          keyValuesMap.remove("ttl");
-          keyValuesMap.remove("_expiresAsTimestamp");
-          keyValuesMap.remove("test-id");
-          keyValuesMap.remove("uri");
-          if (keyValuesMap.size() == queryMap.size()) {
-            return true;
-            // throw new DuplicateEntryException("Record already exists");
-          }
-        }
-      }
-    } catch (ElasticsearchStatusException e) {
-      Log.info("Couldn't find record in database" + e.getMessage());
-    }
-    return false;
-  }
-
-  /**
-   * Removes Square brackets from the start and end of a string eg: ["Hello"] -> "Hello"
-   *
-   * @param toRemove Object that can be converted to a string for which we want to remove brackets
-   * @return String with brackets removed
-   */
-  private String removeBracketFrom(String toRemove) {
-    String type = toRemove;
-    if (type.startsWith("[") && type.endsWith("]")) {
-      type = type.substring(type.indexOf("[") + 1, type.indexOf("]"));
-    }
-    return type;
-  }
 
   /**
    * Inserts message into database
@@ -670,9 +591,9 @@ public class ServiceElasticSearch {
    * @param queryRequest message with the URI of where the message is to be added
    * @throws DatabaseException if insertion is unsuccessful
    */
-  private void insert(Message message, Message queryRequest) throws DatabaseException {
+  private void insert(Message message) throws DatabaseException {
     IndexRequest request = new IndexRequest(this.indexName);
-    request.id(queryRequest.getURI());
+    request.id(message.getURI());
     Gson gson = new Gson();
     String json = gson.toJson(message.getMap());
     request.source(json, XContentType.JSON);

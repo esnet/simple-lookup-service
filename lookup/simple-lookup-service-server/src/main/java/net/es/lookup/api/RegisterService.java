@@ -60,6 +60,7 @@ public class RegisterService {
         // Build the matching query requestURl that must fail for the service to be published
         Message query = new Message();
         Message operators = new Message();
+        operators.add(ReservedKeys.RECORD_OPERATOR, ReservedValues.RECORD_OPERATOR_ALL);
 
         Map<String, Object> keyValues = request.getMap();
 
@@ -77,7 +78,7 @@ public class RegisterService {
         try {
           ServiceElasticSearch db = ServiceElasticSearch.getInstance();
           try {
-            Message res = db.queryAndPublishService(request);
+            Message res = db.queryAndPublishService(request, query, operators);
             System.gc(); // Todo fix memory management
             response = new JSONRegisterResponse(res.getMap());
             String responseString;
@@ -170,7 +171,8 @@ public class RegisterService {
 
     if (key.equals(ReservedKeys.RECORD_TTL)
         || key.equals(ReservedKeys.RECORD_EXPIRES)
-        || key.equals(ReservedKeys.RECORD_URI)) {
+        || key.equals(ReservedKeys.RECORD_URI) 
+        || key.equals(ReservedKeys.RECORD_STATE)){
       return true;
     } else {
       return false;

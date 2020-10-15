@@ -15,8 +15,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
-
-import net.es.lookup.api.BulkRegisterService;
 import net.es.lookup.api.BulkRenewService;
 import net.es.lookup.api.QueryServices;
 import net.es.lookup.api.RegisterService;
@@ -38,7 +36,6 @@ public class MainResource {
   private QueryServices queryServices = new QueryServices();
   private RegisterService registerService = new RegisterService();
   private BulkRenewService bulkRenewService = new BulkRenewService();
-  private BulkRegisterService b = new BulkRegisterService();
   private String prefix = "lookup";
 
   private static Logger Log = LogManager.getLogger(MainResource.class);
@@ -51,21 +48,6 @@ public class MainResource {
     if (sls.equalsIgnoreCase(prefix)) {
 
       return this.registerService.registerService(message);
-    } else {
-      throw new NotSupportedException("Register Operation not supported");
-    }
-  }
-
-  /** Post handler to register records in bulk. */
-  @POST
-  @Path("/bulk")
-  @Consumes("application/json")
-  @Produces("application/json")
-  public String postHandlerBulk(@PathParam("sls") String sls, String message) {
-    if (sls.equalsIgnoreCase(prefix)) {
-
-      return this.b.bulkRegister(message);
-
     } else {
       throw new NotSupportedException("Register Operation not supported");
     }
