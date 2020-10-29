@@ -1,44 +1,52 @@
 package net.es.lookup.service;
 
-import static java.util.Arrays.asList;
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
-import static org.quartz.TriggerBuilder.newTrigger;
-
-import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.es.lookup.common.MemoryManager;
 import net.es.lookup.common.exception.internal.DatabaseException;
-import net.es.lookup.database.MongoDBMaintenanceJob;
-import net.es.lookup.database.ServiceDaoMongoDb;
+import net.es.lookup.database.ElasticSearchMaintenanceJob;
+import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.timer.Scheduler;
+import net.es.lookup.utils.config.reader.IndexMapReader;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
-import net.es.lookup.utils.log.StdOutErrToLog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import static java.util.Arrays.asList;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
+
 public class Invoker {
 
   private static int port = 8080;
+  private static int elasticPort = 9300;
+  private static int restClientPort = 9301;
+  private static String elasticHost = "localhost";
   private static LookupService lookupService = null;
 
-  // private static ServiceDaoMongoDb dao = null;
   private static String host = "localhost";
   private static LookupServiceConfigReader lookupServiceConfigReader;
+  private static IndexMapReader indexMapReader;
   private static QueueServiceConfigReader queueServiceConfigReader;
 
   private static String configPath = "etc/";
   private static final String lookupservicecfg = "lookupservice.yaml";
-  //private static final String queuecfg = "queueservice.yaml";
+
+  private static String mappingConfig = "mapping.json";
+
+  // private static final String queuecfg = "queueservice.yaml";
 
   private static String logConfig = "./etc/log4j2.properties";
+
+
 
   private static Logger LOG;
 
@@ -55,39 +63,44 @@ public class Invoker {
     System.setProperty("log4j2.warn", "true");
     System.setProperty("log4j.configurationFile", logConfig);
 
-
-
     LOG = LogManager.getLogger(Invoker.class.getName());
-    //StdOutErrToLog.redirectStdOutErrToLog();
+    // StdOutErrToLog.redirectStdOutErrToLog();
 
     LookupServiceConfigReader.init(configPath + lookupservicecfg);
-   //QueueServiceConfigReader.init(configPath + queuecfg);
+    // QueueServiceConfigReader.init(configPath + queuecfg);
 
     lookupServiceConfigReader = LookupServiceConfigReader.getInstance();
-    //queueServiceConfigReader = QueueServiceConfigReader.getInstance();
+
+    indexMapReader = IndexMapReader.getInstance();
+    String elasticIndexMapping = indexMapReader.readMapping(configPath+mappingConfig);
+    LOG.info("Reading mapping file"+elasticIndexMapping);
+
+    // queueServiceConfigReader = QueueServiceConfigReader.getInstance();
 
     port = lookupServiceConfigReader.getPort();
+
     host = lookupServiceConfigReader.getHost();
+    restClientPort = lookupServiceConfigReader.getElasticRestClientPort();
+    elasticPort = lookupServiceConfigReader.getElasticServerPort();
+    elasticHost = lookupServiceConfigReader.getElasticServer();
 
-    LOG.info("starting ServiceDaoMongoDb");
+    LOG.info("starting ServiceElasticSearch");
 
-    String dburl = lookupServiceConfigReader.getDbUrl();
-    int dbport = lookupServiceConfigReader.getDbPort();
-    String dbname = lookupServiceConfigReader.getDbName();
-    String collname = lookupServiceConfigReader.getCollName();
+    String dbname = lookupServiceConfigReader.getElasticDbName();
 
     List<String> services = new LinkedList<>();
 
     // Initialize services
     try {
-      new ServiceDaoMongoDb(dburl, dbport, dbname, collname);
-      services.add(LookupService.LOOKUP_SERVICE);
+
+      new ServiceElasticSearch(elasticHost, elasticPort, restClientPort, dbname, elasticIndexMapping);
 
     } catch (DatabaseException e) {
-
-      LOG.info("Error connecting to database; Please check if MongoDB is running");
-      System.exit(1);
+      LOG.fatal("Unable to initialize database" + e.getMessage());
+      System.exit(-1);
     }
+    services.add(LookupService.LOOKUP_SERVICE);
+
     LOG.info("starting Lookup Service");
     // Create the REST service
     Invoker.lookupService = new LookupService(Invoker.host, Invoker.port);
@@ -99,12 +112,13 @@ public class Invoker {
     Scheduler scheduler = Scheduler.getInstance();
     int dbpruneInterval = lookupServiceConfigReader.getPruneInterval();
     long prunethreshold = lookupServiceConfigReader.getPruneThreshold();
-    JobDetail job =
-        newJob(MongoDBMaintenanceJob.class)
+
+     JobDetail job =
+        newJob(ElasticSearchMaintenanceJob.class)
             .withIdentity(LookupService.LOOKUP_SERVICE + "clean", "DBMaintenance")
             .build();
-    job.getJobDataMap().put(MongoDBMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
-    job.getJobDataMap().put(MongoDBMaintenanceJob.DBNAME, dbname);
+    job.getJobDataMap().put(ElasticSearchMaintenanceJob.PRUNE_THRESHOLD, prunethreshold);
+    job.getJobDataMap().put(ElasticSearchMaintenanceJob.DBNAME, dbname);
 
     // Trigger the job to run now, and then every dbpruneInterval seconds
     Trigger trigger =
@@ -121,7 +135,7 @@ public class Invoker {
 
     scheduler.schedule(job, trigger);
 
-   /*   if (queueServiceConfigReader != null && queueServiceConfigReader.isServiceOn()) {
+    /*   if (queueServiceConfigReader != null && queueServiceConfigReader.isServiceOn()) {
 
       PublishService publishService = PublishService.getInstance();
       publishService.setMaxPushEvents(queueServiceConfigReader.getBatchSize());
@@ -199,5 +213,6 @@ public class Invoker {
 
       logConfig = options.valueOf(argLogPath);
     }
+
   }
 }

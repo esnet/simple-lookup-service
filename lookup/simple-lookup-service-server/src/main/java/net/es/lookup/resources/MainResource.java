@@ -1,5 +1,7 @@
 package net.es.lookup.resources;
 
+import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,12 +15,18 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
+
+import net.es.lookup.api.BulkRegisterService;
 import net.es.lookup.api.BulkRenewService;
 import net.es.lookup.api.QueryServices;
 import net.es.lookup.api.RegisterService;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedKeys;
+import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.NotSupportedException;
+import net.es.lookup.database.ElasticSearchMaintenanceJob;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class and other similar resource classes need to be explicitly loaded in the
@@ -30,16 +38,34 @@ public class MainResource {
   private QueryServices queryServices = new QueryServices();
   private RegisterService registerService = new RegisterService();
   private BulkRenewService bulkRenewService = new BulkRenewService();
+  private BulkRegisterService b = new BulkRegisterService();
   private String prefix = "lookup";
+
+  private static Logger Log = LogManager.getLogger(MainResource.class);
 
   /** Post handler to register records. */
   @POST
   @Consumes("application/json")
   @Produces("application/json")
   public String postHandler(@PathParam("sls") String sls, String message) {
-
     if (sls.equalsIgnoreCase(prefix)) {
+
       return this.registerService.registerService(message);
+    } else {
+      throw new NotSupportedException("Register Operation not supported");
+    }
+  }
+
+  /** Post handler to register records in bulk. */
+  @POST
+  @Path("/bulk")
+  @Consumes("application/json")
+  @Produces("application/json")
+  public String postHandlerBulk(@PathParam("sls") String sls, String message) {
+    if (sls.equalsIgnoreCase(prefix)) {
+
+      return this.b.bulkRegister(message);
+
     } else {
       throw new NotSupportedException("Register Operation not supported");
     }
@@ -49,7 +75,6 @@ public class MainResource {
   @GET
   @Produces("application/json")
   public String getHandler(@Context UriInfo ui, @PathParam("sls") String sls) {
-
     MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
     Message message = new Message();
     int maxResults = 0;
@@ -85,7 +110,6 @@ public class MainResource {
         }
       }
     }
-
     return this.queryServices.query(message, maxResults);
   }
 
@@ -94,6 +118,7 @@ public class MainResource {
   @Consumes("application/json")
   @Produces("application/json")
   public String bulkRenewHandler(String message) {
-    return bulkRenewService.bulkRenew(message);
+
+      return bulkRenewService.bulkRenew(message);
   }
 }

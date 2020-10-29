@@ -14,7 +14,7 @@ import org.quartz.JobExecutionException;
 import java.util.Date;
 import java.util.List;
 
-
+@Deprecated
 public class MongoDBMaintenanceJob implements Job {
 
     private static Logger LOG = LogManager.getLogger(MongoDBMaintenanceJob.class);
