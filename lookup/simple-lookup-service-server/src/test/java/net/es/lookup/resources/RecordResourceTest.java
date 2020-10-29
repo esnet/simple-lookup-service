@@ -6,7 +6,9 @@ import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.ServiceElasticSearch;
+
 import net.es.lookup.common.ReservedValues;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
@@ -15,6 +17,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import java.net.URISyntaxException;
 import java.util.UUID;
 
@@ -34,6 +37,7 @@ public class RecordResourceTest {
    */
   @Before
   public void setUp() throws DatabaseException {
+
     client = ServiceElasticSearch.getInstance();
     client.deleteAllRecords();
   }
@@ -46,6 +50,7 @@ public class RecordResourceTest {
    * @throws DuplicateEntryException If message being added already exists in the database
    */
   private void queryAndPublishService() throws DatabaseException, DuplicateEntryException {
+
     Message message = new Message();
     message.add("type", "test");
 
@@ -70,6 +75,7 @@ public class RecordResourceTest {
     operators.add("test-id", ReservedValues.RECORD_OPERATOR_ALL);
 
     Message addedMessage = client.queryAndPublishService(message, query, operators);
+
   }
 
   /**
@@ -80,6 +86,7 @@ public class RecordResourceTest {
    */
   @Test
   public void getHandlerExisting() throws DatabaseException, DuplicateEntryException {
+
     this.queryAndPublishService();
     RecordResource request = new RecordResource();
     String output = request.getHandler("lookup", "interface", "2");
@@ -112,6 +119,7 @@ public class RecordResourceTest {
    */
   @Test
   public void renewHandlerExists() throws DatabaseException, DuplicateEntryException {
+
     this.queryAndPublishService();
     RecordResource request = new RecordResource();
 
@@ -128,6 +136,7 @@ public class RecordResourceTest {
    */
   @Test
   public void renewHandlerNotExists() throws DatabaseException, DuplicateEntryException {
+
     this.queryAndPublishService();
     RecordResource request = new RecordResource();
 

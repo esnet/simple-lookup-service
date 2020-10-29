@@ -1,8 +1,8 @@
 package net.es.lookup.database;
-
 import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
 import net.es.lookup.common.ReservedValues;
+
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.common.exception.internal.RecordNotFoundException;
@@ -10,12 +10,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,13 +42,13 @@ public class ServiceElasticSearchTest {
 
   @Before
   public void setUp() throws DatabaseException {
+
     client = ServiceElasticSearch.getInstance();
     client.deleteAllRecords();
   }
 
   /**
    * creates a message and adds it to the database
-   *
    * @throws DatabaseException If error entering data into the database
    * @throws DuplicateEntryException If message being added already exists in the database
    */
@@ -57,7 +57,6 @@ public class ServiceElasticSearchTest {
     
 
     message.add("type", "test");
-  
     String uuid = UUID.randomUUID().toString();
     message.add(
         "uri", "2"); // 2nd param should be uuid but for testing purposes was assigned a number
@@ -78,6 +77,7 @@ public class ServiceElasticSearchTest {
     operators.add("test-id", ReservedValues.RECORD_OPERATOR_ALL);
 
     Message addedMessage = client.queryAndPublishService(message, query, operators);
+
   }
 
   /**
@@ -88,6 +88,7 @@ public class ServiceElasticSearchTest {
    */
   @Test
   public void queryAndPublishSingle() throws DatabaseException, DuplicateEntryException {
+
     queryAndPublishService();
   }
 
@@ -109,6 +110,7 @@ public class ServiceElasticSearchTest {
         fail();
       }
     } catch (DatabaseException e) {
+
       e.printStackTrace();
       fail();
     } catch (InterruptedException e) {
@@ -124,6 +126,7 @@ public class ServiceElasticSearchTest {
    */
   @Test
   public void deleteExistingUri() throws DatabaseException, DuplicateEntryException, RecordNotFoundException {
+
     this.queryAndPublishService();
     Message status = client.deleteRecord("2");
     assertNotNull(status.getMap());
@@ -149,7 +152,6 @@ public class ServiceElasticSearchTest {
 
   /**
    * Gets a record that exists in the database using the URI
-   *
    * @throws DatabaseException Error deleting the record
    * @throws DuplicateEntryException Entry already exists before test
    */
@@ -225,6 +227,7 @@ public class ServiceElasticSearchTest {
 
     try {
       Message response = client.updateService("3", message);
+
     } catch (DatabaseException e) {
       Log.info("Test passed, database exception was thrown for missing service ID in database");
       assert (true);
@@ -240,6 +243,7 @@ public class ServiceElasticSearchTest {
    */
   @Test
   public void updateEmptyServiceID() throws DuplicateEntryException, DatabaseException, DatabaseException {
+
     this.queryAndPublishService();
     Message message = new Message();
     message.add("type", "test");
@@ -258,6 +262,7 @@ public class ServiceElasticSearchTest {
     try {
       Message response = client.updateService(null, message);
     } catch (DatabaseException e) {
+
       Log.info("Test passed, database exception was thrown for empty service ID");
       assert (true);
     }
@@ -295,6 +300,7 @@ public class ServiceElasticSearchTest {
    */
   @Test
   public void publishServiceExistingTest() throws DatabaseException {
+
     Message message = new Message();
     message.add("type", "test");
 
@@ -379,6 +385,7 @@ public class ServiceElasticSearchTest {
    */
   @Test
   public void bulkUpdateNotExisting() throws DatabaseException {
+
     Message message1 = new Message();
     message1.add("type", "test");
 
@@ -428,6 +435,7 @@ public class ServiceElasticSearchTest {
     try {
       Message count = client.bulkUpdate(messages);
     } catch (DatabaseException e) {
+
       Log.info("error updating due to incorrect URI; Passed test");
     }
   }
@@ -440,6 +448,7 @@ public class ServiceElasticSearchTest {
    */
   @Test
   public void deleteExpired() throws DatabaseException, InterruptedException {
+
     Message message1 = new Message();
     message1.add("type", "test");
 
@@ -463,9 +472,9 @@ public class ServiceElasticSearchTest {
     message2.add("test-id", String.valueOf(2));
 
     message2.add("ttl", "PT10M");
-
     //message2.add("expires", dateTime.toString());
     LeaseManager.getInstance().requestLease(message2);
+
 
     Message message3 = new Message();
     message3.add("type", "test");
@@ -480,6 +489,7 @@ public class ServiceElasticSearchTest {
     //message3.add("expires", dateTime.toString());
     LeaseManager.getInstance().requestLease(message3);
 
+
     client.publishService(message1);
     client.publishService(message2);
     client.publishService(message3);
@@ -492,6 +502,7 @@ public class ServiceElasticSearchTest {
     DateTime pruneTime = now.plus(600000).toDateTime();
     System.out.println(pruneTime.toString());
     assertEquals(client.deleteExpiredRecords(pruneTime), 3);
+
   }
 
   /**
@@ -502,6 +513,7 @@ public class ServiceElasticSearchTest {
    */
   @Test
   public void findRecordInTimeRange() throws DatabaseException, InterruptedException {
+
     Message message1 = new Message();
     message1.add("type", "test");
 
@@ -516,7 +528,9 @@ public class ServiceElasticSearchTest {
     message1.add("expires", dateTime.toString());
 
     Message message2 = new Message();
+
     message2.add("type", "test");
+
 
     message2.add(
         "uri", "2"); // 2nd param should be uuid but for testing purposes was assigned a number
@@ -559,6 +573,7 @@ public class ServiceElasticSearchTest {
    */
   @Test
   public void getKeyExists() throws DatabaseException, DuplicateEntryException {
+
     this.queryAndPublishService();
     Message record = client.getRecordByURI("2");
     String key = "test-id";
@@ -575,6 +590,7 @@ public class ServiceElasticSearchTest {
    */
   @Test
   public void getKeyNotExists() throws DatabaseException, DuplicateEntryException {
+
     this.queryAndPublishService();
     Message record = client.getRecordByURI("2");
     String key = "random";

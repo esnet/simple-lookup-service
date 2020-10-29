@@ -13,6 +13,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class MainResourceTest {
    */
   @Before
   public void setUp() throws DatabaseException {
+
     client = ServiceElasticSearch.getInstance();
     client.deleteAllRecords();
   }
@@ -46,6 +48,7 @@ public class MainResourceTest {
    */
   @Test
   public void postHandlerNotExist() throws DatabaseException, InterruptedException {
+
     MainResource request = new MainResource();
     String added = request.postHandler("lookup", jsonMessage(1));
 

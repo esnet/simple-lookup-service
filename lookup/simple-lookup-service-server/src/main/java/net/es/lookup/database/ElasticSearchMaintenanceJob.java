@@ -37,12 +37,14 @@ public class ElasticSearchMaintenanceJob implements Job {
     JobDataMap data = context.getJobDetail().getJobDataMap();
 
     db = ServiceElasticSearch.getInstance();
+
     long prune_threshold = data.getLong(PRUNE_THRESHOLD) * 1000;
     Instant now = new Instant();
     Instant pTime = now.minus(prune_threshold);
     DateTime pruneTime = pTime.toDateTime();
     LOG.debug("Prune timestamp range: "+now.toDateTime().toString());
     LOG.debug("Prune timestamp: "+pruneTime.toString());
+
 
     //DateTime daterange = pruneTime.toDateTime();
     try {
@@ -53,6 +55,7 @@ public class ElasticSearchMaintenanceJob implements Job {
 
     } catch (DatabaseException e) {
       LOG.error("DatabaseException! Could not query database");
+
     }
   }
 }

@@ -1,7 +1,9 @@
 package net.es.lookup.resources;
 
 import net.es.lookup.common.Message;
+
 import net.es.lookup.common.ReservedValues;
+
 import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
@@ -14,6 +16,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 
 import java.net.URISyntaxException;
 import java.util.UUID;
@@ -44,6 +47,7 @@ public class KeyResourceTest {
    * @throws DuplicateEntryException If message being added already exists in the database
    */
   private void queryAndPublishService() throws DatabaseException, DuplicateEntryException {
+
     Message message = new Message();
     message.add("type", "test");
 
@@ -69,6 +73,7 @@ public class KeyResourceTest {
     operators.add("test-id", ReservedValues.RECORD_OPERATOR_ALL);
 
     Message addedMessage = client.queryAndPublishService(message,query, operators);
+
   }
 
   /**
@@ -78,6 +83,7 @@ public class KeyResourceTest {
    */
   @Test
   public void getHandlerKeyExists() throws DatabaseException, DuplicateEntryException {
+
     this.queryAndPublishService();
     KeyResource request = new KeyResource();
     String result = request.getHandler("lookup", "interface", "2", "test-id");
@@ -92,6 +98,7 @@ public class KeyResourceTest {
    */
   @Test
   public void getHandlerKeyNotExists() throws DatabaseException, DuplicateEntryException {
+
     this.queryAndPublishService();
     KeyResource request = new KeyResource();
     try{
@@ -111,6 +118,7 @@ public class KeyResourceTest {
    */
   @Test
   public void getHandlerURINotExists() throws DatabaseException, DuplicateEntryException {
+
     this.queryAndPublishService();
     KeyResource request = new KeyResource();
     try{

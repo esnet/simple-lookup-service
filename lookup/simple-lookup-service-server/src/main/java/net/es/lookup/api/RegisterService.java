@@ -10,7 +10,6 @@ import net.es.lookup.common.exception.api.ForbiddenRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.api.UnauthorizedException;
 import net.es.lookup.common.exception.internal.DataFormatException;
-import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.protocol.json.JSONMessage;
@@ -22,7 +21,6 @@ import net.es.lookup.service.PublishService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
-
 import java.net.URISyntaxException;
 import java.util.*;
 
@@ -60,7 +58,9 @@ public class RegisterService {
         // Build the matching query requestURl that must fail for the service to be published
         Message query = new Message();
         Message operators = new Message();
+
         operators.add(ReservedKeys.RECORD_OPERATOR, ReservedValues.RECORD_OPERATOR_ALL);
+
 
         Map<String, Object> keyValues = request.getMap();
 
@@ -79,6 +79,7 @@ public class RegisterService {
           ServiceElasticSearch db = ServiceElasticSearch.getInstance();
           try {
             Message res = db.queryAndPublishService(request, query, operators);
+
             System.gc(); // Todo fix memory management
             response = new JSONRegisterResponse(res.getMap());
             String responseString;
@@ -111,6 +112,7 @@ public class RegisterService {
           Log.info("Register status: FAILED due to Duplicate Entry; exiting");
           throw new ForbiddenRequestException(e.getMessage());
         } catch (DatabaseException e) {
+
           Log.error("Error connecting with database");
           throw new InternalErrorException("Error connecting to database");
         }

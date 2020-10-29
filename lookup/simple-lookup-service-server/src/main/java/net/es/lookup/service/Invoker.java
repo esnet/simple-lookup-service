@@ -39,7 +39,9 @@ public class Invoker {
 
   private static String configPath = "etc/";
   private static final String lookupservicecfg = "lookupservice.yaml";
+
   private static String mappingConfig = "mapping.json";
+
   // private static final String queuecfg = "queueservice.yaml";
 
   private static String logConfig = "./etc/log4j2.properties";
@@ -68,6 +70,7 @@ public class Invoker {
     // QueueServiceConfigReader.init(configPath + queuecfg);
 
     lookupServiceConfigReader = LookupServiceConfigReader.getInstance();
+
     indexMapReader = IndexMapReader.getInstance();
     String elasticIndexMapping = indexMapReader.readMapping(configPath+mappingConfig);
     LOG.info("Reading mapping file"+elasticIndexMapping);
@@ -89,7 +92,9 @@ public class Invoker {
 
     // Initialize services
     try {
+
       new ServiceElasticSearch(elasticHost, elasticPort, restClientPort, dbname, elasticIndexMapping);
+
     } catch (DatabaseException e) {
       LOG.fatal("Unable to initialize database" + e.getMessage());
       System.exit(-1);

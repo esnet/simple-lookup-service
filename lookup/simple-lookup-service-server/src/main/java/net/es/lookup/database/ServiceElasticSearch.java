@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.TreeMap;
 import net.es.lookup.common.Message;
+
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.common.exception.internal.RecordNotFoundException;
@@ -17,9 +18,11 @@ import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchStatusException;
+
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -29,13 +32,16 @@ import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
+
 import org.elasticsearch.action.search.ClearScrollRequest;
+
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
+
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -46,6 +52,7 @@ import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.get.GetResult;
+
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
@@ -64,7 +71,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-
 import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.regexpQuery;
 
@@ -78,7 +84,9 @@ public class ServiceElasticSearch {
   private int port2;
   // Name of the database
   private String indexName;
+
   private String indexMapping;
+
 
   private static Logger Log = LogManager.getLogger(ServiceElasticSearch.class);
 
@@ -121,12 +129,12 @@ public class ServiceElasticSearch {
       CreateIndexRequest create = new CreateIndexRequest(this.indexName.toLowerCase());
       try {
         client.indices().create(create, RequestOptions.DEFAULT);
+
         if (indexMapping != null && !indexMapping.isEmpty()){
           PutMappingRequest mappingRequest = new PutMappingRequest(this.indexName.toLowerCase());
           mappingRequest.source(this.indexMapping, XContentType.JSON);
           client.indices().putMapping(mappingRequest, RequestOptions.DEFAULT);
         }
-
       } catch (IOException ex) {
         Log.error("unable to create index!");
         throw new DatabaseException(ex.getMessage());
@@ -250,6 +258,7 @@ public class ServiceElasticSearch {
     } catch (IOException e) {
       Log.error("Caught Elastic IOException"+e.getMessage());
       throw new DatabaseException(e.getMessage());
+
     }
   }
 
@@ -258,6 +267,7 @@ public class ServiceElasticSearch {
    *
    * @param recordURI URI of the record needed to be returned
    * @return Entire record as a message object null if record doesn't exist
+
    * @throws DatabaseException
    */
   public Message getRecordByURI(String recordURI) throws DatabaseException {
@@ -266,6 +276,7 @@ public class ServiceElasticSearch {
     String[] excludes = Strings.EMPTY_ARRAY;
     FetchSourceContext fetchSourceContext = new FetchSourceContext(true, includes, excludes);
     getRequest.fetchSourceContext(fetchSourceContext);
+
     GetResponse getResponse;
     try {
       getResponse = client.get(getRequest, RequestOptions.DEFAULT);
@@ -282,6 +293,7 @@ public class ServiceElasticSearch {
     Message responseAsMessage = removeLsAddedFields(new Message(responseMap));
 
     return responseAsMessage;
+
   }
 
   /**
@@ -454,6 +466,7 @@ public class ServiceElasticSearch {
     List<Message> finalSearchResults = new ArrayList<>();
     SearchRequest searchRequest = buildElasticSearchRequest(queryRequest.getMap(), maxResults, operator);
     Log.debug("Inside query: "+searchRequest.toString());
+
     SearchResponse searchResponse = null;
 
     try {
@@ -603,6 +616,7 @@ private String processWildCardPattern(String searchTerm){
       Log.error("Throwing DatabaseException"+ e.getMessage());
       throw new DatabaseException(e.getMessage());
     }
+
   }
 
   /**
@@ -618,6 +632,7 @@ private String processWildCardPattern(String searchTerm){
 
     Date timestamp = dt.toDate();
     message.add("_expiresAsTimestamp", timestamp.getTime());
+
     message.add("_lastUpdated", new Date());
     return message;
   }
@@ -626,6 +641,7 @@ private String processWildCardPattern(String searchTerm){
     Map<String, Object> messageMap = message.getMap();
     if (messageMap != null) {
       messageMap.remove("_expiresAsTimestamp");
+
       messageMap.remove("_id");
       messageMap.remove("_lastUpdated");
       return new Message(messageMap);
