@@ -8,6 +8,8 @@ import net.es.lookup.common.ResponseCodes;
 import net.es.lookup.common.exception.api.BadRequestException;
 import net.es.lookup.common.exception.api.InternalErrorException;
 import net.es.lookup.common.exception.internal.DataFormatException;
+import net.es.lookup.common.exception.internal.DatabaseException;
+
 import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRenewRequest;
@@ -17,8 +19,6 @@ import net.es.lookup.publish.Publisher;
 import net.es.lookup.service.PublishService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -113,14 +113,15 @@ public class BulkRenewService {
       }
 
       // db call
-      Message renewResponse = db.bulkUpdate(bulkUpdateRequests);
-      notifyPublisher(bulkUpdateRequests);
-
+      Message renewResponse = new Message();
+      if(!bulkUpdateRequests.isEmpty()){
+        renewResponse = db.bulkUpdate(bulkUpdateRequests);
+      }
       JsonBulkRenewResponse jsonBulkRenewResponse =
           formatJsonBulkRenewResponse(allRecordUris.size(), renewResponse, failedUris);
-      return jsonBulkRenewResponse;
+        return jsonBulkRenewResponse;
+    } catch (DatabaseException e) {
 
-    } catch (IOException e) {
 
       LOG.fatal("DatabaseException: Error renewing services." + e.getMessage());
       LOG.info("RenewService status: FAILED; exiting");

@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,18 +28,14 @@ public class MainResourceTest {
 
   private static Logger Log = LogManager.getLogger(RecordResourceTest.class);
 
-  @BeforeClass
-  public static void setUpDatabase() throws DatabaseException, URISyntaxException {
-    new ServiceElasticSearch("localhost", 9200, 9300, "lookup");
-  }
-
   /**
    * Connects to the database an deletes all records if any exist
    *
-   * @throws IOException for error in deleting all records
+   * @throws DatabaseException for error in deleting all records
    */
   @Before
-  public void setUp() throws IOException {
+  public void setUp() throws DatabaseException {
+
     client = ServiceElasticSearch.getInstance();
     client.deleteAllRecords();
   }
@@ -48,11 +43,12 @@ public class MainResourceTest {
   /**
    * Curl request to add a record to database that doesn't already exist
    *
-   * @throws IOException // Error getting result from database
+   * @throws DatabaseException // Error getting result from database
    * @throws InterruptedException // Sleep interrupted
    */
   @Test
-  public void postHandlerNotExist() throws IOException, InterruptedException {
+  public void postHandlerNotExist() throws DatabaseException, InterruptedException {
+
     MainResource request = new MainResource();
     String added = request.postHandler("lookup", jsonMessage(1));
 

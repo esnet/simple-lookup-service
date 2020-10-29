@@ -6,6 +6,9 @@ import net.es.lookup.common.exception.api.NotFoundException;
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.database.ServiceElasticSearch;
+
+import net.es.lookup.common.ReservedValues;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
@@ -15,7 +18,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
@@ -28,18 +30,14 @@ public class RecordResourceTest {
 
   private static Logger Log = LogManager.getLogger(RecordResourceTest.class);
 
-  @BeforeClass
-  public static void setUpDatabase() throws DatabaseException, URISyntaxException {
-    new ServiceElasticSearch("localhost", 9200, 9300, "lookup");
-  }
-
   /**
    * Connects to the database an deletes all records if any exist
    *
-   * @throws IOException for error in deleting all records
+   * @throws DatabaseException for error in deleting all records
    */
   @Before
-  public void setUp() throws IOException {
+  public void setUp() throws DatabaseException {
+
     client = ServiceElasticSearch.getInstance();
     client.deleteAllRecords();
   }
@@ -48,10 +46,11 @@ public class RecordResourceTest {
   /**
    * creates a message and adds it to the database
    *
-   * @throws IOException If error entering data into the database
+   * @throws DatabaseException If error entering data into the database
    * @throws DuplicateEntryException If message being added already exists in the database
    */
-  private void queryAndPublishService() throws IOException, DuplicateEntryException {
+  private void queryAndPublishService() throws DatabaseException, DuplicateEntryException {
+
     Message message = new Message();
     message.add("type", "test");
 
@@ -67,18 +66,27 @@ public class RecordResourceTest {
 
     DateTime dateTime = new DateTime();
     message.add("expires", dateTime.plus(1000000).toString());
+    Message query = new Message();
+    query.add("type", "test");
+    query.add("test-id", String.valueOf(1));
 
-    Message addedMessage = client.queryAndPublishService(message);
+    Message operators = new Message();
+    operators.add("type", ReservedValues.RECORD_OPERATOR_ALL);
+    operators.add("test-id", ReservedValues.RECORD_OPERATOR_ALL);
+
+    Message addedMessage = client.queryAndPublishService(message, query, operators);
+
   }
 
   /**
    * Testing curl GET request for existing record
    *
-   * @throws IOException Error in adding or looking up the record
+   * @throws DatabaseException Error in adding or looking up the record
    * @throws DuplicateEntryException Record already exists before test
    */
   @Test
-  public void getHandlerExisting() throws IOException, DuplicateEntryException {
+  public void getHandlerExisting() throws DatabaseException, DuplicateEntryException {
+
     this.queryAndPublishService();
     RecordResource request = new RecordResource();
     String output = request.getHandler("lookup", "interface", "2");
@@ -88,11 +96,11 @@ public class RecordResourceTest {
   /**
    * Testing curl GET request for a record that doesn['t exist
    *
-   * @throws IOException Error in adding or looking up the record
+   * @throws DatabaseException Error in adding or looking up the record
    * @throws DuplicateEntryException Record already exists before test
    */
   @Test
-  public void getHandlerNotExisting() throws IOException, DuplicateEntryException {
+  public void getHandlerNotExisting() throws DatabaseException, DuplicateEntryException {
     this.queryAndPublishService();
     RecordResource request = new RecordResource();
     try {
@@ -106,11 +114,12 @@ public class RecordResourceTest {
   /**
    * Curl request for renewing an existing URI
    *
-   * @throws IOException Error in adding or looking up the record
+   * @throws DatabaseException Error in adding or looking up the record
    * @throws DuplicateEntryException Record already exists before test
    */
   @Test
-  public void renewHandlerExists() throws IOException, DuplicateEntryException {
+  public void renewHandlerExists() throws DatabaseException, DuplicateEntryException {
+
     this.queryAndPublishService();
     RecordResource request = new RecordResource();
 
@@ -122,11 +131,12 @@ public class RecordResourceTest {
   /**
    * Curl request for renewing a URI that doesn't exist
    *
-   * @throws IOException Error in adding or looking up the record
+   * @throws DatabaseException Error in adding or looking up the record
    * @throws DuplicateEntryException Record already exists before test
    */
   @Test
-  public void renewHandlerNotExists() throws IOException, DuplicateEntryException {
+  public void renewHandlerNotExists() throws DatabaseException, DuplicateEntryException {
+
     this.queryAndPublishService();
     RecordResource request = new RecordResource();
 
@@ -141,11 +151,11 @@ public class RecordResourceTest {
   /**
    * Curl request for deleting existing URI
    *
-   * @throws IOException Error in adding or looking up the record
+   * @throws DatabaseException Error in adding or looking up the record
    * @throws DuplicateEntryException Record already exists before test
    */
   @Test
-  public void deleteHandlerExists() throws IOException, DuplicateEntryException {
+  public void deleteHandlerExists() throws DatabaseException, DuplicateEntryException {
     this.queryAndPublishService();
     RecordResource request = new RecordResource();
     String response = request.deleteHandler("lookup", "interface", "2", jsonMessage());
@@ -155,11 +165,11 @@ public class RecordResourceTest {
   /**
    * Curl request for deleting non existing URI
    *
-   * @throws IOException Error in adding or looking up the record
+   * @throws DatabaseException Error in adding or looking up the record
    * @throws DuplicateEntryException Record already exists before test
    */
   @Test
-  public void deleteHandlerNotExists() throws IOException, DuplicateEntryException {
+  public void deleteHandlerNotExists() throws DatabaseException, DuplicateEntryException {
     this.queryAndPublishService();
     RecordResource request = new RecordResource();
     try {

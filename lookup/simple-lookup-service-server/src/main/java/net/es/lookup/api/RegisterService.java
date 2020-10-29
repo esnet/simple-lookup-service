@@ -21,8 +21,6 @@ import net.es.lookup.service.PublishService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
-
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
 
@@ -61,6 +59,9 @@ public class RegisterService {
         Message query = new Message();
         Message operators = new Message();
 
+        operators.add(ReservedKeys.RECORD_OPERATOR, ReservedValues.RECORD_OPERATOR_ALL);
+
+
         Map<String, Object> keyValues = request.getMap();
 
         for (Object o : keyValues.entrySet()) {
@@ -77,7 +78,8 @@ public class RegisterService {
         try {
           ServiceElasticSearch db = ServiceElasticSearch.getInstance();
           try {
-            Message res = db.queryAndPublishService(request);
+            Message res = db.queryAndPublishService(request, query, operators);
+
             System.gc(); // Todo fix memory management
             response = new JSONRegisterResponse(res.getMap());
             String responseString;
@@ -109,7 +111,8 @@ public class RegisterService {
           Log.error("FobiddenRequestException:" + e.getMessage());
           Log.info("Register status: FAILED due to Duplicate Entry; exiting");
           throw new ForbiddenRequestException(e.getMessage());
-        } catch (IOException e) {
+        } catch (DatabaseException e) {
+
           Log.error("Error connecting with database");
           throw new InternalErrorException("Error connecting to database");
         }
@@ -170,7 +173,8 @@ public class RegisterService {
 
     if (key.equals(ReservedKeys.RECORD_TTL)
         || key.equals(ReservedKeys.RECORD_EXPIRES)
-        || key.equals(ReservedKeys.RECORD_URI)) {
+        || key.equals(ReservedKeys.RECORD_URI) 
+        || key.equals(ReservedKeys.RECORD_STATE)){
       return true;
     } else {
       return false;

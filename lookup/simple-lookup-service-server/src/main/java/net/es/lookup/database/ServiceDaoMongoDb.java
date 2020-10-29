@@ -38,6 +38,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.quartz.DisallowConcurrentExecution;
 
+@Deprecated
 @DisallowConcurrentExecution
 public class ServiceDaoMongoDb {
 

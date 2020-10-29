@@ -87,11 +87,15 @@ public class EditService {
 
             newRequest.add(ReservedKeys.RECORD_STATE, ReservedValues.RECORD_VALUE_STATE_RENEW);
             Message res = db.updateService(serviceid, newRequest);
+            LOG.debug("Renewed " + serviceid);
+
             if (PublishService.isServiceOn()) {
               Publisher publisher = Publisher.getInstance();
               publisher.eventNotification(res);
             }
             response = new JSONRenewResponse(res.getMap());
+            LOG.debug("Sending back response for " + serviceid);
+            LOG.debug("Response is " + JSONMessage.toString(response));
 
             return JSONMessage.toString(response);
 
@@ -108,10 +112,10 @@ public class EditService {
           LOG.info("RenewService status: FAILED; exiting");
           throw new NotFoundException("ServiceRecord Not Found in DB\n");
         }
+      } catch ( DatabaseException e) {
 
-      } catch ( IOException e) {
 
-        LOG.fatal("DatabaseException: The database is out of service." + e.getMessage());
+        LOG.fatal("DatabaseException: " + e.getMessage());
         LOG.info("RenewService status: FAILED; exiting");
         throw new InternalErrorException("Database error\n");
       } catch (DataFormatException e) {
@@ -196,8 +200,8 @@ public class EditService {
           LOG.info("DeleteService status: SUCCESS; exiting");
           return JSONMessage.toString(response);
         }
+      } catch (DatabaseException e) {
 
-      } catch (IOException e) {
         LOG.info("Error connecting to database; exiting");
         throw new NotFoundException("Unable to connect to database" + e.getMessage());
       } catch (DataFormatException e) {

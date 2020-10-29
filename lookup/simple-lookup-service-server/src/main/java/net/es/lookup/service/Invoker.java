@@ -8,6 +8,7 @@ import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.database.ElasticSearchMaintenanceJob;
 import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.timer.Scheduler;
+import net.es.lookup.utils.config.reader.IndexMapReader;
 import net.es.lookup.utils.config.reader.LookupServiceConfigReader;
 import net.es.lookup.utils.config.reader.QueueServiceConfigReader;
 import org.apache.logging.log4j.LogManager;
@@ -33,13 +34,19 @@ public class Invoker {
 
   private static String host = "localhost";
   private static LookupServiceConfigReader lookupServiceConfigReader;
+  private static IndexMapReader indexMapReader;
   private static QueueServiceConfigReader queueServiceConfigReader;
 
   private static String configPath = "etc/";
   private static final String lookupservicecfg = "lookupservice.yaml";
+
+  private static String mappingConfig = "mapping.json";
+
   // private static final String queuecfg = "queueservice.yaml";
 
   private static String logConfig = "./etc/log4j2.properties";
+
+
 
   private static Logger LOG;
 
@@ -63,6 +70,11 @@ public class Invoker {
     // QueueServiceConfigReader.init(configPath + queuecfg);
 
     lookupServiceConfigReader = LookupServiceConfigReader.getInstance();
+
+    indexMapReader = IndexMapReader.getInstance();
+    String elasticIndexMapping = indexMapReader.readMapping(configPath+mappingConfig);
+    LOG.info("Reading mapping file"+elasticIndexMapping);
+
     // queueServiceConfigReader = QueueServiceConfigReader.getInstance();
 
     port = lookupServiceConfigReader.getPort();
@@ -80,7 +92,9 @@ public class Invoker {
 
     // Initialize services
     try {
-      new ServiceElasticSearch(elasticHost, elasticPort, restClientPort, dbname);
+
+      new ServiceElasticSearch(elasticHost, elasticPort, restClientPort, dbname, elasticIndexMapping);
+
     } catch (DatabaseException e) {
       LOG.fatal("Unable to initialize database" + e.getMessage());
       System.exit(-1);
@@ -199,5 +213,6 @@ public class Invoker {
 
       logConfig = options.valueOf(argLogPath);
     }
+
   }
 }

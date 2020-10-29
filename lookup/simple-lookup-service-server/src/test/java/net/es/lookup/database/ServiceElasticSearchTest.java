@@ -1,19 +1,21 @@
 package net.es.lookup.database;
-
+import net.es.lookup.common.LeaseManager;
 import net.es.lookup.common.Message;
+import net.es.lookup.common.ReservedValues;
+
 import net.es.lookup.common.exception.internal.DatabaseException;
 import net.es.lookup.common.exception.internal.DuplicateEntryException;
 import net.es.lookup.common.exception.internal.RecordNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.Instant;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,21 +41,22 @@ public class ServiceElasticSearchTest {
   }
 
   @Before
-  public void setUp() throws IOException {
+  public void setUp() throws DatabaseException {
+
     client = ServiceElasticSearch.getInstance();
     client.deleteAllRecords();
   }
 
   /**
    * creates a message and adds it to the database
-   *
-   * @throws IOException If error entering data into the database
+   * @throws DatabaseException If error entering data into the database
    * @throws DuplicateEntryException If message being added already exists in the database
    */
-  private void queryAndPublishService() throws IOException, DuplicateEntryException {
+  private void queryAndPublishService() throws DatabaseException, DuplicateEntryException {
     Message message = new Message();
-    message.add("type", "test");
+    
 
+    message.add("type", "test");
     String uuid = UUID.randomUUID().toString();
     message.add(
         "uri", "2"); // 2nd param should be uuid but for testing purposes was assigned a number
@@ -65,17 +68,27 @@ public class ServiceElasticSearchTest {
     DateTime dateTime = new DateTime();
     message.add("expires", dateTime.toString());
 
-    Message addedMessage = client.queryAndPublishService(message);
+    Message query = new Message();
+    query.add("type", "test");
+    query.add("test-id", String.valueOf(1));
+
+    Message operators = new Message();
+    operators.add("type", ReservedValues.RECORD_OPERATOR_ALL);
+    operators.add("test-id", ReservedValues.RECORD_OPERATOR_ALL);
+
+    Message addedMessage = client.queryAndPublishService(message, query, operators);
+
   }
 
   /**
    * Test to add a single record to the database
    *
-   * @throws IOException If error inserting message into database
+   * @throws DatabaseException If error inserting message into database
    * @throws DuplicateEntryException If the record already exists in the database
    */
   @Test
-  public void queryAndPublishSingle() throws IOException, DuplicateEntryException {
+  public void queryAndPublishSingle() throws DatabaseException, DuplicateEntryException {
+
     queryAndPublishService();
   }
 
@@ -96,7 +109,8 @@ public class ServiceElasticSearchTest {
         Log.error("entry already exists before test");
         fail();
       }
-    } catch (IOException e) {
+    } catch (DatabaseException e) {
+
       e.printStackTrace();
       fail();
     } catch (InterruptedException e) {
@@ -107,11 +121,12 @@ public class ServiceElasticSearchTest {
   /**
    * Delete an existing record using it's URI from the database
    *
-   * @throws IOException If unable to delete record from database
+   * @throws DatabaseException If unable to delete record from database
    * @throws DuplicateEntryException The record already exists before testing
    */
   @Test
-  public void deleteExistingUri() throws IOException, DuplicateEntryException, RecordNotFoundException {
+  public void deleteExistingUri() throws DatabaseException, DuplicateEntryException, RecordNotFoundException {
+
     this.queryAndPublishService();
     Message status = client.deleteRecord("2");
     assertNotNull(status.getMap());
@@ -120,11 +135,11 @@ public class ServiceElasticSearchTest {
   /**
    * Attempt to delete a URI that doesn't exist in the database
    *
-   * @throws IOException Error deleting the record
+   * @throws DatabaseException Error deleting the record
    * @throws DuplicateEntryException Entry already exists before test
    */
   @Test
-  public void deleteNonExistingUri() throws IOException, DuplicateEntryException {
+  public void deleteNonExistingUri() throws DatabaseException, DuplicateEntryException {
     this.queryAndPublishService();
     Message status = null;
     try {
@@ -137,12 +152,11 @@ public class ServiceElasticSearchTest {
 
   /**
    * Gets a record that exists in the database using the URI
-   *
-   * @throws IOException Error deleting the record
+   * @throws DatabaseException Error deleting the record
    * @throws DuplicateEntryException Entry already exists before test
    */
   @Test
-  public void getExistingRecord() throws IOException, DuplicateEntryException {
+  public void getExistingRecord() throws DatabaseException, DuplicateEntryException {
     this.queryAndPublishService();
     Message response = client.getRecordByURI("2");
     assertNotNull(response.getMap());
@@ -151,11 +165,11 @@ public class ServiceElasticSearchTest {
   /**
    * Attempt to retrieve a record that doesn't exist in the database
    *
-   * @throws IOException Error deleting the record
+   * @throws DatabaseException Error deleting the record
    * @throws DuplicateEntryException Entry already exists before test
    */
   @Test
-  public void getNonExistingRecord() throws IOException, DuplicateEntryException {
+  public void getNonExistingRecord() throws DatabaseException, DuplicateEntryException {
     this.queryAndPublishService();
     Message response = client.getRecordByURI("4");
     assertNull(response);
@@ -164,11 +178,11 @@ public class ServiceElasticSearchTest {
   /**
    * Updates record that exists in the database using it's URI
    *
-   * @throws IOException Error deleting the record
+   * @throws DatabaseException Error deleting the record
    * @throws DuplicateEntryException Entry already exists before test
    */
   @Test
-  public void updateExisting() throws IOException, DuplicateEntryException {
+  public void updateExisting() throws DatabaseException, DuplicateEntryException, DatabaseException {
     this.queryAndPublishService();
     Message message = new Message();
     message.add("type", "test");
@@ -191,11 +205,11 @@ public class ServiceElasticSearchTest {
   /**
    * Attempt to update a record that doesn't exist in the database
    *
-   * @throws IOException Error deleting the record
+   * @throws DatabaseException Error deleting the record
    * @throws DuplicateEntryException Entry already exists before test
    */
   @Test
-  public void updateNotExisting() throws IOException, DuplicateEntryException {
+  public void updateNotExisting() throws DatabaseException, DatabaseException, DuplicateEntryException {
     this.queryAndPublishService();
     Message message = new Message();
     message.add("type", "test");
@@ -213,7 +227,8 @@ public class ServiceElasticSearchTest {
 
     try {
       Message response = client.updateService("3", message);
-    } catch (IOException e) {
+
+    } catch (DatabaseException e) {
       Log.info("Test passed, database exception was thrown for missing service ID in database");
       assert (true);
     }
@@ -222,11 +237,13 @@ public class ServiceElasticSearchTest {
   /**
    * Trying to update with null URI specified
    *
-   * @throws IOException Error deleting the record
+   * @throws DatabaseException             Error deleting the record
    * @throws DuplicateEntryException Entry already exists before test
+   * @throws DatabaseException
    */
   @Test
-  public void updateEmptyServiceID() throws IOException, DuplicateEntryException {
+  public void updateEmptyServiceID() throws DuplicateEntryException, DatabaseException, DatabaseException {
+
     this.queryAndPublishService();
     Message message = new Message();
     message.add("type", "test");
@@ -244,7 +261,8 @@ public class ServiceElasticSearchTest {
 
     try {
       Message response = client.updateService(null, message);
-    } catch (IOException e) {
+    } catch (DatabaseException e) {
+
       Log.info("Test passed, database exception was thrown for empty service ID");
       assert (true);
     }
@@ -253,10 +271,10 @@ public class ServiceElasticSearchTest {
   /**
    * Attempts to add a record that doesn't already exist to database Shouldn't check for duplicates
    *
-   * @throws IOException Error adding record
+   * @throws DatabaseException Error adding record
    */
   @Test
-  public void publishServiceNotExistingTest() throws IOException {
+  public void publishServiceNotExistingTest() throws DatabaseException {
     Message message = new Message();
     message.add("type", "test");
 
@@ -278,10 +296,11 @@ public class ServiceElasticSearchTest {
   /**
    * Attempts to add a record that already exists to database shouldn't check for duplicates
    *
-   * @throws IOException Error adding record to database
+   * @throws DatabaseException Error adding record to database
    */
   @Test
-  public void publishServiceExistingTest() throws IOException {
+  public void publishServiceExistingTest() throws DatabaseException {
+
     Message message = new Message();
     message.add("type", "test");
 
@@ -305,10 +324,10 @@ public class ServiceElasticSearchTest {
   /**
    * Bulk update records that exist in the database
    *
-   * @throws IOException unable to update records
+   * @throws DatabaseException unable to update records
    */
   @Test
-  public void bulkUpdateAllExisting() throws IOException {
+  public void bulkUpdateAllExisting() throws DatabaseException {
     Message message1 = new Message();
     message1.add("type", "test");
 
@@ -362,10 +381,11 @@ public class ServiceElasticSearchTest {
   /**
    * Attempt to update records that don't exist in the database
    *
-   * @throws IOException Error updating records in the database
+   * @throws DatabaseException Error updating records in the database
    */
   @Test
-  public void bulkUpdateNotExisting() throws IOException {
+  public void bulkUpdateNotExisting() throws DatabaseException {
+
     Message message1 = new Message();
     message1.add("type", "test");
 
@@ -414,7 +434,8 @@ public class ServiceElasticSearchTest {
 
     try {
       Message count = client.bulkUpdate(messages);
-    } catch (IOException e) {
+    } catch (DatabaseException e) {
+
       Log.info("error updating due to incorrect URI; Passed test");
     }
   }
@@ -422,11 +443,12 @@ public class ServiceElasticSearchTest {
   /**
    * Delete records that have expired
    *
-   * @throws IOException error deleting records
+   * @throws DatabaseException error deleting records
    * @throws InterruptedException Deletion process interrupted
    */
   @Test
-  public void deleteExpired() throws IOException, InterruptedException {
+  public void deleteExpired() throws DatabaseException, InterruptedException {
+
     Message message1 = new Message();
     message1.add("type", "test");
 
@@ -438,10 +460,11 @@ public class ServiceElasticSearchTest {
     message1.add("ttl", "PT10M");
 
     DateTime dateTime = new DateTime();
-    message1.add("expires", dateTime.toString());
+    LeaseManager.getInstance().requestLease(message1);
+   // message1.add("expires", dateTime.toString());
 
     Message message2 = new Message();
-    message1.add("type", "test");
+    message2.add("type", "test");
 
     message2.add(
         "uri", "2"); // 2nd param should be uuid but for testing purposes was assigned a number
@@ -449,8 +472,9 @@ public class ServiceElasticSearchTest {
     message2.add("test-id", String.valueOf(2));
 
     message2.add("ttl", "PT10M");
+    //message2.add("expires", dateTime.toString());
+    LeaseManager.getInstance().requestLease(message2);
 
-    message2.add("expires", dateTime.toString());
 
     Message message3 = new Message();
     message3.add("type", "test");
@@ -462,7 +486,9 @@ public class ServiceElasticSearchTest {
 
     message3.add("ttl", "PT10M");
 
-    message3.add("expires", dateTime.toString());
+    //message3.add("expires", dateTime.toString());
+    LeaseManager.getInstance().requestLease(message3);
+
 
     client.publishService(message1);
     client.publishService(message2);
@@ -470,19 +496,24 @@ public class ServiceElasticSearchTest {
 
     Thread.sleep(2000);
 
-    DateTime dt = new DateTime();
-    dt.plus(20000);
-    assertEquals(client.deleteExpiredRecords(dt), 3);
+    //DateTime dt = new DateTime();
+    //dt.plus(20000);
+    Instant now = new Instant();
+    DateTime pruneTime = now.plus(600000).toDateTime();
+    System.out.println(pruneTime.toString());
+    assertEquals(client.deleteExpiredRecords(pruneTime), 3);
+
   }
 
   /**
    * Finds records in a given time range
    *
-   * @throws IOException Error accessing records
+   * @throws DatabaseException Error accessing records
    * @throws InterruptedException Accessing records interrupted
    */
   @Test
-  public void findRecordInTimeRange() throws IOException, InterruptedException {
+  public void findRecordInTimeRange() throws DatabaseException, InterruptedException {
+
     Message message1 = new Message();
     message1.add("type", "test");
 
@@ -497,7 +528,9 @@ public class ServiceElasticSearchTest {
     message1.add("expires", dateTime.toString());
 
     Message message2 = new Message();
-    message1.add("type", "test");
+
+    message2.add("type", "test");
+
 
     message2.add(
         "uri", "2"); // 2nd param should be uuid but for testing purposes was assigned a number
@@ -535,11 +568,12 @@ public class ServiceElasticSearchTest {
   /**
    * Get value of key that exists in the record of the given URI
    *
-   * @throws IOException Unable to access record
+   * @throws DatabaseException Unable to access record
    * @throws DuplicateEntryException Record already exists before test
    */
   @Test
-  public void getKeyExists() throws IOException, DuplicateEntryException {
+  public void getKeyExists() throws DatabaseException, DuplicateEntryException {
+
     this.queryAndPublishService();
     Message record = client.getRecordByURI("2");
     String key = "test-id";
@@ -551,11 +585,12 @@ public class ServiceElasticSearchTest {
   /**
    * Get value of key that doesn't exist in record of the given URI
    *
-   * @throws IOException Unable to access record
+   * @throws DatabaseException Unable to access record
    * @throws DuplicateEntryException Record already exists before test
    */
   @Test
-  public void getKeyNotExists() throws IOException, DuplicateEntryException {
+  public void getKeyNotExists() throws DatabaseException, DuplicateEntryException {
+
     this.queryAndPublishService();
     Message record = client.getRecordByURI("2");
     String key = "random";
