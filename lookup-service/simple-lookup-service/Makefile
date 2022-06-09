@@ -7,5 +7,5 @@ RELEASE=${PERFSONAR_AUTO_RELNUM}
 default:
 	@echo No need to build the package. Just run \"make install\"
 
-dist:
-	git archive --format=tar.gz --prefix=${PACKAGE}-${VERSION}/ HEAD
+#dist:
+#	git archive --format=tar.gz --prefix=${PACKAGE}-${VERSION}/ HEAD > ${PACKAGE}-${VERSION}.tar.gz

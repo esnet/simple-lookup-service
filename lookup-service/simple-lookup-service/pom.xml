@@ -2,6 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <properties>
         <perfsonar.auto.version>4.4.4</perfsonar.auto.version>
+        <java.version>1.8</java.version>
     </properties>
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.es.lookup</groupId>
@@ -9,9 +10,6 @@
     <version>${perfsonar.auto.version}</version>
     <packaging>pom</packaging>
     <name>Simple Lookup Service</name>
-    <properties>
-        <java.version>1.8</java.version>
-    </properties>
 
     <modules>
         <module>simple-lookup-service-common</module>

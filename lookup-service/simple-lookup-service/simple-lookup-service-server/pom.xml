@@ -80,14 +80,14 @@
     <dependency>
       <artifactId>simple-lookup-service-client</artifactId>
       <groupId>net.es.lookup</groupId>
-      <version>3.0-SNAPSHOT</version>
+      <version>${perfsonar.auto.version}</version>
     </dependency>
 
     <!-- lookup-service-centos keywords -->
     <dependency>
       <artifactId>simple-lookup-service-common</artifactId>
       <groupId>net.es.lookup</groupId>
-      <version>3.0-SNAPSHOT</version>
+      <version>${perfsonar.auto.version}</version>
 
     </dependency>
 
