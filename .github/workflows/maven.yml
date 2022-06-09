@@ -5,7 +5,8 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ "master", "sowmya/integrating-github-actions" ]
+    branches: [ "*"]
+    tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ "master" ]
 
