@@ -1,0 +1,193 @@
+%define package_name lookup-service
+%define mvn_project_name simple-lookup-service
+%define mvn_project_list %{mvn_project_name}-common,%{mvn_project_name}-client,%{mvn_project_name}-server
+%define install_base /usr/lib/%{package_name}
+%define config_base /etc/%{package_name}
+%define log_dir /var/log/%{package_name}
+%define run_dir /var/run/%{package_name}
+%define data_dir /var/lib/%{package_name}
+%define init_script lookup-service
+%define apacheconf apache-lookup-service.conf
+
+%define perfsonar_auto_version 4.4.4
+%define perfsonar_auto_relnum 1
+
+Version:        %{perfsonar_auto_version}
+Release:        %{perfsonar_auto_relnum}
+
+
+Name:           %{package_name}
+Version:        3.0
+Release:        %{relnum}%{?dist}
+Summary:        Lookup Service
+License:        distributable, see LICENSE
+Group:          Development/Libraries
+URL:            https://github.com/esnet/simple-lookup-service
+Source0:        %{mvn_project_name}-%{version}-%{perfsonar_auto_relnum}.tar.gz
+BuildRoot:      %{_tmppath}/-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRequires:  java-openjdk >= 1.8.0
+BuildRequires:  sed 
+BuildArch:      noarch
+Requires:       java-openjdk >= 1.8.0
+
+%if 0%{?el7}
+BuildRequires: systemd
+BuildRequires:  maven
+%{?systemd_requires: %systemd_requires}
+%else
+BuildRequires:  apache-maven
+Requires:		chkconfig
+%endif
+Requires:	elasticsearch
+Requires: httpd
+
+%description
+Lookup Service is used to find registered services. 
+This package provides a server that allows clients to register and query services 
+via REST interface.
+
+%pre
+/usr/sbin/groupadd lookup 2> /dev/null || :
+/usr/sbin/useradd -g lookup -r -s /sbin/nologin -c "Lookup Service User" -d /tmp lookup 2> /dev/null || :
+
+%prep
+%setup -q -n  %{mvn_project_name}
+
+%clean
+rm -rf %{buildroot}
+
+%build
+mvn --projects %{mvn_project_list} clean
+
+%install
+#Clean out previous build
+rm -rf %{buildroot}
+
+#Run install target
+mvn -DskipTests --projects %{mvn_project_list} install 
+
+#Create directory structure for build root
+mkdir -p %{buildroot}/%{install_base}/target
+mkdir -p %{buildroot}/%{install_base}/bin
+mkdir -p %{buildroot}/%{config_base}
+mkdir -p %{buildroot}/etc/httpd/conf.d
+%if 0%{?el7}
+mkdir -p %{buildroot}%{_unitdir}
+%else
+mkdir -p %{buildroot}/etc/init.d
+%endif
+
+#Copy jar files and scripts
+cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/target/*.jar %{buildroot}/%{install_base}/target/
+install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/bin/* %{buildroot}/%{install_base}/bin/
+
+%if 0%{?el7}
+install -m 644 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scripts/%{init_script}.service %{buildroot}/%{_unitdir}/%{init_script}.service
+%else
+install -m 755 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/scripts/lookup-service %{buildroot}/etc/init.d/%{init_script}
+%endif
+
+#apache config file
+mkdir -p %{buildroot}/etc/httpd/conf.d
+install -D -m 0644 %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/%{apacheconf} %{buildroot}/etc/httpd/conf.d/%{apacheconf}
+rm -f %{buildroot}/%{config_base}/etc/%{apacheconf}
+
+# Copy default config file
+cp %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/lookupservice.yaml %{buildroot}/%{config_base}/lookupservice.yaml
+
+#Update log locations
+sed -e s,%{package_name}.log,%{log_dir}/%{package_name}.log, < %{_builddir}/%{mvn_project_name}/%{mvn_project_name}-server/etc/log4j2.properties > %{buildroot}/%{config_base}/log4j2.properties
+
+
+# Copy LICENSE file
+cp %{_builddir}/%{mvn_project_name}/LICENSE %{buildroot}/%{install_base}/LICENSE
+
+%post
+#Create directory for PID files
+mkdir -p %{run_dir}
+chown lookup:lookup %{run_dir}
+chmod 700 %{run_dir}
+
+#Create directory for logs
+mkdir -p %{log_dir}
+chown lookup:lookup %{log_dir}
+
+#Create database directory
+mkdir -p %{data_dir}
+chown lookup:lookup %{data_dir}
+
+#Create queuedir
+mkdir -p %{install_base}/data
+chown lookup:lookup %{install_base}/data
+#Create symbolic links to latest version of jar files
+##if update then delete old links
+if [ $1 == 2 ]; then
+  if [ -e %{config_base}/lookup-service.yaml ]; then
+     rm %{config_base}/lookup-service.yaml
+  fi
+  if [ -L %{install_base}/target/%{package_name}.one-jar.jar ]; then
+      unlink %{install_base}/target/%{package_name}.one-jar.jar
+  fi
+  if [ -L %{install_base}/target/%{package_name}-server.one-jar.jar ]; then
+     unlink %{install_base}/target/%{package_name}-server.one-jar.jar
+  fi
+fi
+   ln -s %{install_base}/target/%{mvn_project_name}-server-%{version}-SNAPSHOT.one-jar.jar %{install_base}/target/%{package_name}-server.one-jar.jar
+chown lookup:lookup %{install_base}/target/%{package_name}-server.one-jar.jar
+#ln -s %{install_base}/target/%{mvn_project_name}-server-%{version}.jar %{install_base}/target/%{package_name}.jar
+
+service httpd restart &> /dev/null || :
+
+#Configure service to start when machine boots
+
+%if 0%{?el7}
+%systemd_post %{init_script}.service
+if [ "$1" = "1" ]; then
+    #if new install, then enable
+    systemctl enable %{init_script}.service
+    systemctl start %{init_script}.service
+fi
+%else
+/sbin/chkconfig --add %{package_name}
+%endif
+
+%preun
+%if 0%{?el7}
+%systemd_preun %{init_script}.service
+%else
+if [ $1 == 0 ]; then
+    /sbin/chkconfig --del %{package_name}
+    /sbin/service %{package_name} stop
+fi
+%endif
+if [ $1 == 0 ]; then
+    if [ -L %{install_base}/target/%{package_name}-server.one-jar.jar ]; then
+        unlink %{install_base}/target/%{package_name}-server.one-jar.jar
+    fi
+    if [ -L %{install_base}/target/%{package_name}.one-jar.jar ]; then
+        unlink %{install_base}/target/%{package_name}.one-jar.jar
+    fi
+fi
+
+%files
+%defattr(-,lookup,lookup,-)
+%config(noreplace) %{config_base}/*
+%{install_base}/target/*
+%{install_base}/bin/*
+%%license %{install_base}/LICENSE
+%if 0%{?el7}
+%attr(0644,lookup,lookup) %{_unitdir}/%{init_script}.service
+%else
+%attr(0755,lookup,lookup) /etc/init.d/%{init_script}
+%endif
+/etc/httpd/conf.d/*
+
+%changelog
+* Tue Apr 28 2020 sowmya@es.net 3.0-3
+- Enable elasticsearch cleanup job
+* Wed Apr 22 2020 sowmya@es.net 3.0-1
+- Replacing backend with elasticsearch db
+* Wed Oct 23 2019 sowmya@es.net 3.0-0
+- Updated spec file to support Centos 7
+* Mon Sep 24 2018 sowmya@es.net 2.2-9
+- Updated spec file to support Centos 7

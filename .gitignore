@@ -7,3 +7,10 @@ target
 .DS_Store
 *.log
 *.log.gz
+unibuild-log
+unibuild-work/
+unibuild-repo/
+.vscode/
+.settings/
+.project
+__pycache__
