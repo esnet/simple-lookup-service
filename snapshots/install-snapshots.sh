@@ -4,7 +4,7 @@ mkdir -p /usr/lib/lookup-service/snapshots/
 mkdir -p /var/log/lookup-service/snapshots/
 
 # Install dependencies
-pip3 install snapshots/requirements.txt
+pip3 install -r snapshots/requirements.txt
 
 #Copy snapshot scripts
 cp snapshots/snapshots.py /usr/lib/lookup-service/snapshots/snapshpts.py
