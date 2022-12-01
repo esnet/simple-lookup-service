@@ -11,6 +11,8 @@ perfsonar_policy_json='{"policy":{"_meta":{"description": "used for perfsonar ls
 str_date_time = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 dest_index = "ls-snapshot"+"-"+str_date_time
 
+src_index=index
+
 ilm = IlmClient(es)
 try:
   res=ilm.get_lifecycle(ilm_policy_id)
@@ -24,6 +26,14 @@ except exceptions.NotFoundError as e:
     print("Policy not installed. Install again")
     print(str(e))
 #print(res)
+
+dest_settings = {"index.number_of_replicas": 0,
+    "index.lifecycle.name": ilm_policy_id}
+
+src_mapping_res = es.indices.get_mapping(index=src_index)
+src_mapping = src_mapping_res["lookup"]["mappings"]
+es.indices.create(index=dest_index)
+es.indices.put_mapping(index=dest_index, body=src_mapping)
 
 es.reindex({
 "conflicts": "proceed",
