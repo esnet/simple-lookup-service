@@ -16,9 +16,7 @@ import net.es.lookup.database.ServiceElasticSearch;
 import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRegisterRequest;
 import net.es.lookup.protocol.json.JSONRegisterResponse;
-import net.es.lookup.publish.Publisher;
 import net.es.lookup.service.LookupService;
-import net.es.lookup.service.PublishService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
@@ -96,11 +94,6 @@ public class RegisterService {
             Log.info("Register status: SUCCESS; exiting");
             Log.debug("response:" + responseString);
 
-            // Todo deprecated?
-            if (PublishService.isServiceOn()) {
-              Publisher publisher = Publisher.getInstance();
-              publisher.eventNotification(res);
-            }
             return responseString;
           } catch (ElasticsearchException e) {
             Log.error("ElasticSearch Exception" + e.getDetailedMessage());

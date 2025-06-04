@@ -15,8 +15,6 @@ import net.es.lookup.protocol.json.JSONMessage;
 import net.es.lookup.protocol.json.JSONRenewRequest;
 import net.es.lookup.protocol.json.JsonBulkRenewRequest;
 import net.es.lookup.protocol.json.JsonBulkRenewResponse;
-import net.es.lookup.publish.Publisher;
-import net.es.lookup.service.PublishService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.net.URISyntaxException;
@@ -154,17 +152,6 @@ public class BulkRenewService {
       error.add(ReservedKeys.ERROR_MESSAGE, ReservedValues.RECORD_BULKRENEW_EXPIRED_ERRORMESSAGE);
     }
     return error;
-  }
-
-  private void notifyPublisher(Map<String, Message> updates) {
-    if (PublishService.isServiceOn()) {
-
-      Publisher publisher = Publisher.getInstance();
-      for (Entry<String, Message> renewedRecord : updates.entrySet()) {
-
-        publisher.eventNotification(renewedRecord.getValue());
-      }
-    }
   }
 
   private JsonBulkRenewResponse formatJsonBulkRenewResponse(
